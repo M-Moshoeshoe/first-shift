@@ -1,9 +1,9 @@
 "use client";
 
-import { OnboardingLoader } from "@/components/OnboardingLoader";
+import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { WorkFlow } from "./WorkFlow";
 
-/** The young person's form, once their own profile has loaded. */
+/** The young person's form. ProfileGate has already loaded the profile and checked this is their next step. */
 export function WorkOnboarding() {
-  return <OnboardingLoader role="young_person" home="/work" render={(view) => <WorkFlow view={view} />} />;
+  return <WorkFlow view={useGatedProfile()} />;
 }

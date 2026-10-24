@@ -56,7 +56,7 @@ Consequences:
 | Step | Rule |
 | --- | --- |
 | Owner pays | By eWallet, bank transfer or cash, then taps Paid with the amount the app worked out |
-| Owner deadline | Not marked Paid within 24 hours of check-out pauses the business |
+| Owner deadline | Payment is due at check-out. Not marked Paid by 23:59 South African time on the day of the tryout pauses the business, from 00:00 |
 | Young person confirms | Checks their real balance (`*120*277#` for eWallet), then taps Received or Not received |
 | Reminder | At 24 hours without confirmation |
 | Review | At 72 hours without confirmation, or straight away on Not received |

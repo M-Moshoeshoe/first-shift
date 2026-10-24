@@ -18,6 +18,9 @@ export const BUTTON_LABELS = {
   next: "Next",
   back: "Back",
   skipForNow: "Skip for now",
+  lookingForWork: "I'm looking for work",
+  runABusiness: "I run a business",
+  signOut: "Sign out",
 } as const;
 
 /** Shown wherever a message contains it, as a link to SUPPORT_EMAIL (src/config/contact.ts). */
@@ -58,6 +61,8 @@ export const PROFILE_MESSAGES = {
   // Step 6 additions, for review.
   shopfrontNeeded: `Add a photo of your shopfront first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
   pinImprecise: `Your location isn't precise enough yet. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
+  // Approved in step 3; moved here when the Sign out button became shared.
+  signOutFailed: `We couldn't sign you out. Check your connection, then tap ${BUTTON_LABELS.signOut} again.`,
 } as const;
 
 /** Step 6, for review: why a premises pin couldn't be taken, and what to do. */

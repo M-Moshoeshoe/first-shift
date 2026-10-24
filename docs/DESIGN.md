@@ -134,6 +134,9 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/sign-in` | 220 KB | 207.2 KB, 9 scripts |
 | `/onboarding/work` | 260 KB (the cap) | 251.5 KB, 12 scripts |
 | `/onboarding/business` | 260 KB (the cap) | 251.5 KB, 12 scripts |
+| `/onboarding/role` | 260 KB (the cap) | 242.9 KB, 12 scripts |
+| `/work` | 260 KB (the cap) | 243.0 KB, 12 scripts |
+| `/business` | 260 KB (the cap) | 243.0 KB, 12 scripts |
 
 A new page's budget is its measured size plus 10%, never above 260 KB.
 

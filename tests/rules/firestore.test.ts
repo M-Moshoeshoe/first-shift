@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { afterAll, beforeAll, beforeEach, describe, it } from "vitest";
 
 let env: RulesTestEnvironment;
@@ -19,7 +19,10 @@ beforeEach(async () => {
   await env.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
     await setDoc(doc(db, "users/thabo"), { firstName: "Thabo" });
+    await setDoc(doc(db, "users/sipho"), { role: "business", status: "active" });
     await setDoc(doc(db, "businesses/sipho-shop"), { ownerId: "sipho", name: "Sipho's Phone Repairs" });
+    await setDoc(doc(db, "idHashes/hash-of-thabos-id"), { uid: "thabo" });
+    await setDoc(doc(db, "auditLog/entry-1"), { uid: "thabo", action: "role_set" });
     await setDoc(doc(db, "tryouts/live"), { status: "published", ownerId: "sipho" });
     await setDoc(doc(db, "tryouts/draft"), { status: "draft", ownerId: "sipho" });
     await setDoc(doc(db, "applications/a1"), { workerId: "thabo", ownerId: "sipho" });
@@ -31,6 +34,35 @@ beforeEach(async () => {
 
 const as = (uid: string) => env.authenticatedContext(uid).firestore();
 const anonymous = () => env.unauthenticatedContext().firestore();
+
+describe("profile data written only by the server (Phase 1)", () => {
+  it("never lets a client read ID hashes or the audit log, not even its own entries", async () => {
+    for (const reader of [as("thabo"), as("sipho"), anonymous()]) {
+      await assertFails(getDoc(doc(reader, "idHashes/hash-of-thabos-id")));
+      await assertFails(getDoc(doc(reader, "auditLog/entry-1")));
+      await assertFails(getDocs(query(collection(reader, "idHashes"), where("uid", "==", "thabo"))));
+      await assertFails(getDocs(query(collection(reader, "auditLog"), where("uid", "==", "thabo"))));
+    }
+  });
+
+  it("never lets a client create, change or delete a user or business record, even its own", async () => {
+    await assertFails(setDoc(doc(as("ayanda"), "users/ayanda"), { role: "young_person", status: "active" }));
+    await assertFails(updateDoc(doc(as("thabo"), "users/thabo"), { completed: 99 }));
+    await assertFails(deleteDoc(doc(as("thabo"), "users/thabo")));
+    await assertFails(setDoc(doc(as("sipho"), "businesses/sipho"), { ownerId: "sipho", name: "Sipho's Phone Repairs" }));
+    await assertFails(updateDoc(doc(as("sipho"), "businesses/sipho-shop"), { name: "Changed" }));
+    await assertFails(setDoc(doc(as("thabo"), "idHashes/made-up"), { uid: "thabo" }));
+    await assertFails(setDoc(doc(as("thabo"), "auditLog/made-up"), { uid: "thabo", action: "role_set" }));
+  });
+
+  it("lets each person read only their own user record", async () => {
+    await assertSucceeds(getDoc(doc(as("thabo"), "users/thabo")));
+    await assertSucceeds(getDoc(doc(as("sipho"), "users/sipho")));
+    await assertFails(getDoc(doc(as("thabo"), "users/sipho")));
+    await assertFails(getDoc(doc(as("sipho"), "users/thabo")));
+    await assertFails(getDocs(collection(as("thabo"), "users")));
+  });
+});
 
 describe("deny by default", () => {
   it("blocks every read for signed-out visitors", async () => {

@@ -32,8 +32,11 @@ export const RULES = {
   strikeWindowDays: 90,
   strikesToSuspend: 3,
 
-  /** Owners who haven't marked a tryout paid within this many hours of check-out are paused. */
-  ownerPayDeadlineHours: 24,
+  /**
+   * Payment is due at check-out. An owner who hasn't marked the tryout paid
+   * by this South African time on the same day is paused.
+   */
+  ownerPayDeadlineSast: { hour: 23, minute: 59 },
   /** If the young person hasn't confirmed payment, remind them at this point... */
   payConfirmReminderHours: 24,
   /** ...and send the tryout to review at this point. */

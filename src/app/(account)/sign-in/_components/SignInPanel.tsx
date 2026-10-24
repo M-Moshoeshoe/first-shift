@@ -1,22 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { SignOutButton } from "@/components/SignOutButton";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
-import { BUTTON_LABELS } from "@/domain/messages";
+import { BUTTON_LABELS, PROFILE_MESSAGES } from "@/domain/messages";
+import { redirectFor } from "@/domain/profile";
+import { fail } from "@/domain/result";
 import { useAuth } from "@/lib/auth/useAuth";
 import { signInWithGoogle } from "@/lib/auth/signInWithGoogle";
 
 const ERROR_ID = "sign-in-error";
 
 /**
- * The one action on the sign-in screen. Until step 7 adds routing, a person
- * who is already signed in sees that, with a way to sign out.
+ * The one action on the sign-in screen. Someone already signed in, or who
+ * has just signed in, goes straight to where they belong (domain/profile.ts).
  */
 export function SignInPanel() {
-  const { user, loading, error, signOut } = useAuth();
+  const { user, loading, error } = useAuth();
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<{ uid: string; message: string } | null>(null);
+
+  useEffect(() => {
+    if (!user) return undefined;
+    let current = true;
+    // Loaded only now: signed-out visitors never download the profile code.
+    import("@/lib/auth/fetchDestination")
+      .then(({ fetchDestination }) => fetchDestination())
+      .catch(() => fail(PROFILE_MESSAGES.profileUnavailable)) // the code itself didn't download
+      .then((result) => {
+        if (!current) return;
+        if (!result.ok) return setProfileError({ uid: user.uid, message: result.error });
+        const target = redirectFor("/sign-in", result.value);
+        if (target) router.replace(target);
+      });
+    return () => {
+      current = false;
+    };
+  }, [user, router]);
 
   const handleSignIn = async () => {
     if (busy) return;
@@ -27,24 +51,18 @@ export function SignInPanel() {
     setBusy(false);
   };
 
-  const handleSignOut = () =>
-    signOut().catch(() => setMessage("We couldn't sign you out. Check your connection, then tap Sign out again."));
-
-  // A placeholder the exact height of the button, so nothing jumps when the answer arrives.
-  if (loading) return <div role="status" aria-label="Checking whether you're signed in" className="h-13 animate-skeleton bg-mist" />;
   if (error) return <FormError message={error} />;
-
-  if (user) {
+  if (user && profileError?.uid === user.uid) {
+    // Signed in, but the profile didn't load: say why, and offer a way out.
     return (
       <div className="flex flex-col gap-4">
-        <p className="text-lg">You&apos;re signed in{user.email ? ` as ${user.email}` : ""}.</p>
-        <Button variant="secondary" onClick={() => void handleSignOut()} aria-describedby={ERROR_ID}>
-          Sign out
-        </Button>
-        <FormError id={ERROR_ID} message={message} />
+        <FormError message={profileError.message} />
+        <SignOutButton />
       </div>
     );
   }
+  // A placeholder the exact height of the button while it works out who this is and where they go.
+  if (loading || user) return <div role="status" aria-label="Checking whether you're signed in" className="h-13 animate-skeleton bg-mist" />;
 
   return (
     <div className="flex flex-col gap-2">

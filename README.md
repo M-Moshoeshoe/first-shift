@@ -148,3 +148,5 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | `npm run rules` | Security rules tests in the emulators |
 | `npm run emulators` | Firebase emulators with the UI at http://localhost:4000 |
 | `npm run seed` | Load demo data (emulator or a dedicated demo project only) |
+| `npm run e2e:profile` | Role and young person profile through the real client code, against the emulators (settings in section 5) |
+| `npm run e2e:photo` | Photo uploads and the photo route against the Storage emulator |

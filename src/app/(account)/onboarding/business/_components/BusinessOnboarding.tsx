@@ -1,9 +1,9 @@
 "use client";
 
-import { OnboardingLoader } from "@/components/OnboardingLoader";
+import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { BusinessFlow } from "./BusinessFlow";
 
-/** The business form, once the owner's own profile has loaded. */
+/** The business form. ProfileGate has already loaded the profile and checked this is the owner's next step. */
 export function BusinessOnboarding() {
-  return <OnboardingLoader role="business" home="/business" render={(view) => <BusinessFlow view={view} />} />;
+  return <BusinessFlow view={useGatedProfile()} />;
 }

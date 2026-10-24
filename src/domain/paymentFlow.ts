@@ -1,5 +1,5 @@
 import { RULES } from "@/config/rules";
-import { addHours } from "./time";
+import { addHours, addMinutes, atSastTime } from "./time";
 
 export type PaymentMethod = "ewallet" | "bank_transfer" | "cash";
 
@@ -24,10 +24,23 @@ export const referenceAllowed = (state: PaymentState): boolean => state === "rec
 
 export type PaymentAction = "none" | "pause_business" | "remind_worker" | "send_to_review";
 
+/**
+ * Payment is due at check-out, and the owner has until 23:59 South African
+ * time that same day to mark it paid. Returns the first instant that is late:
+ * 00:00 SAST the next day.
+ */
+export function payDeadline(checkedOutAt: Date): Date {
+  const { hour, minute } = RULES.ownerPayDeadlineSast;
+  return addMinutes(atSastTime(checkedOutAt, hour, minute), 1);
+}
+
+/** Whether the owner marked the tryout paid in time: any moment up to and including 23:59 SAST on the day. */
+export const paidOnTime = (checkedOutAt: Date, markedPaidAt: Date): boolean => markedPaidAt < payDeadline(checkedOutAt);
+
 /** What the system should do now, given how long each side has been waiting. */
 export function paymentAction(state: PaymentState, now: Date, checkedOutAt: Date, markedPaidAt?: Date): PaymentAction {
   if (state === "awaiting_payment") {
-    return now > addHours(checkedOutAt, RULES.ownerPayDeadlineHours) ? "pause_business" : "none";
+    return now >= payDeadline(checkedOutAt) ? "pause_business" : "none";
   }
   if (state === "not_received") return "send_to_review";
   if (state === "awaiting_confirmation" && markedPaidAt) {

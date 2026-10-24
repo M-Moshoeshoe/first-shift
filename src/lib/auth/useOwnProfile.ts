@@ -17,27 +17,29 @@ export type OwnProfile =
  * server so account screens never load Firestore. Onboarding fills forms back
  * in from it; ProfileGate (step 7) routes with it.
  */
-export function useOwnProfile(): OwnProfile {
+export function useOwnProfile(refreshKey = ""): OwnProfile {
   const { user, loading, error } = useAuth();
-  const [loaded, setLoaded] = useState<{ uid: string; profile: OwnProfile } | null>(null);
+  const [loaded, setLoaded] = useState<{ key: string; profile: OwnProfile } | null>(null);
+  // A new key (ProfileGate passes the address) reads the profile again, so a step that just changed it is seen.
+  const key = user ? `${user.uid}:${refreshKey}` : "";
 
   useEffect(() => {
     if (!user) return undefined;
     let current = true;
     apiGet("/api/profile", ProfileViewSchema).then(
-      (view) => current && setLoaded({ uid: user.uid, profile: { status: "ready", view } }),
+      (view) => current && setLoaded({ key, profile: { status: "ready", view } }),
       (caught: unknown) => {
         const message = caught instanceof ApiError ? caught.message : PROFILE_MESSAGES.profileUnavailable;
-        if (current) setLoaded({ uid: user.uid, profile: { status: "error", message } });
+        if (current) setLoaded({ key, profile: { status: "error", message } });
       },
     );
     return () => {
       current = false;
     };
-  }, [user]);
+  }, [user, key]);
 
   if (error) return { status: "error", message: error };
   if (loading) return { status: "loading" };
   if (!user) return { status: "signed_out" };
-  return loaded?.uid === user.uid ? loaded.profile : { status: "loading" };
+  return loaded?.key === key ? loaded.profile : { status: "loading" };
 }

@@ -126,6 +126,20 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
 export const DESTINATIONS = ["/sign-in", "/onboarding/role", "/onboarding/work", "/onboarding/business", "/work", "/business"] as const;
 export type Destination = (typeof DESTINATIONS)[number];
 
+export function isDestination(path: string): path is Destination {
+  return DESTINATIONS.some((destination) => destination === path);
+}
+
+/**
+ * Where to send someone who opened path, or null when they belong there.
+ * Every account screen is open only while it's the person's destination, so
+ * nobody skips onboarding, opens the other role's screens or redoes a
+ * finished profile. Server routes enforce everything again regardless.
+ */
+export function redirectFor(path: Destination, destination: Destination): Destination | null {
+  return path === destination ? null : destination;
+}
+
 /** Where a person belongs right now. Screens redirect with this; server routes enforce everything again. */
 export function destinationFor(signedIn: boolean, user: UserRecord | null, business: BusinessRecord | null): Destination {
   if (!signedIn) return "/sign-in";
