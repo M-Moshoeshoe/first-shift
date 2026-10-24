@@ -64,6 +64,15 @@ Folders and files:
 - Motion is limited to the eight listed in `docs/DESIGN.md`. Scroll reveals and load animations are banned on app screens; content in tools appears instantly.
 - Refactor only when it improves structure, never at the cost of behaviour.
 
+## React Aria: one use only
+
+- React Aria Components is used for exactly one thing: the withdraw confirmation on `/business` (its Modal and Dialog), styled as a bottom sheet that uses our sheet-enter and sheet-exit motions through its entering and exiting states.
+- Import per component (`react-aria-components/Modal`), never from the package root. Pin the version under the dependency rules above.
+- Style it only with our tokens through its data attributes (`[data-entering]`, `[data-exiting]`, `[data-pressed]`, `[data-focus-visible]`). No default React Aria styles, and no motion outside `docs/DESIGN.md`.
+- Measure the JavaScript it adds and keep `/business` within its budget.
+- Never use it anywhere else, and never replace an existing primitive with it. Dates and times use native inputs, which open the phone's own pickers at no JavaScript cost; never its DatePicker or TimeField.
+- Area fields use `AreaField`: a native input with a `<datalist>` of known areas from `src/config/areas.ts`, not its ComboBox. The datalist won on budget and behaviour: it adds no JavaScript to onboarding pages that sit within 8 KB of the 260 KB cap, it gives the phone's own suggestion list, and typing any area still works. The server stores known areas under their official name with `canonicaliseArea()` (`src/domain/areas.ts`).
+
 ## Security and data (see SECURITY.md)
 
 - Firestore and Storage rules deny by default. All writes go through server routes using the Admin SDK. Clients only read what they need for live updates. Every rules change ships with a rules test.

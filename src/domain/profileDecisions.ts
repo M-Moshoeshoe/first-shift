@@ -1,4 +1,5 @@
 import { RULES } from "@/config/rules";
+import { canonicaliseArea } from "./areas";
 import type { BusinessDetails, BusinessRecord, PhotoKind, Residency, UserRecord, WorkerDetails } from "./profile";
 import type { Role } from "./roles";
 
@@ -59,7 +60,8 @@ export function decideWorkerSave(
   if (claim.kind === "refuse") return claim;
 
   const { user } = state;
-  const { details } = input;
+  // Known areas are stored under one name, so "ivory prk" and "Ivory Park" are the same place (and a resend is unchanged).
+  const details = { ...input.details, area: canonicaliseArea(input.details.area) };
   const unchanged =
     claim.kind === "already_yours" &&
     user.firstName === details.firstName &&
@@ -75,10 +77,11 @@ export function decideWorkerSave(
 }
 
 /** Saves a business's details. A save without a pin keeps any pin already set. */
-export function decideBusinessSave(user: UserRecord | null, business: BusinessRecord | null, details: BusinessDetails): SaveDecision<BusinessRecord> {
+export function decideBusinessSave(user: UserRecord | null, business: BusinessRecord | null, input: BusinessDetails): SaveDecision<BusinessRecord> {
   const problem = roleProblem(user, "business");
   if (problem) return { kind: "refuse", problem };
   if (!business) return { kind: "refuse", problem: { code: "role_missing" } };
+  const details = { ...input, area: canonicaliseArea(input.area) };
   if (details.location && !pinPreciseEnough(details.location.accuracyMetres)) return { kind: "refuse", problem: { code: "pin_imprecise" } };
 
   const location = details.location ?? business.location;

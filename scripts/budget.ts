@@ -2,11 +2,13 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { JS_BUDGETS_KB } from "../src/config/performance";
+import { TEST_SIGN_IN_MARKER } from "../src/config/testSignIn";
 
 /**
  * Measures each page's JavaScript in the production build, gzipped at the
  * default level, against src/config/performance.ts. Fails closed: a page over
  * budget, or missing build output, exits with an error like a broken test.
+ * It also fails if the test-only emulator sign-in reached the build.
  */
 const APP_DIR = join(".next", "server", "app");
 
@@ -44,7 +46,18 @@ const unbudgeted = readdirSync(APP_DIR, { recursive: true, encoding: "utf8" })
   .filter((route) => !budgeted.has(route));
 if (unbudgeted.length > 0) console.log(`no budget yet: ${unbudgeted.join(", ")}`);
 
-if (failed) {
-  console.error("JavaScript budget failed. Shrink the page, or raise its budget in src/config/performance.ts with a reason.");
-  process.exit(1);
+// The test-only sign-in must never ship: search every file the build produced, browser and server.
+const leaks = ["static", "server"].flatMap((dir) =>
+  readdirSync(join(".next", dir), { recursive: true, encoding: "utf8" })
+    .map((file) => join(".next", dir, file))
+    .filter((file) => /\.(js|html|rsc|json)$/.test(file) && readFileSync(file, "utf8").includes(TEST_SIGN_IN_MARKER)),
+);
+if (leaks.length > 0) {
+  console.error(`The test-only sign-in is in the production build: ${leaks.join(", ")}`);
+  console.error("Check the NODE_ENV guard on loadTestSignIn in SignInPanel.tsx.");
+} else {
+  console.log("ok    test-only sign-in absent from the build");
 }
+
+if (failed) console.error("JavaScript budget failed. Shrink the page, or raise its budget in src/config/performance.ts with a reason.");
+if (failed || leaks.length > 0) process.exit(1);

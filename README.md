@@ -150,3 +150,4 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | `npm run seed` | Load demo data (emulator or a dedicated demo project only) |
 | `npm run e2e:profile` | Role and young person profile through the real client code, against the emulators (settings in section 5) |
 | `npm run e2e:photo` | Photo uploads and the photo route against the Storage emulator |
+| `npm run e2e:browser` | Every routing path and both onboarding forms in Microsoft Edge at 360 px, signed in with the test-only emulator sign-in (needs `npm run emulators` and `npm run dev`) |

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { SignOutButton } from "@/components/SignOutButton";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -10,8 +10,12 @@ import { redirectFor } from "@/domain/profile";
 import { fail } from "@/domain/result";
 import { useAuth } from "@/lib/auth/useAuth";
 import { signInWithGoogle } from "@/lib/auth/signInWithGoogle";
+import { testSignInAllowed } from "@/lib/emulators";
 
 const ERROR_ID = "sign-in-error";
+
+// Development builds only. In production this folds to null and the import is left out of the build.
+const loadTestSignIn = process.env.NODE_ENV === "production" ? null : () => import("./TestSignIn");
 
 /**
  * The one action on the sign-in screen. Someone already signed in, or who
@@ -23,6 +27,12 @@ export function SignInPanel() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<{ uid: string; message: string } | null>(null);
+  const [TestSignIn, setTestSignIn] = useState<ComponentType | null>(null);
+
+  useEffect(() => {
+    if (!loadTestSignIn || !testSignInAllowed(process.env.NODE_ENV, process.env.NEXT_PUBLIC_USE_EMULATORS, window.location.hostname)) return;
+    void loadTestSignIn().then((module) => setTestSignIn(() => module.TestSignIn));
+  }, []);
 
   useEffect(() => {
     if (!user) return undefined;
@@ -70,6 +80,7 @@ export function SignInPanel() {
         {BUTTON_LABELS.continueWithGoogle}
       </Button>
       <FormError id={ERROR_ID} message={message} />
+      {TestSignIn ? <TestSignIn /> : null}
     </div>
   );
 }

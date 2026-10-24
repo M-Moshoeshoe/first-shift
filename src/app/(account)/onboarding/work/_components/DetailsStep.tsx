@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { AreaField } from "@/components/ui/AreaField";
 import { Button } from "@/components/ui/Button";
 import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
 import { TextField } from "@/components/ui/TextField";
@@ -55,7 +56,7 @@ export function DetailsStep({ initial, focusHeading, onNext }: DetailsStepProps)
         About you
       </h2>
       <TextField id={fieldId("firstName")} label="First name" autoComplete="given-name" value={draft.firstName} error={errors.firstName} onChange={(event) => update("firstName", event.target.value)} />
-      <TextField id={fieldId("area")} label="Area" hint="Where you live, like Ivory Park or Tembisa." autoComplete="address-level3" value={draft.area} error={errors.area} onChange={(event) => update("area", event.target.value)} />
+      <AreaField id={fieldId("area")} label="Area" hint="Where you live, like Ivory Park or Tembisa." autoComplete="address-level3" value={draft.area} error={errors.area} onChange={(event) => update("area", event.target.value)} />
       <CheckboxGroup id={fieldId("availability")} legend="When can you work?" options={AVAILABILITY_OPTIONS} values={draft.availability} error={errors.availability} onChange={(values) => update("availability", values)} />
       <TextField
         id={fieldId("payoutPhone")}

@@ -74,6 +74,21 @@ describe("save decisions", () => {
     expect(changed).toMatchObject({ kind: "save", next: { claimId: false, user: { area: "Tembisa", completed: 0 } } });
   });
 
+  it("stores a known area under its official name, so a typed variant of the saved area is unchanged", () => {
+    const state = { user: worker, heldIdHash: "h1", claimOwner: "thabo" };
+    expect(decideWorkerSave("thabo", state, { ...save, details: { ...save.details, area: "ivory prk ext 2" } })).toEqual({ kind: "unchanged" });
+    const moved = decideWorkerSave("thabo", state, { ...save, details: { ...save.details, area: "thembisa" } });
+    expect(moved).toMatchObject({ kind: "save", next: { user: { area: "Tembisa" } } });
+    const unknown = decideWorkerSave("thabo", state, { ...save, details: { ...save.details, area: "Mamelodi East" } });
+    expect(unknown).toMatchObject({ kind: "save", next: { user: { area: "Mamelodi East" } } });
+  });
+
+  it("stores a business area under its official name too", () => {
+    const decision = decideBusinessSave(owner, shop, { name: "Sipho's Phone Repairs", area: "Ivory Park Ext 7", openingHours: "Monday to Saturday, 8:00 to 17:00" });
+    expect(decision).toEqual({ kind: "unchanged" });
+    expect(decideBusinessSave(owner, shop, { name: "Sipho's Phone Repairs", area: "midrand", openingHours: "Monday to Saturday, 8:00 to 17:00" })).toMatchObject({ kind: "save", next: { area: "Midrand" } });
+  });
+
   it("keeps a business pin when a later save has none", () => {
     const pinned = { ...shop, location: { latitude: -26, longitude: 28.2, accuracyMetres: 20 } };
     const decision = decideBusinessSave(owner, pinned, { name: "Sipho's Repairs", area: "Ivory Park", openingHours: "8:00 to 17:00" });

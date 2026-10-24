@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { AreaField } from "@/components/ui/AreaField";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { TextField } from "@/components/ui/TextField";
@@ -69,7 +70,7 @@ export function BusinessDetailsStep({ initial, focusHeading, onSaved }: Business
         About your business
       </h2>
       <TextField id={fieldId("name")} label="Business name" autoComplete="organization" value={draft.name} error={errors.name} onChange={(event) => update("name", event.target.value)} />
-      <TextField id={fieldId("area")} label="Area" hint="Where your business is, like Midrand." value={draft.area} error={errors.area} onChange={(event) => update("area", event.target.value)} />
+      <AreaField id={fieldId("area")} label="Area" hint="Where your business is, like Midrand." value={draft.area} error={errors.area} onChange={(event) => update("area", event.target.value)} />
       <TextField
         id={fieldId("openingHours")}
         label="Opening hours"

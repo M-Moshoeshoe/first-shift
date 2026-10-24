@@ -86,6 +86,14 @@ Keep lines under 70 characters. Left-align everything.
 - Tap targets at least 44 px.
 - Numbered steps only where the content really is a sequence.
 
+## Form controls
+
+Native first, because the phone's own controls cost no JavaScript and work the way people already know.
+
+- **Dates and times:** native `type="date"` and `type="time"` inputs, which open the phone's own pickers.
+- **Areas:** `AreaField`, a text input with a native `<datalist>` of known areas from `src/config/areas.ts`. The phone suggests them as you type, and any other area can still be typed. React Aria's ComboBox was measured against this and lost: it would add JavaScript to onboarding pages already close to their cap, for behaviour the phone gives for free.
+- **React Aria Components** is used once only: the withdraw confirmation sheet on `/business` (Modal and Dialog), styled with our tokens through its data attributes (`[data-entering]`, `[data-exiting]`, `[data-pressed]`, `[data-focus-visible]`) and moving only with sheet-enter and sheet-exit. No default React Aria styles and no other React Aria component (`AGENTS.md`).
+
 ## Motion
 
 CSS only, no animation libraries. Tokens in `globals.css`:
@@ -108,7 +116,7 @@ Responses to what the person did, or to new data. App screens never use scroll r
 
 1. **Press feedback.** Every `Button`, and every link styled with `buttonClass()`, scales to 0.97 while pressed, over `--dur-fast`.
 2. **The Stamp**, the signature moment. Gold fill, `ink` text, 2 px `ink` border, square, rotated -8 degrees. It lands from scale 1.4 and opacity 0 to scale 1 and opacity 1 over `--dur-slow` with `--ease-spring` (`animate-stamp`). Its label is one of "Paid", "Received", "Booked", "Profile done" or "Posted" (a tryout that went live), and nothing else. When it lands, the phone gives one 15 ms vibration if it supports it, the person has tapped the page, and reduced motion is off.
-3. **Sheet enter and item enter.** A sheet slides up from 24 px below over `--dur-slow` with `--ease-out` (`animate-sheet-enter`). A new item in a live feed fades in from 8 px above over `--dur-base` with `--ease-out` (`animate-item-enter`).
+3. **Sheet enter, sheet exit and item enter.** A sheet slides up from 24 px below over `--dur-slow` with `--ease-out` (`animate-sheet-enter`). Closing, it does the reverse: it slides 24 px down over `--dur-base` with `--ease-out` (`animate-sheet-exit`), so it never vanishes in a frame, which reads as broken. A new item in a live feed fades in from 8 px above over `--dur-base` with `--ease-out` (`animate-item-enter`).
 4. **Field error.** When a submit fails validation, the first invalid field shakes once, 3 px left and right twice, 200 ms in all (`animate-field-shake`), and focus moves to it. Its error text fades in over `--dur-base` (`animate-error-in`, built into `FormError`).
 5. **Step progress.** Onboarding shows a thin bar that fills with `transform: scaleX()` over `--dur-slow` with `--ease-out` as each step completes.
 6. **Loading skeletons.** Placeholder blocks sized exactly like the content they stand for, so nothing jumps when data arrives, with a gentle opacity pulse from 1 to 0.55 and back over 1.4 s, ease-in-out (`animate-skeleton`). Loading states only.
