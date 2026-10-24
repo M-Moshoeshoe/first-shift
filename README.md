@@ -103,24 +103,13 @@ The emulators only work with `npm run dev`. A production build (`npm run build` 
 
 "Continue with Google" then opens the emulator's own account picker instead of Google's. The switch only works on `localhost` or `127.0.0.1`, and `/api/health` shows `"emulators": true` while any of these are set. Never set them on Netlify.
 
-## 6. Put it on GitHub
+## 6. GitHub, real services and Netlify
 
-```bash
-git init
-git add .
-git commit -m "Add First Shift skeleton"
-```
+`docs/DEPLOY.md` is the click-by-click guide: the GitHub repository, the Firebase project (Google sign-in, Firestore, Storage, the billing alert, the rules), real settings on your laptop, Netlify and its environment variables, the Anthropic key, and the final checks. Never commit `.env.local` or the service account file; `.gitignore` already excludes them.
 
-Create a public repository on GitHub called `first-shift`, then follow GitHub's instructions to push. A public repo gives judges the Git link Sonke asks for and enables free code scanning. Never commit `.env.local`; `.gitignore` already excludes it.
+## 7. Every push
 
-## 7. Deploy to Netlify
-
-1. At app.netlify.com: Add new site > Import an existing project > GitHub > `first-shift`. `netlify.toml` already sets the build.
-2. Site configuration > Environment variables: add every variable from `.env.local`.
-3. Deploy. Open `https://<your-site>.netlify.app/api/health` and confirm everything is true.
-4. In Firebase **Authentication** > Settings > Authorized domains, add your `netlify.app` domain so Google sign-in works there.
-
-Every push to `main` redeploys. Pull requests get their own preview URL.
+Every push to `main` runs CI on GitHub and redeploys on Netlify. Pull requests get their own preview address.
 
 ## 8. Build with Claude Code
 
