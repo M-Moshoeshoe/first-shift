@@ -109,6 +109,7 @@ Folders and files:
 
 - One phase at a time from `docs/PHASES.md`. Before coding, restate the phase goal and list the files you'll touch. After coding, run `npm run check` and summarise what changed and why.
 - Small commits with plain messages ("Add tryout posting route"), one concern each.
+- Git workflow: work one step at a time; show the step's changes with `git diff`; commit at the end of the step only after the go-ahead, with a plain message naming the step ("Phase 1 step 5: young person onboarding"). Before every commit, check `git status` and the staged content: no `.env.local`, service account or keystore files, and no `PRIVATE KEY`, `AIza` or `sk-ant` anywhere.
 - Never commit `.env.local`, keystores or service account files.
 - Definition of done for any phase: lint, typecheck, unit tests and build pass; new rules have tests; the screen works on a 360 px wide viewport with a throttled connection; copy follows the rules above.
 

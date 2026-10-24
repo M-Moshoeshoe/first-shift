@@ -167,6 +167,14 @@
   }
 }
 
+/*
+ * App screens, motion 4: the first invalid field shakes once. lib/forms.ts
+ * sets data-shaking on the field's wrapper and removes it when the shake ends.
+ */
+[data-shaking] {
+  animation: var(--animate-field-shake);
+}
+
 /* The one load sequence: the example slip slides in, then its Stamp lands 240 ms after. */
 @utility load-sequence {
   animation: var(--animate-slip-enter);

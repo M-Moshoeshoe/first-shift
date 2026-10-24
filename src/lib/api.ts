@@ -13,6 +13,7 @@ export class ApiError extends Error {
 }
 
 const TIMEOUT_MS = 20_000;
+export const OFFLINE_MESSAGE = "We couldn't reach First Shift. Check your connection, then try again.";
 const ServerErrorSchema = z.object({ error: z.string(), message: z.string().min(1) });
 
 /** The server's own public message when it sent one, otherwise a plain sentence for the status. */
@@ -28,25 +29,24 @@ export function errorFromResponse(status: number, body: unknown): ApiError {
  * The one way the browser calls our server. Attaches the signed-in user's ID
  * token, sends JSON, and checks the reply against schema. Every failure
  * becomes an ApiError with a message to show the person. Components never
- * call fetch directly.
+ * call fetch directly; they use apiGet and apiPost.
  */
-export async function apiPost<T>(path: string, body: unknown, schema: z.ZodType<T>): Promise<T> {
+async function request<T>(method: "GET" | "POST", path: string, schema: z.ZodType<T>, body?: unknown): Promise<T> {
   const user = clientAuth().currentUser;
   if (!user) throw new ApiError(401, "not_signed_in", "Sign in to continue.");
 
   let response: Response;
   try {
+    const authorization = `Bearer ${await user.getIdToken()}`;
     response = await fetch(path, {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${await user.getIdToken()}` },
-      body: JSON.stringify(body),
+      method,
+      headers: method === "POST" ? { "content-type": "application/json", authorization } : { authorization },
+      body: method === "POST" ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
   } catch (error) {
     const timedOut = error instanceof DOMException && error.name === "TimeoutError";
-    throw timedOut
-      ? new ApiError(0, "timeout", "First Shift took too long to answer. Check your connection, then try again.")
-      : new ApiError(0, "offline", "We couldn't reach First Shift. Check your connection, then try again.");
+    throw timedOut ? new ApiError(0, "timeout", "First Shift took too long to answer. Check your connection, then try again.") : new ApiError(0, "offline", OFFLINE_MESSAGE);
   }
 
   const json: unknown = await response.json().catch(() => null);
@@ -56,3 +56,6 @@ export async function apiPost<T>(path: string, body: unknown, schema: z.ZodType<
   if (!parsed.success) throw new ApiError(response.status, "bad_response", "First Shift sent a reply this page couldn't read. Reload the page and try again.");
   return parsed.data;
 }
+
+export const apiGet = <T>(path: string, schema: z.ZodType<T>): Promise<T> => request("GET", path, schema);
+export const apiPost = <T>(path: string, body: unknown, schema: z.ZodType<T>): Promise<T> => request("POST", path, schema, body);

@@ -23,7 +23,10 @@ describe("error copy follows the copy rules", () => {
   it("names buttons only by their exact labels", () => {
     const labels: string[] = Object.values(BUTTON_LABELS);
     for (const message of everyMessage) {
-      for (const match of message.matchAll(/\btap (.+?)(?= again| to try| while|\.|,)/gi)) expect(labels).toContain(match[1]);
+      // "tap X or Y": both X and Y must be real labels.
+      for (const match of message.matchAll(/\btap (.+?)(?= again| to try| while| and|\.|,)/gi)) {
+        for (const label of (match[1] ?? "").split(" or ")) expect(labels).toContain(label);
+      }
     }
   });
 

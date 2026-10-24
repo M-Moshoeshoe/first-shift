@@ -7,4 +7,6 @@
 export const JS_BUDGETS_KB = {
   "/": 200,
   "/sign-in": 220,
+  // Measured 257.2 KB (24 October 2026); measured + 10% is 282.9, capped at 260.
+  "/onboarding/work": 260,
 } as const;

@@ -81,7 +81,45 @@ export function isProfileComplete(user: UserRecord | null, business: BusinessRec
   return Boolean(business?.name && business.area && business.openingHours && business.location && business.shopfrontPhoto);
 }
 
-export type Destination = "/sign-in" | "/onboarding/role" | "/onboarding/work" | "/onboarding/business" | "/work" | "/business";
+/** 27821234567 as a person types it: 082 123 4567. */
+export function displayPhone(stored: string): string {
+  const local = stored.startsWith("27") ? `0${stored.slice(2)}` : stored;
+  return local.length === 10 ? `${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}` : local;
+}
+
+/**
+ * What a person may see of their own profile, for filling forms back in and
+ * routing. No counters, no hash, no storage paths.
+ */
+export interface ProfileView {
+  role: Role | null;
+  complete: boolean;
+  destination: Destination;
+  worker: (Partial<WorkerDetails> & { idLastFour?: string; hasPhoto: boolean }) | null;
+  business: (Partial<BusinessDetails> & { hasPhoto: boolean }) | null;
+}
+
+export function profileView(user: UserRecord | null, business: BusinessRecord | null): ProfileView {
+  const worker =
+    user?.role === "young_person"
+      ? {
+          firstName: user.firstName,
+          area: user.area,
+          availability: user.availability,
+          payoutPhone: user.payoutPhone ? displayPhone(user.payoutPhone) : undefined,
+          idLastFour: user.idLastFour,
+          hasPhoto: Boolean(user.profilePhoto),
+        }
+      : null;
+  const shop =
+    user?.role === "business" && business
+      ? { name: business.name, area: business.area, openingHours: business.openingHours, location: business.location, hasPhoto: Boolean(business.shopfrontPhoto) }
+      : null;
+  return { role: user?.role ?? null, complete: isProfileComplete(user, business), destination: destinationFor(true, user, business), worker, business: shop };
+}
+
+export const DESTINATIONS = ["/sign-in", "/onboarding/role", "/onboarding/work", "/onboarding/business", "/work", "/business"] as const;
+export type Destination = (typeof DESTINATIONS)[number];
 
 /** Where a person belongs right now. Screens redirect with this; server routes enforce everything again. */
 export function destinationFor(signedIn: boolean, user: UserRecord | null, business: BusinessRecord | null): Destination {

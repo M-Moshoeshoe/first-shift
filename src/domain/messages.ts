@@ -13,6 +13,10 @@ export const BUTTON_LABELS = {
   saveMyProfile: "Save my profile",
   saveMyBusiness: "Save my business",
   useMyLocation: "Use my location",
+  takeAPhoto: "Take a photo",
+  chooseAPhoto: "Choose a photo",
+  next: "Next",
+  back: "Back",
 } as const;
 
 /** Shown wherever a message contains it, as a link to SUPPORT_EMAIL (src/config/contact.ts). */
@@ -46,6 +50,10 @@ export const PROFILE_MESSAGES = {
   detailsFirst: "Save your details first, then add your photo.",
   pinMissing: `Your profile is saved. To finish, come back and tap ${BUTTON_LABELS.useMyLocation} while you're at the business.`,
   fallback: "Some of your details couldn't be saved. Check the form and try again.",
+  // Step 5 additions, for review.
+  photoUnreadable: `This photo can't be opened on this phone. Tap ${BUTTON_LABELS.takeAPhoto}, or tap ${BUTTON_LABELS.chooseAPhoto} and pick a different one.`,
+  photoNeeded: `Add a photo of your face first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
+  profileUnavailable: "Your profile didn't load. Check your connection, then reload the page.",
 } as const;
 
 export function profileProblemMessage(problem: ProfileProblem): string {
@@ -68,6 +76,13 @@ export function profileProblemMessage(problem: ProfileProblem): string {
       return PROFILE_MESSAGES.photoTooBig;
   }
 }
+
+/** What the photo button says while it works, and the line that appears when an upload is slow. */
+export const UPLOAD_COPY = {
+  preparing: "Getting your photo ready",
+  uploading: (percent: number | null) => (percent === null ? "Uploading your photo" : `Uploading your photo, ${percent}%`),
+  slow: "Your connection is slow. Keep this page open.",
+} as const;
 
 export const FIELD_MESSAGES = {
   firstNameEmpty: "Enter your first name.",

@@ -20,7 +20,8 @@
     "seed": "tsx scripts/seed.ts",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build && npm run budget",
     "budget": "tsx scripts/budget.ts",
-    "e2e:profile": "tsx scripts/profile-e2e.ts"
+    "e2e:profile": "tsx scripts/e2e/profile.ts",
+    "e2e:photo": "tsx scripts/e2e/photo.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",

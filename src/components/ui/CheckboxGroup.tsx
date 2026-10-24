@@ -29,7 +29,7 @@ export function CheckboxGroup<T extends string>({ id, legend, options, values, o
     onChange(options.map((option) => option.value).filter((v) => (v === value ? checked : values.includes(v))));
 
   return (
-    <fieldset aria-describedby={hint ? `${hintId} ${errorId}` : errorId} className="flex flex-col gap-1">
+    <fieldset data-field={id} aria-describedby={hint ? `${hintId} ${errorId}` : errorId} className="flex flex-col gap-1">
       <legend className="mb-1 font-bold">{legend}</legend>
       {hint ? (
         <p id={hintId} className="text-sm text-muted">

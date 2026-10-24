@@ -1,6 +1,6 @@
 import "server-only";
 import { ID_PROBLEM_MESSAGES, profileProblemMessage } from "@/domain/messages";
-import { isProfileComplete, newAccount, photoPath, type PhotoKind } from "@/domain/profile";
+import { isProfileComplete, newAccount, photoPath, profileView, type PhotoKind, type ProfileView } from "@/domain/profile";
 import { decideBusinessSave, decidePhotoSave, decideWorkerSave, type ProfileProblem } from "@/domain/profileDecisions";
 import { decideRole, type Role } from "@/domain/roles";
 import { checkSaId } from "@/domain/saId";
@@ -82,6 +82,11 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
           result: { status: "saved", complete: isProfileComplete(state.user, decision.next) },
         };
       });
+    },
+
+    /** The person's own profile, read in a transaction that writes nothing. */
+    async getProfile(uid: string): Promise<ProfileView> {
+      return repo.transact<ProfileView>(uid, null, (state) => ({ write: null, result: profileView(state.user, state.business) }));
     },
 
     async savePhoto(uid: string, kind: PhotoKind): Promise<SaveResult> {

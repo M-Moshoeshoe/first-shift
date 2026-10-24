@@ -15,7 +15,7 @@ export function TextField({ id, label, hint, error, ...inputProps }: TextFieldPr
   const errorId = `${id}-error`;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div data-field={id} className="flex flex-col gap-1">
       <label htmlFor={id} className="font-bold">
         {label}
       </label>

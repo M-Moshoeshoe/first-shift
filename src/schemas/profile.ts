@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { FIELD_MESSAGES, ID_PROBLEM_MESSAGES, PROFILE_MESSAGES } from "@/domain/messages";
-import { AVAILABILITY, PHOTO_KINDS } from "@/domain/profile";
+import { AVAILABILITY, DESTINATIONS, PHOTO_KINDS } from "@/domain/profile";
 import { ROLES } from "@/domain/roles";
 
 // Every field names its own message, so a person never sees a raw validation error.
@@ -34,6 +34,36 @@ export const YoungPersonProfileSchema = z.object({
   idNumber: IdNumberSchema,
 });
 export type YoungPersonProfileInput = z.infer<typeof YoungPersonProfileSchema>;
+
+/** Step 1 of the young person form, checked in the browser before moving on. The server checks it all again. */
+export const WorkerDetailsSchema = YoungPersonProfileSchema.pick({ firstName: true, area: true, availability: true, payoutPhone: true });
+
+/** GET /api/profile: the person's own safe fields only (domain/profile.ts, profileView). */
+export const ProfileViewSchema = z.object({
+  role: z.enum(ROLES).nullable(),
+  complete: z.boolean(),
+  destination: z.enum(DESTINATIONS),
+  worker: z
+    .object({
+      firstName: z.string().optional(),
+      area: z.string().optional(),
+      availability: z.array(z.enum(AVAILABILITY)).optional(),
+      payoutPhone: z.string().optional(),
+      idLastFour: z.string().optional(),
+      hasPhoto: z.boolean(),
+    })
+    .nullable(),
+  business: z
+    .object({
+      name: z.string().optional(),
+      area: z.string().optional(),
+      openingHours: z.string().optional(),
+      location: z.object({ latitude: z.number(), longitude: z.number() }).optional(),
+      hasPhoto: z.boolean(),
+    })
+    .nullable(),
+});
+export type ProfileViewResponse = z.infer<typeof ProfileViewSchema>;
 
 /** A pin inside South Africa's bounding box. Both coordinates or neither. */
 const coordinate = (min: number, max: number) =>
