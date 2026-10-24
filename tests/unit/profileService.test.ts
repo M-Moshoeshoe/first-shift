@@ -108,7 +108,7 @@ describe("young person profile", () => {
 
 describe("business profile", () => {
   const details = { name: "Sipho's Phone Repairs", area: "Ivory Park", openingHours: "Monday to Saturday, 8:00 to 17:00" };
-  const pin = { latitude: -25.99, longitude: 28.23 };
+  const pin = { latitude: -25.99, longitude: 28.23, accuracyMetres: 20 };
 
   beforeEach(async () => {
     await service.setRole("sipho", "business");

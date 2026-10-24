@@ -50,6 +50,9 @@ export const RULES = {
   photoMaxBytes: 2 * 1024 * 1024,
   photoContentTypes: ["image/jpeg", "image/png", "image/webp"],
 
+  /** A premises pin counts only if the phone reports it to within this many metres. */
+  pinMaxAccuracyMetres: 150,
+
   /** Below this confidence, a work classification goes to human review. */
   workClassificationMinConfidence: 0.7,
 } as const;

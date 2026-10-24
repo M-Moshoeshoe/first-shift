@@ -132,8 +132,14 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | --- | --- | --- |
 | `/` | 200 KB | 174.3 KB, 8 scripts |
 | `/sign-in` | 220 KB | 207.2 KB, 9 scripts |
+| `/onboarding/work` | 260 KB (the cap) | 251.5 KB, 12 scripts |
+| `/onboarding/business` | 260 KB (the cap) | 251.5 KB, 12 scripts |
 
-Almost all of the home page's baseline is React and the Next.js runtime, so it has about 26 KB of room. Marketing pages never load auth or Firebase code (`AGENTS.md`), which is what keeps them inside it. Account pages load Firebase per service (`firebaseClient.ts` for Auth, `firebaseDb.ts`, `firebaseStorage.ts`), so a screen downloads only what it uses.
+A new page's budget is its measured size plus 10%, never above 260 KB.
+
+Almost all of the home page's baseline is React and the Next.js runtime, so it has about 26 KB of room. Marketing pages never load auth or Firebase code (`AGENTS.md`), which is what keeps them inside it. Account pages load Firebase per service (`firebaseClient.ts` for Auth, `firebaseDb.ts`, `firebaseStorage.ts`), so a screen downloads only what it uses, and the photo code (Storage and resizing, about 10 KB) loads only when a photo step appears.
+
+Known fix if a page nears its cap: Zod is about 31 KB of each onboarding page, because the browser runs the same schemas as the server. Zod's smaller build (`zod/mini`) would save about 20 KB, at the cost of rewriting the schemas in its functional style. Not adopted yet; reach for it before raising a budget.
 
 ## Avoid (these read as AI-made)
 

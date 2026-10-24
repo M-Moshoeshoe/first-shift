@@ -26,6 +26,7 @@ const HTTP_STATUS: Record<ProfileProblem["code"], number> = {
   photo_missing: 422,
   photo_wrong_type: 422,
   photo_too_big: 422,
+  pin_imprecise: 422,
 };
 
 /** Nothing to write: the request matches what is stored, so there's no audit entry either. */

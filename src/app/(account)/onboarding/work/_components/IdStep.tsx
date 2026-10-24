@@ -10,7 +10,7 @@ import { ApiError, apiPost } from "@/lib/api";
 import { shakeAndFocus } from "@/lib/forms";
 import { IdNumberSchema, SaveResultSchema } from "@/schemas/profile";
 import type { DetailsDraft } from "./DetailsStep";
-import { useHeadingFocus } from "./useHeadingFocus";
+import { useHeadingFocus } from "@/lib/useHeadingFocus";
 
 const FIELD_ID = "work-idNumber";
 const FORM_ERROR_ID = "work-id-form-error";

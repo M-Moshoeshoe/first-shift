@@ -21,7 +21,12 @@ export interface Counters {
 export interface Location {
   latitude: number;
   longitude: number;
+  /** How precise the phone said the reading was, in metres. Stored with the pin and shown to the owner. */
+  accuracyMetres: number;
 }
+
+/** Why a premises pin couldn't be taken. */
+export type LocationProblem = "denied" | "unavailable" | "timeout" | "unsupported" | "imprecise";
 
 /** A photo in Storage. version changes whenever the file is replaced. */
 export interface StoredPhoto {

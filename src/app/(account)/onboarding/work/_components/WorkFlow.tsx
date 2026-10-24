@@ -6,7 +6,7 @@ import type { ProfileViewResponse } from "@/schemas/profile";
 import { DetailsStep, type DetailsDraft } from "./DetailsStep";
 import { IdStep } from "./IdStep";
 import { PhotoStep } from "./PhotoStep";
-import { ProfileDone } from "./ProfileDone";
+import { ProfileDone } from "@/components/ProfileDone";
 
 type Step = 1 | 2 | 3;
 
@@ -38,7 +38,7 @@ export function WorkFlow({ view }: { view: ProfileViewResponse }) {
     <div className="flex flex-col gap-6">
       <StepProgress current={step} done={finished ? 3 : step - 1} total={3} />
       {finished ? (
-        <ProfileDone />
+        <ProfileDone next="/work" />
       ) : step === 1 ? (
         <DetailsStep
           initial={details}

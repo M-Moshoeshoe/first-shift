@@ -36,7 +36,7 @@ const BusinessRecordSchema = z.object({
   name: z.string().optional(),
   area: z.string().optional(),
   openingHours: z.string().optional(),
-  location: z.object({ latitude: z.number(), longitude: z.number() }).optional(),
+  location: z.object({ latitude: z.number(), longitude: z.number(), accuracyMetres: z.number() }).optional(),
   shopfrontPhoto: PhotoSchema.optional(),
 });
 

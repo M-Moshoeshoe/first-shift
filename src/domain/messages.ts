@@ -1,4 +1,4 @@
-import type { PhotoKind } from "./profile";
+import type { LocationProblem, PhotoKind } from "./profile";
 import type { ProfileProblem } from "./profileDecisions";
 import type { Role } from "./roles";
 import type { IdProblem } from "./saId";
@@ -17,6 +17,7 @@ export const BUTTON_LABELS = {
   chooseAPhoto: "Choose a photo",
   next: "Next",
   back: "Back",
+  skipForNow: "Skip for now",
 } as const;
 
 /** Shown wherever a message contains it, as a link to SUPPORT_EMAIL (src/config/contact.ts). */
@@ -54,7 +55,32 @@ export const PROFILE_MESSAGES = {
   photoUnreadable: `This photo can't be opened on this phone. Tap ${BUTTON_LABELS.takeAPhoto}, or tap ${BUTTON_LABELS.chooseAPhoto} and pick a different one.`,
   photoNeeded: `Add a photo of your face first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
   profileUnavailable: "Your profile didn't load. Check your connection, then reload the page.",
+  // Step 6 additions, for review.
+  shopfrontNeeded: `Add a photo of your shopfront first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
+  pinImprecise: `Your location isn't precise enough yet. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
 } as const;
+
+/** Step 6, for review: why a premises pin couldn't be taken, and what to do. */
+export const LOCATION_MESSAGES: Record<LocationProblem, string> = {
+  denied: `Location is blocked for First Shift. Tap the icon next to the web address, choose Permissions, and turn on Location. Then tap ${BUTTON_LABELS.useMyLocation} again.`,
+  unavailable: `Your phone couldn't find where you are. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
+  timeout: `Your phone took too long to find where you are. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
+  unsupported: `This browser can't share your location. Open First Shift in Chrome or Samsung Internet to add your pin, or tap ${BUTTON_LABELS.skipForNow}.`,
+  imprecise: PROFILE_MESSAGES.pinImprecise,
+};
+
+/** Step 6, for review: what "Use my location" says while it works. */
+export const LOCATION_COPY = {
+  finding: "Finding your location",
+  saving: "Saving your pin",
+  notPinned: "Not pinned yet",
+} as const;
+
+/** "Pinned to within 20 metres." Whole metres, rounded up so it never claims more precision than it has. */
+export function pinPrecisionText(accuracyMetres: number): string {
+  const metres = Math.max(1, Math.ceil(accuracyMetres));
+  return `Pinned to within ${metres} ${metres === 1 ? "metre" : "metres"}.`;
+}
 
 export function profileProblemMessage(problem: ProfileProblem): string {
   switch (problem.code) {
@@ -74,6 +100,8 @@ export function profileProblemMessage(problem: ProfileProblem): string {
       return PROFILE_MESSAGES.photoWrongType;
     case "photo_too_big":
       return PROFILE_MESSAGES.photoTooBig;
+    case "pin_imprecise":
+      return PROFILE_MESSAGES.pinImprecise;
   }
 }
 

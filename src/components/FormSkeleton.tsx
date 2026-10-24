@@ -1,7 +1,7 @@
 /**
- * Motion 6: placeholder blocks the size of the first form step (progress,
- * label and input, a checkbox group, the button), so nothing jumps when the
- * profile arrives. Never a blank screen or a spinner.
+ * Motion 6, shared by both onboarding forms: placeholder blocks the size of
+ * the first form step (progress, label and input, a group, the button), so
+ * nothing jumps when the profile arrives. Never a blank screen or a spinner.
  */
 export function FormSkeleton() {
   const block = "animate-skeleton bg-mist";

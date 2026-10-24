@@ -58,7 +58,7 @@ export const ProfileViewSchema = z.object({
       name: z.string().optional(),
       area: z.string().optional(),
       openingHours: z.string().optional(),
-      location: z.object({ latitude: z.number(), longitude: z.number() }).optional(),
+      location: z.object({ latitude: z.number(), longitude: z.number(), accuracyMetres: z.number() }).optional(),
       hasPhoto: z.boolean(),
     })
     .nullable(),
@@ -69,7 +69,15 @@ export type ProfileViewResponse = z.infer<typeof ProfileViewSchema>;
 const coordinate = (min: number, max: number) =>
   z.number({ error: FIELD_MESSAGES.pinOutsideSa }).min(min, FIELD_MESSAGES.pinOutsideSa).max(max, FIELD_MESSAGES.pinOutsideSa);
 
-const LocationSchema = z.object({ latitude: coordinate(-35, -22), longitude: coordinate(16, 33) }, { error: FIELD_MESSAGES.pinOutsideSa });
+const LocationSchema = z.object(
+  {
+    latitude: coordinate(-35, -22),
+    longitude: coordinate(16, 33),
+    // Any honest reading is accepted here; whether it's precise enough is a rule (domain/profileDecisions.ts).
+    accuracyMetres: z.number({ error: PROFILE_MESSAGES.fallback }).positive(PROFILE_MESSAGES.fallback).max(100_000, PROFILE_MESSAGES.fallback),
+  },
+  { error: FIELD_MESSAGES.pinOutsideSa },
+);
 
 export const BusinessProfileSchema = z.object({
   name: z.string({ error: FIELD_MESSAGES.businessName }).trim().min(2, FIELD_MESSAGES.businessName).max(80, FIELD_MESSAGES.businessName),
@@ -78,3 +86,6 @@ export const BusinessProfileSchema = z.object({
   location: LocationSchema.optional(),
 });
 export type BusinessProfileInput = z.infer<typeof BusinessProfileSchema>;
+
+/** Step 1 of the business form, checked in the browser before saving. */
+export const BusinessDetailsSchema = BusinessProfileSchema.pick({ name: true, area: true, openingHours: true });

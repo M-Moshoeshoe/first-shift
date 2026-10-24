@@ -10,7 +10,13 @@ export type ProfileProblem =
   | { code: "details_first" }
   | { code: "photo_missing"; kind: PhotoKind }
   | { code: "photo_wrong_type" }
-  | { code: "photo_too_big" };
+  | { code: "photo_too_big" }
+  | { code: "pin_imprecise" };
+
+/** A pin counts only if the phone reports it precisely enough to find the door. */
+export function pinPreciseEnough(accuracyMetres: number): boolean {
+  return accuracyMetres > 0 && accuracyMetres <= RULES.pinMaxAccuracyMetres;
+}
 
 export type SaveDecision<T> = { kind: "save"; next: T } | { kind: "unchanged" } | { kind: "refuse"; problem: ProfileProblem };
 
@@ -73,6 +79,7 @@ export function decideBusinessSave(user: UserRecord | null, business: BusinessRe
   const problem = roleProblem(user, "business");
   if (problem) return { kind: "refuse", problem };
   if (!business) return { kind: "refuse", problem: { code: "role_missing" } };
+  if (details.location && !pinPreciseEnough(details.location.accuracyMetres)) return { kind: "refuse", problem: { code: "pin_imprecise" } };
 
   const location = details.location ?? business.location;
   const unchanged =
@@ -80,7 +87,8 @@ export function decideBusinessSave(user: UserRecord | null, business: BusinessRe
     business.area === details.area &&
     business.openingHours === details.openingHours &&
     business.location?.latitude === location?.latitude &&
-    business.location?.longitude === location?.longitude;
+    business.location?.longitude === location?.longitude &&
+    business.location?.accuracyMetres === location?.accuracyMetres;
   if (unchanged) return { kind: "unchanged" };
   return { kind: "save", next: { ...business, name: details.name, area: details.area, openingHours: details.openingHours, location } };
 }

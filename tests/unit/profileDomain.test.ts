@@ -47,7 +47,7 @@ describe("completeness and where a person belongs", () => {
   });
 
   it("needs the business details, the pin and the shopfront photo", () => {
-    const pinned = { ...shop, location: { latitude: -26, longitude: 28.2 } };
+    const pinned = { ...shop, location: { latitude: -26, longitude: 28.2, accuracyMetres: 20 } };
     expect(isProfileComplete(owner, { ...shop, shopfrontPhoto: photo })).toBe(false);
     expect(isProfileComplete(owner, { ...pinned, shopfrontPhoto: photo })).toBe(true);
   });
@@ -75,9 +75,9 @@ describe("save decisions", () => {
   });
 
   it("keeps a business pin when a later save has none", () => {
-    const pinned = { ...shop, location: { latitude: -26, longitude: 28.2 } };
+    const pinned = { ...shop, location: { latitude: -26, longitude: 28.2, accuracyMetres: 20 } };
     const decision = decideBusinessSave(owner, pinned, { name: "Sipho's Repairs", area: "Ivory Park", openingHours: "8:00 to 17:00" });
-    expect(decision).toMatchObject({ kind: "save", next: { location: { latitude: -26, longitude: 28.2 } } });
+    expect(decision).toMatchObject({ kind: "save", next: { location: { latitude: -26, longitude: 28.2, accuracyMetres: 20 } } });
   });
 
   it("accepts photos just under the size limit and refuses at it", () => {

@@ -9,7 +9,7 @@ import type { Availability } from "@/domain/profile";
 import { fieldErrors, firstInvalid, shakeAndFocus } from "@/lib/forms";
 import { WorkerDetailsSchema } from "@/schemas/profile";
 import { AVAILABILITY_OPTIONS } from "./availability";
-import { useHeadingFocus } from "./useHeadingFocus";
+import { useHeadingFocus } from "@/lib/useHeadingFocus";
 
 export interface DetailsDraft {
   firstName: string;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BUTTON_LABELS, FIELD_MESSAGES, ID_HINT, ID_PROBLEM_MESSAGES, PROFILE_MESSAGES, signInErrorMessage, splitContactLink } from "@/domain/messages";
+import { BUTTON_LABELS, FIELD_MESSAGES, ID_HINT, ID_PROBLEM_MESSAGES, LOCATION_MESSAGES, PROFILE_MESSAGES, UPLOAD_COPY, pinPrecisionText, signInErrorMessage, splitContactLink } from "@/domain/messages";
 import { PHOTO_KINDS } from "@/domain/profile";
 
 const SIGN_IN_CODES = ["auth/popup-blocked", "auth/popup-closed-by-user", "auth/network-request-failed", "auth/too-many-requests", "auth/x"];
@@ -12,6 +12,9 @@ const everyMessage = [
   ...PHOTO_KINDS.map((kind) => PROFILE_MESSAGES.photoMissing(kind)),
   ...Object.values(PROFILE_MESSAGES).flatMap((value) => (typeof value === "string" ? [value] : [])),
   ...SIGN_IN_CODES.map(signInErrorMessage),
+  ...Object.values(LOCATION_MESSAGES),
+  pinPrecisionText(20),
+  UPLOAD_COPY.slow,
 ];
 
 describe("error copy follows the copy rules", () => {
@@ -23,8 +26,8 @@ describe("error copy follows the copy rules", () => {
   it("names buttons only by their exact labels", () => {
     const labels: string[] = Object.values(BUTTON_LABELS);
     for (const message of everyMessage) {
-      // "tap X or Y": both X and Y must be real labels.
-      for (const match of message.matchAll(/\btap (.+?)(?= again| to try| while| and|\.|,)/gi)) {
+      // "tap X or Y": both X and Y must be real labels. Our labels are capitalised; "tap the icon" is the browser's own.
+      for (const match of message.matchAll(/\b[Tt]ap ([A-Z].*?)(?= again| to try| while| and|\.|,)/g)) {
         for (const label of (match[1] ?? "").split(" or ")) expect(labels).toContain(label);
       }
     }

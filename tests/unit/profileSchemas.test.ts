@@ -37,7 +37,7 @@ describe("business profile", () => {
 
   it("accepts a profile with or without a pin", () => {
     expect(BusinessProfileSchema.safeParse(valid).success).toBe(true);
-    expect(BusinessProfileSchema.safeParse({ ...valid, location: { latitude: -25.99, longitude: 28.13 } }).success).toBe(true);
+    expect(BusinessProfileSchema.safeParse({ ...valid, location: { latitude: -25.99, longitude: 28.13, accuracyMetres: 20 } }).success).toBe(true);
   });
 
   it("refuses a pin outside South Africa, or half a pin, with the pin's message", () => {
