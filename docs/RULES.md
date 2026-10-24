@@ -94,6 +94,10 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 | Sending the same role, or the same ID with the same details, again is fine and changes nothing | A double tap or a retry on weak signal never fails or duplicates anything |
 | A wrong ID number is corrected only through support | The person is told to contact us; corrections go through the review list in Phase 7 |
 
+## Location
+
+A tryout shows where it is as a cell about 1 km across (a 6-character geohash) and the cell's centre, never the business's exact pin. The pin stays on the business record (`geo.ts`).
+
 ## Work that can't be posted
 
 The AI sorts every request into a category; `allowedWork.ts` decides. Blocked categories are refused with a safer option, whatever the AI's confidence. Unclear requests (confidence below 0.7) wait for human review. Electrical installation is blocked because the Electrical Installation Regulations, 2009 require it to be done under the control of a registered person.

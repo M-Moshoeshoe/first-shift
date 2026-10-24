@@ -25,6 +25,19 @@ describe("validateTryoutWindow", () => {
 
   it("allows a tryout that ends exactly at 18:00", () => {
     expect(validateTryoutWindow(now, { start: sast("2026-10-24T10:00:00"), end: sast("2026-10-24T18:00:00") }).ok).toBe(true);
+    expect(validateTryoutWindow(now, { start: sast("2026-10-24T14:00:00"), end: sast("2026-10-24T18:00:00") }).ok).toBe(true);
+  });
+
+  it("refuses a 17:00 start for 4 hours, which ends at 21:00", () => {
+    const result = validateTryoutWindow(now, { start: sast("2026-10-24T17:00:00"), end: sast("2026-10-24T21:00:00") });
+    expect(!result.ok && result.error).toContain("outside_daylight");
+  });
+
+  it("refuses any start at or after 18:00 as outside daylight, even across midnight", () => {
+    const six = validateTryoutWindow(now, { start: sast("2026-10-24T18:00:00"), end: sast("2026-10-24T22:00:00") });
+    const eight = validateTryoutWindow(now, { start: sast("2026-10-24T20:00:00"), end: sast("2026-10-25T00:00:00") });
+    expect(!six.ok && six.error).toContain("outside_daylight");
+    expect(!eight.ok && eight.error).toContain("outside_daylight");
   });
 
   it("rejects tryouts shorter than four hours or longer than eight", () => {

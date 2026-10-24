@@ -3,7 +3,7 @@
 import type { AnimationEvent } from "react";
 
 /** The only words a Stamp can say (docs/DESIGN.md, Motion). */
-export type StampLabel = "Paid" | "Received" | "Booked" | "Profile done";
+export type StampLabel = "Paid" | "Received" | "Booked" | "Profile done" | "Posted";
 
 function shouldVibrate(): boolean {
   if (!("vibrate" in navigator)) return false;

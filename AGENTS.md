@@ -36,7 +36,7 @@ tests/unit/          domain tests
 tests/rules/         security rules tests
 ```
 
-Dependency direction is one way: `app` and `components` may use `domain`, `schemas`, `config`, `server` (in route handlers) and `lib`. `server` may use `domain`, `schemas` and `config`. `domain` uses only `config` and itself. ESLint enforces these boundaries; never disable the rule to get around it.
+Dependency direction is one way: `app` and `components` may use `domain`, `schemas`, `config`, `server` (in route handlers) and `lib`. `server` may use `domain`, `schemas` and `config`. `domain` uses only `config` and itself, plus a pure library with no I/O and no dependencies of its own where one saves real work (today only `geofire-common`, for geohashes). ESLint enforces these boundaries; never disable the rule to get around it.
 
 A route handler does four things, in order: verify the user (`requireUser`), validate input (a Zod schema), call a service (or domain functions directly, for a one-step route), then respond, with every error through `toErrorResponse`. Business decisions never live in a route handler or a component.
 

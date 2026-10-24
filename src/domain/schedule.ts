@@ -26,8 +26,10 @@ export function validateTryoutWindow(now: Date, window: TryoutWindow): Result<{ 
 
   const start = sastParts(window.start);
   const end = sastParts(window.end);
+  // A start at or after 18:00 is named for what it is, even when it also runs into the next day.
+  const startsOutsideDaylight = start.hour < RULES.daylightStartHour || start.hour >= RULES.daylightEndHour;
   const endsAfterDaylight = end.hour > RULES.daylightEndHour || (end.hour === RULES.daylightEndHour && end.minute > 0);
-  if (start.hour < RULES.daylightStartHour || endsAfterDaylight) problems.push("outside_daylight");
+  if (startsOutsideDaylight || endsAfterDaylight) problems.push("outside_daylight");
 
   const hours = minutes / 60;
   if (hours < RULES.minPaidHours) problems.push("too_short");

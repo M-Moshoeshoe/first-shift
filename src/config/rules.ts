@@ -55,6 +55,11 @@ export const RULES = {
 
   /** A premises pin counts only if the phone reports it to within this many metres. */
   pinMaxAccuracyMetres: 150,
+  /**
+   * Tryouts carry a geohash cell this long (6 characters, about 1 km) and its
+   * centre. The exact pin stays on the business record.
+   */
+  coarseGeohashPrecision: 6,
 
   /** Below this confidence, a work classification goes to human review. */
   workClassificationMinConfidence: 0.7,

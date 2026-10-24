@@ -19,10 +19,15 @@ export function sastParts(date: Date): { year: number; month: number; day: numbe
   };
 }
 
+/** The UTC instant of a South African wall-clock time. Month is 1 to 12. */
+export function fromSast(year: number, month: number, day: number, hour: number, minute: number): Date {
+  return addMinutes(new Date(Date.UTC(year, month - 1, day, hour, minute)), -RULES.timezoneOffsetMinutes);
+}
+
 /** The UTC instant of a South African wall-clock time on the same SAST day as date. */
 export function atSastTime(date: Date, hour: number, minute: number): Date {
   const { year, month, day } = sastParts(date);
-  return addMinutes(new Date(Date.UTC(year, month - 1, day, hour, minute)), -RULES.timezoneOffsetMinutes);
+  return fromSast(year, month, day, hour, minute);
 }
 
 export function sameSastDay(a: Date, b: Date): boolean {
