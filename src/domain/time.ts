@@ -30,6 +30,12 @@ export function atSastTime(date: Date, hour: number, minute: number): Date {
   return fromSast(year, month, day, hour, minute);
 }
 
+/** The South African calendar date of an instant, "YYYY-MM-DD", for anything counted per day. */
+export function sastDateKey(date: Date): string {
+  const { year, month, day } = sastParts(date);
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 export function sameSastDay(a: Date, b: Date): boolean {
   const x = sastParts(a);
   const y = sastParts(b);

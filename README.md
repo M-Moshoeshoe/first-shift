@@ -5,7 +5,7 @@ Paid one-day tryouts at businesses near you, with a reference from the business 
 ## What's in this skeleton
 
 - Next.js 16 (App Router), strict TypeScript and Tailwind, ready for Netlify
-- Every product rule as a pure, unit-tested function in `src/domain` (51 tests)
+- Every product rule as a pure, unit-tested function in `src/domain`
 - Firestore and Storage security rules that deny by default, with emulator tests
 - Server-only adapters for Firebase Admin, auth, the Claude API, rate limits and logging
 - CI (lint, typecheck, tests, dependency audit, build, rules tests) and a ZAP security scan
@@ -17,7 +17,7 @@ Paid one-day tryouts at businesses near you, with a reference from the business 
 2. **Git** from git-scm.com. Accept the defaults; this also installs Git Bash.
 3. **VS Code** from code.visualstudio.com.
 4. **Java 21** (Eclipse Temurin, from adoptium.net). Only needed for the Firebase emulators.
-5. **Firebase CLI:** in a terminal, run `npm install -g firebase-tools`, then `firebase login`.
+5. **Firebase CLI:** nothing to install. The project pins `firebase-tools` 15.34.1 as a dev dependency, and the npm scripts use that copy. Run it yourself as `npx firebase`, never a global install, so everyone uses the same version.
 
 Use **Git Bash** as your VS Code terminal (Terminal > New Terminal > the dropdown > Git Bash). Commands below are written for it. In PowerShell, use `curl.exe` instead of `curl`.
 
@@ -69,11 +69,12 @@ Restart `npm run dev` and check `/api/health` again; every value should now be t
 Deploy the security rules to your project:
 
 ```bash
-firebase use --add
-firebase deploy --only firestore:rules,storage
+npx firebase login
+npx firebase use --add
+npx firebase deploy --only firestore:rules,storage
 ```
 
-## 5. Emulators, security rules tests and demo data
+## 5. Emulators and security rules tests
 
 Run the security rules tests (starts the emulators, runs the tests, stops them):
 
@@ -81,15 +82,9 @@ Run the security rules tests (starts the emulators, runs the tests, stops them):
 npm run rules
 ```
 
-For local development against the emulators, run `npm run emulators` in one terminal. In a second terminal, load the demo data:
+For local development against the emulators, run `npm run emulators` in one terminal and `npm run dev` in another.
 
-```bash
-FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 npm run seed
-```
-
-The seed script refuses to run against a live project unless `SEED_DEMO_PROJECT=yes` is set, so demo data can't leak into real feeds.
-
-To run the app itself against the emulators, with no real Firebase project needed, put these in `.env.local` and restart `npm run dev`:
+To run the app against the emulators, with no real Firebase project needed, put these in **`.env.development.local`** (not `.env.local`) and restart `npm run dev`:
 
 ```bash
 NEXT_PUBLIC_USE_EMULATORS=true
@@ -101,6 +96,8 @@ FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
 FIREBASE_STORAGE_EMULATOR_HOST=127.0.0.1:9199
 ```
+
+Why that file: `npm run dev` reads `.env.development.local` first and `.env.local` second, and the first value found wins. Keeping the emulator settings in `.env.development.local` means they apply to `npm run dev` only, never to a production build. It also means **real settings in `.env.local` are ignored while these lines are there**. To switch to real services, delete or comment out every line above in `.env.development.local`, then restart `npm run dev`.
 
 The emulators only work with `npm run dev`. A production build (`npm run build` then `npm start`) sends a security policy that blocks connections to local addresses such as `127.0.0.1`, by design, so it can't reach them.
 
@@ -127,13 +124,14 @@ Every push to `main` redeploys. Pull requests get their own preview URL.
 
 ## 8. Build with Claude Code
 
-Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` automatically. Work through `docs/PHASES.md` one phase at a time, and run `npm run check` after every phase before you commit.
+Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` automatically. Work through `docs/PHASES.md` one item at a time, and run `npm run check` after every item before you commit.
 
 ## Troubleshooting
 
 - **`npm ci` says your Node version isn't supported:** install Node.js 24 LTS (v24.12 or later) and reopen VS Code.
-- **`npm ci` fails with a peer dependency error:** make sure the `.npmrc` file is in the project folder. It tells npm not to auto-resolve optional peer packages, which works around a known npm bug; every package we need is listed in `package.json`.
+- **Why `.npmrc` has `legacy-peer-deps=true`:** it was added in Phase 0 to work around an npm resolver bug with optional peer dependencies, where npm tried to install or reconcile optional peers no package here uses and failed with a peer dependency error. Every package we need is listed in `package.json` with an exact version, so npm doesn't need to resolve peers for us. On 25 October 2026 a fresh resolve of `package.json` without the flag succeeded with no peer errors, so the flag may no longer be needed; it stays until someone removes it and `npm ci`, `npm run check` and `npm run rules` still pass. The cost of keeping it: npm no longer warns about peer mismatches, so check a new package's peer requirements by hand before adding it.
 - **Typecheck fails after moving a route** (for example "Cannot find module '../../src/app/page.js'" in `.next/types`): Next.js generated route types for the old paths. Delete the `.next` folder and run the build again.
+- **Real Firebase settings in `.env.local` seem to be ignored, or sign-in still opens the emulator's account picker:** `.env.development.local` still holds the emulator settings, and `npm run dev` reads it before `.env.local`, so its values win (Next.js loads `process.env`, then `.env.development.local`, then `.env.local`, then `.env.development`, then `.env`). Delete or comment out the emulator lines in `.env.development.local` and restart `npm run dev`. `/api/health` shows `"emulators": false` once they're gone.
 - **Google sign-in fails on the live site:** add your `netlify.app` domain under Firebase Authentication > Settings > Authorized domains.
 - **`/api/health` shows false for something:** that environment variable is missing or misnamed in `.env.local` or in Netlify.
 
@@ -146,8 +144,7 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | `npm run budget` | Each page's JavaScript, gzipped, against `src/config/performance.ts` (needs a build first) |
 | `npm test` | Unit tests only |
 | `npm run rules` | Security rules tests in the emulators |
-| `npm run emulators` | Firebase emulators with the UI at http://localhost:4000 |
-| `npm run seed` | Load demo data (emulator or a dedicated demo project only) |
+| `npm run emulators` | Firebase emulators (pinned `firebase-tools`) with the UI at http://localhost:4000 |
 | `npm run e2e:profile` | Role and young person profile through the real client code, against the emulators (settings in section 5) |
 | `npm run e2e:photo` | Photo uploads and the photo route against the Storage emulator |
 | `npm run e2e:browser` | Every routing path and both onboarding forms in Microsoft Edge at 360 px, signed in with the test-only emulator sign-in (needs `npm run emulators` and `npm run dev`) |

@@ -1,6 +1,7 @@
 "use client";
 
 import { SignOutButton } from "@/components/SignOutButton";
+import { PageTitle } from "@/components/ui/PageTitle";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 
@@ -10,12 +11,7 @@ export function BusinessHome() {
   const heading = useHeadingFocus(true);
   return (
     <>
-      <div className="flex flex-col gap-4">
-        <h1 ref={heading} tabIndex={-1} className="text-4xl font-bold leading-tight tracking-title">
-          {business?.name}
-        </h1>
-        <p className="text-lg text-muted">You&apos;ll post your first tryout from here soon.</p>
-      </div>
+      <PageTitle headingRef={heading} title={business?.name} intro="You'll post your first tryout from here soon." />
       <SignOutButton />
     </>
   );

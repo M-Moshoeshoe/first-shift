@@ -17,7 +17,6 @@
     "test:rules": "vitest run --config vitest.rules.config.mts",
     "rules": "firebase emulators:exec --project demo-first-shift --only firestore,storage \"npm run test:rules\"",
     "emulators": "firebase emulators:start --project demo-first-shift --only auth,firestore,storage",
-    "seed": "tsx scripts/seed.ts",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build && npm run budget",
     "budget": "tsx scripts/budget.ts",
     "e2e:profile": "tsx scripts/e2e/profile.ts",
@@ -44,6 +43,7 @@
     "@types/react-dom": "19.3.0",
     "eslint": "9.39.5",
     "eslint-config-next": "16.4.3",
+    "firebase-tools": "15.34.1",
     "playwright-core": "1.64.0",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
@@ -51,6 +51,14 @@
     "vitest": "4.1.12"
   },
   "overrides": {
-    "@grpc/grpc-js": "1.14.6"
+    "@grpc/grpc-js": "1.14.6",
+    "firebase-tools": {
+      "gaxios": {
+        "uuid": "11.1.1"
+      },
+      "@google-cloud/pubsub": {
+        "@opentelemetry/core": "2.8.0"
+      }
+    }
   }
 }

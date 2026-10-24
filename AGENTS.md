@@ -31,7 +31,7 @@ src/server/          server-only adapters: Firebase Admin, auth, Claude, rate li
 src/server/services/       coordinate one use case: call domain to decide, a repository to write
 src/server/repositories/   storage behind small interfaces (Firestore, Storage); fakes in tests
 src/lib/             client-only helpers (Firebase web SDK)
-src/data/            demo data, always marked demo: true
+src/data/            demo data, always marked demo: true (rebuilt with demo mode, docs/PHASES.md item K)
 tests/unit/          domain tests
 tests/rules/         security rules tests
 ```
@@ -47,7 +47,7 @@ Folders and files:
 - Marketing pages never load auth or Firebase code. Check the home page's JavaScript in the build output after any change to `(marketing)` or the root layout.
 - Components used by one screen live in that segment's `_components/` folder. Move a component to `src/components` only when two or more features use it.
 - One component per file. PascalCase file names for components, camelCase for modules. No barrel `index.ts` re-export files.
-- `scripts/` holds tools (seed, budget, end-to-end checks). App code never imports from it; ESLint enforces this.
+- `scripts/` holds tools (budget, AI eval, end-to-end checks). App code never imports from it; ESLint enforces this.
 
 ## Engineering standard
 
@@ -84,7 +84,7 @@ Folders and files:
 - No silent failures. Every rejected write and every AI failure is logged with `log()` and shown to the user with a clear next step. Fail closed: an error blocks the action, it never skips a check.
 - POPIA: collect the minimum. ID numbers are stored only as an HMAC hash plus the last four digits. No face matching. No personal data in logs (`log()` redacts it) or in AI prompts.
 - Rate limits on every AI route and on applying and posting, from `RULES`.
-- Dependencies: exact versions and a committed lockfile. Don't adopt a release newer than 14 days, except a patch that fixes a published security advisory, which we take immediately. When a library pins a vulnerable package we can't upgrade directly, use an `overrides` entry in `package.json` and note why in `SECURITY.md`. `npm audit` must report zero vulnerabilities before every push.
+- Dependencies: exact versions and a committed lockfile. Don't adopt a release newer than 14 days, except a patch that fixes a published security advisory, which we take immediately. When a library pins a vulnerable package we can't upgrade directly, use an `overrides` entry in `package.json` and note why in `SECURITY.md`. `npm audit` must report zero vulnerabilities before every push. `.npmrc` sets `legacy-peer-deps=true`, added to work around an npm resolver bug with optional peer dependencies (README, Troubleshooting); because npm then stays silent about peer mismatches, check a new package's peer requirements by hand. Run the Firebase CLI from the pinned dev dependency (`npx firebase`, or the npm scripts), never a global install.
 
 ## AI rules
 

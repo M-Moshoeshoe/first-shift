@@ -1,9 +1,10 @@
 "use client";
 
 import { PhotoStepForm } from "@/components/PhotoStepForm";
+import { SavedSummary } from "@/components/SavedSummary";
 import { BUTTON_LABELS, PROFILE_MESSAGES } from "@/domain/messages";
+import { availabilityText } from "./availability";
 import type { DetailsDraft } from "./DetailsStep";
-import { SavedDetails } from "./SavedDetails";
 
 interface PhotoStepProps {
   details: DetailsDraft;
@@ -14,13 +15,20 @@ interface PhotoStepProps {
 
 /** Step 3: a photo of the young person's face, so the business knows it's them at the door. */
 export function PhotoStep({ details, idLastFour, focusHeading, onDone }: PhotoStepProps) {
+  const rows = [
+    { term: "First name", value: details.firstName },
+    { term: "Area", value: details.area },
+    { term: "When you can work", value: availabilityText(details.availability) },
+    { term: "Cellphone for payments", value: details.payoutPhone },
+    { term: "ID number", value: `Ending in ${idLastFour}` },
+  ];
   return (
     <PhotoStepForm
       kind="profile"
       fieldId="work-photo"
       heading="Your photo"
       focusHeading={focusHeading}
-      summary={<SavedDetails details={details} idLastFour={idLastFour} />}
+      summary={<SavedSummary id="work-saved" rows={rows} />}
       label="A photo of your face"
       hint="A clear photo, so the business knows it's you at the door."
       saveLabel={BUTTON_LABELS.saveMyProfile}

@@ -14,7 +14,7 @@ export const PROJECT = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "demo-firs
 export const BUCKET = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? `${PROJECT}.appspot.com`;
 const BASE = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 
-/** The same guard as the seed script: emulators or nothing. */
+/** Emulators or nothing: these checks never touch a real project. */
 export function requireEmulators(hosts: readonly string[]): void {
   const missing = [...hosts.filter((name) => !process.env[name]), ...(process.env.NEXT_PUBLIC_USE_EMULATORS === "true" ? [] : ["NEXT_PUBLIC_USE_EMULATORS=true"])];
   if (missing.length === 0) return;

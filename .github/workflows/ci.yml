@@ -21,7 +21,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: npm audit --audit-level=high --omit=dev
+      # Zero vulnerabilities, dev tools included (AGENTS.md).
+      - run: npm audit
       - run: npm run build
       - run: npm run budget
 
@@ -38,4 +39,5 @@ jobs:
           distribution: temurin
           java-version: "21"
       - run: npm ci
-      - run: npx --yes firebase-tools@15.34.1 emulators:exec --only firestore,storage --project demo-first-shift "npm run test:rules"
+      # The firebase-tools pinned in package.json, never a global install.
+      - run: npm run rules

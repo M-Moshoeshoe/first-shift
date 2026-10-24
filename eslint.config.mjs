@@ -2,6 +2,9 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
+// Scripts (budget, AI eval, end-to-end checks) are tools, never part of the app.
+const noScripts = { group: ["**/scripts/*", "**/scripts/**"], message: "App code must never import from scripts/." };
+
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -38,11 +41,23 @@ export default defineConfig([
     },
   },
   {
-    // Scripts (seed, budget, end-to-end checks) are tools, never part of the app.
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/domain/**/*.ts", "src/config/**/*.ts", "src/server/**/*.ts"],
+    rules: { "no-restricted-imports": ["error", { patterns: [noScripts] }] },
+  },
+  {
+    // Shared components serve the app; they never reach back into a route's code.
+    // A later no-restricted-imports entry replaces earlier ones for the same files, so each repeats noScripts.
+    files: ["src/components/**/*.{ts,tsx}"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [{ group: ["**/scripts/*", "**/scripts/**"], message: "App code must never import from scripts/." }] }],
+      "no-restricted-imports": ["error", { patterns: [noScripts, { group: ["@/app/*", "@/app/**", "**/app/*"], message: "Components must not import from app/." }] }],
+    },
+  },
+  {
+    // Client helpers run in the browser; server code (secrets, Admin SDK) must never reach them.
+    files: ["src/lib/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [noScripts, { group: ["@/server/*", "@/server/**", "**/server/*", "server-only"], message: "Client helpers must not import server code." }] }],
     },
   },
   {

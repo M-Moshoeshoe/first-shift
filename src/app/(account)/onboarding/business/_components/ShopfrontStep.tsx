@@ -1,10 +1,10 @@
 "use client";
 
 import { PhotoStepForm } from "@/components/PhotoStepForm";
-import { BUTTON_LABELS, PROFILE_MESSAGES } from "@/domain/messages";
+import { SavedSummary } from "@/components/SavedSummary";
+import { BUTTON_LABELS, LOCATION_COPY, PROFILE_MESSAGES, pinPrecisionText } from "@/domain/messages";
 import type { Location } from "@/domain/profile";
 import type { BusinessDraft } from "./BusinessDetailsStep";
-import { BusinessSaved } from "./BusinessSaved";
 
 interface ShopfrontStepProps {
   details: BusinessDraft;
@@ -15,13 +15,19 @@ interface ShopfrontStepProps {
 
 /** Step 3: a photo of the shopfront from the street, taken with the back camera. */
 export function ShopfrontStep({ details, pin, focusHeading, onSaved }: ShopfrontStepProps) {
+  const rows = [
+    { term: "Business name", value: details.name },
+    { term: "Area", value: details.area },
+    { term: "Opening hours", value: details.openingHours },
+    { term: "Premises pin", value: pin ? pinPrecisionText(pin.accuracyMetres) : LOCATION_COPY.notPinned },
+  ];
   return (
     <PhotoStepForm
       kind="shopfront"
       fieldId="business-photo"
       heading="Your shopfront"
       focusHeading={focusHeading}
-      summary={<BusinessSaved details={details} pin={pin} />}
+      summary={<SavedSummary id="business-saved" rows={rows} />}
       label="A photo of your shopfront"
       hint="Take it from the street, so young people can find you."
       saveLabel={BUTTON_LABELS.saveMyBusiness}
