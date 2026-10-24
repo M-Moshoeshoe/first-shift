@@ -1,7 +1,8 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
-import { AI_MODEL } from "@/config/ai";
+import { AI_EFFORT, AI_MODEL } from "@/config/ai";
 import { serverEnv } from "./env";
 import { AppError } from "./errors";
 import { log } from "./log";
@@ -15,11 +16,6 @@ function anthropic(): Anthropic {
   return client;
 }
 
-function extractJson(text: string): unknown {
-  const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
-  return JSON.parse(cleaned);
-}
-
 interface JsonRequest<T> {
   purpose: string;
   system: string;
@@ -29,21 +25,24 @@ interface JsonRequest<T> {
 }
 
 /**
- * Asks the model for JSON and validates it. Anything that doesn't match the
- * schema is rejected, so the app fails closed instead of trusting bad output.
+ * Asks the model for JSON in the schema's shape (structured outputs) and
+ * validates it with the full Zod schema. A refusal, a cut-off answer or
+ * anything that doesn't match is rejected, so the app fails closed instead of
+ * trusting bad output.
  */
 export async function askForJson<T>({ purpose, system, user, maxTokens, schema }: JsonRequest<T>): Promise<T> {
   try {
-    const message = await anthropic().messages.create({
+    const message = await anthropic().messages.parse({
       model: AI_MODEL,
       max_tokens: maxTokens,
+      output_config: { effort: AI_EFFORT, format: zodOutputFormat(schema) },
       system,
       messages: [{ role: "user", content: user }],
     });
-    const text = message.content.flatMap((block) => (block.type === "text" ? [block.text] : [])).join("");
-    const parsed = schema.safeParse(extractJson(text));
-    if (!parsed.success) throw new Error("schema_mismatch");
-    return parsed.data;
+    // Only a finished answer counts: "refusal" and "max_tokens" mean there is no complete JSON to trust.
+    if (message.stop_reason !== "end_turn") throw new Error(`stopped_${message.stop_reason ?? "unknown"}`);
+    if (message.parsed_output === null) throw new Error("schema_mismatch");
+    return message.parsed_output;
   } catch (error) {
     if (error instanceof AppError) throw error;
     log("error", "ai_request_failed", { purpose, reason: error instanceof Error ? error.message : "unknown" });

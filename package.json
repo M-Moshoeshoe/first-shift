@@ -22,7 +22,8 @@
     "budget": "tsx scripts/budget.ts",
     "e2e:profile": "tsx scripts/e2e/profile.ts",
     "e2e:photo": "tsx scripts/e2e/photo.ts",
-    "e2e:browser": "tsx scripts/e2e/browser.ts"
+    "e2e:browser": "tsx scripts/e2e/browser.ts",
+    "eval:ai": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/evalAi.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",
