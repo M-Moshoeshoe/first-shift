@@ -1,0 +1,51 @@
+{
+  "name": "first-shift",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Paid one-day tryouts at local businesses, with references from the business that paid.",
+  "engines": {
+    "node": ">=24.12 <25"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rules": "vitest run --config vitest.rules.config.mts",
+    "rules": "firebase emulators:exec --only firestore,storage \"npm run test:rules\"",
+    "emulators": "firebase emulators:start --only auth,firestore,storage",
+    "seed": "tsx scripts/seed.ts",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build && npm run budget",
+    "budget": "tsx scripts/budget.ts",
+    "e2e:profile": "tsx scripts/profile-e2e.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.132.1",
+    "firebase": "13.0.0",
+    "firebase-admin": "14.5.0",
+    "next": "16.4.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.3",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "4.1.12"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.6"
+  }
+}

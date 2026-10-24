@@ -1,0 +1,106 @@
+import "server-only";
+import { ID_PROBLEM_MESSAGES, profileProblemMessage } from "@/domain/messages";
+import { isProfileComplete, newAccount, photoPath, type PhotoKind } from "@/domain/profile";
+import { decideBusinessSave, decidePhotoSave, decideWorkerSave, type ProfileProblem } from "@/domain/profileDecisions";
+import { decideRole, type Role } from "@/domain/roles";
+import { checkSaId } from "@/domain/saId";
+import type { BusinessProfileInput, SaveResult, YoungPersonProfileInput } from "@/schemas/profile";
+import { AppError } from "../errors";
+import type { PhotoStore } from "../repositories/photoStore";
+import type { Plan, ProfileRepository, StoredProfile } from "../repositories/profileRepository";
+
+export interface ProfileServiceDeps {
+  repo: ProfileRepository;
+  photos: PhotoStore;
+  hashId: (digits: string) => string;
+  now: () => Date;
+}
+
+// How each refusal is reported over HTTP. The decision itself comes from src/domain.
+const HTTP_STATUS: Record<ProfileProblem["code"], number> = {
+  role_missing: 409,
+  role_locked: 409,
+  id_in_use: 409,
+  id_locked: 409,
+  details_first: 409,
+  photo_missing: 422,
+  photo_wrong_type: 422,
+  photo_too_big: 422,
+};
+
+/** Nothing to write: the request matches what is stored, so there's no audit entry either. */
+const unchanged = (state: StoredProfile): Plan<SaveResult> => ({ write: null, result: { status: "unchanged", complete: isProfileComplete(state.user, state.business) } });
+
+function refuse(problem: ProfileProblem): never {
+  throw new AppError(HTTP_STATUS[problem.code], problem.code, profileProblemMessage(problem));
+}
+
+/**
+ * Coordinates profile writes. It holds no rules of its own: every decision
+ * comes from src/domain, and every write happens inside one repository
+ * transaction together with its audit entry.
+ */
+export function createProfileService({ repo, photos, hashId, now }: ProfileServiceDeps) {
+  return {
+    async setRole(uid: string, role: Role): Promise<SaveResult> {
+      return repo.transact<SaveResult>(uid, null, (state) => {
+        const decision = decideRole(state.user?.role ?? null, role);
+        if (decision.kind === "refuse") refuse({ code: "role_locked", current: decision.current });
+        if (decision.kind === "unchanged") return unchanged(state);
+        const { user, business } = newAccount(uid, decision.role);
+        return { write: { user, business: business ?? undefined, audit: "role_set" }, result: { status: "saved", complete: false } };
+      });
+    },
+
+    async saveWorker(uid: string, input: YoungPersonProfileInput): Promise<SaveResult> {
+      const { idNumber, ...details } = input;
+      const check = checkSaId(idNumber, now());
+      if (!check.ok) throw new AppError(422, check.error, ID_PROBLEM_MESSAGES[check.error]);
+      // Only these two facts and the hash leave this function; the number and date of birth are dropped here.
+      const { lastFour, residency } = check.value;
+      const idHash = hashId(idNumber);
+
+      return repo.transact<SaveResult>(uid, idHash, (state) => {
+        const decision = decideWorkerSave(uid, state, { details, idLastFour: lastFour, residency, idHash });
+        if (decision.kind === "refuse") refuse(decision.problem);
+        if (decision.kind === "unchanged") return unchanged(state);
+        const { user, claimId } = decision.next;
+        return {
+          write: { user, claimIdHash: claimId ? idHash : undefined, audit: "worker_profile_saved" },
+          result: { status: "saved", complete: isProfileComplete(user, state.business) },
+        };
+      });
+    },
+
+    async saveBusiness(uid: string, input: BusinessProfileInput): Promise<SaveResult> {
+      return repo.transact<SaveResult>(uid, null, (state) => {
+        const decision = decideBusinessSave(state.user, state.business, input);
+        if (decision.kind === "refuse") refuse(decision.problem);
+        if (decision.kind === "unchanged") return unchanged(state);
+        return {
+          write: { business: decision.next, audit: "business_profile_saved" },
+          result: { status: "saved", complete: isProfileComplete(state.user, decision.next) },
+        };
+      });
+    },
+
+    async savePhoto(uid: string, kind: PhotoKind): Promise<SaveResult> {
+      // The path is built here from the signed-in uid; a path from the browser is never accepted.
+      const path = photoPath(uid, kind);
+      const meta = await photos.metadata(path);
+      return repo.transact<SaveResult>(uid, null, (state) => {
+        const decision = decidePhotoSave(state, kind, path, meta);
+        if (decision.kind === "refuse") refuse(decision.problem);
+        if (decision.kind === "unchanged") return unchanged(state);
+        const user = decision.next.user ?? state.user;
+        const business = decision.next.business ?? state.business;
+        return {
+          write: { user: decision.next.user, business: decision.next.business, audit: "photo_saved" },
+          result: { status: "saved", complete: isProfileComplete(user, business) },
+        };
+      });
+    },
+  };
+}
+
+export type ProfileService = ReturnType<typeof createProfileService>;

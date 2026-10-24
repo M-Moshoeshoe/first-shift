@@ -1,0 +1,26 @@
+import { RULES } from "@/config/rules";
+
+const MINUTE_MS = 60_000;
+
+export const addMinutes = (date: Date, minutes: number): Date => new Date(date.getTime() + minutes * MINUTE_MS);
+export const addHours = (date: Date, hours: number): Date => addMinutes(date, hours * 60);
+export const addDays = (date: Date, days: number): Date => addHours(date, days * 24);
+export const minutesBetween = (from: Date, to: Date): number => (to.getTime() - from.getTime()) / MINUTE_MS;
+
+/** Local South African wall-clock parts for a UTC instant. */
+export function sastParts(date: Date): { year: number; month: number; day: number; hour: number; minute: number } {
+  const local = addMinutes(date, RULES.timezoneOffsetMinutes);
+  return {
+    year: local.getUTCFullYear(),
+    month: local.getUTCMonth() + 1,
+    day: local.getUTCDate(),
+    hour: local.getUTCHours(),
+    minute: local.getUTCMinutes(),
+  };
+}
+
+export function sameSastDay(a: Date, b: Date): boolean {
+  const x = sastParts(a);
+  const y = sastParts(b);
+  return x.year === y.year && x.month === y.month && x.day === y.day;
+}

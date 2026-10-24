@@ -1,0 +1,24 @@
+name: ZAP baseline scan
+
+# Passive scan of a deployed URL: safe to run against our own live or preview site.
+# Never point this at a site you don't own.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "URL to scan, for example a Netlify deploy preview"
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: ${{ inputs.target }}
+          allow_issue_writing: false

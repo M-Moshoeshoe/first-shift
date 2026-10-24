@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Deny by default. Every write goes through a server route using the Admin SDK,
+// which checks the signed-in user, validates input and applies the product rules.
+// The browser may only read the documents it needs for live updates.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isParty() {
+      return signedIn() && (request.auth.uid == resource.data.workerId || request.auth.uid == resource.data.ownerId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isUser(uid);
+    }
+
+    match /businesses/{businessId} {
+      allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Published tryouts hold no exact address; that is revealed only after booking.
+    match /tryouts/{tryoutId} {
+      allow read: if signedIn() && (resource.data.status == "published" || resource.data.ownerId == request.auth.uid);
+    }
+
+    match /applications/{applicationId} {
+      allow read: if signedIn() && (resource.data.workerId == request.auth.uid || resource.data.ownerId == request.auth.uid);
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isParty();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isParty();
+    }
+  }
+}
