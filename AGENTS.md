@@ -112,11 +112,13 @@ Folders and files:
 5. A single-file prototype was rebuilt from scratch. Start in this structure; never prototype outside it.
 6. A feature was promised against an API nobody had seen. Build only on what we control; the FNB eWallet API is a roadmap ask, not a dependency.
 7. `curl` behaves differently in PowerShell. Use Git Bash, or `curl.exe`.
-8. A blanket 14-day wait on new releases nearly shipped a critical remote-code-execution flaw in Next.js. Security patches skip the wait, and `npm audit` runs before every push.
+8. A blanket 14-day wait on new releases nearly shipped a critical remote-code-execution flaw in Next.js. Security patches skip the wait, and `npm audit` runs in every build (`npm run verify`).
 
 ## How we work
 
-- One phase at a time from `docs/PHASES.md`. Before coding, restate the phase goal and list the files you'll touch. After coding, run `npm run check` and summarise what changed and why.
+- One phase at a time from `docs/PHASES.md`. Before coding, restate the phase goal and list the files you'll touch. After coding, run `npm run verify` and summarise what changed and why.
+- Checks, while GitHub Actions is paused for a billing issue on the account (the workflows in `.github/workflows` stay, and resume once it's fixed): `npm run verify` (lint, typecheck, unit tests, build, budgets, `npm audit`) is Netlify's build command, so every deploy runs it and a failure stops the deploy; `npm run rules` needs Java and the emulators, so it runs locally before every push. Nothing claims CI ran when it didn't.
+- Branches, to save Netlify credits: day-to-day work happens on `dev`, which Netlify doesn't build. Merge `dev` into `main` only for a deliberate deploy, after `npm run verify` and `npm run rules` pass locally. Netlify builds `main` for production.
 - Small commits with plain messages ("Add tryout posting route"), one concern each.
 - Git workflow: work one step at a time; show the step's changes with `git diff`; commit at the end of the step only after the go-ahead, with a plain message naming the step ("Phase 1 step 5: young person onboarding"). Before every commit, check `git status` and the staged content: no `.env.local`, service account or keystore files, and no secret in any staged file: a PEM private key block, a Google API key or an Anthropic key.
 - Never commit `.env.local`, keystores or service account files.
@@ -124,13 +126,13 @@ Folders and files:
 
 ## Pre-submit checklist
 
-- [ ] `npm run check` passes and `npm run rules` passes
+- [ ] `npm run verify` passes and `npm run rules` passes
 - [ ] `/api/health` on the live URL reports every integration configured
 - [ ] Both demo accounts work and demo mode walks the whole loop
 - [ ] No test flags on in production; demo data labelled everywhere it appears
 - [ ] ZAP baseline scan on the live URL reviewed
 - [ ] Throttled-phone test passed
-- [ ] `npm run budget` passes (part of `npm run check`)
+- [ ] `npm run budget` passes (part of `npm run verify`)
 - [ ] Emulators off: `/api/health` on the live URL reports `"emulators": false`
 
 <!-- BEGIN:nextjs-agent-rules -->

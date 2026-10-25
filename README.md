@@ -8,7 +8,7 @@ Paid one-day tryouts at businesses near you, with a reference from the business 
 - Every product rule as a pure, unit-tested function in `src/domain`
 - Firestore and Storage security rules that deny by default, with emulator tests
 - Server-only adapters for Firebase Admin, auth, the Claude API, rate limits and logging
-- CI (lint, typecheck, tests, dependency audit, build, rules tests) and a ZAP security scan
+- Checks on every deploy: Netlify runs `npm run verify` (lint, typecheck, tests, build, budgets, dependency audit) and refuses to deploy a failure. GitHub Actions workflows for the same checks, the rules tests and a ZAP scan are in `.github/workflows`, paused for now (Troubleshooting)
 - `AGENTS.md`, the engineering standard Claude Code follows, plus `SECURITY.md`, `docs/RULES.md`, `docs/DESIGN.md` and `docs/PHASES.md`
 
 ## 1. Install the tools (once)
@@ -107,19 +107,20 @@ The emulators only work with `npm run dev`. A production build (`npm run build` 
 
 `docs/DEPLOY.md` is the click-by-click guide: the GitHub repository, the Firebase project (Google sign-in, Firestore, Storage, the billing alert, the rules), real settings on your laptop, Netlify and its environment variables, the Anthropic key, and the final checks. Never commit `.env.local` or the service account file; `.gitignore` already excludes them.
 
-## 7. Every push
+## 7. Branches and deploys
 
-Every push to `main` runs CI on GitHub and redeploys on Netlify. Pull requests get their own preview address.
+Work on the `dev` branch: Netlify doesn't build it, so it costs no credits. When a change should go live, run `npm run verify` and `npm run rules` locally, then merge `dev` into `main` and push. Netlify builds `main`, running `npm run verify` first; a failing check stops the deploy and the live site stays as it was.
 
 ## 8. Build with Claude Code
 
-Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` automatically. Work through `docs/PHASES.md` one item at a time, and run `npm run check` after every item before you commit.
+Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` automatically. Work through `docs/PHASES.md` one item at a time, and run `npm run verify` after every item before you commit.
 
 ## Troubleshooting
 
 - **`npm ci` says your Node version isn't supported:** install Node.js 24 LTS (v24.12 or later) and reopen VS Code.
 - **Why `.npmrc` has `legacy-peer-deps=true`:** it was added in Phase 0 to work around an npm resolver bug with optional peer dependencies, where npm tried to install or reconcile optional peers no package here uses and failed with a peer dependency error. Every package we need is listed in `package.json` with an exact version, so npm doesn't need to resolve peers for us. On 25 October 2026 a fresh resolve of `package.json` without the flag succeeded with no peer errors, so the flag may no longer be needed; it stays until someone removes it and `npm ci`, `npm run check` and `npm run rules` still pass. The cost of keeping it: npm no longer warns about peer mismatches, so check a new package's peer requirements by hand before adding it.
 - **Typecheck fails after moving a route** (for example "Cannot find module '../../src/app/page.js'" in `.next/types`): Next.js generated route types for the old paths. Delete the `.next` folder and run the build again.
+- **GitHub shows a red X on every push, "The job was not started because your account is locked due to a billing issue":** GitHub Actions is paused on the account. Nothing failed: no job ran. The same checks run in every Netlify build (`npm run verify`) and the rules tests run locally (`npm run rules`). The workflows resume by themselves once the account's billing is sorted out.
 - **Real Firebase settings in `.env.local` seem to be ignored, or sign-in still opens the emulator's account picker:** `.env.development.local` still holds the emulator settings, and `npm run dev` reads it before `.env.local`, so its values win (Next.js loads `process.env`, then `.env.development.local`, then `.env.local`, then `.env.development`, then `.env`). Delete or comment out the emulator lines in `.env.development.local` and restart `npm run dev`. `/api/health` shows `"emulators": false` once they're gone.
 - **Google sign-in fails on the live site:** add your `netlify.app` domain under Firebase Authentication > Settings > Authorized domains.
 - **`/api/health` shows false for something:** that environment variable is missing or misnamed in `.env.local` or in Netlify.
@@ -129,7 +130,8 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Local development server |
-| `npm run check` | Lint, typecheck, unit tests, build and JavaScript budget: run before every push |
+| `npm run check` | Lint, typecheck, unit tests, build and JavaScript budget |
+| `npm run verify` | `check` plus `npm audit`: Netlify's build command, and what to run before every push |
 | `npm run budget` | Each page's JavaScript, gzipped, against `src/config/performance.ts` (needs a build first) |
 | `npm test` | Unit tests only |
 | `npm run rules` | Security rules tests in the emulators |

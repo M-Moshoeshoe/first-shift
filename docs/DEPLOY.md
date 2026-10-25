@@ -22,7 +22,7 @@ Use **Git Bash** for the commands (in PowerShell, use `curl.exe` instead of `cur
    ```
 
    Git opens a browser window to sign in to GitHub the first time.
-6. On GitHub, open the **Actions** tab. The **CI** workflow runs on the push. Both jobs (**check** and **security-rules**) should go green within about 10 minutes. If one fails, open it, copy the failing step's last 30 lines and send them to me.
+6. GitHub Actions is paused on this account for a billing issue (README, Troubleshooting), so a push shows a red X with "The job was not started". Nothing failed. The checks run in every Netlify build instead (`npm run verify`), and the rules tests locally (`npm run rules`).
 
 ## 2. Firebase project (25 minutes)
 
@@ -230,7 +230,7 @@ Every value under `configured` must be `true`, and `"emulators"` must be `false`
 
 Tick each one, on the live site unless it says otherwise:
 
-- [ ] GitHub **Actions**: both CI jobs green on the latest push
+- [ ] `npm run verify` and `npm run rules` pass locally, and the latest Netlify deploy is **Published** (its build ran `npm run verify`)
 - [ ] `https://<name>.netlify.app/api/health`: `firebaseAdmin`, `anthropic`, `idHashing` and `photoStorage` all `true`, `"emulators": false`
 - [ ] On **your phone**, on mobile data: open the live site, **Continue with Google** with a real account, choose **I'm looking for work**, and finish the profile, including a photo taken with the camera
 - [ ] With a **second Google account** (on the phone or a laptop): choose **I run a business**, and finish the profile including the pin (at your business, or anywhere with good GPS) and a shopfront photo
