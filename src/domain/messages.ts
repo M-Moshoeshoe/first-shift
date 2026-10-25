@@ -2,26 +2,13 @@ import type { LocationProblem, PhotoKind } from "./profile";
 import type { ProfileProblem } from "./profileDecisions";
 import type { Role } from "./roles";
 import type { IdProblem } from "./saId";
+import { BUTTON_LABELS } from "./buttonLabels";
 
-/**
- * Every sentence a person sees when something goes wrong, and the button
- * labels those sentences name. A message that tells someone to tap a button
- * uses the exact label from here. Copy rules: AGENTS.md.
+/*
+ * Every sentence a person sees when something goes wrong. A message that
+ * tells someone to tap a button uses the exact label from buttonLabels.ts.
+ * Copy rules: AGENTS.md.
  */
-export const BUTTON_LABELS = {
-  continueWithGoogle: "Continue with Google",
-  saveMyProfile: "Save my profile",
-  saveMyBusiness: "Save my business",
-  useMyLocation: "Use my location",
-  takeAPhoto: "Take a photo",
-  chooseAPhoto: "Choose a photo",
-  next: "Next",
-  back: "Back",
-  skipForNow: "Skip for now",
-  lookingForWork: "I'm looking for work",
-  runABusiness: "I run a business",
-  signOut: "Sign out",
-} as const;
 
 /** Shown wherever a message contains it, as a link to SUPPORT_EMAIL (src/config/contact.ts). */
 export const CONTACT_PHRASE = "contact us";
@@ -57,7 +44,7 @@ export const PROFILE_MESSAGES = {
   // Step 5 additions, for review.
   photoUnreadable: `This photo can't be opened on this phone. Tap ${BUTTON_LABELS.takeAPhoto}, or tap ${BUTTON_LABELS.chooseAPhoto} and pick a different one.`,
   photoNeeded: `Add a photo of your face first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
-  profileUnavailable: "Your profile didn't load. Check your connection, then reload the page.",
+  profileUnavailable: `Your profile didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`,
   // Step 6 additions, for review.
   shopfrontNeeded: `Add a photo of your shopfront first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
   pinImprecise: `Your location isn't precise enough yet. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,

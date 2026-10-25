@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { ChangeEvent } from "react";
-import { BUTTON_LABELS } from "@/domain/messages";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { buttonClass } from "./Button";
 import { FormError } from "./FormError";
 
@@ -40,7 +40,7 @@ export function PhotoField({ id, label, hint, error, preview, camera, onSelect }
   };
 
   return (
-    <div data-field={id} className="flex flex-col gap-1">
+    <div data-field={id} className="flex flex-col gap-2">
       <p id={labelId} className="font-bold">
         {label}
       </p>
@@ -50,9 +50,9 @@ export function PhotoField({ id, label, hint, error, preview, camera, onSelect }
         </p>
       ) : null}
       {preview ? (
-        <Image src={preview} alt="The photo you chose" width={128} height={128} unoptimized className="my-2 size-32 border-2 border-ink object-cover" />
+        <Image src={preview} alt="The photo you chose" width={128} height={128} unoptimized className="size-32 border-2 border-ink object-cover" />
       ) : null}
-      <div className="mt-2 flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         {options.map((option) => (
           <label
             key={option.inputId}

@@ -8,7 +8,7 @@ Young people on cheap Android phones, often outdoors in bright sun, and busy sma
 
 Green and gold, picked for the team: South Africa's sporting colours. Green means paid and go. Gold means reward.
 
-Each tryout is drawn as a **shift slip**: a gold time stub separated by a dashed tear line, with the pay given the most weight, because time and pay are what people decide on. When something is won (a booking, a payment, a finished profile) a gold **Stamp** lands on it.
+Each tryout is drawn as a **shift slip**: a gold time stub separated by a dashed tear line, with the pay given the most weight, because time and pay are what people decide on. The stub is 112 px wide on a phone and 128 px from 1024 px, so the day and the time each take one line; a Stamp on a slip sits over its top-right corner, lifted clear of the pay, which is never covered. When something is won (a booking, a payment, a finished profile) a gold **Stamp** lands on it.
 
 Spend boldness in two places only, the slip and the Stamp. Everything around them stays quiet.
 
@@ -65,6 +65,7 @@ System fonts only, for speed on weak signal: `system-ui` and the platform defaul
 | Body | 16 to 18 px | Regular |
 | Stamp label | 16 px (`text-base`) | Bold |
 | Secondary | 14 px (`text-sm`) | Regular, `muted` |
+| Errors | 14 px (`text-sm`) | Regular, `stop`; never bold, so four errors at once don't become a wall |
 
 Money always uses tabular numerals (`tabular-nums`), so amounts line up and don't shift as they change.
 
@@ -76,11 +77,29 @@ Keep lines under 70 characters. Left-align everything.
 - Photos are square. No circles anywhere.
 - Edges are drawn, not shaded: a 2 px `ink` border on slips, cards, the Stamp and secondary buttons, `edge` on inputs. No shadows.
 
+## Spacing
+
+Seven steps, each with one job. Every gap and margin in `src/` is one of them, used for its job.
+
+| Step | Tailwind | Use |
+| --- | --- | --- |
+| 4 px | `1` | Tight pairs: a term and its value, lines inside one slip |
+| 8 px | `2` | Inside a field: label, hint, input and error; a heading and its one sentence |
+| 12 px | `3` | Button stacks: buttons, and the error under them |
+| 16 px | `4` | Between fields in a form; a page title and the sentence under it |
+| 24 px | `6` | Between groups: the title block, the form, the actions (`Band`'s gap) |
+| 32 px | `8` | Band padding, top and bottom |
+| 48 px | `12` | Page sections on a desktop: between columns, around the app column |
+
+The side gutter stays 20 px (`px-5`), a layout value rather than a spacing step: it's what keeps a 360 px phone's column at 320 px.
+
 ## Layout
 
-- A screen is a stack of full-width tonal bands that alternate between `paper` and `mist`, starting with `paper`. Two bands of the same tone never sit next to each other.
+- A screen is a stack of full-width tonal bands that alternate between `paper` and `mist`, starting with `paper`. Two bands of the same tone never sit next to each other, at any width.
 - Inside each band: single column, max width 28 rem, 20 px side padding. `Band` and `PageShell` in `src/components/ui` draw this; screens don't rebuild it.
 - The wordmark header sits at the top of the screen on `paper` and runs straight into the first band, which is also `paper`.
+- **The app shell** (`AppShell`) holds every account screen. Its header has the wordmark on the left and, on the right, Sign out whenever someone is signed in, onboarding included, so nobody is stuck on the wrong account. A role's destinations come from `src/config/nav.ts`: a bottom tab bar on phones (56 px tabs, the current one on `mist`), links in the header on a desktop. The bar appears only once a role has two destinations; one tab would only take space. Marketing pages, the 404 and the error page use `PageShell`, which loads no auth code.
+- **Desktop, from 1024 px.** Marketing: a 72 rem layout, with the hero as two columns (the promise left, the example slip right) and the three pitches as one three-column row, 48 px apart; on a phone each is still its own band. Tones keep alternating at both sizes: the hero is `paper`, how it works `mist`, the pitches `paper`, the closing actions `mist`. Account screens: a full-width header with a 2 px `ink` line under it, and the app column (28 rem) on a `mist` backdrop, `paper` inside a 2 px `ink` edge, 48 px from the header. It reads as an app, not a stretched phone page.
 - Text on `mist` uses `ink` or `muted` only (ratios above). Forms sit on `paper` bands.
 - One primary action per screenful, full width, at least 52 px tall. A screenful is what fits in the viewport at once, so a long page may repeat its primary action as long as two never show together. The home page does this: "Find a paid tryout" sits under the example slip and again in the closing band, so someone who has read to the end doesn't scroll back up. At 360 px the two are about 900 px apart and never on screen together.
 - Tap targets at least 44 px.
@@ -91,6 +110,7 @@ Keep lines under 70 characters. Left-align everything.
 Native first, because the phone's own controls cost no JavaScript and work the way people already know.
 
 - **Dates and times:** native `type="date"` and `type="time"` inputs, which open the phone's own pickers.
+- **Invalid fields:** a 2 px `stop` border. Focused, a valid field gets the 3 px `ink` focus outline 2 px out; an invalid one gets a 3 px `stop` outline flush against its border instead, so it shows one thick red edge, not two outlines.
 - **Areas:** `AreaField`, a text input with a native `<datalist>` of known areas from `src/config/areas.ts`. The phone suggests them as you type, and any other area can still be typed. React Aria's ComboBox was measured against this and lost: it would add JavaScript to onboarding pages already close to their cap, for behaviour the phone gives for free.
 - **React Aria Components** is used once only: the withdraw confirmation sheet on `/business` (Modal and Dialog), styled with our tokens through its data attributes (`[data-entering]`, `[data-exiting]`, `[data-pressed]`, `[data-focus-visible]`) and moving only with sheet-enter and sheet-exit. No default React Aria styles and no other React Aria component (`AGENTS.md`).
 
@@ -136,21 +156,23 @@ The home page is the first thing anyone opens, often on a cheap phone with weak 
 
 Every page's JavaScript has a budget: the gzipped size of all the scripts it loads. The budgets live in one place, `src/config/performance.ts`, and a phase that adds a page adds its budget there. `npm run budget` measures the production build against them (every `<script src>` in the page's HTML under `.next/server/app`, each file gzipped at the default level, summed). It runs inside `npm run check` and in CI, so going over budget fails like a broken test.
 
-| Page | Budget | Baseline (24 October 2026) |
+| Page | Budget | Measured (25 October 2026: app shell, error page, `zod/mini`) |
 | --- | --- | --- |
-| `/` | 200 KB | 174.3 KB, 8 scripts |
-| `/sign-in` | 220 KB | 207.2 KB, 9 scripts |
-| `/onboarding/work` | 260 KB (the cap) | 251.5 KB, 12 scripts |
-| `/onboarding/business` | 260 KB (the cap) | 251.5 KB, 12 scripts |
-| `/onboarding/role` | 260 KB (the cap) | 242.9 KB, 12 scripts |
-| `/work` | 260 KB (the cap) | 243.0 KB, 12 scripts |
-| `/business` | 260 KB (the cap) | 243.0 KB, 12 scripts |
+| `/` | 200 KB | 179.3 KB, 9 scripts |
+| `/sign-in` | 228 KB (207.2 KB at first, + 10%) | 219.9 KB, 12 scripts |
+| `/onboarding/work` | 260 KB (the cap) | 250.2 KB, 15 scripts |
+| `/onboarding/business` | 260 KB (the cap) | 249.7 KB, 15 scripts |
+| `/onboarding/role` | 260 KB (the cap) | 239.8 KB, 14 scripts |
+| `/work` | 260 KB (the cap) | 239.4 KB, 14 scripts |
+| `/business` | 260 KB (the cap) | 239.4 KB, 14 scripts |
 
 A new page's budget is its measured size plus 10%, never above 260 KB.
 
-Almost all of the home page's baseline is React and the Next.js runtime, so it has about 26 KB of room. Marketing pages never load auth or Firebase code (`AGENTS.md`), which is what keeps them inside it. Account pages load Firebase per service (`firebaseClient.ts` for Auth, `firebaseDb.ts`, `firebaseStorage.ts`), so a screen downloads only what it uses, and the photo code (Storage and resizing, about 10 KB) loads only when a photo step appears.
+Almost all of the home page's JavaScript is React and the Next.js runtime, so it has about 21 KB of room. Marketing pages never load auth or Firebase code (`AGENTS.md`), which is what keeps them inside it. Account pages load Firebase per service (`firebaseClient.ts` for Auth, `firebaseDb.ts`, `firebaseStorage.ts`), so a screen downloads only what it uses, and the photo code (Storage and resizing, about 10 KB) loads only when a photo step appears.
 
-Known fix if a page nears its cap: Zod is about 31 KB of each onboarding page, because the browser runs the same schemas as the server. Zod's smaller build (`zod/mini`) would save about 20 KB, at the cost of rewriting the schemas in its functional style. Not adopted yet; reach for it before raising a budget.
+Every account page also carries the app shell (the header with Sign out, about 4 KB including Next's link code) and every page carries the branded error page (about 4.4 KB: as a root error boundary it loads everywhere, with its own copy of the link code).
+
+`zod/mini`, Zod's small build, is adopted for every schema the browser runs (`src/schemas/profile.ts`, `src/lib/api.ts`): it saved about 10 KB on each account page (25 October 2026). Server-only schemas (AI output, environment) stay on the full build. Parsing that must accept either goes through `safeParse` from `zod/v4/core`.
 
 ## Avoid (these read as AI-made)
 

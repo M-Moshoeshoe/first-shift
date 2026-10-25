@@ -5,7 +5,7 @@ import { AreaField } from "@/components/ui/AreaField";
 import { Button } from "@/components/ui/Button";
 import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
 import { TextField } from "@/components/ui/TextField";
-import { BUTTON_LABELS } from "@/domain/messages";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import type { Availability } from "@/domain/profile";
 import { fieldErrors, firstInvalid, shakeAndFocus } from "@/lib/forms";
 import { WorkerDetailsSchema } from "@/schemas/profile";
@@ -51,7 +51,7 @@ export function DetailsStep({ initial, focusHeading, onNext }: DetailsStepProps)
   };
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         About you
       </h2>

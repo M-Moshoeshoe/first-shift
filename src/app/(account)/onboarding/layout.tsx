@@ -3,5 +3,5 @@ import { ProfileGate } from "@/components/ProfileGate";
 
 /** Onboarding is open only to the person whose next step it is (ProfileGate). */
 export default function OnboardingLayout({ children }: { children: ReactNode }) {
-  return <ProfileGate skeleton="form">{children}</ProfileGate>;
+  return <ProfileGate>{children}</ProfileGate>;
 }

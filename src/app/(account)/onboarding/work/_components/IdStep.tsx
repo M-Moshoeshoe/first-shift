@@ -4,7 +4,8 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { TextField } from "@/components/ui/TextField";
-import { BUTTON_LABELS, ID_HINT, ID_PROBLEM_MESSAGES, PROFILE_MESSAGES } from "@/domain/messages";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { ID_HINT, ID_PROBLEM_MESSAGES, PROFILE_MESSAGES } from "@/domain/messages";
 import { checkSaId } from "@/domain/saId";
 import { ApiError, apiPost } from "@/lib/api";
 import { shakeAndFocus } from "@/lib/forms";
@@ -63,7 +64,7 @@ export function IdStep({ details, onBack, onSaved }: IdStepProps) {
   };
 
   return (
-    <form noValidate onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-5">
+    <form noValidate onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         Your ID number
       </h2>

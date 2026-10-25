@@ -1,35 +1,33 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Band } from "@/components/ui/Band";
-import { FormError } from "@/components/ui/FormError";
-import { PageShell } from "@/components/ui/PageShell";
+import { NAV } from "@/config/nav";
+import { readIntent, withIntent } from "@/domain/intent";
 import { destinationFor, isDestination, redirectFor } from "@/domain/profile";
 import { GatedProfileContext } from "@/lib/auth/gatedProfile";
 import { useOwnProfile } from "@/lib/auth/useOwnProfile";
-import { FormSkeleton } from "./FormSkeleton";
-import { HomeSkeleton } from "./HomeSkeleton";
-
-interface ProfileGateProps {
-  /** Which placeholder to show while the profile loads: the shape of the screen it guards. */
-  skeleton: "form" | "home";
-  children: ReactNode;
-}
+import { AppShell } from "./AppShell";
+import { ProfileErrorState } from "./ProfileErrorState";
+import { ScreenSkeleton } from "./ScreenSkeleton";
 
 /**
- * Guards the onboarding, work and business screens. Reads the person's own
- * profile from GET /api/profile (never Firestore in the browser) and lets
- * them stay only if this is where they belong (domain/profile.ts,
- * destinationFor and redirectFor); otherwise it sends them there. A skeleton
- * shows while it decides, never a blank screen or a spinner. If the profile
- * can't load, the screen stays closed and says why. Server routes enforce
- * everything again regardless.
+ * Guards the onboarding, work and business screens, inside the app shell.
+ * Reads the person's own profile from GET /api/profile (never Firestore in
+ * the browser) and lets them stay only if this is where they belong
+ * (domain/profile.ts, destinationFor and redirectFor); otherwise it sends
+ * them there, carrying the home page's intent (domain/intent.ts). A skeleton
+ * the shape of the screen shows while it decides, never a blank screen or a
+ * spinner. If the profile can't load, it says so and offers Try again and
+ * Sign out. Server routes enforce everything again regardless.
  */
-export function ProfileGate({ skeleton, children }: ProfileGateProps) {
+export function ProfileGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const profile = useOwnProfile(pathname);
+  const [attempt, setAttempt] = useState(0);
+  // A new key reads the profile again: a new address (a step just changed it) or Try again.
+  const profile = useOwnProfile(`${pathname}#${attempt}`);
 
   const target =
     profile.status === "signed_out"
@@ -41,28 +39,27 @@ export function ProfileGate({ skeleton, children }: ProfileGateProps) {
         : null;
 
   useEffect(() => {
-    if (target) router.replace(target);
+    if (target) router.replace(withIntent(target, readIntent(window.location.search)));
   }, [target, router]);
 
   if (profile.status === "ready" && !target) {
-    return <GatedProfileContext.Provider value={profile.view}>{children}</GatedProfileContext.Provider>;
+    const nav = profile.view.complete && profile.view.role ? NAV[profile.view.role] : [];
+    return (
+      <GatedProfileContext.Provider value={profile.view}>
+        <AppShell nav={nav}>{children}</AppShell>
+      </GatedProfileContext.Provider>
+    );
   }
 
   return (
-    <PageShell>
+    <AppShell>
       <Band tone="paper">
         {profile.status === "error" ? (
-          <FormError message={profile.message} />
+          <ProfileErrorState message={profile.message} onRetry={() => setAttempt((count) => count + 1)} />
         ) : (
-          <>
-            <div aria-hidden="true" className="flex flex-col gap-4">
-              <div className="h-10 w-3/4 animate-skeleton bg-mist" />
-              <div className="h-7 animate-skeleton bg-mist" />
-            </div>
-            {skeleton === "form" ? <FormSkeleton /> : <HomeSkeleton />}
-          </>
+          <ScreenSkeleton path={pathname} />
         )}
       </Band>
-    </PageShell>
+    </AppShell>
   );
 }

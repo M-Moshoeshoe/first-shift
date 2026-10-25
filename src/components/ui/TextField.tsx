@@ -15,7 +15,7 @@ export function TextField({ id, label, hint, error, ...inputProps }: TextFieldPr
   const errorId = `${id}-error`;
 
   return (
-    <div data-field={id} className="flex flex-col gap-1">
+    <div data-field={id} className="flex flex-col gap-2">
       <label htmlFor={id} className="font-bold">
         {label}
       </label>
@@ -29,7 +29,7 @@ export function TextField({ id, label, hint, error, ...inputProps }: TextFieldPr
         id={id}
         aria-describedby={hint ? `${hintId} ${errorId}` : errorId}
         aria-invalid={error ? true : undefined}
-        className="min-h-11 w-full border-2 border-edge bg-paper px-3 text-lg text-ink placeholder:text-muted aria-invalid:border-stop"
+        className="min-h-11 w-full border-2 border-edge bg-paper px-3 text-lg text-ink placeholder:text-muted aria-invalid:border-stop aria-invalid:focus-visible:outline-stop aria-invalid:focus-visible:outline-offset-0"
       />
       <FormError id={errorId} message={error} />
     </div>

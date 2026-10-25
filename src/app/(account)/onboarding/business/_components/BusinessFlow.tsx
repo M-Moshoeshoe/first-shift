@@ -70,6 +70,7 @@ export function BusinessFlow({ view }: { view: ProfileViewResponse }) {
           }}
           onNext={() => go(3)}
           onSkip={() => go(3)}
+          onBack={() => go(1)}
         />
       ) : (
         <ShopfrontStep
@@ -81,6 +82,7 @@ export function BusinessFlow({ view }: { view: ProfileViewResponse }) {
             if (complete) setFinished(true);
             else go(2);
           }}
+          onBack={() => go(2)}
         />
       )}
     </div>

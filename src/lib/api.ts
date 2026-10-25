@@ -1,4 +1,5 @@
-import { z } from "zod";
+import * as z from "zod/mini";
+import { safeParse, type $ZodType } from "zod/v4/core";
 import { clientAuth } from "./firebaseClient";
 
 /** An error the person can act on. message is always safe to show as it is. */
@@ -14,11 +15,12 @@ export class ApiError extends Error {
 
 const TIMEOUT_MS = 20_000;
 export const OFFLINE_MESSAGE = "We couldn't reach First Shift. Check your connection, then try again.";
-const ServerErrorSchema = z.object({ error: z.string(), message: z.string().min(1) });
+// zod/mini in the browser: the full build would add about 20 KB to every account page (docs/DESIGN.md, Performance).
+const ServerErrorSchema = z.object({ error: z.string(), message: z.string().check(z.minLength(1)) });
 
 /** The server's own public message when it sent one, otherwise a plain sentence for the status. */
 export function errorFromResponse(status: number, body: unknown): ApiError {
-  const parsed = ServerErrorSchema.safeParse(body);
+  const parsed = safeParse(ServerErrorSchema, body);
   if (parsed.success) return new ApiError(status, parsed.data.error, parsed.data.message);
   if (status === 401) return new ApiError(status, "not_signed_in", "Your session has ended. Sign in again.");
   if (status === 429) return new ApiError(status, "too_many_requests", "You've done that too many times today. Try again tomorrow.");
@@ -31,7 +33,7 @@ export function errorFromResponse(status: number, body: unknown): ApiError {
  * becomes an ApiError with a message to show the person. Components never
  * call fetch directly; they use apiGet and apiPost.
  */
-async function request<T>(method: "GET" | "POST", path: string, schema: z.ZodType<T>, body?: unknown): Promise<T> {
+async function request<T>(method: "GET" | "POST", path: string, schema: $ZodType<T>, body?: unknown): Promise<T> {
   const user = clientAuth().currentUser;
   if (!user) throw new ApiError(401, "not_signed_in", "Sign in to continue.");
 
@@ -52,10 +54,10 @@ async function request<T>(method: "GET" | "POST", path: string, schema: z.ZodTyp
   const json: unknown = await response.json().catch(() => null);
   if (!response.ok) throw errorFromResponse(response.status, json);
 
-  const parsed = schema.safeParse(json);
+  const parsed = safeParse(schema, json);
   if (!parsed.success) throw new ApiError(response.status, "bad_response", "First Shift sent a reply this page couldn't read. Reload the page and try again.");
   return parsed.data;
 }
 
-export const apiGet = <T>(path: string, schema: z.ZodType<T>): Promise<T> => request("GET", path, schema);
-export const apiPost = <T>(path: string, body: unknown, schema: z.ZodType<T>): Promise<T> => request("POST", path, schema, body);
+export const apiGet = <T>(path: string, schema: $ZodType<T>): Promise<T> => request("GET", path, schema);
+export const apiPost = <T>(path: string, body: unknown, schema: $ZodType<T>): Promise<T> => request("POST", path, schema, body);

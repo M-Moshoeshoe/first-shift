@@ -2,7 +2,8 @@
 
 import { PhotoStepForm } from "@/components/PhotoStepForm";
 import { SavedSummary } from "@/components/SavedSummary";
-import { BUTTON_LABELS, PROFILE_MESSAGES } from "@/domain/messages";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { PROFILE_MESSAGES } from "@/domain/messages";
 import { availabilityText } from "./availability";
 import type { DetailsDraft } from "./DetailsStep";
 
@@ -11,10 +12,11 @@ interface PhotoStepProps {
   idLastFour: string;
   focusHeading: boolean;
   onDone: () => void;
+  onBack: () => void;
 }
 
 /** Step 3: a photo of the young person's face, so the business knows it's them at the door. */
-export function PhotoStep({ details, idLastFour, focusHeading, onDone }: PhotoStepProps) {
+export function PhotoStep({ details, idLastFour, focusHeading, onDone, onBack }: PhotoStepProps) {
   const rows = [
     { term: "First name", value: details.firstName },
     { term: "Area", value: details.area },
@@ -34,6 +36,7 @@ export function PhotoStep({ details, idLastFour, focusHeading, onDone }: PhotoSt
       saveLabel={BUTTON_LABELS.saveMyProfile}
       neededMessage={PROFILE_MESSAGES.photoNeeded}
       onSaved={onDone}
+      onBack={onBack}
     />
   );
 }

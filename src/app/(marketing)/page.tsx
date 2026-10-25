@@ -1,13 +1,14 @@
 import { PageShell } from "@/components/ui/PageShell";
 import { RULES } from "@/config/rules";
 import { formatRand } from "@/domain/money";
-import { ExampleTryoutBand } from "./_components/ExampleTryoutBand";
+import { BandRow } from "./_components/BandRow";
 import { HeroBand } from "./_components/HeroBand";
 import { HowItWorksBand } from "./_components/HowItWorksBand";
-import { PitchBand } from "./_components/PitchBand";
+import { Pitch } from "./_components/Pitch";
 import { StartBand } from "./_components/StartBand";
 
-// Bands alternate paper and mist from the top: hero, slip, how it works, then these three.
+// Tones alternate from the top at every width. Phone: hero paper, slip mist, how it works paper,
+// the three pitches mist, paper, mist, start paper. Desktop: hero paper, how it works mist, pitches paper, start mist.
 const pitches = [
   {
     id: "for-young-people",
@@ -33,11 +34,8 @@ export default function HomePage() {
   return (
     <PageShell>
       <HeroBand />
-      <ExampleTryoutBand />
       <HowItWorksBand />
-      {pitches.map((pitch) => (
-        <PitchBand key={pitch.id} {...pitch} />
-      ))}
+      <BandRow lgTone="paper" columns={3} align="start" cells={pitches.map((pitch) => ({ key: pitch.id, tone: pitch.tone, content: <Pitch {...pitch} /> }))} />
       <StartBand />
     </PageShell>
   );

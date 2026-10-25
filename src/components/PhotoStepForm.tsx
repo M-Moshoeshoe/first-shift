@@ -3,6 +3,7 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { PhotoField } from "@/components/ui/PhotoField";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { UPLOAD_COPY } from "@/domain/messages";
 import type { PhotoKind } from "@/domain/profile";
 import { useAuth } from "@/lib/auth/useAuth";
@@ -24,6 +25,8 @@ interface PhotoStepFormProps {
   /** Shown when Save is tapped with no photo chosen. */
   neededMessage: string;
   onSaved: (result: SaveResult) => void;
+  /** Back to the previous step; what's saved stays saved. */
+  onBack?: () => void;
 }
 
 /**
@@ -32,7 +35,7 @@ interface PhotoStepFormProps {
  * caught straight away; saving uploads it with a live percentage. "Take a
  * photo" opens the front camera for a face and the back camera for a shopfront.
  */
-export function PhotoStepForm({ kind, fieldId, heading, focusHeading, summary, label, hint, saveLabel, neededMessage, onSaved }: PhotoStepFormProps) {
+export function PhotoStepForm({ kind, fieldId, heading, focusHeading, summary, label, hint, saveLabel, neededMessage, onSaved, onBack }: PhotoStepFormProps) {
   const { user } = useAuth();
   const photos = usePhotoUpload(kind);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +62,7 @@ export function PhotoStepForm({ kind, fieldId, heading, focusHeading, summary, l
   };
 
   return (
-    <form noValidate onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-5">
+    <form noValidate onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
       <h2 ref={headingRef} tabIndex={-1} className="text-xl font-bold">
         {heading}
       </h2>
@@ -73,10 +76,15 @@ export function PhotoStepForm({ kind, fieldId, heading, focusHeading, summary, l
         error={error}
         onSelect={(file) => void handleSelect(file)}
       />
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <Button type="submit" busy={photos.busy} busyLabel={photos.busyLabel}>
           {saveLabel}
         </Button>
+        {onBack ? (
+          <Button variant="secondary" disabled={photos.busy} onClick={onBack}>
+            {BUTTON_LABELS.back}
+          </Button>
+        ) : null}
         <p role="status" className="text-sm text-muted">
           {photos.slow ? UPLOAD_COPY.slow : ""}
         </p>

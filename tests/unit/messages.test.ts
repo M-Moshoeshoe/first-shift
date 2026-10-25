@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BUTTON_LABELS, FIELD_MESSAGES, ID_HINT, ID_PROBLEM_MESSAGES, LOCATION_MESSAGES, PROFILE_MESSAGES, UPLOAD_COPY, pinPrecisionText, signInErrorMessage, splitContactLink } from "@/domain/messages";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { FIELD_MESSAGES, ID_HINT, ID_PROBLEM_MESSAGES, LOCATION_MESSAGES, PROFILE_MESSAGES, UPLOAD_COPY, pinPrecisionText, signInErrorMessage, splitContactLink } from "@/domain/messages";
 import { PHOTO_KINDS } from "@/domain/profile";
 
 const SIGN_IN_CODES = ["auth/popup-blocked", "auth/popup-closed-by-user", "auth/network-request-failed", "auth/too-many-requests", "auth/x"];
@@ -24,11 +25,19 @@ describe("error copy follows the copy rules", () => {
   });
 
   it("names buttons only by their exact labels", () => {
-    const labels: string[] = Object.values(BUTTON_LABELS);
+    // Longest first, so "Try again" is matched whole rather than stopping at a shorter label.
+    const labels: string[] = Object.values(BUTTON_LABELS).sort((a, b) => b.length - a.length);
     for (const message of everyMessage) {
-      // "tap X or Y": both X and Y must be real labels. Our labels are capitalised; "tap the icon" is the browser's own.
-      for (const match of message.matchAll(/\b[Tt]ap ([A-Z].*?)(?= again| to try| while| and|\.|,)/g)) {
-        for (const label of (match[1] ?? "").split(" or ")) expect(labels).toContain(label);
+      // "tap X" or "tap X or Y": each must start with a real label. Our labels are capitalised; "tap the icon" is the browser's own.
+      for (const match of message.matchAll(/\b[Tt]ap (?=[A-Z])/g)) {
+        let rest = message.slice((match.index ?? 0) + match[0].length);
+        for (;;) {
+          const label = labels.find((candidate) => rest.startsWith(candidate));
+          expect(label, `"${rest}" in "${message}"`).toBeDefined();
+          rest = rest.slice(label?.length ?? rest.length);
+          if (!rest.startsWith(" or ")) break;
+          rest = rest.slice(" or ".length);
+        }
       }
     }
   });

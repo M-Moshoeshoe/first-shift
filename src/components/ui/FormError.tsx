@@ -29,7 +29,7 @@ function MessageText({ message }: { message: string }) {
  */
 export function FormError({ id, message }: FormErrorProps) {
   return (
-    <p id={id} aria-live="polite" className="text-sm font-bold text-stop">
+    <p id={id} aria-live="polite" className="text-sm text-stop">
       {message ? (
         <span key={message} className="animate-error-in">
           <MessageText message={message} />

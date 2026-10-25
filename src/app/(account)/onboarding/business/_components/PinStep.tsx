@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
-import { BUTTON_LABELS, LOCATION_COPY, LOCATION_MESSAGES, PROFILE_MESSAGES, pinPrecisionText } from "@/domain/messages";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { LOCATION_COPY, LOCATION_MESSAGES, PROFILE_MESSAGES, pinPrecisionText } from "@/domain/messages";
 import type { Location } from "@/domain/profile";
 import { ApiError, apiPost } from "@/lib/api";
 import { shakeAndFocus } from "@/lib/forms";
@@ -23,6 +24,7 @@ interface PinStepProps {
   onPinned: (pin: Location, complete: boolean) => void;
   onNext: () => void;
   onSkip: () => void;
+  onBack: () => void;
 }
 
 /**
@@ -31,7 +33,7 @@ interface PinStepProps {
  * better is accepted; anything else says why and what to do, and the owner
  * can skip for now and come back.
  */
-export function PinStep({ details, pin, hasPhoto, focusHeading, onPinned, onNext, onSkip }: PinStepProps) {
+export function PinStep({ details, pin, hasPhoto, focusHeading, onPinned, onNext, onSkip, onBack }: PinStepProps) {
   const [busyLabel, setBusyLabel] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -64,7 +66,7 @@ export function PinStep({ details, pin, hasPhoto, focusHeading, onPinned, onNext
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         Your premises pin
       </h2>
@@ -85,12 +87,17 @@ export function PinStep({ details, pin, hasPhoto, focusHeading, onPinned, onNext
         </Button>
         <FormError id={ERROR_ID} message={error} />
       </div>
-      {pin && !hasPhoto ? <Button onClick={onNext}>{BUTTON_LABELS.next}</Button> : null}
-      {!pin && failed && !hasPhoto ? (
-        <Button variant="secondary" onClick={onSkip}>
-          {BUTTON_LABELS.skipForNow}
+      <div className="flex flex-col gap-3">
+        {pin && !hasPhoto ? <Button onClick={onNext}>{BUTTON_LABELS.next}</Button> : null}
+        {!pin && failed && !hasPhoto ? (
+          <Button variant="secondary" onClick={onSkip}>
+            {BUTTON_LABELS.skipForNow}
+          </Button>
+        ) : null}
+        <Button variant="secondary" disabled={busyLabel !== null} onClick={onBack}>
+          {BUTTON_LABELS.back}
         </Button>
-      ) : null}
+      </div>
     </div>
   );
 }

@@ -22,7 +22,7 @@ src/app/(marketing)/ public pages; never load auth or Firebase code
 src/app/(account)/   sign-in, onboarding, work, business; wrapped in AuthProvider,
                      work and business behind ProfileGate
 src/app/api/         thin route handlers
-src/components/ui/   shared primitives: Band, PageShell, Button, fields, Stamp
+src/components/ui/   shared primitives: Band, PageShell, PageTitle, Button, fields, Stamp
 src/components/      presentational components used by two or more features
 src/domain/          pure business rules, no I/O, fully unit tested
 src/config/          rule values, AI settings and the theme colour

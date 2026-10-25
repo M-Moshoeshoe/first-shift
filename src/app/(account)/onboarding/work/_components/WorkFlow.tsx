@@ -58,7 +58,7 @@ export function WorkFlow({ view }: { view: ProfileViewResponse }) {
           }}
         />
       ) : (
-        <PhotoStep details={details} idLastFour={idLastFour} focusHeading={moved} onDone={() => setFinished(true)} />
+        <PhotoStep details={details} idLastFour={idLastFour} focusHeading={moved} onDone={() => setFinished(true)} onBack={() => go(2)} />
       )}
     </div>
   );

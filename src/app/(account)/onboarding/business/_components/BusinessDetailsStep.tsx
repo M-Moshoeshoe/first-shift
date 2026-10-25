@@ -5,7 +5,8 @@ import { AreaField } from "@/components/ui/AreaField";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { TextField } from "@/components/ui/TextField";
-import { BUTTON_LABELS, PROFILE_MESSAGES } from "@/domain/messages";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { PROFILE_MESSAGES } from "@/domain/messages";
 import { ApiError, apiPost } from "@/lib/api";
 import { fieldErrors, firstInvalid, shakeAndFocus } from "@/lib/forms";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
@@ -65,7 +66,7 @@ export function BusinessDetailsStep({ initial, focusHeading, onSaved }: Business
   };
 
   return (
-    <form noValidate onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-5">
+    <form noValidate onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         About your business
       </h2>
@@ -79,7 +80,7 @@ export function BusinessDetailsStep({ initial, focusHeading, onSaved }: Business
         error={errors.openingHours}
         onChange={(event) => update("openingHours", event.target.value)}
       />
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <Button type="submit" busy={busy} busyLabel="Saving your details" aria-describedby={FORM_ERROR_ID}>
           {BUTTON_LABELS.next}
         </Button>

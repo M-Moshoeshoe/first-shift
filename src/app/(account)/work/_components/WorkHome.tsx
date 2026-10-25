@@ -1,6 +1,5 @@
 "use client";
 
-import { SignOutButton } from "@/components/SignOutButton";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
@@ -9,10 +8,5 @@ import { useHeadingFocus } from "@/lib/useHeadingFocus";
 export function WorkHome() {
   const { worker } = useGatedProfile();
   const heading = useHeadingFocus(true);
-  return (
-    <>
-      <PageTitle headingRef={heading} title={`Hi ${worker?.firstName ?? ""}`} intro="Paid tryouts near you will show up here soon." />
-      <SignOutButton />
-    </>
-  );
+  return <PageTitle headingRef={heading} title={`Hi ${worker?.firstName ?? ""}`} intro="Paid tryouts near you will show up here soon." />;
 }

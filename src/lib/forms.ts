@@ -1,7 +1,8 @@
-import type { z } from "zod";
-
 /** The first message for each field, keyed by field name. Only fields the form lists are kept. */
-export function fieldErrors<K extends string>(error: z.ZodError, fields: readonly K[]): Partial<Record<K, string>> {
+/** Any Zod error, from the full build or zod/mini: only its issues are read. */
+type Issues = { issues: readonly { path: readonly PropertyKey[]; message: string }[] };
+
+export function fieldErrors<K extends string>(error: Issues, fields: readonly K[]): Partial<Record<K, string>> {
   const errors: Partial<Record<K, string>> = {};
   for (const issue of error.issues) {
     const field = fields.find((name) => name === issue.path[0]);

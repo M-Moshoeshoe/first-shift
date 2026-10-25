@@ -6,14 +6,14 @@ const steps = ["A business near you posts a paid tryout.", "You do the work and 
 /** Each step reveals through its own slice of the list's scroll range, so they arrive in order. */
 export function HowItWorksBand() {
   return (
-    <Band tone="paper">
-      <section aria-labelledby="how-it-works" className="reveal">
+    <Band tone="paper" lgTone="mist" wide>
+      <section aria-labelledby="how-it-works" className="reveal flex flex-col gap-2">
         <h2 id="how-it-works" className="text-xl font-bold">
           How it works
         </h2>
-        <ol className="reveal-steps mt-3 flex flex-col gap-2">
+        <ol className="reveal-steps flex flex-col gap-2 lg:grid lg:grid-cols-3 lg:gap-12">
           {steps.map((step, index) => (
-            <li key={step} className="reveal-step flex gap-3" style={{ "--step": index } as CSSProperties}>
+            <li key={step} className="reveal-step flex gap-2" style={{ "--step": index } as CSSProperties}>
               <span className="font-bold">{index + 1}.</span>
               <span>{step}</span>
             </li>

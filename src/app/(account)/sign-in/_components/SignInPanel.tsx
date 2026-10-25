@@ -2,10 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ComponentType } from "react";
-import { SignOutButton } from "@/components/SignOutButton";
+import { ProfileErrorState } from "@/components/ProfileErrorState";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
-import { BUTTON_LABELS, PROFILE_MESSAGES } from "@/domain/messages";
+import { readIntent, withIntent } from "@/domain/intent";
+import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { PROFILE_MESSAGES } from "@/domain/messages";
 import { redirectFor } from "@/domain/profile";
 import { fail } from "@/domain/result";
 import { useAuth } from "@/lib/auth/useAuth";
@@ -19,7 +21,8 @@ const loadTestSignIn = process.env.NODE_ENV === "production" ? null : () => impo
 
 /**
  * The one action on the sign-in screen. Someone already signed in, or who
- * has just signed in, goes straight to where they belong (domain/profile.ts).
+ * has just signed in, goes straight to where they belong (domain/profile.ts),
+ * carrying the home page's intent to the role screen (domain/intent.ts).
  */
 export function SignInPanel() {
   const { user, loading, error } = useAuth();
@@ -27,6 +30,7 @@ export function SignInPanel() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [profileError, setProfileError] = useState<{ uid: string; message: string } | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [TestSignIn, setTestSignIn] = useState<ComponentType | null>(null);
 
   useEffect(() => {
@@ -45,12 +49,12 @@ export function SignInPanel() {
         if (!current) return;
         if (!result.ok) return setProfileError({ uid: user.uid, message: result.error });
         const target = redirectFor("/sign-in", result.value);
-        if (target) router.replace(target);
+        if (target) router.replace(withIntent(target, readIntent(window.location.search)));
       });
     return () => {
       current = false;
     };
-  }, [user, router]);
+  }, [user, router, attempt]);
 
   const handleSignIn = async () => {
     if (busy) return;
@@ -61,25 +65,25 @@ export function SignInPanel() {
     setBusy(false);
   };
 
+  const retry = () => {
+    setProfileError(null);
+    setAttempt((count) => count + 1);
+  };
+
   if (error) return <FormError message={error} />;
-  if (user && profileError?.uid === user.uid) {
-    // Signed in, but the profile didn't load: say why, and offer a way out.
-    return (
-      <div className="flex flex-col gap-4">
-        <FormError message={profileError.message} />
-        <SignOutButton />
-      </div>
-    );
-  }
+  // Signed in, but the profile didn't load: say why, and offer Try again and Sign out.
+  if (user && profileError?.uid === user.uid) return <ProfileErrorState message={profileError.message} onRetry={retry} />;
   // A placeholder the exact height of the button while it works out who this is and where they go.
   if (loading || user) return <div role="status" aria-label="Checking whether you're signed in" className="h-13 animate-skeleton bg-mist" />;
 
   return (
-    <div className="flex flex-col gap-2">
-      <Button busy={busy} busyLabel="Opening Google" onClick={() => void handleSignIn()} aria-describedby={ERROR_ID}>
-        {BUTTON_LABELS.continueWithGoogle}
-      </Button>
-      <FormError id={ERROR_ID} message={message} />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <Button busy={busy} busyLabel="Opening Google" onClick={() => void handleSignIn()} aria-describedby={ERROR_ID}>
+          {BUTTON_LABELS.continueWithGoogle}
+        </Button>
+        <FormError id={ERROR_ID} message={message} />
+      </div>
       {TestSignIn ? <TestSignIn /> : null}
     </div>
   );

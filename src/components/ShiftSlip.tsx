@@ -15,20 +15,25 @@ interface ShiftSlipProps {
 export function ShiftSlip({ day, hours, business, area, payCents, returnFareCents, stamp }: ShiftSlipProps) {
   return (
     <article className="relative flex border-2 border-ink bg-paper">
-      <div className="flex w-24 shrink-0 flex-col justify-center border-r-2 border-dashed border-ink bg-gold px-3 py-4">
-        <p className="text-sm font-semibold">{day}</p>
+      <div className="flex w-28 shrink-0 lg:w-32 flex-col justify-center border-r-2 border-dashed border-ink bg-gold px-3 py-4">
+        <p className="text-sm font-bold">{day}</p>
         <p className="text-sm">{hours}</p>
       </div>
       <div className="flex-1 px-4 py-4">
-        <p className="text-2xl font-bold tracking-tight tabular-nums">{formatRand(payCents)}</p>
-        <p className="mt-1 font-medium">{business}</p>
+        <p className="text-2xl font-bold tabular-nums">{formatRand(payCents)}</p>
+        <p className="mt-1">{business}</p>
         <p className="text-sm text-muted tabular-nums">
           {area}
-          {returnFareCents !== null ? `, return taxi ${formatRand(returnFareCents)}` : ""}
+          {/* The fare wraps as one piece, so the amount never sits on a line without its label. */}
+          {returnFareCents !== null ? (
+            <>
+              , <span className="whitespace-nowrap">return taxi {formatRand(returnFareCents)}</span>
+            </>
+          ) : null}
         </p>
       </div>
       {stamp ? (
-        <span className="absolute -top-3 right-3">
+        <span className="absolute -top-6 right-3">
           <Stamp label={stamp} />
         </span>
       ) : null}
