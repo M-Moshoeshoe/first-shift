@@ -74,7 +74,7 @@ The worst outcome isn't a data leak. It's a fake tryout that puts a young person
 
    | Date | Model and effort | Allowed | Blocked refused | Hostile resisted | Result |
    | --- | --- | --- | --- | --- | --- |
-   | Not yet run | `claude-haiku-5-5`, low | - | - | - | Waiting for a run with a real key |
+   | 25 October 2026 | `claude-haiku-5-5`, effort low | 8 of 8 | 8 of 8 | 4 of 4 | **20 of 20 passed**, on the first run, with no prompt changes. Every blocked and hostile case was sorted into its exact expected category, except the R5-an-hour instruction, which went to review (not allowed, as required); the pay floor is enforced in code whatever the model says |
 
 ## Reporting a vulnerability
 
