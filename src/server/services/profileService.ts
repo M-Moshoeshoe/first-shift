@@ -1,6 +1,7 @@
 import "server-only";
+import { decideWelcomeGrant, type CreditEntry } from "@/domain/credits";
 import { ID_PROBLEM_MESSAGES, profileProblemMessage } from "@/domain/messages";
-import { isProfileComplete, newAccount, photoPath, profileView, type PhotoKind, type ProfileView } from "@/domain/profile";
+import { isProfileComplete, newAccount, photoPath, profileView, type BusinessRecord, type PhotoKind, type ProfileView, type UserRecord } from "@/domain/profile";
 import { decideBusinessSave, decidePhotoSave, decideWorkerSave, type ProfileProblem } from "@/domain/profileDecisions";
 import { decideRole, type Role } from "@/domain/roles";
 import { checkSaId } from "@/domain/saId";
@@ -31,6 +32,13 @@ const HTTP_STATUS: Record<ProfileProblem["code"], number> = {
 
 /** Nothing to write: the request matches what is stored, so there's no audit entry either. */
 const unchanged = (state: StoredProfile): Plan<SaveResult> => ({ write: null, result: { status: "unchanged", complete: isProfileComplete(state.user, state.business) } });
+
+/** The free credits ride along with the save that first completes a business profile (domain/credits.ts). */
+function welcomeCredits(user: UserRecord | null, business: BusinessRecord | null, credits: readonly CreditEntry[]): CreditEntry[] | undefined {
+  if (user?.role !== "business") return undefined;
+  const grant = decideWelcomeGrant(isProfileComplete(user, business), credits);
+  return grant.kind === "append" ? grant.entries : undefined;
+}
 
 function refuse(problem: ProfileProblem): never {
   throw new AppError(HTTP_STATUS[problem.code], problem.code, profileProblemMessage(problem));
@@ -79,7 +87,7 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
         if (decision.kind === "refuse") refuse(decision.problem);
         if (decision.kind === "unchanged") return unchanged(state);
         return {
-          write: { business: decision.next, audit: "business_profile_saved" },
+          write: { business: decision.next, audit: "business_profile_saved", ledger: welcomeCredits(state.user, decision.next, state.credits) },
           result: { status: "saved", complete: isProfileComplete(state.user, decision.next) },
         };
       });
@@ -87,7 +95,7 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
 
     /** The person's own profile, read in a transaction that writes nothing. */
     async getProfile(uid: string): Promise<ProfileView> {
-      return repo.transact<ProfileView>(uid, null, (state) => ({ write: null, result: profileView(state.user, state.business) }));
+      return repo.transact<ProfileView>(uid, null, (state) => ({ write: null, result: profileView(state.user, state.business, state.credits) }));
     },
 
     async savePhoto(uid: string, kind: PhotoKind): Promise<SaveResult> {
@@ -101,7 +109,7 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
         const user = decision.next.user ?? state.user;
         const business = decision.next.business ?? state.business;
         return {
-          write: { user: decision.next.user, business: decision.next.business, audit: "photo_saved" },
+          write: { user: decision.next.user, business: decision.next.business, audit: "photo_saved", ledger: welcomeCredits(user, business, state.credits) },
           result: { status: "saved", complete: isProfileComplete(user, business) },
         };
       });

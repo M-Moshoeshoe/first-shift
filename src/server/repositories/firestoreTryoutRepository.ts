@@ -50,7 +50,7 @@ export const firestoreTryoutRepository: TryoutRepository = {
       const { write, result } = plan(snapshot.exists ? parseTryout(snapshot.data()) : null);
       if (!write) return result;
       const at = FieldValue.serverTimestamp();
-      tx.update(ref, { status: write.status, updatedAt: at });
+      tx.update(ref, { status: write.status, ...(write.category ? { category: write.category } : {}), updatedAt: at });
       tx.create(db.collection("auditLog").doc(), { uid, action: write.audit, target: id, at });
       return result;
     });

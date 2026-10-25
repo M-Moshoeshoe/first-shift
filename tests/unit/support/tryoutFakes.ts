@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { decideWork } from "@/domain/allowedWork";
+import type { CreditEntry } from "@/domain/credits";
 import type { BusinessRecord, UserRecord } from "@/domain/profile";
 import type { TryoutRecord, TryoutTerms } from "@/domain/tryoutDecisions";
 import { AppError } from "@/server/errors";
@@ -12,6 +13,9 @@ export const NOW = new Date("2026-10-26T06:00:00Z");
 
 /** Lerato's shop, pinned exactly; a tryout must only ever carry the cell around it. */
 export const PIN = { latitude: -25.996341, longitude: 28.227113, accuracyMetres: 20 };
+
+/** The free credits every complete business starts with. */
+export const WELCOME: CreditEntry = { kind: "grant", amount: 3, reason: "welcome" };
 
 export const owner: UserRecord = { role: "business", status: "active" };
 export const shop: BusinessRecord = {
@@ -53,6 +57,7 @@ export function createTryoutFakes() {
   const store = createFakeStore();
   store.users.set("lerato", owner);
   store.businesses.set("lerato", shop);
+  store.ledgers.set("lerato", [WELCOME]);
   const tryouts = new Map<string, TryoutRecord>();
   const audit: { uid: string; action: TryoutAuditAction; target: string }[] = [];
   const quota = new Map<string, number>();

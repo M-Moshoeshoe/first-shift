@@ -6,16 +6,16 @@ import { addMinutes, fromSast } from "./time";
 export const TRYOUT_STATUSES = ["review", "published", "booked", "completed", "withdrawn"] as const;
 export type TryoutStatus = (typeof TRYOUT_STATUSES)[number];
 
-export const TRYOUT_ACTIONS = ["approve", "withdraw", "book", "complete"] as const;
+export const TRYOUT_ACTIONS = ["approve", "reject", "withdraw", "book", "complete"] as const;
 export type TryoutAction = (typeof TRYOUT_ACTIONS)[number];
 
 /**
  * Every move a tryout can make. A review tryout goes live only when approved,
- * and a tryout can be withdrawn only while nobody is booked on it. Anything
- * not listed is refused.
+ * or is taken down when rejected; a tryout can be withdrawn only while nobody
+ * is booked on it. Anything not listed is refused.
  */
 const MOVES: Record<TryoutStatus, Partial<Record<TryoutAction, TryoutStatus>>> = {
-  review: { approve: "published", withdraw: "withdrawn" },
+  review: { approve: "published", reject: "withdrawn", withdraw: "withdrawn" },
   published: { book: "booked", withdraw: "withdrawn" },
   booked: { complete: "completed" },
   completed: {},

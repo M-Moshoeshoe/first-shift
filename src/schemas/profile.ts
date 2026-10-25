@@ -72,6 +72,7 @@ export const ProfileViewSchema = z.object({
       openingHours: z.optional(z.string()),
       location: z.optional(z.object({ latitude: z.number(), longitude: z.number(), accuracyMetres: z.number() })),
       hasPhoto: z.boolean(),
+      credits: z.object({ available: z.number(), onlyFree: z.boolean() }),
     }),
   ),
 });

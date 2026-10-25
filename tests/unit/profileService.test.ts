@@ -126,6 +126,29 @@ describe("business profile", () => {
     await service.setRole("thabo", "young_person");
     await expectRefusedWithoutChange(() => service.saveBusiness("thabo", details), PROFILE_MESSAGES.roleLocked.young_person);
   });
+
+  it(`grants ${RULES.freeCredits} free credits with the save that completes the profile, once, each with an audit entry`, async () => {
+    await service.saveBusiness("sipho", { ...details, location: pin });
+    expect(store.ledgers.get("sipho")).toBeUndefined();
+    store.photos.set("photos/sipho/shopfront.jpg", { contentType: "image/jpeg", size: 200_000, version: "1" });
+    expect(await service.savePhoto("sipho", "shopfront")).toEqual({ status: "saved", complete: true });
+    expect(store.ledgers.get("sipho")).toEqual([{ kind: "grant", amount: RULES.freeCredits, reason: "welcome" }]);
+    // A changed detail and a new photo later: still one grant.
+    await service.saveBusiness("sipho", { ...details, name: "Sipho's Repairs", location: pin });
+    store.photos.set("photos/sipho/shopfront.jpg", { contentType: "image/jpeg", size: 200_000, version: "2" });
+    await service.savePhoto("sipho", "shopfront");
+    expect(store.ledgers.get("sipho")).toHaveLength(1);
+    expect(store.audit.filter((entry) => entry.action === "credit_grant")).toHaveLength(1);
+    expect((await service.getProfile("sipho")).business?.credits).toEqual({ available: RULES.freeCredits, onlyFree: true });
+  });
+
+  it("grants nothing to a young person", async () => {
+    await service.setRole("thabo", "young_person");
+    await service.saveWorker("thabo", workerInput());
+    store.photos.set("photos/thabo/profile.jpg", { contentType: "image/jpeg", size: 180_000, version: "1" });
+    await service.savePhoto("thabo", "profile");
+    expect(store.ledgers.get("thabo")).toBeUndefined();
+  });
 });
 
 describe("photos", () => {

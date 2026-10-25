@@ -32,7 +32,7 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
   /** The poster's own records, read in a transaction that writes nothing; refused unless they may post. */
   async function poster(uid: string): Promise<StoredProfile> {
     const state = await profiles.transact<StoredProfile>(uid, null, (stored) => ({ write: null, result: stored }));
-    const problem = postingProblem(state.user, state.business);
+    const problem = postingProblem(state.user, state.business, state.credits);
     if (problem) throw new AppError(problem === "not_business" ? 403 : 409, problem, POSTING_PROBLEM_MESSAGES[problem]);
     return state;
   }

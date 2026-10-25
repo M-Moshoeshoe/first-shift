@@ -1,12 +1,13 @@
+import type { WorkCategory } from "@/domain/allowedWork";
 import type { TryoutStatus } from "@/domain/tryout";
 import type { TryoutRecord } from "@/domain/tryoutDecisions";
 
 /** Who did what to which tryout; no personal data. */
-export type TryoutAuditAction = "tryout_posted" | "tryout_sent_to_review" | "tryout_withdrawn";
+export type TryoutAuditAction = "tryout_posted" | "tryout_sent_to_review" | "tryout_withdrawn" | "tryout_approved" | "tryout_rejected";
 
 export interface TryoutPlan<R> {
   /** The new status and its audit entry, written together, or nothing at all. */
-  write: { status: TryoutStatus; audit: TryoutAuditAction } | null;
+  write: { status: TryoutStatus; audit: TryoutAuditAction; category?: WorkCategory } | null;
   result: R;
 }
 

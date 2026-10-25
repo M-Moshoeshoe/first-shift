@@ -14,6 +14,7 @@ import {
 describe("transition", () => {
   const allowed: Record<string, TryoutStatus> = {
     "review approve": "published",
+    "review reject": "withdrawn",
     "review withdraw": "withdrawn",
     "published book": "booked",
     "published withdraw": "withdrawn",

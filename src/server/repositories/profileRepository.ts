@@ -1,3 +1,4 @@
+import type { CreditEntry } from "@/domain/credits";
 import type { BusinessRecord, UserRecord } from "@/domain/profile";
 
 export type AuditAction = "role_set" | "worker_profile_saved" | "business_profile_saved" | "photo_saved";
@@ -10,14 +11,21 @@ export interface StoredProfile {
   heldIdHash: string | null;
   /** Who holds the hash being claimed in this transaction, if one is. */
   claimOwner: string | null;
+  /** A business's credit ledger, in order; empty for anyone else. */
+  credits: CreditEntry[];
 }
 
-/** What a decision changes. Every write carries exactly one audit action, written with it. */
+/**
+ * What a decision changes. A change to the user or business carries exactly
+ * one audit action; each new ledger entry gets its own (firestoreLedger.ts).
+ */
 export interface ProfileWrite {
   user?: UserRecord;
   business?: BusinessRecord;
   claimIdHash?: string;
-  audit: AuditAction;
+  /** Credit entries to append to this business's ledger. */
+  ledger?: CreditEntry[];
+  audit: AuditAction | null;
 }
 
 export interface Plan<R> {

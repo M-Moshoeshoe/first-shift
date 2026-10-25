@@ -30,6 +30,7 @@ beforeEach(async () => {
     await setDoc(doc(db, "bookings/b1"), { workerId: "thabo", ownerId: "sipho" });
     await setDoc(doc(db, "payments/p1"), { workerId: "thabo", ownerId: "sipho" });
     await setDoc(doc(db, "references/r1"), { workerId: "thabo", ownerId: "sipho" });
+    await setDoc(doc(db, "creditLedger/sipho_000001"), { businessId: "sipho", seq: 1, kind: "grant", amount: 3, reason: "welcome" });
   });
 });
 
@@ -105,6 +106,16 @@ describe("reads", () => {
       await assertFails(updateDoc(doc(writer, "tryouts/live"), { status: "withdrawn" }));
       await assertFails(updateDoc(doc(writer, "tryouts/in-review"), { status: "published" }));
       await assertFails(deleteDoc(doc(writer, "tryouts/live")));
+    }
+  });
+
+  it("keeps the credit ledger server-only: no client reads it or writes it, not even its own business", async () => {
+    for (const client of [as("sipho"), as("thabo"), anonymous()]) {
+      await assertFails(getDoc(doc(client, "creditLedger/sipho_000001")));
+      await assertFails(getDocs(query(collection(client, "creditLedger"), where("businessId", "==", "sipho"))));
+      await assertFails(setDoc(doc(client, "creditLedger/sipho_000002"), { businessId: "sipho", seq: 2, kind: "grant", amount: 100, reason: "top_up" }));
+      await assertFails(updateDoc(doc(client, "creditLedger/sipho_000001"), { amount: 100 }));
+      await assertFails(deleteDoc(doc(client, "creditLedger/sipho_000001")));
     }
   });
 

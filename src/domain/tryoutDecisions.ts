@@ -1,4 +1,5 @@
-import type { BlockedCategory, WorkCategory, WorkDecision } from "./allowedWork";
+import { decideWork, type BlockedCategory, type WorkCategory, type WorkDecision } from "./allowedWork";
+import { canPost, type CreditEntry } from "./credits";
 import { coarseLocation, type CoarseLocation } from "./geo";
 import type { Cents } from "./money";
 import { agreedPayCents } from "./pay";
@@ -42,13 +43,14 @@ export interface TryoutRecord {
   status: TryoutStatus;
 }
 
-export type PostingProblem = "not_business" | "profile_incomplete" | "account_paused";
+export type PostingProblem = "not_business" | "profile_incomplete" | "account_paused" | "no_credits";
 
-/** Only a business with a complete, active profile may draft or post. */
-export function postingProblem(user: UserRecord | null, business: BusinessRecord | null): PostingProblem | null {
+/** Only a business with a complete, active profile and an available credit may draft or post. */
+export function postingProblem(user: UserRecord | null, business: BusinessRecord | null, credits: readonly CreditEntry[]): PostingProblem | null {
   if (!user || user.role !== "business" || !business) return "not_business";
   if (!canTakePart(user.status) || !canTakePart(business.status)) return "account_paused";
   if (!isProfileComplete(user, business)) return "profile_incomplete";
+  if (!canPost(credits)) return "no_credits";
   return null;
 }
 
@@ -111,4 +113,22 @@ export function decideWithdraw(uid: string, tryout: TryoutRecord | null): Withdr
   if (tryout.status === "withdrawn") return { kind: "unchanged" };
   if (transition(tryout.status, "withdraw").ok) return { kind: "withdraw" };
   return { kind: "refuse", problem: tryout.status === "booked" ? "booked" : "finished" };
+}
+
+export type ReviewDecision =
+  | { kind: "approve"; category: WorkCategory }
+  | { kind: "reject" }
+  | { kind: "refuse"; problem: "not_found" | "not_in_review" | "blocked_category" };
+
+/**
+ * A person checks a tryout the AI couldn't classify (scripts/reviewTryout.ts).
+ * Approving names the kind of work, and only an allowed kind can go live: the
+ * same rule as posting (allowedWork.ts), so a reviewer can't publish blocked work.
+ */
+export function decideReview(tryout: TryoutRecord | null, action: "approve" | "reject", category?: WorkCategory): ReviewDecision {
+  if (!tryout) return { kind: "refuse", problem: "not_found" };
+  if (!transition(tryout.status, action).ok) return { kind: "refuse", problem: "not_in_review" };
+  if (action === "reject") return { kind: "reject" };
+  if (!category || decideWork(category, 1).decision !== "allowed") return { kind: "refuse", problem: "blocked_category" };
+  return { kind: "approve", category };
 }

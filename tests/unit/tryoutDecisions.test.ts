@@ -1,16 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { decideWork } from "@/domain/allowedWork";
-import { checkTerms, decideWithdraw, newTryout, postedStatus, postingProblem, type TryoutRecord } from "@/domain/tryoutDecisions";
+import { checkTerms, decideReview, decideWithdraw, newTryout, postedStatus, postingProblem, type TryoutRecord } from "@/domain/tryoutDecisions";
 import { TRYOUT_STATUSES } from "@/domain/tryout";
-import { NOW, owner, shop, terms } from "./support/tryoutFakes";
+import { NOW, owner, shop, terms, WELCOME } from "./support/tryoutFakes";
 
 describe("postingProblem", () => {
   it("lets only a business with a complete profile post", () => {
-    expect(postingProblem(owner, shop)).toBeNull();
-    expect(postingProblem(null, null)).toBe("not_business");
-    expect(postingProblem({ role: "young_person", status: "active" }, null)).toBe("not_business");
-    expect(postingProblem(owner, null)).toBe("not_business");
-    expect(postingProblem(owner, { ...shop, location: undefined })).toBe("profile_incomplete");
+    expect(postingProblem(owner, shop, [WELCOME])).toBeNull();
+    expect(postingProblem(null, null, [])).toBe("not_business");
+    expect(postingProblem({ role: "young_person", status: "active" }, null, [])).toBe("not_business");
+    expect(postingProblem(owner, null, [])).toBe("not_business");
+    expect(postingProblem(owner, { ...shop, location: undefined }, [WELCOME])).toBe("profile_incomplete");
+  });
+
+  it("needs an available credit", () => {
+    expect(postingProblem(owner, shop, [])).toBe("no_credits");
+    const allHeld = [WELCOME, ...["a", "b", "c"].map((tryoutId) => ({ kind: "hold" as const, tryoutId }))];
+    expect(postingProblem(owner, shop, allHeld)).toBe("no_credits");
   });
 });
 
@@ -74,5 +80,30 @@ describe("decideWithdraw", () => {
   it("treats a missing tryout and someone else's alike, as not found", () => {
     expect(decideWithdraw("lerato", null)).toEqual({ kind: "refuse", problem: "not_found" });
     expect(decideWithdraw("sipho", record("published"))).toEqual({ kind: "refuse", problem: "not_found" });
+  });
+});
+
+describe("decideReview", () => {
+  const inReview = (): TryoutRecord => {
+    const built = newTryout("lerato", shop, terms(), { window: { start: new Date(), end: new Date() }, payCents: 1 }, "review", null);
+    if (!built) throw new Error("fixture");
+    return built;
+  };
+
+  it("approves with an allowed kind of work, or rejects", () => {
+    expect(decideReview(inReview(), "approve", "stock_and_packing")).toEqual({ kind: "approve", category: "stock_and_packing" });
+    expect(decideReview(inReview(), "reject")).toEqual({ kind: "reject" });
+  });
+
+  it("never lets a reviewer publish blocked work, or approve without naming the work", () => {
+    expect(decideReview(inReview(), "approve", "electrical")).toEqual({ kind: "refuse", problem: "blocked_category" });
+    expect(decideReview(inReview(), "approve")).toEqual({ kind: "refuse", problem: "blocked_category" });
+  });
+
+  it("only reviews tryouts in review", () => {
+    expect(decideReview(null, "reject")).toEqual({ kind: "refuse", problem: "not_found" });
+    for (const status of ["published", "booked", "completed", "withdrawn"] as const) {
+      expect(decideReview({ ...inReview(), status }, "approve", "cleaning")).toEqual({ kind: "refuse", problem: "not_in_review" });
+    }
   });
 });

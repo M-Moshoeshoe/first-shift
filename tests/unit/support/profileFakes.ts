@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import type { CreditEntry } from "@/domain/credits";
 import type { BusinessRecord, UserRecord } from "@/domain/profile";
 import type { PhotoMeta } from "@/domain/profileDecisions";
 import type { PhotoStore } from "@/server/repositories/photoStore";
@@ -33,7 +34,9 @@ export function createFakeStore() {
   const users = new Map<string, UserRecord>();
   const businesses = new Map<string, BusinessRecord>();
   const idHashes = new Map<string, string>();
-  const audit: { uid: string; action: AuditAction }[] = [];
+  const audit: { uid: string; action: AuditAction | `credit_${CreditEntry["kind"]}` }[] = [];
+  // Append-only, like creditLedger: entries are pushed, never changed.
+  const ledgers = new Map<string, CreditEntry[]>();
   const photos = new Map<string, PhotoMeta>();
 
   const repo: ProfileRepository = {
@@ -44,6 +47,7 @@ export function createFakeStore() {
         business: businesses.get(uid) ?? null,
         heldIdHash,
         claimOwner: claimHash ? (idHashes.get(claimHash) ?? null) : null,
+        credits: users.get(uid)?.role === "business" ? (ledgers.get(uid) ?? []) : [],
       });
       // If plan throws, nothing below runs: the same guarantee a Firestore transaction gives.
       const { write, result } = plan(state);
@@ -52,15 +56,19 @@ export function createFakeStore() {
         if (write.user) users.set(uid, structuredClone(write.user));
         if (write.business) businesses.set(uid, structuredClone(write.business));
         if (write.claimIdHash) idHashes.set(write.claimIdHash, uid);
-        audit.push({ uid, action: write.audit });
+        if (write.audit) audit.push({ uid, action: write.audit });
+        for (const entry of write.ledger ?? []) {
+          ledgers.set(uid, [...(ledgers.get(uid) ?? []), structuredClone(entry)]);
+          audit.push({ uid, action: `credit_${entry.kind}` });
+        }
       }
       return result;
     },
   };
 
   const photoStore: PhotoStore = { metadata: async (path) => photos.get(path) ?? null };
-  const snapshot = () => JSON.stringify({ users: [...users], businesses: [...businesses], idHashes: [...idHashes], audit });
-  return { users, businesses, idHashes, audit, photos, repo, photoStore, snapshot };
+  const snapshot = () => JSON.stringify({ users: [...users], businesses: [...businesses], idHashes: [...idHashes], ledgers: [...ledgers], audit });
+  return { users, businesses, idHashes, ledgers, audit, photos, repo, photoStore, snapshot };
 }
 
 export type FakeStore = ReturnType<typeof createFakeStore>;

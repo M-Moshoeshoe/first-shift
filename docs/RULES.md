@@ -105,4 +105,20 @@ The AI sorts every request into a category; `allowedWork.ts` decides. Blocked ca
 ## Hiring and fees
 
 - After 3 completed tryouts with the same person, the owner is asked "Offer a job?", once.
-- Fees due: R25 per completed tryout, shown to each business. Nothing is collected during the hackathon.
+
+## Tryout credits
+
+A business pays for tryouts with prepaid credits (`credits.ts`), so nobody has to chase fees after the day.
+
+| Rule | Value |
+| --- | --- |
+| Free credits | 3, granted once when the business profile is first complete |
+| Price | One credit, R25, per completed tryout |
+| Posting | Needs at least one available credit. Drafting is refused too, so no AI work is wasted |
+| Available | Granted, minus used, minus held |
+| Hold | One credit is held when someone is booked (wired in with booking) |
+| Use | The held credit is used when the tryout is completed (wired in with completion) |
+| Release | The held credit comes back if the booking is cancelled (wired in with cancellations) |
+| Top-ups | Not open yet. A business that needs more contacts support |
+
+The ledger is append-only: entries are only ever added, by the server, in the same transaction as the event that causes them, each with an audit entry.

@@ -28,6 +28,15 @@ describe("draft", () => {
     expect(tryouts.size + audit.length).toBe(0);
   });
 
+  it("refuses a business with no credit left before any AI is used, with the top-up message", async () => {
+    const { service, store, quota } = createTryoutFakes();
+    store.ledgers.set("lerato", []);
+    expect(await refusal(service.draft("lerato", "Help sorting stock please"))).toMatchObject({ status: 409, code: "no_credits", publicMessage: POSTING_PROBLEM_MESSAGES.no_credits });
+    expect(await refusal(service.post("lerato", terms()))).toMatchObject({ code: "no_credits" });
+    expect(fakeCheckWork).not.toHaveBeenCalled();
+    expect(quota.size).toBe(0);
+  });
+
   it("refuses a young person and an unfinished business before any AI is used", async () => {
     const { service, store, quota } = createTryoutFakes();
     store.users.set("thabo", { role: "young_person", status: "active" });

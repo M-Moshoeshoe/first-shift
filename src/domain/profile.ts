@@ -1,3 +1,4 @@
+import { creditBalance, type CreditEntry } from "./credits";
 import type { Role } from "./roles";
 import type { IdCheck } from "./saId";
 
@@ -101,10 +102,10 @@ export interface ProfileView {
   complete: boolean;
   destination: Destination;
   worker: (Partial<WorkerDetails> & { idLastFour?: string; hasPhoto: boolean }) | null;
-  business: (Partial<BusinessDetails> & { hasPhoto: boolean }) | null;
+  business: (Partial<BusinessDetails> & { hasPhoto: boolean; credits: { available: number; onlyFree: boolean } }) | null;
 }
 
-export function profileView(user: UserRecord | null, business: BusinessRecord | null): ProfileView {
+export function profileView(user: UserRecord | null, business: BusinessRecord | null, credits: readonly CreditEntry[] = []): ProfileView {
   const worker =
     user?.role === "young_person"
       ? {
@@ -116,9 +117,17 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
           hasPhoto: Boolean(user.profilePhoto),
         }
       : null;
+  const balance = creditBalance(credits);
   const shop =
     user?.role === "business" && business
-      ? { name: business.name, area: business.area, openingHours: business.openingHours, location: business.location, hasPhoto: Boolean(business.shopfrontPhoto) }
+      ? {
+          name: business.name,
+          area: business.area,
+          openingHours: business.openingHours,
+          location: business.location,
+          hasPhoto: Boolean(business.shopfrontPhoto),
+          credits: { available: balance.available, onlyFree: balance.onlyFree },
+        }
       : null;
   return { role: user?.role ?? null, complete: isProfileComplete(user, business), destination: destinationFor(true, user, business), worker, business: shop };
 }

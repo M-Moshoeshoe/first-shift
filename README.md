@@ -136,6 +136,8 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | `npm test` | Unit tests only |
 | `npm run rules` | Security rules tests in the emulators |
 | `npm run emulators` | Firebase emulators (pinned `firebase-tools`) with the UI at http://localhost:4000 |
+| `npm run credits:backfill` | Shows which complete businesses lack their free credits; `-- --apply` grants them (says first whether it targets the emulators or the live project) |
+| `npm run review:tryout` | Lists tryouts waiting for review; `-- <id> approve <category> --reviewer <name>` or `-- <id> reject --reviewer <name>` decides one, audit-logged |
 | `npm run e2e:profile` | Role and young person profile through the real client code, against the emulators (settings in section 5) |
 | `npm run e2e:photo` | Photo uploads and the photo route against the Storage emulator |
 | `npm run e2e:browser` | Every routing path and both onboarding forms in Microsoft Edge at 360 px, signed in with the test-only emulator sign-in (needs `npm run emulators` and `npm run dev`) |

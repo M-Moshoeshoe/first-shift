@@ -1,3 +1,4 @@
+import { SUPPORT_EMAIL } from "@/config/contact";
 import { RULES } from "@/config/rules";
 import { formatRand } from "./money";
 import type { PostingProblem, TermsProblem } from "./tryoutDecisions";
@@ -15,6 +16,7 @@ export const POSTING_PROBLEM_MESSAGES: Record<PostingProblem, string> = {
   not_business: "Only a business account can post tryouts. Sign in with the Google account you used for your business.",
   profile_incomplete: "Finish your business profile first: your details, your premises pin and a photo of your shopfront.",
   account_paused: `Your account is paused, so you can't post tryouts right now. Contact us to sort it out.`,
+  no_credits: `You've used your free tryouts. Top-ups open soon. Contact us at ${SUPPORT_EMAIL} if you need more now.`,
 };
 
 export const TERMS_MESSAGES: Record<TermsProblem, string> = {

@@ -46,7 +46,10 @@ export const RULES = {
   postsPerDay: 5,
 
   hirePromptAfterTryouts: 3,
-  feeCentsPerCompletedTryout: 2500,
+  /** Prepaid tryout credits: each completed tryout uses one, bought at this price. */
+  creditPriceCents: 2500,
+  /** Granted once, when a business profile is first complete. */
+  freeCredits: 3,
   minimumAge: 18,
 
   /** Profile and shopfront photos. storage.rules enforces the same limits on upload. */

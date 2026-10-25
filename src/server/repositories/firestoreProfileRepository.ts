@@ -4,6 +4,7 @@ import { z } from "zod";
 import { AVAILABILITY, type BusinessRecord, type UserRecord } from "@/domain/profile";
 import { ROLES } from "@/domain/roles";
 import { adminDb } from "../firebaseAdmin";
+import { appendLedger, readLedger } from "./firestoreLedger";
 import type { ProfileRepository } from "./profileRepository";
 
 // Stored documents are parsed on the way in, so a malformed record fails loudly instead of being trusted.
@@ -60,12 +61,16 @@ export const firestoreProfileRepository: ProfileRepository = {
         tx.get(idHashes.where("uid", "==", uid).limit(1)),
         claimHash ? tx.get(idHashes.doc(claimHash)) : Promise.resolve(null),
       ]);
+      const parsedUser = user.exists ? parseUser(user.data()) : null;
+      // Only a business has a ledger; every other account skips the read.
+      const credits = parsedUser?.role === "business" ? await readLedger(db, tx, uid) : [];
 
       const { write, result } = plan({
-        user: user.exists ? parseUser(user.data()) : null,
+        user: parsedUser,
         business: business.exists ? parseBusiness(business.data()) : null,
         heldIdHash: held.docs[0]?.id ?? null,
         claimOwner: claim?.exists ? String(claim.get("uid")) : null,
+        credits,
       });
       if (!write) return result;
 
@@ -74,7 +79,8 @@ export const firestoreProfileRepository: ProfileRepository = {
       if (write.business) tx.set(businessRef, { ...defined(write.business), updatedAt: at }, { merge: true });
       if (write.claimIdHash) tx.create(idHashes.doc(write.claimIdHash), { uid, claimedAt: at });
       // The audit entry holds no personal data: who, what and when.
-      tx.create(db.collection("auditLog").doc(), { uid, action: write.audit, at });
+      if (write.audit) tx.create(db.collection("auditLog").doc(), { uid, action: write.audit, at });
+      if (write.ledger?.length) appendLedger(db, tx, uid, credits.length, write.ledger, uid);
       return result;
     });
   },
