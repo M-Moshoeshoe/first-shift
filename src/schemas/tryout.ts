@@ -48,11 +48,6 @@ export type PostResult = z.infer<typeof PostResultSchema>;
 export const WithdrawResultSchema = z.object({ status: z.enum(["withdrawn", "unchanged"]) });
 export type WithdrawResult = z.infer<typeof WithdrawResultSchema>;
 
-export const ApplySchema = z.object({
-  tryoutId: TryoutIdSchema,
-  note: z.optional(z.string().check(z.trim(), z.maxLength(200))),
-});
-
 /** The owner's three one-tap answers. The reference is written from these only. */
 export const OwnerAnswersSchema = z.object({
   onTime: z.boolean(),

@@ -69,6 +69,10 @@ export const RULES = {
    * centre. The exact pin stays on the business record.
    */
   coarseGeohashPrecision: 6,
+  /** How far the nearby feed looks from the young person's area centre. */
+  nearbyRadiusKm: 10,
+  /** The note a young person may add when applying. */
+  applicationNoteMaxChars: 200,
 
   /** Below this confidence, a work classification goes to human review. */
   workClassificationMinConfidence: 0.7,

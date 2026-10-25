@@ -28,7 +28,7 @@ const TryoutRecordSchema = z.object({
   demo: z.boolean().default(false),
 });
 
-const parseTryout = (data: unknown): TryoutRecord => TryoutRecordSchema.parse(data);
+export const parseTryout = (data: unknown): TryoutRecord => TryoutRecordSchema.parse(data);
 
 export const firestoreTryoutRepository: TryoutRepository = {
   async create(tryout, audit) {

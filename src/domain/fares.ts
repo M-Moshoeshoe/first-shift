@@ -30,3 +30,8 @@ export function returnFare(fromArea: string, toArea: string): ReturnFare | null 
   const oneWay = from === "ivory park" ? FROM_IVORY_PARK[to] : to === "ivory park" ? FROM_IVORY_PARK[from] : undefined;
   return oneWay === undefined ? null : { returnCents: oneWay * 2, source: IVORY_PARK_SOURCE };
 }
+
+/** What the young person keeps after the return taxi fare, or null when the fare isn't known. Never below zero. */
+export function keepAfterFare(payCents: Cents, returnFareCents: Cents | null): Cents | null {
+  return returnFareCents === null ? null : Math.max(0, payCents - returnFareCents);
+}

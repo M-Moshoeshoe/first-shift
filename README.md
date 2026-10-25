@@ -138,9 +138,10 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | `npm run emulators` | Firebase emulators (pinned `firebase-tools`) with the UI at http://localhost:4000 |
 | `npm run demo:accounts` | Sets up the two demo accounts for judges from `.env.demo.local` or flags, and switches off Firebase's own password sign-in (`docs/DEPLOY.md`, 5b) |
 | `npm run demo:reset` | Puts the demo accounts' data back to a known state; touches only demo records |
+| `npx firebase deploy --only firestore:indexes` | Deploys the Firestore indexes in `firestore.indexes.json` (the nearby feed needs one) |
 | `npm run e2e:demo` | Attacks a demo account in the emulators the way anyone with its password could, and checks each attack is refused |
 | `npm run credits:backfill` | Shows which complete businesses lack their free credits; `-- --apply` grants them (says first whether it targets the emulators or the live project) |
 | `npm run review:tryout` | Lists tryouts waiting for review; `-- <id> approve <category> --reviewer <name>` or `-- <id> reject --reviewer <name>` decides one, audit-logged |
 | `npm run e2e:profile` | Role and young person profile through the real client code, against the emulators (settings in section 5) |
 | `npm run e2e:photo` | Photo uploads and the photo route against the Storage emulator |
-| `npm run e2e:browser` | Every routing path and both onboarding forms in Microsoft Edge at 360 px, signed in with the test-only emulator sign-in (needs `npm run emulators` and `npm run dev`) |
+| `npm run e2e:browser` | The whole walk in Microsoft Edge at 360 and 1280 px, axe on every screen: both onboarding journeys, posting, the nearby feed, a tryout, applying and withdrawing, and the dashboard's applicant count, plus Slow 4G timings, signed in with the test-only emulator sign-in (needs `npm run emulators` and `npm run dev`) |

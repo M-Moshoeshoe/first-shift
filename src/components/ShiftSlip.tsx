@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { FEED_COPY } from "@/domain/findingMessages";
 import { formatRand } from "@/domain/money";
 import { Stamp, type StampLabel } from "./ui/Stamp";
 
@@ -8,14 +9,24 @@ interface ShiftSlipProps {
   business: string;
   area: string;
   payCents: number;
-  returnFareCents: number | null;
+  /** The return minibus taxi fare; null says "Fare not known"; left out, no fare line at all (the owner's own slips). */
+  returnFareCents?: number | null;
+  /** "about 4 km" from the young person's area. */
+  distance?: string | null;
+  /** Further plain lines, such as the injury cover line. */
+  notes?: readonly string[];
+  /** The business has no completed tryout yet. */
+  isNew?: boolean;
   stamp?: StampLabel;
   /** A row under the slip's details, such as the owner's status line and actions. */
   footer?: ReactNode;
 }
 
+const FARE_UNKNOWN = FEED_COPY.fareUnknown;
+const NEW_BUSINESS = FEED_COPY.newBusiness;
+
 /** A tryout drawn as a shift slip: time on the gold stub, pay given the most weight. */
-export function ShiftSlip({ day, hours, business, area, payCents, returnFareCents, stamp, footer }: ShiftSlipProps) {
+export function ShiftSlip({ day, hours, business, area, payCents, returnFareCents, distance, notes = [], isNew = false, stamp, footer }: ShiftSlipProps) {
   return (
     <article className="relative border-2 border-ink bg-paper">
       <div className="flex">
@@ -28,13 +39,21 @@ export function ShiftSlip({ day, hours, business, area, payCents, returnFareCent
           <p className="mt-1">{business}</p>
           <p className="text-sm text-muted tabular-nums">
             {area}
+            {distance ? `, ${distance}` : null}
             {/* The fare wraps as one piece, so the amount never sits on a line without its label. */}
-            {returnFareCents !== null ? (
+            {typeof returnFareCents === "number" ? (
               <>
                 , <span className="whitespace-nowrap">return taxi {formatRand(returnFareCents)}</span>
               </>
             ) : null}
           </p>
+          {returnFareCents === null ? <p className="text-sm text-muted">{FARE_UNKNOWN}</p> : null}
+          {notes.map((note) => (
+            <p key={note} className="text-sm text-muted">
+              {note}
+            </p>
+          ))}
+          {isNew ? <p className="text-sm font-bold">{NEW_BUSINESS}</p> : null}
         </div>
       </div>
       {footer ? <div className="border-t-2 border-ink px-4 py-2">{footer}</div> : null}

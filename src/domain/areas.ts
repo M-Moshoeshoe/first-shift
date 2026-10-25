@@ -19,3 +19,10 @@ const LOOKUP = new Map(AREAS.flatMap(({ name, aliases }) => [name, ...aliases].m
 export function canonicaliseArea(typed: string): string {
   return LOOKUP.get(normalise(typed)) ?? typed;
 }
+
+const CENTRES = new Map(AREAS.map(({ name, centre }) => [name, centre]));
+
+/** A known area's approximate centre, the search point for nearby tryouts; null for an area we don't know. */
+export function areaCentre(typed: string): { lat: number; lng: number } | null {
+  return CENTRES.get(canonicaliseArea(typed)) ?? null;
+}

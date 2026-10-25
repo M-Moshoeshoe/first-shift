@@ -48,6 +48,12 @@ describe("every account screen is open only while it's the person's destination"
     expect(redirectFor("/business/post", "/onboarding/business")).toBe("/onboarding/business");
     expect(redirectFor("/business/anything-else", "/business")).toBe("/business");
     expect(redirectFor("/business/post/../admin", "/business")).toBe("/business");
+    expect(redirectFor("/work/tryouts/abc_123-X", "/work")).toBeNull();
+    expect(redirectFor("/work/tryouts/abc_123-X", "/business")).toBe("/business");
+    expect(redirectFor("/work/tryouts/abc_123-X", "/onboarding/work")).toBe("/onboarding/work");
+    expect(redirectFor("/work/tryouts/", "/work")).toBe("/work");
+    expect(redirectFor("/work/tryouts/a/b", "/work")).toBe("/work");
+    expect(redirectFor("/work/tryouts/a.b", "/work")).toBe("/work");
   });
 
   it("only treats known screens as destinations", () => {

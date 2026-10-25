@@ -118,7 +118,7 @@ export async function youngPerson(rec: Recorder, page: Page): Promise<void> {
   await page.getByRole("button", { name: "Save my profile" }).click();
   await page.getByText("Profile done").waitFor();
   await pathIs(page, "/work");
-  await page.getByRole("heading", { name: "Hi Thabo" }).waitFor();
+  await page.getByRole("heading", { name: "Paid tryouts near you" }).waitFor();
   await rec.check(page, "young person home");
   await expectStoredArea(rec, "users", "firstName", "Thabo", "Ivory Park");
   await skeleton(rec, page, "/work");
@@ -147,7 +147,7 @@ export async function business(rec: Recorder, page: Page): Promise<void> {
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByText("Choose whether you're registered with the Compensation Fund.", { exact: false }).waitFor();
   await rec.check(page, "business step 1, COIDA not answered");
-  await page.getByLabel("Yes, we're registered").check();
+  await page.locator("label", { hasText: "Yes, we're registered" }).click();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("heading", { name: "Your premises pin" }).waitFor();
   await page.getByRole("button", { name: "Back" }).click();

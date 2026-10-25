@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canWithdraw, orderTryouts, STATUS_LINE } from "@/app/(account)/business/_components/ownTryouts";
+import { canWithdraw, orderTryouts, STATUS_LINE, statusLine } from "@/app/(account)/business/_components/ownTryouts";
 import type { OwnTryout } from "@/lib/useOwnTryouts";
 import { TRYOUT_STATUSES } from "@/domain/tryout";
 
@@ -11,11 +11,18 @@ const tryout = (id: string, status: OwnTryout["status"], day: number): OwnTryout
   endAt: new Date(Date.UTC(2026, 9, day, 13)),
   payCents: 18138,
   status,
+  applicants: 0,
 });
 
 describe("the owner's tryout list", () => {
   it("has a status line for every status", () => {
     expect(TRYOUT_STATUSES.map((status) => STATUS_LINE[status])).toEqual(["Being checked", "Live", "Booked", "Done", "Withdrawn"]);
+  });
+
+  it("says how many have applied while a tryout is live", () => {
+    expect(statusLine({ status: "published", applicants: 0 })).toBe("Live, 0 applied");
+    expect(statusLine({ status: "published", applicants: 3 })).toBe("Live, 3 applied");
+    expect(statusLine({ status: "booked", applicants: 3 })).toBe("Booked");
   });
 
   it("offers Withdraw only while nobody is booked", () => {

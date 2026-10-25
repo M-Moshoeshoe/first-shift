@@ -10,6 +10,10 @@ export const STATUS_LINE: Record<TryoutStatus, string> = {
   withdrawn: "Withdrawn",
 };
 
+/** The status line, with how many have applied while a tryout is live: "Live, 2 applied". */
+export const statusLine = (tryout: Pick<OwnTryout, "status" | "applicants">): string =>
+  tryout.status === "published" ? `${STATUS_LINE.published}, ${tryout.applicants} applied` : STATUS_LINE[tryout.status];
+
 /** Only a tryout nobody is booked on can be withdrawn (domain/tryout.ts); the server checks again. */
 export const canWithdraw = (status: TryoutStatus): boolean => status === "review" || status === "published";
 

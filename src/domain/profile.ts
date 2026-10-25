@@ -147,10 +147,15 @@ export function isDestination(path: string): path is Destination {
   return DESTINATIONS.some((destination) => destination === path);
 }
 
-/** The other screens each home opens to, listed one by one so nothing else slips through. */
-const SCREENS_OF: Partial<Record<Destination, readonly string[]>> = {
+/** The other screens each home opens to, listed one by one (or by an exact pattern) so nothing else slips through. */
+const SCREENS_OF: Partial<Record<Destination, readonly (string | RegExp)[]>> = {
   "/business": ["/business/post"],
+  // A tryout's detail page; the id has the same shape the routes accept (schemas/tryout.ts, TryoutIdSchema).
+  "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/],
 };
+
+const opensTo = (destination: Destination, path: string): boolean =>
+  SCREENS_OF[destination]?.some((screen) => (typeof screen === "string" ? screen === path : screen.test(path))) ?? false;
 
 /**
  * Where to send someone who opened path, or null when they belong there.
@@ -160,7 +165,7 @@ const SCREENS_OF: Partial<Record<Destination, readonly string[]>> = {
  * Server routes enforce everything again regardless.
  */
 export function redirectFor(path: string, destination: Destination): Destination | null {
-  return path === destination || (SCREENS_OF[destination]?.includes(path) ?? false) ? null : destination;
+  return path === destination || opensTo(destination, path) ? null : destination;
 }
 
 /** Where a person belongs right now. Screens redirect with this; server routes enforce everything again. */

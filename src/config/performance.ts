@@ -15,8 +15,11 @@ export const JS_BUDGETS_KB = {
   "/onboarding/business": 260,
   // Measured 242.9 KB (24 October 2026); measured + 10% is 267.2, capped at 260.
   "/onboarding/role": 260,
-  // Measured 243.0 KB (24 October 2026); measured + 10% is 267.3, capped at 260.
+  // Measured 247.0 KB (25 October 2026, the nearby feed); measured + 10% is over the 260 cap.
   "/work": 260,
+  // The tryout detail page, measured on the one shell built ahead of time (generateStaticParams); every id
+  // loads the same scripts. Measured 247.9 KB (25 October 2026); measured + 10% is over the cap.
+  "/work/tryouts/tryout": 260,
   // Measured 244.5 KB (25 October 2026, the dashboard): the withdraw sheet (React Aria, 20.9 KB) and the
   // Firestore listener (171.8 KB) load after the page has drawn and aren't in this figure. + 10% is over the cap.
   "/business": 260,

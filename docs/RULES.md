@@ -108,6 +108,21 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 
 A tryout shows where it is as a cell about 1 km across (a 6-character geohash) and the cell's centre, never the business's exact pin. The pin stays on the business record (`geo.ts`).
 
+## Finding and applying
+
+| Rule | Value | Code |
+| --- | --- | --- |
+| Search point | The young person's area's approximate centre (`src/config/areas.ts`); an area we don't know gives no feed, and the screen says so | `areas.ts` |
+| Radius | 10 km, measured to the tryout's cell centre, shown as "about 4 km" | `nearby.ts` |
+| What the feed shows | Published tryouts still open for booking, soonest first, in the viewer's world only (demo or real) | `nearby.ts`, `demo.ts` |
+| Who may apply | A young person with a complete, active profile | `applications.ts` |
+| When | While the tryout is published and booking is open (until 1 hour before the start) | `applications.ts` |
+| One each | One application per young person per tryout; applying again changes nothing | `applications.ts` |
+| No overlaps | Never for a tryout that overlaps one they're booked on | `applications.ts` |
+| Daily limit | 10 applications a day, counted in South African days | `RULES.applicationsPerDay` |
+| A note | Optional, up to 200 characters | `RULES.applicationNoteMaxChars` |
+| Withdrawing | The applicant can withdraw, and apply again while booking is open | `applications.ts` |
+
 ## Work that can't be posted
 
 The AI sorts every request into a category; `allowedWork.ts` decides. Blocked categories are refused with a safer option, whatever the AI's confidence. Unclear requests (confidence below 0.7) wait for human review. Electrical installation is blocked because the Electrical Installation Regulations, 2009 require it to be done under the control of a registered person.

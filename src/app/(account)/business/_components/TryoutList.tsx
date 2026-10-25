@@ -2,33 +2,18 @@
 
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ShiftSlip } from "@/components/ShiftSlip";
+import { SlipSkeleton } from "@/components/SlipSkeleton";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { sastSlot } from "@/domain/time";
 import { useOwnTryouts } from "@/lib/useOwnTryouts";
-import { canWithdraw, orderTryouts, STATUS_LINE } from "./ownTryouts";
+import { canWithdraw, orderTryouts, statusLine } from "./ownTryouts";
 
 // React Aria (about 20 KB) loads after the dashboard has drawn, in idle time, so it never delays the
 // first screen and is ready before anyone taps Withdraw (docs/DESIGN.md, Performance).
 const loadSheet = () => import("./WithdrawSheet");
 const WithdrawSheet = lazy(() => loadSheet().then((module) => ({ default: module.WithdrawSheet })));
-
-/** A placeholder the size of one slip with its status row, pulsing gently while the list loads. */
-function SlipSkeleton() {
-  return (
-    <div aria-hidden="true" className="flex flex-col border-2 border-mist">
-      <div className="flex">
-        <div className="h-27 w-28 shrink-0 animate-skeleton bg-mist lg:w-32" />
-        <div className="flex flex-1 flex-col gap-2 px-4 py-4">
-          <div className="h-8 w-28 animate-skeleton bg-mist" />
-          <div className="h-5 w-3/4 animate-skeleton bg-mist" />
-        </div>
-      </div>
-      <div className="h-12 animate-skeleton border-t-2 border-mist bg-mist" />
-    </div>
-  );
-}
 
 /**
  * The owner's tryouts, live: a Firestore listener, so a new or changed tryout
@@ -94,10 +79,9 @@ export function TryoutList({ uid }: { uid: string }) {
                 business={tryout.title}
                 area={tryout.area}
                 payCents={tryout.payCents}
-                returnFareCents={null}
                 footer={
                   <div className="flex min-h-11 items-center justify-between gap-4">
-                    <p className="font-bold">{STATUS_LINE[tryout.status]}</p>
+                    <p className="font-bold tabular-nums">{statusLine(tryout)}</p>
                     {canWithdraw(tryout.status) ? (
                       <Button variant="quiet" aria-label={`Withdraw ${tryout.title} on ${day}`} onClick={() => setWithdrawing(tryout.id)}>
                         Withdraw

@@ -1,10 +1,12 @@
+import { SlipSkeleton } from "./SlipSkeleton";
+
 /** Lines of text at 360 px and at the desktop column width: each skeleton line stands in for one. */
 type Lines = { phone: number; desktop: number };
 
 interface Spec {
   title: Lines;
   intro: Lines;
-  body: "role" | "form" | "dashboard" | "none";
+  body: "role" | "form" | "dashboard" | "feed";
 }
 
 // Line counts measured on the real screens at 360 px and in the 1280 px desktop column; npm run e2e:browser
@@ -14,7 +16,7 @@ const SPECS: Record<string, Spec> = {
   "/onboarding/role": { title: { phone: 2, desktop: 2 }, intro: { phone: 2, desktop: 2 }, body: "role" },
   "/onboarding/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 2 }, body: "form" },
   "/onboarding/business": { title: { phone: 2, desktop: 1 }, intro: { phone: 3, desktop: 2 }, body: "form" },
-  "/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "none" },
+  "/work": { title: { phone: 2, desktop: 1 }, intro: { phone: 1, desktop: 1 }, body: "feed" },
   "/business": { title: { phone: 1, desktop: 1 }, intro: { phone: 1, desktop: 1 }, body: "dashboard" },
   "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 4, desktop: 3 }, body: "form" },
 };
@@ -83,6 +85,12 @@ export function ScreenSkeleton({ path }: { path: string }) {
             <FieldBars hint={false} />
             <FieldBars hint />
           </div>
+        </div>
+      ) : null}
+      {spec.body === "feed" ? (
+        <div className="flex flex-col gap-4">
+          <SlipSkeleton />
+          <SlipSkeleton />
         </div>
       ) : null}
       {spec.body === "dashboard" ? (

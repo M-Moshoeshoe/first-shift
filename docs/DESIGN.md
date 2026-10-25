@@ -165,7 +165,8 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/onboarding/work` | 260 KB (the cap) | 250.2 KB, 15 scripts |
 | `/onboarding/business` | 260 KB (the cap) | 249.7 KB, 15 scripts |
 | `/onboarding/role` | 260 KB (the cap) | 239.8 KB, 14 scripts |
-| `/work` | 260 KB (the cap) | 239.4 KB, 14 scripts |
+| `/work` | 260 KB (the cap) | 247.0 KB, 15 scripts (the nearby feed, 25 October 2026) |
+| `/work/tryouts/[id]` | 260 KB (the cap) | 247.9 KB, 15 scripts, measured on the one shell built ahead of time (`/work/tryouts/tryout`); every id loads the same scripts |
 | `/business` | 260 KB (the cap) | 244.5 KB, 15 scripts; the withdraw sheet (React Aria, 20.9 KB) and the Firestore listener (171.8 KB) load after the page has drawn |
 | `/business/post` | 260 KB (the cap) | 249.4 KB, 15 scripts |
 

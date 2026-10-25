@@ -1,4 +1,5 @@
 import type { Page, Route } from "playwright-core";
+import { findingAndApplying } from "./findingFlow";
 import { skeleton } from "./flows";
 import { BASE, pathIs, signIn, throttle, type Recorder } from "./kit";
 
@@ -49,12 +50,12 @@ async function describe(page: Page, text: string): Promise<void> {
  * account can't be relied on to produce them on cue.
  */
 export async function postingAndDashboard(rec: Recorder, page: Page): Promise<Timing[]> {
-  await postingStates(rec, page);
-  return businessTimings(page);
+  const finding = await postingStates(rec, page);
+  return [...finding, ...(await businessTimings(page))];
 }
 
 /** From the empty dashboard through every posting state, to a real tryout posted with the real model. */
-async function postingStates(rec: Recorder, page: Page): Promise<void> {
+async function postingStates(rec: Recorder, page: Page): Promise<Timing[]> {
   await page.goto(`${BASE}/sign-in`);
   await signIn(page, "e2e-lerato");
   await pathIs(page, "/business");
@@ -107,15 +108,18 @@ async function postingStates(rec: Recorder, page: Page): Promise<void> {
   await page.getByText("Your tryout is live").waitFor({ timeout: 90_000 });
   await rec.check(page, "post, posted");
 
-  await page.getByRole("link", { name: "Back to your tryouts" }).click();
+  // A young person nearby finds it and applies (findingFlow.ts), then the business is signed back in.
+  const timings = await findingAndApplying(rec, page);
   await dashboardStates(rec, page);
+  return timings;
 }
 
 /** The dashboard with a live tryout, the withdraw sheet, then the forced states: review and no credits left. */
 async function dashboardStates(rec: Recorder, page: Page): Promise<void> {
   await pathIs(page, "/business");
-  await page.getByText("Live", { exact: true }).waitFor();
-  await rec.check(page, "dashboard, one tryout live");
+  // Thabo applied, withdrew and applied again: one applicant, counted live.
+  await page.getByText("Live, 1 applied", { exact: true }).waitFor();
+  await rec.check(page, "dashboard, one tryout live, 1 applied");
   await page.getByRole("button", { name: /^Withdraw / }).click();
   await page.getByRole("heading", { name: "Withdraw this tryout?" }).waitFor();
   await page.waitForTimeout(400); // let sheet-enter finish, for the screenshot

@@ -13,6 +13,8 @@ export interface OwnTryout {
   endAt: Date;
   payCents: number;
   status: TryoutStatus;
+  /** Young people who have applied and not withdrawn, kept by the server in the same transaction as each application. */
+  applicants: number;
 }
 
 export type OwnTryouts =
@@ -22,7 +24,7 @@ export type OwnTryouts =
   | { status: "ready"; tryouts: OwnTryout[]; fresh: ReadonlySet<string> };
 
 const instant = z.custom<{ toDate: () => Date }>((value) => typeof value === "object" && value !== null && "toDate" in value);
-const TryoutDocSchema = z.object({ title: z.string(), area: z.string(), startAt: instant, endAt: instant, payCents: z.number(), status: z.enum(TRYOUT_STATUSES) });
+const TryoutDocSchema = z.object({ title: z.string(), area: z.string(), startAt: instant, endAt: instant, payCents: z.number(), status: z.enum(TRYOUT_STATUSES), applicants: z.optional(z.number()) });
 
 /**
  * A live list of the signed-in owner's tryouts, through a Firestore listener
@@ -46,7 +48,7 @@ export function useOwnTryouts(uid: string, attempt: number): OwnTryouts {
           (snapshot) => {
             const tryouts = snapshot.docs.flatMap((doc) => {
               const parsed = TryoutDocSchema.safeParse(doc.data());
-              return parsed.success ? [{ id: doc.id, ...parsed.data, startAt: parsed.data.startAt.toDate(), endAt: parsed.data.endAt.toDate() }] : [];
+              return parsed.success ? [{ id: doc.id, ...parsed.data, applicants: parsed.data.applicants ?? 0, startAt: parsed.data.startAt.toDate(), endAt: parsed.data.endAt.toDate() }] : [];
             });
             const seen = known.current;
             const fresh = new Set(seen ? tryouts.map((tryout) => tryout.id).filter((id) => !seen.has(id)) : []);

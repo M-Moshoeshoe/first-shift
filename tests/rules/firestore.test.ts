@@ -141,6 +141,21 @@ describe("reads", () => {
     }
   });
 
+  it("lets only the applicant and the tryout's owner read an application, and no client write one (Phase 3)", async () => {
+    await assertSucceeds(getDoc(doc(as("thabo"), "applications/a1")));
+    await assertSucceeds(getDoc(doc(as("sipho"), "applications/a1")));
+    await assertSucceeds(getDocs(query(collection(as("sipho"), "applications"), where("ownerId", "==", "sipho"))));
+    for (const reader of [as("lerato"), as("demo-thabo", { demo: true }), anonymous()]) {
+      await assertFails(getDoc(doc(reader, "applications/a1")));
+      await assertFails(getDocs(query(collection(reader, "applications"), where("ownerId", "==", "sipho"))));
+    }
+    for (const writer of [as("thabo"), as("sipho")]) {
+      await assertFails(setDoc(doc(writer, "applications/t1_thabo"), { workerId: "thabo", ownerId: "sipho", status: "applied" }));
+      await assertFails(updateDoc(doc(writer, "applications/a1"), { status: "withdrawn" }));
+      await assertFails(deleteDoc(doc(writer, "applications/a1")));
+    }
+  });
+
   it("keeps a business record private to its owner", async () => {
     await assertSucceeds(getDoc(doc(as("sipho"), "businesses/sipho-shop")));
     await assertFails(getDoc(doc(as("thabo"), "businesses/sipho-shop")));

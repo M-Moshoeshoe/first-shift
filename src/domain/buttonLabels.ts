@@ -19,4 +19,7 @@ export const BUTTON_LABELS = {
   signOut: "Sign out",
   tryAgain: "Try again",
   goHome: "Go to the home page",
+  refresh: "Refresh",
+  apply: "Apply",
+  withdrawApplication: "Withdraw my application",
 } as const;

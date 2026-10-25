@@ -79,7 +79,15 @@ npx firebase use --add             # choose your first-shift project; for the al
 npx firebase deploy --only firestore:rules,storage
 ```
 
-It should finish with **Deploy complete!** and list `firestore` and `storage`. `firebase use --add` creates a small `.firebaserc` file holding only the project ID, which isn't secret. Commit it so the deploy command works on any machine:
+It should finish with **Deploy complete!** and list `firestore` and `storage`.
+
+The nearby feed needs one composite index (tryouts by `status`, then `location.geohash`), kept in `firestore.indexes.json`. Deploy it whenever that file changes:
+
+```bash
+npx firebase deploy --only firestore:indexes
+```
+
+Firestore takes a few minutes to build a new index. Until it's ready, the feed answers with an error, and the server log names the missing index. `firebase use --add` creates a small `.firebaserc` file holding only the project ID, which isn't secret. Commit it so the deploy command works on any machine:
 
 ```bash
 git add .firebaserc && git commit -m "Point the Firebase CLI at the live project" && git push
