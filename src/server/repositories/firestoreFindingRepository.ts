@@ -12,8 +12,9 @@ import { parseTryout } from "./firestoreTryoutRepository";
 
 // Stored documents are parsed on the way in, so a malformed record fails loudly instead of being trusted.
 const BookingSchema = z.object({ startAt: instant, endAt: instant });
-/** Only what the feed shows about a business: its track record and its injury cover answer. Never its pin. */
-const BusinessSummarySchema = z.object({ completed: z.number().int().min(0), coida: z.enum(COIDA_ANSWERS).optional() });
+/** Only what the feed shows about a business: its track record, its record for paying and its injury cover answer. Never its pin. */
+const count = z.number().int().min(0);
+const BusinessSummarySchema = z.object({ completed: count, coida: z.enum(COIDA_ANSWERS).optional(), payments: count.optional(), paidOnTime: count.optional() });
 
 /** The businesses behind these tryouts, read in one round trip. A missing business counts as new, with cover not confirmed. */
 async function withBusinesses(db: Firestore, tryouts: readonly { id: string; tryout: TryoutRecord }[]): Promise<Listing[]> {

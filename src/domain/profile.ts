@@ -1,5 +1,6 @@
 import { creditBalance, type CreditEntry } from "./credits";
 import type { CoidaAnswer } from "./injuryCover";
+import type { PaymentMethod } from "./paymentFlow";
 import type { Role } from "./roles";
 import type { IdCheck } from "./saId";
 
@@ -44,6 +45,8 @@ export interface WorkerDetails {
   availability: Availability[];
   /** Always 27XXXXXXXXX. */
   payoutPhone: string;
+  /** How businesses can pay them, at least one (paymentFlow.ts). Profiles from before it was asked have none until they choose. */
+  payMethods: PaymentMethod[];
 }
 
 export interface BusinessDetails {
@@ -75,6 +78,9 @@ export interface BusinessRecord extends Counters, Partial<Omit<BusinessDetails, 
   demo?: boolean;
   location?: Location;
   shopfrontPhoto?: StoredPhoto;
+  /** Payments counted towards "Paid on time", and how many were on time (day.ts, payRecordCounters). Absent until the first. */
+  payments?: number;
+  paidOnTime?: number;
 }
 
 const ZERO_COUNTERS: Counters = { completed: 0, onTime: 0, lateCancellations: 0, noShows: 0 };
@@ -124,6 +130,7 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
           area: user.area,
           availability: user.availability,
           payoutPhone: user.payoutPhone ? displayPhone(user.payoutPhone) : undefined,
+          payMethods: user.payMethods,
           idLastFour: user.idLastFour,
           hasPhoto: Boolean(user.profilePhoto),
         }
@@ -156,7 +163,7 @@ export function isDestination(path: string): path is Destination {
 const BOOKING_PAGE = /^\/bookings\/[A-Za-z0-9_-]{1,128}$/;
 const SCREENS_OF: Partial<Record<Destination, readonly (string | RegExp)[]>> = {
   "/business": ["/business/post", /^\/business\/tryouts\/[A-Za-z0-9_-]{1,128}$/, BOOKING_PAGE],
-  "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/, "/work/applications", BOOKING_PAGE],
+  "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/, "/work/applications", "/work/profile", BOOKING_PAGE],
 };
 
 const opensTo = (destination: Destination, path: string): boolean =>

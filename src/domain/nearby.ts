@@ -3,6 +3,7 @@ import { RULES } from "@/config/rules";
 import { bookingOpen } from "./applications";
 import { sameWorld, type Viewer } from "./demo";
 import { returnFare } from "./fares";
+import { FEED_COPY } from "./findingMessages";
 import { injuryCoverLine, type CoidaAnswer } from "./injuryCover";
 import type { TryoutRecord } from "./tryoutDecisions";
 
@@ -24,8 +25,12 @@ export const aboutHowFar = (km: number): string => (km < 1 ? "under 1 km" : `abo
 export interface Listing {
   id: string;
   tryout: TryoutRecord;
-  business: { completed: number; coida?: CoidaAnswer };
+  business: { completed: number; coida?: CoidaAnswer; payments?: number; paidOnTime?: number };
 }
+
+/** "Paid on time: 4 of 5" once any payment has counted (day.ts, payRecordCounters); "New on First Shift" until then. */
+export const payRecordLine = (business: Listing["business"]): string =>
+  (business.payments ?? 0) > 0 ? FEED_COPY.paidOnTime(business.paidOnTime ?? 0, business.payments ?? 0) : FEED_COPY.newBusiness;
 
 /** One slip in the feed or on the detail page: everything a young person decides on, and nothing about where exactly the business is. */
 export interface FeedItem {
@@ -43,8 +48,8 @@ export interface FeedItem {
   /** "about 4 km" from the young person's area; null when we don't know where their area is. */
   distance: string | null;
   injuryCover: string;
-  /** The business has no completed tryout yet. */
-  isNew: boolean;
+  /** The business's reputation for paying: "Paid on time: N of N", or "New on First Shift". */
+  payRecord: string;
 }
 
 export function feedItem(listing: Listing, from: { area: string; centre: Point | null }): FeedItem {
@@ -62,7 +67,7 @@ export function feedItem(listing: Listing, from: { area: string; centre: Point |
     returnFareCents: returnFare(from.area, tryout.area)?.returnCents ?? null,
     distance: from.centre ? aboutHowFar(distanceKm(from.centre, tryout.location)) : null,
     injuryCover: injuryCoverLine(listing.business.coida),
-    isNew: listing.business.completed === 0,
+    payRecord: payRecordLine(listing.business),
   };
 }
 

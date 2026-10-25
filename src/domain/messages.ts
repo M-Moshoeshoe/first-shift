@@ -114,6 +114,7 @@ export const FIELD_MESSAGES = {
   workerArea: "Enter the area you live in, like Ivory Park or Tembisa.",
   availability: "Choose at least one time you can work.",
   payoutPhone: "Enter a South African cellphone number, like 082 123 4567.",
+  payMethods: "Choose at least one way businesses can pay you.",
   businessName: "Enter your business name.",
   businessArea: "Enter the area your business is in, like Midrand.",
   openingHours: "Enter your opening hours, like Monday to Saturday, 8:00 to 17:00.",

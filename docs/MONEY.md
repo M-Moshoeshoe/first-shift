@@ -56,7 +56,7 @@ Per completed tryout, once a business is past its free credits:
 | AI (drafting and two safety checks on Claude Haiku 5.5), about | -R0.10 |
 | **Earned, about** | **R23.50** |
 
-The young person's pay never passes through First Shift: the business pays them directly (FNB eWallet, bank transfer or cash), so there's no float to hold and no payout fee.
+The young person's pay never passes through First Shift: the business pays them directly, by one of the four methods the young person chose (FNB eWallet, PayShap, a cash-send from the business's own bank, or cash; `docs/RULES.md`, Paying), so there's no float to hold and no payout fee.
 
 **Free credits.** Each business's first 3 tryouts are free, which costs about R75 in fees not earned per business that uses them all. They're paid for by what that business brings in after: the 4th completed tryout and later. The AI cost of a free tryout (about R0.10) is still spent.
 

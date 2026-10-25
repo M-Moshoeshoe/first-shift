@@ -23,6 +23,7 @@ export const thabo: UserRecord = {
   area: "Ivory Park",
   availability: ["saturdays"],
   payoutPhone: "27821234567",
+  payMethods: ["ewallet", "cash"],
   idLastFour: "0087",
   residency: "citizen",
   profilePhoto: { path: "photos/thabo/profile.jpg", version: "1" },

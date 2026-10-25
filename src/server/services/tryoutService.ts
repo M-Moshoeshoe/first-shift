@@ -2,6 +2,7 @@ import "server-only";
 import { RULES } from "@/config/rules";
 import type { WorkDecision } from "@/domain/allowedWork";
 import type { Viewer } from "@/domain/demo";
+import { asksForMoney } from "@/domain/scamRules";
 import { checkText, suggestHours } from "@/domain/tryout";
 import { checkTerms, decideWithdraw, newTryout, postedStatus, postingProblem, type TryoutTerms } from "@/domain/tryoutDecisions";
 import { POSTING_PROBLEM_MESSAGES, TRYOUT_MESSAGES, termsMessage } from "@/domain/tryoutMessages";
@@ -34,6 +35,13 @@ function inContext(error: unknown, message: string): unknown {
   return error instanceof AppError && error.code === "ai_unavailable" ? new AppError(error.status, error.code, message) : error;
 }
 
+/** Young people never pay anyone to get a tryout (scamRules.ts): refused in code, before the AI sees it. */
+function refuseIfAsksForMoney(uid: string, text: string): void {
+  if (!asksForMoney(text)) return;
+  log("warn", "tryout_asks_for_money", { uid });
+  throw new AppError(422, "asks_for_money", TRYOUT_MESSAGES.asksForMoney);
+}
+
 export function createTryoutService({ tryouts, profiles, draftTryout, checkWork, consumeQuota, aiDailyLimit, now }: TryoutServiceDeps) {
   /** The poster's own records, read in a transaction that writes nothing; refused unless they may post. */
   async function poster(uid: string): Promise<StoredProfile> {
@@ -47,6 +55,7 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
     /** One sentence to a draft. The draft and the safety check run side by side; nothing is written. */
     async draft(uid: string, description: string): Promise<DraftResult> {
       await poster(uid);
+      refuseIfAsksForMoney(uid, description);
       await consumeQuota(uid, "ai", aiDailyLimit, { message: TRYOUT_MESSAGES.aiLimit });
       const [checked, drafted] = await Promise.allSettled([checkWork(checkText("", [], description)), draftTryout(description)]);
       // Fail closed: no safety answer, no draft. A blocked answer stands whatever happened to the draft.
@@ -72,6 +81,7 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
       const { business } = await poster(uid);
       const decided = checkTerms(now(), terms);
       if (!decided.ok) throw new AppError(422, "tryout_terms", termsMessage(decided.error));
+      refuseIfAsksForMoney(uid, checkText(terms.title, terms.tasks, terms.description));
 
       await consumeQuota(uid, "posts", RULES.postsPerDay, { message: TRYOUT_MESSAGES.postsLimit });
       const work = await checkWork(checkText(terms.title, terms.tasks, terms.description)).catch((error: unknown) => {

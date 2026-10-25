@@ -28,8 +28,15 @@ export async function dayWalk(rec: Recorder, page: Page, bookingPath: string): P
   await page.locator("label", { hasText: "We finished the work" }).click();
   await page.getByRole("button", { name: "Check out" }).click();
   await page.getByText("You owe Thabo R210.00.").waitFor();
-  await rec.check(page, "checked out, pay");
-  await page.locator("label", { hasText: "FNB eWallet" }).click();
+  // Only the ways Thabo chose (Profile: FNB eWallet, PayShap and cash), never cash-send.
+  const methods = await page.getByRole("group", { name: "How did you pay?" }).locator("label").allInnerTexts();
+  if (methods.join(", ") !== "FNB eWallet, PayShap, Cash") rec.failures.push(`${rec.width} px: the owner was offered ${methods.join(", ")}`);
+  await page.locator('label[for="pay-method-cash"]').click();
+  await page.getByText("Hand over the cash, then ask Thabo to tap Received on their phone.").waitFor();
+  await rec.check(page, "checked out, pay in cash");
+  await page.locator('label[for="pay-method-ewallet"]').click();
+  await page.getByLabel("Payment reference").fill("FS THABO 27");
+  await rec.check(page, "checked out, pay by eWallet with a reference");
   await page.getByRole("button", { name: "Paid", exact: true }).click();
   await page.getByText("Waiting for Thabo to confirm", { exact: false }).waitFor();
   await rec.check(page, "paid, waiting for Thabo");
@@ -38,6 +45,12 @@ export async function dayWalk(rec: Recorder, page: Page, bookingPath: string): P
   await switchTo(page, "e2e-thabo", "/work");
   await page.goto(`${BASE}${bookingPath}`);
   await page.getByText("says they paid you R210.00 by FNB eWallet", { exact: false }).waitFor();
+  await page.getByText("Payment reference: FS THABO 27").waitFor();
+  // The codes exactly as they're dialled, asterisks and all, each a link that dials.
+  for (const code of ["*120*277#", "*130*277#"]) {
+    const link = page.getByRole("link", { name: code, exact: true });
+    if ((await link.count()) !== 1 || (await link.getAttribute("href")) !== `tel:${encodeURIComponent(code)}`) rec.failures.push(`${rec.width} px: the balance code ${code} isn't on the page as a link that dials`);
+  }
   await rec.check(page, "young person, check your balance");
   await page.getByRole("button", { name: "Received", exact: true }).click();
   await page.getByText("Received. Your reference comes next.").waitFor();

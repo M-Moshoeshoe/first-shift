@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DEMO_ROLES } from "../src/config/demo";
 import { applicationId } from "../src/domain/applications";
 import { DEMO_EXTRA_OWNERS, demoApplication, demoState } from "../src/data/demo";
-import { adminDb } from "../src/server/firebaseAdmin";
+import { adminBucket, adminDb } from "../src/server/firebaseAdmin";
 import { appendLedger } from "../src/server/repositories/firestoreLedger";
 import { firestoreTryoutRepository } from "../src/server/repositories/firestoreTryoutRepository";
 import { announceTarget } from "./adminTarget";
@@ -14,7 +14,7 @@ import { announceTarget } from "./adminTarget";
  * live tryouts in the next three days, all marked demo, and Thabo's
  * application to Sipho's first tryout. Everything the demo accounts made
  * since (tryouts, applications, bookings and their secrets, credits, cases,
- * strikes, daily limits) is deleted first. It touches only demo records: the demo accounts' own uids,
+ * strikes, proof screenshots, daily limits) is deleted first. It touches only demo records: the demo accounts' own uids,
  * the two extra demo businesses, and documents marked demo: true. The audit
  * log is kept, with one demo_reset entry per account added to it.
  *
@@ -69,8 +69,11 @@ async function main(): Promise<void> {
       db.collection("cases").where("businessId", "in", owners),
       db.collection("cases").where("reporterId", "in", accounts),
       db.collection("strikes").where("uid", "in", accounts),
+      db.collection("evidence").where("demo", "==", true),
     ])),
   ]);
+  // Screenshots added as proof on demo bookings, at their private paths (domain/evidence.ts).
+  await Promise.all(bookingRefs.map((ref) => adminBucket().deleteFiles({ prefix: `evidence/${ref.id}/` })));
   console.log(`Removed ${removed} demo documents.`);
 
   const state = demoState(uids, new Date());

@@ -3,6 +3,8 @@ import { FormError } from "./FormError";
 export interface CheckboxOption<T extends string> {
   value: T;
   label: string;
+  /** One short line under the label, such as what a payment method needs. */
+  detail?: string;
 }
 
 interface CheckboxGroupProps<T extends string> {
@@ -61,7 +63,10 @@ export function CheckboxGroup<T extends string>({ id, legend, options, values, o
             >
               <path d="M6 12l4 4 8-9" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
             </svg>
-            <span className="text-lg">{option.label}</span>
+            <span className="flex flex-col">
+              <span className="text-lg">{option.label}</span>
+              {option.detail ? <span className="text-sm text-muted">{option.detail}</span> : null}
+            </span>
           </label>
         );
       })}

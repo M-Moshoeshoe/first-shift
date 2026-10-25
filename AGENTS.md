@@ -4,7 +4,7 @@ Read this file in full at the start of every session. Every change must comply w
 
 ## The product, in one paragraph
 
-First Shift connects young South Africans with paid one-day tryouts at small businesses near them. A business posts a tryout in one sentence; a young person nearby applies, works the day, gets paid directly by the business (FNB eWallet, bank transfer or cash), and receives a reference written from the owner's answers. Every tryout adds a verified line to the young person's work record. Built for the FNB App of the Year Hackathon 2026, Youth employment and work readiness track.
+First Shift connects young South Africans with paid one-day tryouts at small businesses near them. A business posts a tryout in one sentence; a young person nearby applies, works the day, gets paid directly by the business (FNB eWallet, PayShap, a cash-send from the business's bank, or cash), and receives a reference written from the owner's answers. Every tryout adds a verified line to the young person's work record. Built for the FNB App of the Year Hackathon 2026, Youth employment and work readiness track.
 
 ## Sources of truth
 

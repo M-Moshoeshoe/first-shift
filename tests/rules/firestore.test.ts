@@ -183,4 +183,16 @@ describe("applications and bookings, written only by the server (Phases 3 and 4)
       await assertFails(setDoc(doc(client, "cases/c2"), { kind: "report", reporterId: "thabo" }));
     }
   });
+
+  it("keeps proof added after Not received server-only: neither party reads its own or the other's, and no client writes it", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "evidence/e1"), { bookingId: "b1", party: "young_person", uid: "thabo", path: "evidence/b1/young_person-x", note: "My balance at 18:00" });
+    });
+    for (const client of [as("thabo"), as("sipho"), as("lerato"), anonymous()]) {
+      await assertFails(getDoc(doc(client, "evidence/e1")));
+      await assertFails(getDocs(query(collection(client, "evidence"), where("bookingId", "==", "b1"))));
+      await assertFails(setDoc(doc(client, "evidence/e2"), { bookingId: "b1", party: "business", uid: "sipho" }));
+      await assertFails(updateDoc(doc(client, "evidence/e1"), { note: "changed" }));
+    }
+  });
 });

@@ -93,7 +93,8 @@ export function BookingDetail() {
         </Suspense>
       ) : null}
       <BookingActions booking={booking} when={`${day}, ${hours}`} />
-      {booking.status === "booked" || booking.status === "checked_in" ? <ReportForm bookingId={booking.id} /> : null}
+      {/* On every booking, before, during and after the day: the scam rules send people here (docs/RULES.md). */}
+      <ReportForm bookingId={booking.id} party={booking.party} />
       {booking.cancel ? <CancelPanel bookingId={booking.id} cancel={booking.cancel} onCancelled={reload} /> : null}
     </>
   );

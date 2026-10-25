@@ -3,10 +3,10 @@ import { decideWelcomeGrant, type CreditEntry } from "@/domain/credits";
 import { ID_PROBLEM_MESSAGES, profileProblemMessage } from "@/domain/messages";
 import { isProfileComplete, newAccount, photoPath, profileView, type BusinessRecord, type PhotoKind, type ProfileView, type UserRecord } from "@/domain/profile";
 import type { Viewer } from "@/domain/demo";
-import { decideBusinessSave, decidePhotoSave, decideWorkerSave, profileEditProblem, type ProfileProblem } from "@/domain/profileDecisions";
+import { decideBusinessSave, decidePhotoSave, decideWorkerEdit, decideWorkerSave, profileEditProblem, type ProfileProblem } from "@/domain/profileDecisions";
 import { decideRole, type Role } from "@/domain/roles";
 import { checkSaId } from "@/domain/saId";
-import type { BusinessProfileInput, SaveResult, YoungPersonProfileInput } from "@/schemas/profile";
+import type { BusinessProfileInput, SaveResult, WorkerEditInput, YoungPersonProfileInput } from "@/schemas/profile";
 import { AppError } from "../errors";
 import type { PhotoStore } from "../repositories/photoStore";
 import type { Plan, ProfileRepository, StoredProfile } from "../repositories/profileRepository";
@@ -89,6 +89,17 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
           write: { user, claimIdHash: claimId ? idHash : undefined, audit: "worker_profile_saved" },
           result: { status: "saved", complete: isProfileComplete(user, state.business) },
         };
+      });
+    },
+
+    /** Changes to a finished young person's profile, such as how businesses can pay them. */
+    async editWorker(viewer: Viewer, input: WorkerEditInput): Promise<SaveResult> {
+      const uid = editableBy(viewer);
+      return repo.transact<SaveResult>(uid, null, (state) => {
+        const decision = decideWorkerEdit(state.user, input);
+        if (decision.kind === "refuse") refuse(decision.problem);
+        if (decision.kind === "unchanged") return unchanged(state);
+        return { write: { user: decision.next, audit: "worker_profile_edited" }, result: { status: "saved", complete: isProfileComplete(decision.next, state.business) } };
       });
     },
 

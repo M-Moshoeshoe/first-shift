@@ -1,16 +1,67 @@
 "use client";
 
+import { lazy, Suspense } from "react";
 import { Stamp } from "@/components/ui/Stamp";
-import { DAY_COPY, METHOD_LABELS } from "@/domain/dayMessages";
+import { DAY_COPY, EVIDENCE_COPY } from "@/domain/dayMessages";
+import { METHOD_LABELS } from "@/domain/paymentMethodCopy";
 import { sastClock } from "@/domain/time";
 import type { BookingViewResponse } from "@/schemas/booking";
+import { BalanceCheck } from "./BalanceCheck";
 import { CheckInForm } from "./CheckInForm";
 import { CheckOutForm } from "./CheckOutForm";
 import { ConfirmPayment } from "./ConfirmPayment";
 import { ConfirmStep } from "./ConfirmStep";
 import { PayForm } from "./PayForm";
 
+// Proof is asked for only in a dispute, so its form and the resizing code load only then.
+const EvidenceForm = lazy(() => import("./EvidenceForm").then((module) => ({ default: module.EvidenceForm })));
+
 const NOT_FOUND = "We can't find that booking. Go back and check your tryouts.";
+
+/** After Not received, either side: add their screenshot once, or see it's been sent. */
+function Proof({ booking, reload }: { booking: BookingViewResponse; reload: () => void }) {
+  const { evidence } = booking.day;
+  if (evidence.sent) return <p className="text-lg">{EVIDENCE_COPY.sent}</p>;
+  if (!evidence.canAdd) return null;
+  return (
+    <Suspense fallback={<div role="status" aria-label="Loading" className="h-44 animate-skeleton bg-mist" />}>
+      <EvidenceForm bookingId={booking.id} done={reload} />
+    </Suspense>
+  );
+}
+
+/** The young person's pay: waiting, then what the owner says they sent, checked against their real balance, then Received. */
+function WorkerPay({ booking, reload }: { booking: BookingViewResponse; reload: () => void }) {
+  const { day } = booking;
+  const payment = day.payment;
+  const paid = payment?.amountCents ?? day.owedCents;
+  return (
+    <div className="flex flex-col gap-3 border-2 border-ink p-4">
+      <h2 className="text-xl font-bold">{DAY_COPY.workerTitle}</h2>
+      {payment?.state === "awaiting_payment" ? <p className="text-lg tabular-nums">{DAY_COPY.workerWaiting(day.owedCents)}</p> : null}
+      {payment?.state === "awaiting_confirmation" ? (
+        <>
+          {day.remind ? <p className="text-lg font-bold">{DAY_COPY.reminder(booking.businessName)}</p> : null}
+          <p className="text-lg tabular-nums">{DAY_COPY.workerPaid(booking.businessName, paid, payment.method ? METHOD_LABELS[payment.method] : "")}</p>
+          {payment.reference ? <p className="text-lg">{DAY_COPY.workerReference(payment.reference)}</p> : null}
+          {paid > day.owedCents ? <p className="text-lg">{DAY_COPY.overpaid(day.owedCents)}</p> : null}
+          <BalanceCheck method={payment.method} />
+          <ConfirmPayment bookingId={booking.id} done={reload} />
+        </>
+      ) : null}
+      {payment?.state === "received" ? (
+        <>
+          <span className="self-start">
+            <Stamp label="Received" />
+          </span>
+          <p className="text-lg">{DAY_COPY.receivedDone}</p>
+        </>
+      ) : null}
+      {payment?.state === "not_received" ? <p className="text-lg">{DAY_COPY.notReceivedDone}</p> : null}
+      <p className="text-sm text-muted">{DAY_COPY.neverSendBack}</p>
+    </div>
+  );
+}
 
 /**
  * The day on the booking page, for whichever side is looking: the door,
@@ -22,7 +73,6 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
   const path = (step: string) => `/api/bookings/${encodeURIComponent(booking.id)}/${step}`;
   const checkedIn = day.checkedInAt ? <p className="text-lg font-bold text-go">{DAY_COPY.checkedIn(sastClock(new Date(day.checkedInAt)))}</p> : null;
   const payment = day.payment;
-  const paidBy = payment?.method ? METHOD_LABELS[payment.method] : "";
 
   if (booking.party === "business") {
     return (
@@ -35,7 +85,7 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
         {day.payable && payment?.state === "awaiting_payment" ? (
           <>
             <p className="text-xl font-bold tabular-nums">{DAY_COPY.owe(booking.workerFirstName, day.owedCents)}</p>
-            <PayForm bookingId={booking.id} owedCents={day.owedCents} minimumCents={day.owedMinimumCents} done={reload} />
+            <PayForm bookingId={booking.id} name={booking.workerFirstName} phone={booking.payoutPhone ?? ""} methods={day.payMethods} owedCents={day.owedCents} minimumCents={day.owedMinimumCents} done={reload} />
           </>
         ) : null}
         {payment && payment.state !== "awaiting_payment" ? (
@@ -44,9 +94,11 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
               <Stamp label={payment.state === "received" ? "Received" : "Paid"} />
             </span>
             {payment.state === "awaiting_confirmation" ? <p className="text-lg">{DAY_COPY.waitingAnswer(booking.workerFirstName)}</p> : null}
+            {payment.state === "awaiting_confirmation" && payment.method === "cash" ? <p className="text-lg">{DAY_COPY.cashHandover(booking.workerFirstName)}</p> : null}
             {payment.state === "not_received" ? <p className="text-lg">{DAY_COPY.notReceivedDone}</p> : null}
           </div>
         ) : null}
+        <Proof booking={booking} reload={reload} />
       </section>
     );
   }
@@ -55,28 +107,8 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
     <section aria-label="The day" className="flex flex-col gap-4">
       {checkedIn}
       {day.canReportNotOpen ? <ConfirmStep path={path("not-open")} label={DAY_COPY.notOpen} explain={DAY_COPY.notOpenConfirm} yes={DAY_COPY.notOpenYes} fallback={NOT_FOUND} done={reload} /> : null}
-      {day.payable ? (
-        <div className="flex flex-col gap-3 border-2 border-ink p-4">
-          <h2 className="text-xl font-bold">{DAY_COPY.workerTitle}</h2>
-          {payment?.state === "awaiting_payment" ? <p className="text-lg tabular-nums">{DAY_COPY.workerWaiting(day.owedCents)}</p> : null}
-          {payment?.state === "awaiting_confirmation" ? (
-            <>
-              {day.remind ? <p className="text-lg font-bold">{DAY_COPY.reminder(booking.businessName)}</p> : null}
-              <p className="text-lg tabular-nums">{DAY_COPY.workerPaid(booking.businessName, payment.amountCents ?? day.owedCents, paidBy)}</p>
-              <ConfirmPayment bookingId={booking.id} done={reload} />
-            </>
-          ) : null}
-          {payment?.state === "received" ? (
-            <>
-              <span className="self-start">
-                <Stamp label="Received" />
-              </span>
-              <p className="text-lg">{DAY_COPY.receivedDone}</p>
-            </>
-          ) : null}
-          {payment?.state === "not_received" ? <p className="text-lg">{DAY_COPY.notReceivedDone}</p> : null}
-        </div>
-      ) : null}
+      {day.payable ? <WorkerPay booking={booking} reload={reload} /> : null}
+      <Proof booking={booking} reload={reload} />
     </section>
   );
 }

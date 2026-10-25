@@ -1,16 +1,21 @@
 import "server-only";
-import type { CheckoutReason } from "@/domain/bookings";
-import { decideBusinessNotOpen, decideCheckIn, decideCheckOut, decideConfirm, decideMarkPaid, decideNoShow, deadlineActions, unpaidPause, wasOnTime, type DoorCheck } from "@/domain/day";
+import type { BookingRecord, CheckoutReason, Payment } from "@/domain/bookings";
+import type { ReviewCase } from "@/domain/cases";
+import { decideBusinessNotOpen, decideCheckIn, decideCheckOut, decideConfirm, decideMarkPaid, decideNoShow, deadlineActions, payRecordCounters, unpaidPause, wasOnTime, type DoorCheck, type MarkPaid } from "@/domain/day";
 import { CHECK_IN_MESSAGES, MARK_PAID_MESSAGES } from "@/domain/dayMessages";
 import type { Viewer } from "@/domain/demo";
-import type { PaymentMethod } from "@/domain/paymentFlow";
 import { settlementCredit } from "@/domain/settlement";
 import { AppError } from "../errors";
 import { log } from "../log";
-import type { BookingRepository } from "../repositories/bookingRepository";
+import type { BookingRepository, BookingWrite } from "../repositories/bookingRepository";
+import type { EvidenceStore } from "../repositories/photoStore";
+import { addEvidence } from "./evidenceStep";
 
 export interface DayServiceDeps {
   bookings: BookingRepository;
+  evidence: EvidenceStore;
+  /** A random part for each evidence path, so a file is never overwritten. */
+  newId: () => string;
   now: () => Date;
 }
 
@@ -24,7 +29,7 @@ const refuse = (problem: "not_found" | string, message: string) => new AppError(
  * is decided in src/domain (day.ts), every amount and credit comes from
  * settle(), and each step is one transaction with its audit entry.
  */
-export function createDayService({ bookings, now }: DayServiceDeps) {
+export function createDayService({ bookings, evidence, newId, now }: DayServiceDeps) {
   return {
     async checkIn(viewer: Viewer, bookingId: string, check: DoorCheck): Promise<Step> {
       const outcome = await bookings.transactBooking<Step | { refused: keyof typeof CHECK_IN_MESSAGES }>(bookingId, viewer.uid, ({ booking, secrets }) => {
@@ -87,32 +92,43 @@ export function createDayService({ bookings, now }: DayServiceDeps) {
     },
 
     /** The owner paid, by their own means, and says so. Paying the tryout a pause was for lifts the pause. */
-    async markPaid(viewer: Viewer, bookingId: string, method: PaymentMethod, amountCents: number): Promise<Step> {
+    async markPaid(viewer: Viewer, bookingId: string, paid: MarkPaid): Promise<Step> {
       return bookings.transactBooking<Step>(bookingId, viewer.uid, ({ booking, businessPausedFor }) => {
-        const decision = decideMarkPaid(viewer, booking, method, amountCents, now());
+        const decision = decideMarkPaid(viewer, booking, paid, now());
         if (decision.kind === "refuse") throw refuse(decision.problem, MARK_PAID_MESSAGES[decision.problem]);
         if (decision.kind === "unchanged") return { write: null, result: { status: "unchanged" } };
         const lift = businessPausedFor === unpaidPause(bookingId) ? { business: { status: "active" as const, pausedFor: null } } : {};
-        return { write: { booking: { payment: decision.payment }, ...lift, audit: `marked_paid_${method}` }, result: { status: "done" } };
+        return { write: { booking: { payment: decision.payment }, ...lift, audit: `marked_paid_${paid.method}` }, result: { status: "done" } };
       });
     },
 
-    /** The young person answers. Not received opens a review and pauses the business until it's sorted out. */
+    /**
+     * The young person answers. Either answer counts once towards the
+     * business's "Paid on time" line; Not received also opens a review and
+     * pauses the business until it's sorted out.
+     */
     async confirm(viewer: Viewer, bookingId: string, received: boolean): Promise<Step> {
       return bookings.transactBooking<Step>(bookingId, viewer.uid, ({ booking }) => {
         const decision = decideConfirm(viewer, bookingId, booking, received, now());
         if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? NOT_FOUND : NOT_NOW);
-        if (decision.kind === "unchanged") return { write: null, result: { status: "unchanged" } };
-        if (received) return { write: { booking: { payment: decision.payment }, audit: "payment_received" }, result: { status: "done" } };
-        return {
-          write: { booking: { payment: decision.payment, reviewOpened: true }, review: decision.review, business: { status: "paused", pausedFor: unpaidPause(bookingId) }, audit: "payment_not_received" },
-          result: { status: "done" },
-        };
+        if (decision.kind === "unchanged" || !booking) return { write: null, result: { status: "unchanged" } };
+        return { write: answerWrite(bookingId, booking, decision, received), result: { status: "done" } };
       });
     },
 
+    /** Proof, only after Not received: one screenshot and a note from each side (evidenceStep.ts). */
+    addEvidence: (viewer: Viewer, bookingId: string, bytes: Uint8Array, note: string): Promise<Step> => addEvidence({ bookings, evidence, newId }, viewer, bookingId, bytes, note),
+
     sweepDeadlines: (viewer: Viewer) => sweepDeadlines(bookings, viewer, now()),
   };
+}
+
+/** What the young person's answer writes: the payment, its one count on the "Paid on time" line, and for Not received a review and a pause. */
+function answerWrite(bookingId: string, booking: BookingRecord, decision: { payment: Payment; review: ReviewCase | null }, received: boolean): BookingWrite {
+  const counted = payRecordCounters(booking, received ? "received" : "not_received");
+  const record = counted ? { counters: { business: counted } } : {};
+  if (received) return { booking: { payment: decision.payment, payCounted: true }, ...record, audit: "payment_received" };
+  return { booking: { payment: decision.payment, reviewOpened: true, payCounted: true }, ...record, review: decision.review, business: { status: "paused", pausedFor: unpaidPause(bookingId) }, audit: "payment_not_received" };
 }
 
 /**
@@ -129,7 +145,12 @@ export async function sweepDeadlines(bookings: BookingRepository, viewer: Viewer
       if (!booking) return { write: null, result: null };
       const actions = deadlineActions(id, booking, businessPausedFor, at);
       if (actions.remindWorker) reminders.add(id);
-      if (actions.pauseBusiness) return { write: { business: { status: "paused", pausedFor: unpaidPause(id) }, audit: "business_paused_unpaid" }, result: null };
+      if (actions.pauseBusiness) {
+        // Paused unpaid counts once as a late payment on the business's "Paid on time" line.
+        const counted = payRecordCounters(booking, "paused_unpaid");
+        const record = counted ? { counters: { business: counted }, booking: { payCounted: true } } : {};
+        return { write: { business: { status: "paused", pausedFor: unpaidPause(id) }, ...record, audit: "business_paused_unpaid" }, result: null };
+      }
       if (actions.review) return { write: { review: actions.review, booking: { reviewOpened: true }, audit: "payment_unconfirmed_review" }, result: null };
       return { write: null, result: null };
     });

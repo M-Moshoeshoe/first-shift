@@ -78,12 +78,27 @@ export function decideWorkerSave(
     user.area === details.area &&
     sameList(user.availability, details.availability) &&
     user.payoutPhone === details.payoutPhone &&
+    sameList(user.payMethods, details.payMethods) &&
     user.idLastFour === input.idLastFour &&
     user.residency === input.residency;
   if (unchanged) return { kind: "unchanged" };
 
   const next: UserRecord = { ...user, ...details, idLastFour: input.idLastFour, residency: input.residency };
   return { kind: "save", next: { user: next, claimId: claim.kind === "claim" } };
+}
+
+/** What a young person can change after onboarding (WorkerEditSchema). Their name, ID and number stay as onboarding set them. */
+export interface WorkerEdit {
+  payMethods: WorkerDetails["payMethods"];
+}
+
+/** A young person changes their profile after onboarding. Only a finished profile can be edited; the same answer again changes nothing. */
+export function decideWorkerEdit(user: UserRecord | null, input: WorkerEdit): SaveDecision<UserRecord> {
+  const problem = roleProblem(user, "young_person");
+  if (problem || !user) return { kind: "refuse", problem: problem ?? { code: "role_missing" } };
+  if (!user.firstName || !user.idLastFour) return { kind: "refuse", problem: { code: "details_first" } };
+  if (sameList(user.payMethods, input.payMethods)) return { kind: "unchanged" };
+  return { kind: "save", next: { ...user, payMethods: [...input.payMethods] } };
 }
 
 /** Saves a business's details. A save without a pin, or without the COIDA answer, keeps the one already set. */

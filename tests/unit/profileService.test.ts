@@ -81,6 +81,15 @@ describe("young person profile", () => {
     expect(store.audit.filter((entry) => entry.action === "worker_profile_saved")).toHaveLength(2);
   });
 
+  it("changes how businesses can pay them after onboarding, audited once, and never a demo profile", async () => {
+    await service.saveWorker(real("thabo"), workerInput());
+    expect(await service.editWorker(real("thabo"), { payMethods: ["payshap", "cash"] })).toEqual({ status: "saved", complete: false });
+    expect(store.users.get("thabo")?.payMethods).toEqual(["payshap", "cash"]);
+    expect(store.audit.at(-1)).toEqual({ uid: "thabo", action: "worker_profile_edited" });
+    expect(await service.editWorker(real("thabo"), { payMethods: ["payshap", "cash"] })).toMatchObject({ status: "unchanged" });
+    await expectRefusedWithoutChange(() => service.editWorker({ uid: "thabo", demo: true }, { payMethods: ["cash"] }), PROFILE_MESSAGES.demoLocked);
+  });
+
   it("refuses a different ID on an account that already has one", async () => {
     await service.saveWorker(real("thabo"), workerInput());
     await expectRefusedWithoutChange(() => service.saveWorker(real("thabo"), workerInput({ idNumber: OTHER_ADULT_ID })), PROFILE_MESSAGES.idLocked);

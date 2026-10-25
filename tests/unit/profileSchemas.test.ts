@@ -16,7 +16,7 @@ describe("payout phone", () => {
 });
 
 describe("young person profile", () => {
-  const valid = { firstName: " Thabo ", area: "Ivory Park", availability: ["saturdays"], payoutPhone: "0821234567", idNumber: "000115 5800 087" };
+  const valid = { firstName: " Thabo ", area: "Ivory Park", availability: ["saturdays"], payoutPhone: "0821234567", payMethods: ["ewallet"], idNumber: "000115 5800 087" };
 
   it("trims names and strips spaces from the ID number", () => {
     expect(YoungPersonProfileSchema.parse(valid)).toMatchObject({ firstName: "Thabo", idNumber: "0001155800087", payoutPhone: "27821234567" });
@@ -28,6 +28,9 @@ describe("young person profile", () => {
     expect(firstIssue(YoungPersonProfileSchema.safeParse({ ...valid, availability: [] }))).toBe(FIELD_MESSAGES.availability);
     expect(firstIssue(YoungPersonProfileSchema.safeParse({ ...valid, availability: "saturdays" }))).toBe(FIELD_MESSAGES.availability);
     expect(firstIssue(YoungPersonProfileSchema.safeParse({ ...valid, idNumber: "12345" }))).toBe(ID_PROBLEM_MESSAGES.format);
+    // At least one of the four ways to be paid, and never a bank account.
+    expect(firstIssue(YoungPersonProfileSchema.safeParse({ ...valid, payMethods: [] }))).toBe(FIELD_MESSAGES.payMethods);
+    expect(firstIssue(YoungPersonProfileSchema.safeParse({ ...valid, payMethods: ["bank_transfer"] }))).toBe(FIELD_MESSAGES.payMethods);
     expect(firstIssue(YoungPersonProfileSchema.safeParse({ ...valid, area: undefined }))).toBe(FIELD_MESSAGES.workerArea);
   });
 });

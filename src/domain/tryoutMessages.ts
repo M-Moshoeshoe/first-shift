@@ -41,6 +41,7 @@ export const TRYOUT_MESSAGES = {
   notFound: "We can't find that tryout. It may have been withdrawn already. Go back to your tryouts and check.",
   booked: `Someone is booked on this tryout, so it can't be withdrawn. Contact us if you need to cancel.`,
   finished: "This tryout has already happened, so it can't be withdrawn.",
+  asksForMoney: "A tryout never costs the young person anything. Take out anything that asks them to pay, such as a fee, a deposit or their own uniform, then try again.",
 } as const;
 
 /** Booking (Phase 4). Approved copy; a question, because the answer is the owner's choice. */

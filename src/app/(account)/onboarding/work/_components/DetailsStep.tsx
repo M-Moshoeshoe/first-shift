@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { CheckboxGroup } from "@/components/ui/CheckboxGroup";
 import { TextField } from "@/components/ui/TextField";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { PAYMENT_METHODS, type PaymentMethod } from "@/domain/paymentFlow";
+import { PAY_METHODS_QUESTION, payMethodOptions } from "@/domain/paymentMethodCopy";
 import type { Availability } from "@/domain/profile";
 import { fieldErrors, firstInvalid, shakeAndFocus } from "@/lib/forms";
 import { WorkerDetailsSchema } from "@/schemas/profile";
@@ -17,9 +19,11 @@ export interface DetailsDraft {
   area: string;
   availability: Availability[];
   payoutPhone: string;
+  payMethods: PaymentMethod[];
 }
 
-const FIELDS = ["firstName", "area", "availability", "payoutPhone"] as const;
+const FIELDS = ["firstName", "area", "availability", "payoutPhone", "payMethods"] as const;
+const PAY_OPTIONS = payMethodOptions(PAYMENT_METHODS);
 type Field = (typeof FIELDS)[number];
 const fieldId = (field: Field) => `work-${field}`;
 
@@ -61,13 +65,22 @@ export function DetailsStep({ initial, focusHeading, onNext }: DetailsStepProps)
       <TextField
         id={fieldId("payoutPhone")}
         label="Cellphone number for payments"
-        hint="Businesses pay you themselves, for example by FNB eWallet to this number."
+        hint="Businesses pay you themselves, to this number."
         type="tel"
         inputMode="tel"
         autoComplete="tel"
         value={draft.payoutPhone}
         error={errors.payoutPhone}
         onChange={(event) => update("payoutPhone", event.target.value)}
+      />
+      <CheckboxGroup
+        id={fieldId("payMethods")}
+        legend={PAY_METHODS_QUESTION.legend}
+        hint={PAY_METHODS_QUESTION.hint}
+        options={PAY_OPTIONS}
+        values={draft.payMethods}
+        error={errors.payMethods}
+        onChange={(values) => update("payMethods", values)}
       />
       <Button type="submit">{BUTTON_LABELS.next}</Button>
     </form>

@@ -4,8 +4,18 @@
  * about a tryout from either side. Opening a case never decides it; a person
  * does, on review.
  */
-export const REPORT_CATEGORIES = ["harassment", "unsafe_work", "not_paid", "other"] as const;
+export const REPORT_CATEGORIES = ["harassment", "unsafe_work", "asked_for_money", "not_paid", "paid_too_much", "other"] as const;
 export type ReportCategory = (typeof REPORT_CATEGORIES)[number];
+
+/**
+ * What each side can report. A young person can say a business asked them for
+ * money, which never happens on a real tryout; a business that paid too much
+ * reports it, because overpayments are settled only by review, never by asking
+ * the young person to send money back (docs/RULES.md, Scam rules).
+ */
+export function reportCategoriesFor(party: "business" | "young_person"): readonly ReportCategory[] {
+  return party === "young_person" ? ["harassment", "unsafe_work", "asked_for_money", "not_paid", "other"] : ["harassment", "unsafe_work", "paid_too_much", "other"];
+}
 
 export type CaseStatus = "open" | "closed";
 
@@ -28,12 +38,12 @@ export const bookingReview = (reason: BookingReviewReason, booking: { bookingId:
 });
 
 /**
- * Harassment and unsafe work pause the business at once, before anyone has
- * looked: a young person's safety comes first, and a pause can be lifted on
- * review. Not being paid pauses it through the payment rules instead
- * (paymentFlow.ts), and "other" waits for review.
+ * Harassment, unsafe work and asking a young person for money pause the
+ * business at once, before anyone has looked: a young person's safety comes
+ * first, and a pause can be lifted on review. Not being paid pauses it
+ * through the payment rules instead (paymentFlow.ts); the rest wait for review.
  */
-export const pausesBusinessAtOnce = (category: ReportCategory): boolean => category === "harassment" || category === "unsafe_work";
+export const pausesBusinessAtOnce = (category: ReportCategory): boolean => category === "harassment" || category === "unsafe_work" || category === "asked_for_money";
 
 export function newReport(input: { category: ReportCategory; tryoutId: string; reporterId: string; businessId: string; note: string }): ReviewCase {
   return { kind: "report", ...input, note: input.note.trim(), status: "open" };

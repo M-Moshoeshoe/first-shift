@@ -90,8 +90,8 @@ describe("references", () => {
 });
 
 describe("reports", () => {
-  it("pauses the business at once for harassment and unsafe work only", () => {
-    expect(REPORT_CATEGORIES.filter(pausesBusinessAtOnce)).toEqual(["harassment", "unsafe_work"]);
+  it("pauses the business at once for harassment, unsafe work and asking a young person for money only", () => {
+    expect(REPORT_CATEGORIES.filter(pausesBusinessAtOnce)).toEqual(["harassment", "unsafe_work", "asked_for_money"]);
   });
 
   it("feeds an open safety report into the business's status, until the case is closed", () => {

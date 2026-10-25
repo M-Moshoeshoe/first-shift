@@ -19,7 +19,7 @@ export const FeedItemSchema = z.object({
   returnFareCents: z.nullable(z.number()),
   distance: z.nullable(z.string()),
   injuryCover: z.string(),
-  isNew: z.boolean(),
+  payRecord: z.string(),
 });
 export type FeedItemResponse = z.infer<typeof FeedItemSchema>;
 
@@ -37,7 +37,7 @@ const ApplyStateSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("booked"), bookingId: z.string() }),
   z.object({ kind: z.literal("not_selected") }),
   z.object({ kind: z.literal("closed"), reason: z.enum(["booking_closed", "not_open"]) }),
-  z.object({ kind: z.literal("not_eligible"), reason: z.enum(["not_young_person", "profile_incomplete", "account_paused", "overlaps_booking"]) }),
+  z.object({ kind: z.literal("not_eligible"), reason: z.enum(["not_young_person", "profile_incomplete", "no_pay_methods", "account_paused", "overlaps_booking"]) }),
 ]);
 export type ApplyStateResponse = z.infer<typeof ApplyStateSchema>;
 

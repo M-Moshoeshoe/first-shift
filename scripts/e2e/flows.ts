@@ -103,6 +103,8 @@ export async function youngPerson(rec: Recorder, page: Page): Promise<void> {
   await page.getByLabel("Area", { exact: true }).fill("ivory prk ext 2");
   await page.locator("label", { hasText: "Saturdays" }).click();
   await page.getByLabel("Cellphone number for payments").fill("082 123 4567");
+  for (const method of ["ewallet", "cash"]) await page.locator(`label[for="work-payMethods-${method}"]`).click();
+  await rec.check(page, "young person step 1, ways to be paid chosen");
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByLabel("ID number").fill(ID_NUMBER);
   await rec.check(page, "young person step 2");
@@ -121,11 +123,27 @@ export async function youngPerson(rec: Recorder, page: Page): Promise<void> {
   await page.getByRole("heading", { name: "Paid tryouts near you" }).waitFor();
   await rec.check(page, "young person home");
   await expectStoredArea(rec, "users", "firstName", "Thabo", "Ivory Park");
+  await workerProfile(rec, page);
   await skeleton(rec, page, "/work");
   await profileError(rec, page, "/work");
   for (const path of ["/onboarding/work", "/onboarding/role", "/sign-in", "/business"]) await visit(rec, page, path, "/work");
   await page.getByRole("button", { name: "Sign out" }).first().click();
   await pathIs(page, "/sign-in");
+}
+
+/** Profile, from the tab bar: the saved details, and the ways to be paid changed and saved. */
+async function workerProfile(rec: Recorder, page: Page): Promise<void> {
+  await visit(rec, page, "/work/profile", "/work/profile");
+  const chosen = await Promise.all(["ewallet", "payshap", "cash_send", "cash"].map((method) => page.locator(`#profile-payMethods-${method}`).isChecked()));
+  if (chosen.join() !== "true,false,false,true") rec.failures.push(`${rec.width} px: Profile shows ${chosen.join()}, not the ways chosen in onboarding`);
+  if ((await page.getByText(/bank account number/i).count()) !== 1) rec.failures.push(`${rec.width} px: Profile should say once that we never ask for a bank account number`);
+  await page.locator('label[for="profile-payMethods-payshap"]').click();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await page.getByText("Saved. Businesses will see these ways when they book you.").waitFor();
+  await rec.check(page, "profile, ways to be paid saved");
+  const stored = await getFirestore(adminApp()).collection("users").where("firstName", "==", "Thabo").get();
+  const methods = stored.docs.map((doc) => doc.get("payMethods"));
+  if (JSON.stringify(methods) !== JSON.stringify([["ewallet", "payshap", "cash"]])) rec.failures.push(`${rec.width} px: stored pay methods ${JSON.stringify(methods)}`);
 }
 
 /** From the home page's "Post a tryout" to a finished business profile, using Back on steps 2 and 3. */

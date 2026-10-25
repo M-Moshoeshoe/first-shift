@@ -39,6 +39,15 @@ describe("draft", () => {
     expect(await refusal(service.draft("lerato", "Help sorting stock please"))).toMatchObject({ status: 502, publicMessage: TRYOUT_MESSAGES.aiDraftUnavailable });
   });
 
+  it("refuses a tryout that asks the young person to pay, in code, before any AI is used", async () => {
+    const { service, tryouts, quota } = createTryoutFakes();
+    expect(await refusal(service.draft("lerato", "Shop helper, R50 registration fee on the day"))).toMatchObject({ status: 422, code: "asks_for_money", publicMessage: TRYOUT_MESSAGES.asksForMoney });
+    expect(await refusal(service.post(real("lerato"), terms({ tasks: ["Serve customers", "You must buy your own uniform"] })))).toMatchObject({ code: "asks_for_money" });
+    expect(fakeCheckWork).not.toHaveBeenCalled();
+    expect(fakeDraft).not.toHaveBeenCalled();
+    expect(tryouts.size + quota.size).toBe(0);
+  });
+
   it("refuses a business with no credit left before any AI is used, with the top-up message", async () => {
     const { service, store, quota } = createTryoutFakes();
     store.ledgers.set("lerato", []);

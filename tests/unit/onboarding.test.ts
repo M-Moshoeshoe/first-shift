@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { FIELD_MESSAGES } from "@/domain/messages";
 import { displayPhone, newAccount, profileView, type UserRecord } from "@/domain/profile";
 import { fieldErrors, firstInvalid } from "@/lib/forms";
-import { PHOTO_MAX_EDGE_PX, fitWithin } from "@/lib/photos";
+import { fitWithin } from "@/lib/imageResize";
+import { PHOTO_MAX_EDGE_PX } from "@/lib/photos";
 import { ProfileViewSchema, WorkerDetailsSchema } from "@/schemas/profile";
 import { createFakeStore, fakeService, real, workerInput } from "./support/profileFakes";
 
@@ -18,13 +19,13 @@ describe("photo resizing", () => {
 });
 
 describe("form errors", () => {
-  const FIELDS = ["firstName", "area", "availability", "payoutPhone"] as const;
+  const FIELDS = ["firstName", "area", "availability", "payoutPhone", "payMethods"] as const;
 
   it("keeps one message per field and finds the first invalid one in screen order", () => {
-    const parsed = WorkerDetailsSchema.safeParse({ firstName: "", area: "Tembisa", availability: [], payoutPhone: "123" });
+    const parsed = WorkerDetailsSchema.safeParse({ firstName: "", area: "Tembisa", availability: [], payoutPhone: "123", payMethods: [] });
     if (parsed.success) throw new Error("expected errors");
     const errors = fieldErrors(parsed.error, FIELDS);
-    expect(errors).toEqual({ firstName: FIELD_MESSAGES.firstNameEmpty, availability: FIELD_MESSAGES.availability, payoutPhone: FIELD_MESSAGES.payoutPhone });
+    expect(errors).toEqual({ firstName: FIELD_MESSAGES.firstNameEmpty, availability: FIELD_MESSAGES.availability, payoutPhone: FIELD_MESSAGES.payoutPhone, payMethods: FIELD_MESSAGES.payMethods });
     expect(firstInvalid(errors, FIELDS)).toBe("firstName");
     expect(firstInvalid({ payoutPhone: "x" }, FIELDS)).toBe("payoutPhone");
     expect(firstInvalid({}, FIELDS)).toBeNull();

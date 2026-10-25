@@ -1,8 +1,16 @@
 import { RULES } from "@/config/rules";
 import { addHours, addMinutes, atSastTime } from "./time";
 
-export const PAYMENT_METHODS = ["ewallet", "bank_transfer", "cash"] as const;
+/**
+ * The four ways a business pays, directly and by its own means (docs/MONEY.md):
+ * FNB eWallet, PayShap and a cash-send from its own bank, each to the young
+ * person's cellphone number, or cash in person. Never a bank account number.
+ */
+export const PAYMENT_METHODS = ["ewallet", "payshap", "cash_send", "cash"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+/** Every method but cash leaves a reference the young person can match. */
+export const isElectronic = (method: PaymentMethod): boolean => method !== "cash";
 
 export type PaymentState = "awaiting_payment" | "awaiting_confirmation" | "received" | "not_received";
 

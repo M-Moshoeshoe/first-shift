@@ -1,6 +1,6 @@
 import type { Viewer } from "./demo";
 import { classifyCancellation, reliesOnGrace, type CancellationKind, type Party } from "./cancellation";
-import { newReport, pausesBusinessAtOnce, type ReportCategory, type ReviewCase } from "./cases";
+import { newReport, pausesBusinessAtOnce, reportCategoriesFor, type ReportCategory, type ReviewCase } from "./cases";
 import type { BusinessRecord, Location, UserRecord } from "./profile";
 import { settle, type SettleEvent, type Settlement } from "./settlement";
 import { addDays, atSastTime } from "./time";
@@ -28,6 +28,8 @@ export interface BookingRecord {
   workerArea: string;
   /** 27XXXXXXXXX: the owner pays to it and can message the young person on it. */
   workerPayoutPhone: string;
+  /** How the young person can be paid, as their profile said when they were booked. Bookings from before it was asked have none: any method. */
+  workerPayMethods?: PaymentMethod[];
   startAt: Date;
   endAt: Date;
   hours: number;
@@ -47,6 +49,10 @@ export interface BookingRecord {
   payment?: Payment | null;
   /** Each deadline acts once (day.ts, deadlineActions). */
   reviewOpened?: boolean;
+  /** Counted once towards the business's "Paid on time" line (day.ts, payRecordCounters). */
+  payCounted?: boolean;
+  /** Who has added a screenshot after "Not received": one each (evidence.ts). */
+  evidenceBy?: Party[];
 }
 
 export const CHECKOUT_REASONS = ["completed", "finished_early", "worker_left_early", "business_ended_early", "safety"] as const;
@@ -56,6 +62,8 @@ export interface Payment {
   state: PaymentState;
   method?: PaymentMethod;
   amountCents?: number;
+  /** The reference the owner's bank shows, for an electronic payment; never for cash. */
+  reference?: string;
   markedPaidAt?: Date;
   answeredAt?: Date;
 }
@@ -75,6 +83,7 @@ export function newBooking(tryoutId: string, tryout: TryoutRecord, business: Bus
     workerFirstName: worker.firstName,
     workerArea: worker.area,
     workerPayoutPhone: worker.payoutPhone,
+    ...(worker.payMethods?.length ? { workerPayMethods: worker.payMethods } : {}),
     workerIdLastFour: worker.idLastFour,
     startAt: tryout.startAt,
     endAt: tryout.endAt,
@@ -139,9 +148,10 @@ export function decideCancel(viewer: Viewer, booking: BookingRecord | null, now:
  * the young person reports harassment or unsafe work, the business is paused
  * at once (cases.ts); a business's report waits for review.
  */
-export function decideReport(viewer: Viewer, booking: BookingRecord | null, tryoutId: string, category: ReportCategory, note: string): { kind: "report"; reviewCase: ReviewCase; pauseBusiness: boolean } | { kind: "refuse"; problem: "not_found" } {
+export function decideReport(viewer: Viewer, booking: BookingRecord | null, tryoutId: string, category: ReportCategory, note: string): { kind: "report"; reviewCase: ReviewCase; pauseBusiness: boolean } | { kind: "refuse"; problem: "not_found" | "category" } {
   const party = partyOf(viewer, booking);
   if (!party || !booking) return { kind: "refuse", problem: "not_found" };
+  if (!reportCategoriesFor(party).includes(category)) return { kind: "refuse", problem: "category" };
   const reviewCase = newReport({ category, tryoutId, reporterId: viewer.uid, businessId: booking.ownerId, note });
   return { kind: "report", reviewCase, pauseBusiness: party === "young_person" && pausesBusinessAtOnce(category) };
 }

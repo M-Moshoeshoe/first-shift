@@ -26,8 +26,8 @@ function withTryouts() {
 describe("nearby", () => {
   it("shows a real young person only real tryouts, and a demo one only demo tryouts", async () => {
     const { service } = withTryouts();
-    expect(await service.nearby(real)).toMatchObject({ status: "ok", area: "Ivory Park", items: [{ id: "real-1", isNew: false, injuryCover: "Injury cover: confirmed by the business" }] });
-    expect(await service.nearby(demoThabo)).toMatchObject({ status: "ok", items: [{ id: "demo-1", isNew: true }] });
+    expect(await service.nearby(real)).toMatchObject({ status: "ok", area: "Ivory Park", items: [{ id: "real-1", payRecord: "New on First Shift", injuryCover: "Injury cover: confirmed by the business" }] });
+    expect(await service.nearby(demoThabo)).toMatchObject({ status: "ok", items: [{ id: "demo-1", payRecord: "New on First Shift" }] });
   });
 
   it("says so when the young person's area has no map point, without querying", async () => {

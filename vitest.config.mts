@@ -10,5 +10,5 @@ export default defineConfig({
     },
   },
   // hermeticEnv clears real settings first, so tests behave the same on a laptop and in Netlify's build.
-  test: { environment: "node", include: ["tests/unit/**/*.test.ts"], setupFiles: ["tests/unit/support/hermeticEnv.ts"] },
+  test: { environment: "node", include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"], setupFiles: ["tests/unit/support/hermeticEnv.ts"] },
 });

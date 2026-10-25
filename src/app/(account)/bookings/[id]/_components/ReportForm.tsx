@@ -6,16 +6,16 @@ import { FormError } from "@/components/ui/FormError";
 import { RadioGroup } from "@/components/ui/RadioGroup";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { BOOKING_COPY, REPORT_COPY, REPORT_LABELS } from "@/domain/bookingMessages";
-import { REPORT_CATEGORIES, type ReportCategory } from "@/domain/cases";
+import { reportCategoriesFor, type ReportCategory } from "@/domain/cases";
 import { ApiError, apiPost } from "@/lib/api";
 import { shakeAndFocus } from "@/lib/forms";
 import { ReportResultSchema } from "@/schemas/booking";
 
-const OPTIONS = REPORT_CATEGORIES.map((value) => ({ value, label: REPORT_LABELS[value] }));
 const ERROR_ID = "report-error";
 
-/** Report a problem, on every booking: a kind, an optional note, and what happens next. Opened with one tap so it never crowds the page. */
-export function ReportForm({ bookingId }: { bookingId: string }) {
+/** Report a problem, on every booking: a kind (each side has its own), an optional note, and what happens next. Opened with one tap so it never crowds the page. */
+export function ReportForm({ bookingId, party }: { bookingId: string; party: "business" | "young_person" }) {
+  const options = reportCategoriesFor(party).map((value) => ({ value, label: REPORT_LABELS[value] }));
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<ReportCategory | undefined>(undefined);
   const [note, setNote] = useState("");
@@ -27,7 +27,7 @@ export function ReportForm({ bookingId }: { bookingId: string }) {
     event.preventDefault();
     if (busy) return;
     if (!category) {
-      setError("Choose what happened.");
+      setError(REPORT_COPY.categoryMissing);
       requestAnimationFrame(() => shakeAndFocus("report-category"));
       return;
     }
@@ -53,7 +53,7 @@ export function ReportForm({ bookingId }: { bookingId: string }) {
   return (
     <form noValidate onSubmit={(event) => void submit(event)} aria-label={BOOKING_COPY.report} className="flex flex-col gap-4 border-2 border-ink p-4">
       <p className="text-lg font-bold">{REPORT_COPY.emergency}</p>
-      <RadioGroup id="report-category" legend={REPORT_COPY.legend} options={OPTIONS} value={category} onChange={setCategory} />
+      <RadioGroup id="report-category" legend={REPORT_COPY.legend} options={options} value={category} onChange={setCategory} />
       <TextAreaField id="report-note" label={REPORT_COPY.note} hint={REPORT_COPY.noteHint} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} />
       <div className="flex flex-col gap-3">
         <Button type="submit" variant="secondary" busy={busy} busyLabel="Sending" aria-describedby={ERROR_ID}>

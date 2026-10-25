@@ -1,6 +1,7 @@
 import { RULES } from "@/config/rules";
 import type { CheckoutReason } from "./bookings";
 import type { CheckInProblem, MarkPaidProblem } from "./day";
+import type { EvidenceProblem } from "./evidence";
 import { formatRand } from "./money";
 import type { PaymentMethod } from "./paymentFlow";
 
@@ -24,6 +25,7 @@ export const MARK_PAID_MESSAGES: Record<MarkPaidProblem, string> = {
   not_found: "We can't find that booking. Go back and check your tryouts.",
   not_payable: "There's nothing to pay on this booking yet. Check them out first.",
   below_minimum: "That's less than what's owed. Enter at least the amount shown; paying more is fine.",
+  method_not_offered: "They can't be paid that way. Choose one of the ways shown, which they picked on their profile.",
 };
 
 export const DAY_COPY = {
@@ -51,6 +53,12 @@ export const DAY_COPY = {
   safetyReview: "A safety stop always goes to review. We'll contact you both.",
   payTitle: "Pay",
   methodLegend: "How did you pay?",
+  methodHint: (name: string, phone: string) => `${name} chose these ways to be paid, to ${phone}.`,
+  reference: "Payment reference",
+  referenceHint: (name: string) => `Recommended. The reference on your payment, so ${name} can match it. Up to ${RULES.paymentReferenceMaxChars} characters.`,
+  referenceTooLong: `The reference can be up to ${RULES.paymentReferenceMaxChars} characters. Make it shorter.`,
+  cashHandover: (name: string) => `Hand over the cash, then ask ${name} to tap Received on their phone.`,
+  paidTooMuch: "Paid too much? Don't ask for it back. Tap Report a problem and choose I paid too much: we'll sort it out.",
   amount: "Amount paid",
   amountHint: (owed: number, minimum: number) =>
     minimum < owed ? `${formatRand(owed)} is owed for the full day. You can lower it to the hours worked, not below ${formatRand(minimum)}.` : `${formatRand(owed)} is owed. You can pay more.`,
@@ -60,7 +68,9 @@ export const DAY_COPY = {
   workerTitle: "Your pay",
   workerWaiting: (cents: number) => `You're owed ${formatRand(cents)}. The business pays you directly; you'll confirm here when it arrives.`,
   workerPaid: (business: string, cents: number, method: string) => `${business} says they paid you ${formatRand(cents)} by ${method}.`,
-  checkBalance: "Check your real balance before you answer: dial *120*277# (or the free *130*277#) for FNB eWallet, check your bank app, or count the cash.",
+  workerReference: (reference: string) => `Payment reference: ${reference}`,
+  overpaid: (owed: number) => `That's more than the ${formatRand(owed)} owed. You don't have to send anything back: if anyone asks you to, don't pay, and tap Report a problem.`,
+  neverSendBack: "First Shift never asks you to send money back, and you never pay anyone to get a tryout. If someone asks, don't pay: tap Report a problem.",
   received: "Received",
   notReceived: "Not received",
   receivedDone: "Received. Your reference comes next.",
@@ -76,8 +86,37 @@ export const CHECKOUT_LABELS: Record<CheckoutReason, (name: string) => string> =
   safety: () => "Ended for safety",
 };
 
-export const METHOD_LABELS: Record<PaymentMethod, string> = {
-  ewallet: "FNB eWallet",
-  bank_transfer: "Bank transfer",
-  cash: "Cash",
+/** The FNB eWallet balance codes, exactly as they're dialled. */
+export const EWALLET_BALANCE_CODES = ["*120*277#", "*130*277#"] as const;
+
+/** How to check a payment is real before tapping Received, for the method the owner used. */
+export const BALANCE_CHECKS: Record<PaymentMethod, string> = {
+  ewallet: `Check your eWallet balance before you answer: dial ${EWALLET_BALANCE_CODES[0]}, or the free ${EWALLET_BALANCE_CODES[1]}.`,
+  payshap: "Check your banking app before you answer: the payment should be in your account already.",
+  cash_send: "Check the SMS with the PIN before you answer. It's only real once an ATM or till pays it out, so draw it first.",
+  cash: "Count the cash in person before you answer.",
+};
+
+/** A tryout from before methods were asked, with no method recorded. */
+export const BALANCE_CHECK_ANY = "Check that the money has really arrived before you answer.";
+
+/** Proof, only after Not received: one screenshot and a note from each side, seen only by the person reviewing it (evidence.ts). */
+export const EVIDENCE_COPY = {
+  title: "Show us what happened",
+  hint: "Add one screenshot, such as your banking app or the cash-send SMS, with a note. Only the person reviewing this sees it.",
+  file: "Your screenshot",
+  note: "What it shows (optional)",
+  noteTooLong: `Your note can be up to ${RULES.evidenceNoteMaxChars} characters. Make it shorter.`,
+  choose: "Choose a screenshot first.",
+  send: "Send proof",
+  sending: "Sending your proof",
+  sent: "Thanks. Your proof is with the person reviewing this.",
+} as const;
+
+export const EVIDENCE_MESSAGES: Record<EvidenceProblem, string> = {
+  not_found: "We can't find that booking. Go back and check your tryouts.",
+  not_disputed: "Proof is added only after the young person taps Not received.",
+  already_added: "You've already sent your proof for this tryout.",
+  not_an_image: "That file isn't a picture. Choose a screenshot saved as a JPEG, PNG or WebP image.",
+  too_big: "That screenshot is bigger than 2 MB. Choose a smaller one.",
 };

@@ -28,6 +28,7 @@ export const workerInput = (overrides: Partial<{ firstName: string; area: string
   area: "Ivory Park",
   availability: ["saturdays" as const],
   payoutPhone: "27821234567",
+  payMethods: ["ewallet" as const],
   idNumber: ADULT_ID,
   ...overrides,
 });

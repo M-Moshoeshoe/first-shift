@@ -3,7 +3,7 @@ import { partyOf, type BookingRecord, type CheckoutReason, type Payment } from "
 import { bookingReview, type ReviewCase } from "./cases";
 import type { Viewer } from "./demo";
 import { isAcceptedAmount } from "./pay";
-import { nextPaymentState, paymentAction, type PaymentMethod } from "./paymentFlow";
+import { isElectronic, nextPaymentState, paidOnTime, paymentAction, PAYMENT_METHODS, type PaymentMethod } from "./paymentFlow";
 import { settle, type SettleEvent, type Settlement } from "./settlement";
 import { addMinutes, minutesBetween } from "./time";
 
@@ -85,18 +85,52 @@ export const isPayable = (booking: BookingRecord): boolean => (booking.status ==
 /** When the payment was due: check-out, or the late cancellation. The owner has until 23:59 that day (paymentFlow.ts). */
 export const dueFrom = (booking: BookingRecord): Date | null => booking.ended?.at ?? booking.cancellation?.at ?? null;
 
-export type MarkPaidProblem = "not_found" | "not_payable" | "below_minimum";
+/** The methods the owner may pay by: the ones the young person chose. A booking from before they were asked takes any. */
+export const methodsFor = (booking: Pick<BookingRecord, "workerPayMethods">): readonly PaymentMethod[] =>
+  booking.workerPayMethods?.length ? booking.workerPayMethods : PAYMENT_METHODS;
 
-/** The owner sends the payment themselves, then taps Paid with the method and the amount: at least what's owed, more is always fine. */
-export function decideMarkPaid(viewer: Viewer, booking: BookingRecord | null, method: PaymentMethod, amountCents: number, now: Date): { kind: "paid"; payment: Payment } | { kind: "unchanged" } | { kind: "refuse"; problem: MarkPaidProblem } {
+export type MarkPaidProblem = "not_found" | "not_payable" | "below_minimum" | "method_not_offered";
+
+export interface MarkPaid {
+  method: PaymentMethod;
+  amountCents: number;
+  /** As the owner's bank shows it; kept for an electronic payment only. */
+  reference?: string;
+}
+
+/**
+ * The owner sends the payment themselves, by a method the young person
+ * accepts, then taps Paid with the method and the amount: at least what's
+ * owed, more is always fine. A reference is kept only for an electronic payment.
+ */
+export function decideMarkPaid(viewer: Viewer, booking: BookingRecord | null, paid: MarkPaid, now: Date): { kind: "paid"; payment: Payment } | { kind: "unchanged" } | { kind: "refuse"; problem: MarkPaidProblem } {
   if (!asOwner(viewer, booking)) return { kind: "refuse", problem: "not_found" };
   if (!isPayable(booking)) return { kind: "refuse", problem: "not_payable" };
   const state = booking.payment?.state ?? "awaiting_payment";
   if (state !== "awaiting_payment") return { kind: "unchanged" };
+  if (!methodsFor(booking).includes(paid.method)) return { kind: "refuse", problem: "method_not_offered" };
   const owed = { amountCents: booking.owedCents ?? 0, minimumCents: booking.owedMinimumCents ?? booking.owedCents ?? 0, needsReview: false };
-  if (!isAcceptedAmount(amountCents, owed)) return { kind: "refuse", problem: "below_minimum" };
+  if (!isAcceptedAmount(paid.amountCents, owed)) return { kind: "refuse", problem: "below_minimum" };
   const next = nextPaymentState(state, "owner_marked_paid");
-  return next ? { kind: "paid", payment: { state: next, method, amountCents, markedPaidAt: now } } : { kind: "unchanged" };
+  if (!next) return { kind: "unchanged" };
+  const reference = isElectronic(paid.method) ? paid.reference?.trim().slice(0, RULES.paymentReferenceMaxChars) : undefined;
+  return { kind: "paid", payment: { state: next, method: paid.method, amountCents: paid.amountCents, markedPaidAt: now, ...(reference ? { reference } : {}) } };
+}
+
+export type PayCounter = "payments" | "paidOnTime";
+
+/**
+ * How one tryout's payment counts towards the business's "Paid on time: N of
+ * N" line, once only: on Received, on time when it was marked paid by 23:59
+ * on the day it was due; as late when the business was paused unpaid, or the
+ * young person said Not received. Null once it has been counted.
+ */
+export function payRecordCounters(booking: BookingRecord, outcome: "received" | "not_received" | "paused_unpaid"): PayCounter[] | null {
+  if (booking.payCounted) return null;
+  const due = dueFrom(booking);
+  const markedAt = booking.payment?.markedPaidAt;
+  const onTime = outcome === "received" && due !== null && markedAt !== undefined && paidOnTime(due, markedAt);
+  return onTime ? ["payments", "paidOnTime"] : ["payments"];
 }
 
 /** The young person checks their real balance, then answers. Not received goes to review at once. */

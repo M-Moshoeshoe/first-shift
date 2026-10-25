@@ -79,6 +79,12 @@ export const RULES = {
   nearbyRadiusKm: 10,
   /** The note a young person may add when applying. */
   applicationNoteMaxChars: 200,
+  /** The reference an owner may add when paying electronically, as their bank shows it. */
+  paymentReferenceMaxChars: 40,
+  /** The note that goes with a screenshot added after "Not received". */
+  evidenceNoteMaxChars: 500,
+  /** A screenshot added after "Not received": the photo limits, at a size a banking screen stays readable. */
+  evidenceMaxEdgePx: 1600,
 
   /** Below this confidence, a work classification goes to human review. */
   workClassificationMinConfidence: 0.7,

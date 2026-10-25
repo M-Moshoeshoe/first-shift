@@ -159,3 +159,21 @@ describe("ranking applicants", () => {
     expect(ranked[0]?.showUp.reasons[0]).toBe("On time for 5 of 5 tryouts");
   });
 });
+
+describe("reports, by side", () => {
+  const booked = (): BookingRecord => ({
+    tryoutId: "t1", ownerId: "sipho", workerId: "thabo", demo: false, title: "Phone shop helper", businessName: "Sipho's Phone Repairs", businessArea: "Randburg",
+    location: { latitude: -26.0939, longitude: 28.0071, accuracyMetres: 15 }, workerFirstName: "Thabo", workerArea: "Ivory Park", workerPayoutPhone: "27821234567", workerIdLastFour: "0087",
+    startAt: fromSast(2026, 10, 27, 9, 0), endAt: fromSast(2026, 10, 27, 15, 0), hours: 6, rateCentsPerHour: 3500, payCents: 21000, status: "booked", bookedAt: NOW,
+  });
+
+  it("pauses the business when a young person says they were asked for money", () => {
+    expect(decideReport(worker, booked(), "t1", "asked_for_money", "They want R50 first")).toMatchObject({ kind: "report", pauseBusiness: true, reviewCase: { category: "asked_for_money" } });
+  });
+
+  it("takes a business's overpayment as a review case, never a pause, and refuses each side the other's categories", () => {
+    expect(decideReport(owner, booked(), "t1", "paid_too_much", "")).toMatchObject({ kind: "report", pauseBusiness: false });
+    expect(decideReport(owner, booked(), "t1", "asked_for_money", "")).toEqual({ kind: "refuse", problem: "category" });
+    expect(decideReport(worker, booked(), "t1", "paid_too_much", "")).toEqual({ kind: "refuse", problem: "category" });
+  });
+});

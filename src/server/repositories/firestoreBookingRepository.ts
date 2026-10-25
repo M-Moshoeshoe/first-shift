@@ -22,6 +22,8 @@ function applyBookingWrite(db: Firestore, tx: Transaction, bookingId: string, bo
     tx.update(db.collection(write.strike.party === "business" ? "businesses" : "users").doc(uid), { [counter]: FieldValue.increment(1), updatedAt: at });
   }
   if (write.review) tx.create(db.collection("cases").doc(), { ...write.review, openedAt: at });
+  // The note can hold personal details: it stays on the evidence record, which no client can read, never in the audit log.
+  if (write.evidence) tx.create(db.collection("evidence").doc(), { ...write.evidence, at });
   if (write.business) tx.update(db.collection("businesses").doc(booking.ownerId), { ...write.business, updatedAt: at });
   const bump = (counters: readonly Counter[] | undefined) => Object.fromEntries((counters ?? []).map((name) => [name, FieldValue.increment(1)]));
   if (write.counters?.worker?.length) tx.update(db.collection("users").doc(booking.workerId), { ...bump(write.counters.worker), updatedAt: at });

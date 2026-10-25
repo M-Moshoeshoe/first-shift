@@ -2,6 +2,7 @@ import * as z from "zod/mini";
 import { FIELD_MESSAGES, ID_PROBLEM_MESSAGES, PROFILE_MESSAGES } from "@/domain/messages";
 import { AVAILABILITY, DESTINATIONS, PHOTO_KINDS } from "@/domain/profile";
 import { COIDA_ANSWERS } from "@/domain/injuryCover";
+import { PAYMENT_METHODS } from "@/domain/paymentFlow";
 import { ROLES } from "@/domain/roles";
 
 // Zod's small build (zod/mini): these schemas run in the browser as well as on
@@ -44,12 +45,17 @@ export const YoungPersonProfileSchema = z.object({
   area: text(2, 60, FIELD_MESSAGES.workerArea),
   availability: z.array(z.enum(AVAILABILITY), { error: FIELD_MESSAGES.availability }).check(z.minLength(1, FIELD_MESSAGES.availability)),
   payoutPhone: SaMobileSchema,
+  payMethods: z.array(z.enum(PAYMENT_METHODS, { error: FIELD_MESSAGES.payMethods }), { error: FIELD_MESSAGES.payMethods }).check(z.minLength(1, FIELD_MESSAGES.payMethods)),
   idNumber: IdNumberSchema,
 });
 export type YoungPersonProfileInput = z.infer<typeof YoungPersonProfileSchema>;
 
 /** Step 1 of the young person form, checked in the browser before moving on. The server checks it all again. */
-export const WorkerDetailsSchema = z.pick(YoungPersonProfileSchema, { firstName: true, area: true, availability: true, payoutPhone: true });
+export const WorkerDetailsSchema = z.pick(YoungPersonProfileSchema, { firstName: true, area: true, availability: true, payoutPhone: true, payMethods: true });
+
+/** POST /api/profile/worker/edit: what a young person can change on their profile after onboarding. */
+export const WorkerEditSchema = z.pick(YoungPersonProfileSchema, { payMethods: true });
+export type WorkerEditInput = z.infer<typeof WorkerEditSchema>;
 
 /** GET /api/profile: the person's own safe fields only (domain/profile.ts, profileView). */
 export const ProfileViewSchema = z.object({
@@ -62,6 +68,7 @@ export const ProfileViewSchema = z.object({
       area: z.optional(z.string()),
       availability: z.optional(z.array(z.enum(AVAILABILITY))),
       payoutPhone: z.optional(z.string()),
+      payMethods: z.optional(z.array(z.enum(PAYMENT_METHODS))),
       idLastFour: z.optional(z.string()),
       hasPhoto: z.boolean(),
     }),

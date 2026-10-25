@@ -3,7 +3,7 @@ import type { BookingRecord } from "@/domain/bookings";
 import type { ReviewCase } from "@/domain/cases";
 import type { CreditEntry } from "@/domain/credits";
 import type { TryoutRecord } from "@/domain/tryoutDecisions";
-import type { BookingRepository } from "@/server/repositories/bookingRepository";
+import type { BookingRepository, EvidenceRecord } from "@/server/repositories/bookingRepository";
 import type { BookingSecrets, OfferRepository } from "@/server/repositories/offerRepository";
 import { createBookingService } from "@/server/services/bookingService";
 import { createDayService } from "@/server/services/dayService";
@@ -23,6 +23,9 @@ export function createBookingFakes(now: () => Date) {
   const cases: ReviewCase[] = [];
   const strikes: { uid: string; reason: string }[] = [];
   const audit: string[] = [];
+  const evidence: EvidenceRecord[] = [];
+  // Storage for proof screenshots: path to bytes, as the server saved them.
+  const files = new Map<string, Uint8Array>();
 
   const ledger = (uid: string): CreditEntry[] => store.ledgers.get(uid) ?? [];
   const appendLedger = (uid: string, entries: readonly CreditEntry[]) => store.ledgers.set(uid, [...ledger(uid), ...entries]);
@@ -36,7 +39,7 @@ export function createBookingFakes(now: () => Date) {
     if (current) tryouts.set(id, { ...current, ...changes });
   };
 
-  const shared: SharedState = { store, tryouts, applications, bookings, secrets, cases, strikes, audit, counter: { bookings: 0 }, ledger, appendLedger, updateApp, updateTryout };
+  const shared: SharedState = { store, tryouts, applications, bookings, secrets, cases, strikes, audit, evidence, counter: { bookings: 0 }, ledger, appendLedger, updateApp, updateTryout };
   const offers = fakeOfferRepository(shared);
   const bookingRepo = fakeBookingRepository(shared);
 
@@ -47,8 +50,10 @@ export function createBookingFakes(now: () => Date) {
   };
   const offerService = createOfferService({ offers, profiles: store.repo, newSecrets, now });
   const bookingService = createBookingService({ bookings: bookingRepo, photos: { metadata: async () => null, download: async () => null }, now });
-  const dayService = createDayService({ bookings: bookingRepo, now });
-  return { store, tryouts, applications, bookings, secrets, cases, strikes, audit, offerService, bookingService, dayService };
+  let ids = 0;
+  const evidenceStore = { save: async (path: string, bytes: Uint8Array) => void files.set(path, bytes), remove: async (path: string) => void files.delete(path) };
+  const dayService = createDayService({ bookings: bookingRepo, evidence: evidenceStore, newId: () => `id${(ids += 1)}`, now });
+  return { store, tryouts, applications, bookings, secrets, cases, strikes, audit, evidence, files, offerService, bookingService, dayService };
 }
 
 export type BookingFakes = ReturnType<typeof createBookingFakes>;
@@ -62,6 +67,7 @@ interface SharedState {
   cases: ReviewCase[];
   strikes: { uid: string; reason: string }[];
   audit: string[];
+  evidence: EvidenceRecord[];
   /** Bookings made so far, for their ids: booking-1, booking-2. */
   counter: { bookings: number };
   ledger: (uid: string) => CreditEntry[];
@@ -71,7 +77,7 @@ interface SharedState {
 }
 
 /** The booking repository over the same in-memory state. */
-function fakeBookingRepository({ store, applications, bookings, secrets, cases, strikes, audit, ledger, appendLedger, updateApp, updateTryout }: SharedState): BookingRepository {
+function fakeBookingRepository({ store, applications, bookings, secrets, cases, strikes, audit, evidence, ledger, appendLedger, updateApp, updateTryout }: SharedState): BookingRepository {
   return {
     async get(id) {
       const booking = bookings.get(id);
@@ -96,6 +102,7 @@ function fakeBookingRepository({ store, applications, bookings, secrets, cases, 
       appendLedger(booking.ownerId, write.ledger ?? []);
       if (write.strike) strikes.push({ uid: write.strike.party === "business" ? booking.ownerId : booking.workerId, reason: write.strike.reason });
       if (write.review) cases.push(structuredClone(write.review));
+      if (write.evidence) evidence.push(structuredClone(write.evidence));
       const owner = store.businesses.get(booking.ownerId);
       if (write.business && owner) store.businesses.set(booking.ownerId, { ...owner, ...write.business });
       const bump = <T extends object>(record: T | undefined, names: readonly string[] | undefined): T | undefined =>

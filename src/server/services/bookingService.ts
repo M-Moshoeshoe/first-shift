@@ -1,10 +1,11 @@
 import "server-only";
 import { RULES } from "@/config/rules";
-import { BOOKING_COPY } from "@/domain/bookingMessages";
+import { BOOKING_COPY, REPORT_COPY } from "@/domain/bookingMessages";
 import { cancelOutcome, decideCancel, type CancelOutcome, decideReport, mapsUrl, mayViewPhoto, partyOf, statusView, whatsAppUrl, type BookingRecord } from "@/domain/bookings";
 import type { Party } from "@/domain/cancellation";
 import type { ReportCategory } from "@/domain/cases";
-import { dayOptions } from "@/domain/day";
+import { dayOptions, methodsFor } from "@/domain/day";
+import { canAddEvidence } from "@/domain/evidence";
 import type { Viewer } from "@/domain/demo";
 import { displayPhone, photoPath, type PhotoKind } from "@/domain/profile";
 import { settlementCredit } from "@/domain/settlement";
@@ -56,10 +57,12 @@ function bookingView(bookingId: string, booking: BookingRecord, secrets: Booking
       endReason: booking.ended?.reason ?? null,
       owedCents: booking.owedCents ?? 0,
       owedMinimumCents: booking.owedMinimumCents ?? booking.owedCents ?? 0,
-      payment: booking.payment ? { state: booking.payment.state, method: booking.payment.method ?? null, amountCents: booking.payment.amountCents ?? null } : null,
+      payment: booking.payment ? { state: booking.payment.state, method: booking.payment.method ?? null, amountCents: booking.payment.amountCents ?? null, reference: booking.payment.reference ?? null } : null,
+      payMethods: [...methodsFor(booking)],
       // The door check's two facts, for the owner only, and only while they're needed.
       door: isOwner && booking.status === "booked" ? { lastFour: booking.workerIdLastFour } : null,
       remind,
+      evidence: { canAdd: canAddEvidence(party, booking), sent: (booking.evidenceBy ?? []).includes(party) },
     },
   };
 }
@@ -122,7 +125,7 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
     async report(viewer: Viewer, bookingId: string, category: ReportCategory, note: string): Promise<{ paused: boolean }> {
       const found = await bookings.get(bookingId);
       const decision = decideReport(viewer, found?.booking ?? null, found?.booking.tryoutId ?? "", category, note);
-      if (decision.kind === "refuse") throw notFound();
+      if (decision.kind === "refuse") throw decision.problem === "not_found" ? notFound() : new AppError(422, "category", REPORT_COPY.categoryMissing);
       await bookings.report(decision.reviewCase, viewer.uid, decision.pauseBusiness);
       return { paused: decision.pauseBusiness };
     },

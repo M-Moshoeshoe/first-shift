@@ -79,6 +79,7 @@ export const BOOKING_COPY = {
   codeHint: "Show it to the owner at the door. They check your face and your ID card, then enter it.",
   payoutPhone: "Their number for payments",
   payment: "You send the payment yourself, from your FNB app, your bank or in cash. First Shift doesn't move money. It records the payment, and the young person confirms they received it.",
+  payMethods: "How they can be paid",
   chat: "Chat on WhatsApp",
   chatHint: (name: string) => `${name} can message you on WhatsApp at your number for payments.`,
   share: "Share my trip",
@@ -98,6 +99,7 @@ export const BOOKING_COPY = {
 
 export const REPORT_COPY = {
   legend: "What happened?",
+  categoryMissing: "Choose what happened.",
   note: "Tell us more (optional)",
   noteHint: "Only the First Shift team reads this.",
   send: "Send report",
@@ -109,6 +111,8 @@ export const REPORT_COPY = {
 export const REPORT_LABELS: Record<ReportCategory, string> = {
   harassment: "Harassment",
   unsafe_work: "Unsafe work",
+  asked_for_money: "They asked me for money",
   not_paid: "Not paid",
+  paid_too_much: "I paid too much",
   other: "Something else",
 };

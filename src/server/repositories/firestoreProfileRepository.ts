@@ -3,6 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 import { ACCOUNT_STATUSES, AVAILABILITY, type BusinessRecord, type UserRecord } from "@/domain/profile";
 import { COIDA_ANSWERS } from "@/domain/injuryCover";
+import { PAYMENT_METHODS } from "@/domain/paymentFlow";
 import { ROLES } from "@/domain/roles";
 import { adminDb } from "../firebaseAdmin";
 import { appendLedger, readLedger } from "./firestoreLedger";
@@ -24,6 +25,7 @@ const UserRecordSchema = z.object({
   area: z.string().optional(),
   availability: z.array(z.enum(AVAILABILITY)).optional(),
   payoutPhone: z.string().optional(),
+  payMethods: z.array(z.enum(PAYMENT_METHODS)).optional(),
   idLastFour: z.string().optional(),
   residency: z.enum(["citizen", "permanent_resident"]).optional(),
   profilePhoto: PhotoSchema.optional(),
@@ -44,6 +46,8 @@ const BusinessRecordSchema = z.object({
   location: z.object({ latitude: z.number(), longitude: z.number(), accuracyMetres: z.number() }).optional(),
   shopfrontPhoto: PhotoSchema.optional(),
   coida: z.enum(COIDA_ANSWERS).optional(),
+  payments: counter.optional(),
+  paidOnTime: counter.optional(),
 });
 
 export const parseUser = (data: unknown): UserRecord => UserRecordSchema.parse(data);

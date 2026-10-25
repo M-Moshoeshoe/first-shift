@@ -21,6 +21,10 @@ export const FEED_COPY = {
   empty: (area: string) => `Nothing within ${RULES.nearbyRadiusKm} km of ${area} is open for applications. Tap ${BUTTON_LABELS.refresh} to check again later.`,
   fareUnknown: "Fare not known",
   newBusiness: "New on First Shift",
+  paidOnTime: (onTime: number, total: number) => `Paid on time: ${onTime} of ${total}`,
+  payMethodsMissingTitle: "How can businesses pay you?",
+  payMethodsMissing: "Choose at least one way before you apply, so a business that books you knows how to pay you.",
+  openProfile: "Open Profile",
 } as const;
 
 export const DETAIL_COPY = {
@@ -35,6 +39,7 @@ export const DETAIL_COPY = {
     `Daylight only, between ${clock(RULES.daylightStartHour)} and ${clock(RULES.daylightEndHour)}.`,
     "At the business itself, never at someone's home.",
     "The owner checks your ID at the door.",
+    "You never pay anyone to get a tryout. If someone asks you to, don't pay.",
   ],
   address: "Exact address after booking.",
   noteLabel: "A note for the business (optional)",
@@ -49,6 +54,7 @@ export const DETAIL_COPY = {
 export const NOT_ELIGIBLE_MESSAGES: Record<NotEligibleReason, string> = {
   not_young_person: "Only someone looking for work can apply for tryouts. Sign in with the Google account you use to find work.",
   profile_incomplete: "Finish your profile first: your details, your ID number and a photo of your face.",
+  no_pay_methods: "Choose how businesses can pay you first. Open Profile and pick at least one way.",
   account_paused: "Your account is paused, so you can't apply for tryouts right now. Contact us to sort it out.",
   overlaps_booking: "You're booked on another tryout at this time, so you can't apply for this one. Pick a tryout on another day.",
 };

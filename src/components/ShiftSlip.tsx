@@ -15,18 +15,17 @@ interface ShiftSlipProps {
   distance?: string | null;
   /** Further plain lines, such as the injury cover line. */
   notes?: readonly string[];
-  /** The business has no completed tryout yet. */
-  isNew?: boolean;
+  /** The business's record for paying: "Paid on time: N of N" or "New on First Shift". */
+  record?: string;
   stamp?: StampLabel;
   /** A row under the slip's details, such as the owner's status line and actions. */
   footer?: ReactNode;
 }
 
 const FARE_UNKNOWN = FEED_COPY.fareUnknown;
-const NEW_BUSINESS = FEED_COPY.newBusiness;
 
 /** A tryout drawn as a shift slip: time on the gold stub, pay given the most weight. */
-export function ShiftSlip({ day, hours, business, area, payCents, returnFareCents, distance, notes = [], isNew = false, stamp, footer }: ShiftSlipProps) {
+export function ShiftSlip({ day, hours, business, area, payCents, returnFareCents, distance, notes = [], record, stamp, footer }: ShiftSlipProps) {
   return (
     <article className="relative border-2 border-ink bg-paper">
       <div className="flex">
@@ -53,7 +52,7 @@ export function ShiftSlip({ day, hours, business, area, payCents, returnFareCent
               {note}
             </p>
           ))}
-          {isNew ? <p className="text-sm font-bold">{NEW_BUSINESS}</p> : null}
+          {record ? <p className="text-sm font-bold">{record}</p> : null}
         </div>
       </div>
       {footer ? <div className="border-t-2 border-ink px-4 py-2">{footer}</div> : null}

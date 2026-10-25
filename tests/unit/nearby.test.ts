@@ -66,11 +66,14 @@ describe("nearbyFeed", () => {
     expect(nearbyFeed({ uid: "demo-thabo", demo: true }, from, [listing("demo", { demo: true }), listing("ok")], NOW).map((item) => item.id)).toEqual(["demo"]);
   });
 
-  it("shows pay, the return fare, how far, the injury cover line and whether the business is new", () => {
-    const [item] = nearbyFeed(real, from, [{ ...listing("t1"), business: { completed: 2, coida: "registered" } }], NOW);
-    expect(item).toMatchObject({ payCents: 21000, returnFareCents: 3600, distance: "about 7 km", injuryCover: "Injury cover: confirmed by the business", isNew: false });
+  it("shows pay, the return fare, how far, the injury cover line and how the business has paid", () => {
+    const [item] = nearbyFeed(real, from, [{ ...listing("t1"), business: { completed: 5, coida: "registered", payments: 5, paidOnTime: 4 } }], NOW);
+    expect(item).toMatchObject({ payCents: 21000, returnFareCents: 3600, distance: "about 7 km", injuryCover: "Injury cover: confirmed by the business", payRecord: "Paid on time: 4 of 5" });
+    // Completed tryouts with no payment counted yet still read as new: the line is about paying.
+    const [unpaid] = nearbyFeed(real, from, [{ ...listing("t1"), business: { completed: 2 } }], NOW);
+    expect(unpaid?.payRecord).toBe("New on First Shift");
     const [unknownFare] = nearbyFeed(real, { area: "Tembisa", centre: IVORY_PARK }, [listing("t2")], NOW);
-    expect(unknownFare).toMatchObject({ returnFareCents: null, injuryCover: "Injury cover: not confirmed", isNew: true });
+    expect(unknownFare).toMatchObject({ returnFareCents: null, injuryCover: "Injury cover: not confirmed", payRecord: "New on First Shift" });
   });
 
   it("never sends the business's pin, only the cell", () => {
@@ -106,6 +109,9 @@ describe("applying", () => {
   it("says why someone can't apply, each with its own reason", () => {
     expect(applyState({ ...inputs, worker: { role: "business", status: "active" } })).toEqual({ kind: "not_eligible", reason: "not_young_person" });
     expect(applyState({ ...inputs, worker: { ...thabo, profilePhoto: undefined } })).toEqual({ kind: "not_eligible", reason: "profile_incomplete" });
+    // A profile from before the question: no business could know how to pay, so no applying until they choose.
+    expect(applyState({ ...inputs, worker: { ...thabo, payMethods: undefined } })).toEqual({ kind: "not_eligible", reason: "no_pay_methods" });
+    expect(applyState({ ...inputs, worker: { ...thabo, payMethods: [] } })).toEqual({ kind: "not_eligible", reason: "no_pay_methods" });
     expect(applyState({ ...inputs, tryout: { ...tryout, status: "withdrawn" } })).toEqual({ kind: "closed", reason: "not_open" });
     expect(applyState({ ...inputs, now: new Date("2026-10-27T06:30:00Z") })).toEqual({ kind: "closed", reason: "booking_closed" });
     const overlapping = { start: new Date("2026-10-27T12:00:00Z"), end: new Date("2026-10-27T15:00:00Z") };

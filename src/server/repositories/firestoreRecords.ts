@@ -4,6 +4,7 @@ import { z } from "zod";
 import { APPLICATION_STATUSES, type ApplicationRecord } from "@/domain/applications";
 import { CHECKOUT_REASONS, type BookingRecord } from "@/domain/bookings";
 import { BOOKING_STATUSES } from "@/domain/bookingStatus";
+import { PAYMENT_METHODS } from "@/domain/paymentFlow";
 import type { BookingSecrets } from "./offerRepository";
 
 /*
@@ -37,6 +38,7 @@ const BookingSchema = z.object({
   workerFirstName: z.string(),
   workerArea: z.string(),
   workerPayoutPhone: z.string(),
+  workerPayMethods: z.array(z.enum(PAYMENT_METHODS)).optional(),
   startAt: instant,
   endAt: instant,
   hours: z.number(),
@@ -57,14 +59,17 @@ const BookingSchema = z.object({
   payment: z
     .object({
       state: z.enum(["awaiting_payment", "awaiting_confirmation", "received", "not_received"]),
-      method: z.enum(["ewallet", "bank_transfer", "cash"]).optional(),
+      method: z.enum(PAYMENT_METHODS).optional(),
       amountCents: z.number().int().optional(),
+      reference: z.string().optional(),
       markedPaidAt: instant.optional(),
       answeredAt: instant.optional(),
     })
     .nullable()
     .optional(),
   reviewOpened: z.boolean().optional(),
+  payCounted: z.boolean().optional(),
+  evidenceBy: z.array(z.enum(["business", "young_person"])).optional(),
 });
 
 const SecretsSchema = z.object({ checkInCode: z.string(), shareToken: z.string(), expiresAt: instant, codeAttempts: z.number().int().optional() });

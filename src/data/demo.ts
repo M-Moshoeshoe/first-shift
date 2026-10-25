@@ -31,13 +31,15 @@ export const DEMO_EXTRA_OWNERS = ["demo-lerato", "demo-ayanda"] as const;
 
 const photo = (uid: string, kind: "profile" | "shopfront") => ({ path: photoPath(uid, kind), version: "demo" });
 
-function business(uid: string, details: { name: string; area: string; latitude: number; longitude: number; completed: number; coida: CoidaAnswer }): BusinessRecord {
+function business(uid: string, details: { name: string; area: string; latitude: number; longitude: number; completed: number; paidOnTime: number; coida: CoidaAnswer }): BusinessRecord {
   const base = newAccount(uid, "business", true).business;
   if (!base) throw new Error("a business account always has a business record");
   return {
     ...base,
     completed: details.completed,
     onTime: details.completed,
+    // Every completed demo tryout was paid and confirmed; some not by 23:59 that day.
+    ...(details.completed > 0 ? { payments: details.completed, paidOnTime: details.paidOnTime } : {}),
     name: details.name,
     area: details.area,
     openingHours: "Monday to Saturday, 8:00 to 17:00",
@@ -85,9 +87,9 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
   const [lerato, ayanda] = DEMO_EXTRA_OWNERS;
   const businesses: Record<string, BusinessRecord> = {
     // Randburg: about 21 km from Thabo in Ivory Park, on a direct taxi route (R28 each way).
-    [uids.business]: business(uids.business, { name: "Sipho's Phone Repairs", area: "Randburg", latitude: -26.0939, longitude: 28.0071, completed: 0, coida: "registered" }),
-    [lerato]: business(lerato, { name: "Lerato's Spaza", area: "Tembisa", latitude: -25.9964, longitude: 28.2268, completed: 6, coida: "registered" }),
-    [ayanda]: business(ayanda, { name: "Ayanda's Car Wash", area: "Ivory Park", latitude: -25.9861, longitude: 28.1958, completed: 2, coida: "not_sure" }),
+    [uids.business]: business(uids.business, { name: "Sipho's Phone Repairs", area: "Randburg", latitude: -26.0939, longitude: 28.0071, completed: 0, paidOnTime: 0, coida: "registered" }),
+    [lerato]: business(lerato, { name: "Lerato's Spaza", area: "Tembisa", latitude: -25.9964, longitude: 28.2268, completed: 6, paidOnTime: 6, coida: "registered" }),
+    [ayanda]: business(ayanda, { name: "Ayanda's Car Wash", area: "Ivory Park", latitude: -25.9861, longitude: 28.1958, completed: 2, paidOnTime: 1, coida: "not_sure" }),
   };
   const thabo: UserRecord = {
     ...newAccount(uids.youngPerson, "young_person", true).user,
@@ -96,6 +98,7 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
     availability: ["weekday_mornings", "saturdays"],
     // Not a number anyone can be reached on, so nothing ever messages a real person.
     payoutPhone: "27000000000",
+    payMethods: ["ewallet", "cash"],
     idLastFour: "0000",
     residency: "citizen",
     profilePhoto: photo(uids.youngPerson, "profile"),

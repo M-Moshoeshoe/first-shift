@@ -8,6 +8,7 @@ export const NAV = {
     { href: "/work", label: "Tryouts", badge: false },
     // The badge counts offers waiting for an answer.
     { href: "/work/applications", label: "Applications", badge: true },
+    { href: "/work/profile", label: "Profile", badge: false },
   ],
   business: [
     // The badge counts new applicants the owner hasn't looked at yet.

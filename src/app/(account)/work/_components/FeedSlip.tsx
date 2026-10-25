@@ -3,7 +3,7 @@ import { ShiftSlip } from "@/components/ShiftSlip";
 import { sastSlot } from "@/domain/time";
 import type { FeedItemResponse } from "@/schemas/finding";
 
-/** A tryout from the feed drawn as a slip: time, pay, business, area and distance, fare, injury cover, and "New on First Shift". */
+/** A tryout from the feed drawn as a slip: time, pay, business, area and distance, fare, injury cover, and how the business pays. */
 export function FeedSlip({ item, footer }: { item: FeedItemResponse; footer?: ReactNode }) {
   const { day, hours } = sastSlot(new Date(item.startAt), new Date(item.endAt));
   return (
@@ -16,7 +16,7 @@ export function FeedSlip({ item, footer }: { item: FeedItemResponse; footer?: Re
       payCents={item.payCents}
       returnFareCents={item.returnFareCents}
       notes={[item.injuryCover]}
-      isNew={item.isNew}
+      record={item.payRecord}
       footer={footer}
     />
   );

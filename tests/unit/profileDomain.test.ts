@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { RULES } from "@/config/rules";
 import { destinationFor, isProfileComplete, newAccount, photoPath, type BusinessRecord, type UserRecord } from "@/domain/profile";
-import { decideBusinessSave, decideIdClaim, decidePhotoSave, decideWorkerSave } from "@/domain/profileDecisions";
+import { decideBusinessSave, decideIdClaim, decidePhotoSave, decideWorkerEdit, decideWorkerSave } from "@/domain/profileDecisions";
 import { decideRole } from "@/domain/roles";
 
 const photo = { path: "photos/u/profile.jpg", version: "1" };
@@ -11,6 +11,7 @@ const worker: UserRecord = {
   area: "Ivory Park",
   availability: ["saturdays"],
   payoutPhone: "27821234567",
+  payMethods: ["ewallet"],
   idLastFour: "0087",
   residency: "citizen",
 };
@@ -66,12 +67,21 @@ describe("completeness and where a person belongs", () => {
 });
 
 describe("save decisions", () => {
-  const save = { details: { firstName: "Thabo", area: "Ivory Park", availability: ["saturdays" as const], payoutPhone: "27821234567" }, idLastFour: "0087", residency: "citizen" as const, idHash: "h1" };
+  const save = { details: { firstName: "Thabo", area: "Ivory Park", availability: ["saturdays" as const], payoutPhone: "27821234567", payMethods: ["ewallet" as const] }, idLastFour: "0087", residency: "citizen" as const, idHash: "h1" };
 
   it("treats an identical worker resend as unchanged, and any change as a save", () => {
     expect(decideWorkerSave("thabo", { user: worker, heldIdHash: "h1", claimOwner: "thabo" }, save)).toEqual({ kind: "unchanged" });
     const changed = decideWorkerSave("thabo", { user: worker, heldIdHash: "h1", claimOwner: "thabo" }, { ...save, details: { ...save.details, area: "Tembisa" } });
     expect(changed).toMatchObject({ kind: "save", next: { claimId: false, user: { area: "Tembisa", completed: 0 } } });
+    const methods = decideWorkerSave("thabo", { user: worker, heldIdHash: "h1", claimOwner: "thabo" }, { ...save, details: { ...save.details, payMethods: ["ewallet", "payshap"] } });
+    expect(methods).toMatchObject({ kind: "save", next: { user: { payMethods: ["ewallet", "payshap"] } } });
+  });
+
+  it("lets a finished young person change how they can be paid, and nothing before onboarding", () => {
+    expect(decideWorkerEdit(worker, { payMethods: ["ewallet"] })).toEqual({ kind: "unchanged" });
+    expect(decideWorkerEdit(worker, { payMethods: ["cash_send", "cash"] })).toMatchObject({ kind: "save", next: { payMethods: ["cash_send", "cash"], firstName: "Thabo" } });
+    expect(decideWorkerEdit({ role: "young_person", status: "active" }, { payMethods: ["cash"] })).toEqual({ kind: "refuse", problem: { code: "details_first" } });
+    expect(decideWorkerEdit(owner, { payMethods: ["cash"] })).toEqual({ kind: "refuse", problem: { code: "role_locked", current: "business" } });
   });
 
   it("stores a known area under its official name, so a typed variant of the saved area is unchanged", () => {

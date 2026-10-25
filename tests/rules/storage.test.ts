@@ -67,4 +67,15 @@ describe("photo uploads", () => {
     await assertFails(upload(null, "photos/thabo/profile.jpg", JPEG, "image/jpeg"));
     await assertFails(upload("thabo", "thabo/profile.jpg", JPEG, "image/jpeg"));
   });
+
+  it("keeps proof screenshots private: only the server writes them and only an admin reads them", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await context.storage().ref("evidence/b1/young_person-x").put(JPEG, { contentType: "image/jpeg" });
+    });
+    for (const uid of ["thabo", "sipho"]) {
+      await assertFails(upload(uid, "evidence/b1/young_person-y", JPEG, "image/jpeg"));
+      await assertFails(Promise.resolve(env.authenticatedContext(uid).storage().ref("evidence/b1/young_person-x").getDownloadURL()));
+    }
+    await assertFails(Promise.resolve(env.unauthenticatedContext().storage().ref("evidence/b1/young_person-x").getDownloadURL()));
+  });
 });

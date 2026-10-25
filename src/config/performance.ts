@@ -29,6 +29,8 @@ export const JS_BUDGETS_KB = {
   // tryout page 256.0 KB, Applications 249.0 KB, the booking page 256.5 KB (257.8 KB with Phase 5; the day's panels load lazily). + 10% is over the cap for each.
   "/business/tryouts/tryout": 260,
   "/work/applications": 260,
+  // The young person's profile (how businesses can pay them), measured 245.3 KB on 26 October 2026; + 10% is over the cap.
+  "/work/profile": 260,
   "/bookings/booking": 260,
   // The trusted contact's status page: a marketing page, no sign-in code, so it keeps the home page's budget. Measured 198.7 KB.
   "/status/token": 200,

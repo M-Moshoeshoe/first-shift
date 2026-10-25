@@ -1,6 +1,6 @@
 import "server-only";
 import { randomBytes, randomInt } from "node:crypto";
-import { firebasePhotoStore } from "../repositories/firebasePhotoStore";
+import { firebaseEvidenceStore, firebasePhotoStore } from "../repositories/firebasePhotoStore";
 import { firestoreBookingRepository } from "../repositories/firestoreBookingRepository";
 import { firestoreOfferRepository } from "../repositories/firestoreOfferRepository";
 import { firestoreProfileRepository } from "../repositories/firestoreProfileRepository";
@@ -17,7 +17,7 @@ export function liveOfferService(): OfferService {
 }
 
 export function liveDayService(): DayService {
-  return createDayService({ bookings: firestoreBookingRepository, now: () => new Date() });
+  return createDayService({ bookings: firestoreBookingRepository, evidence: firebaseEvidenceStore, newId: () => randomBytes(9).toString("base64url"), now: () => new Date() });
 }
 
 export function liveBookingService(): BookingService {

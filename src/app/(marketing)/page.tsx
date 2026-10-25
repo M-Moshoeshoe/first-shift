@@ -20,7 +20,7 @@ const pitches = [
     id: "for-businesses",
     tone: "paper",
     heading: "For businesses",
-    text: "Post a tryout in one sentence, see who's likely to show up, and pay them yourself by eWallet, bank transfer or cash.",
+    text: "Post a tryout in one sentence, see who's likely to show up, and pay them yourself by FNB eWallet, PayShap, a cash-send or cash.",
   },
   {
     id: "safe-for-both-sides",

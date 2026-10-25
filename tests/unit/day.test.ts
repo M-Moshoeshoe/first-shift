@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BookingRecord } from "@/domain/bookings";
-import { dayOptions, deadlineActions, decideBusinessNotOpen, decideCheckIn, decideCheckOut, decideConfirm, decideMarkPaid, decideNoShow, unpaidPause, wasOnTime } from "@/domain/day";
+import { dayOptions, deadlineActions, decideBusinessNotOpen, decideCheckIn, decideCheckOut, decideConfirm, decideMarkPaid, decideNoShow, methodsFor, payRecordCounters, unpaidPause, wasOnTime } from "@/domain/day";
 import { fromSast } from "@/domain/time";
 
 const owner = { uid: "sipho", demo: false };
@@ -85,11 +85,29 @@ describe("payment", () => {
   const now = fromSast(2026, 10, 27, 15, 5);
 
   it("takes at least the minimum owed, more is fine", () => {
-    expect(decideMarkPaid(owner, ended, "ewallet", 14000, now)).toMatchObject({ kind: "paid", payment: { state: "awaiting_confirmation", method: "ewallet", amountCents: 14000 } });
-    expect(decideMarkPaid(owner, ended, "cash", 25000, now)).toMatchObject({ kind: "paid" });
-    expect(decideMarkPaid(owner, ended, "cash", 13999, now)).toEqual({ kind: "refuse", problem: "below_minimum" });
-    expect(decideMarkPaid(owner, booking(), "cash", 21000, now)).toEqual({ kind: "refuse", problem: "not_payable" });
-    expect(decideMarkPaid(worker, ended, "cash", 21000, now)).toEqual({ kind: "refuse", problem: "not_found" });
+    expect(decideMarkPaid(owner, ended, { method: "ewallet", amountCents: 14000 }, now)).toMatchObject({ kind: "paid", payment: { state: "awaiting_confirmation", method: "ewallet", amountCents: 14000 } });
+    expect(decideMarkPaid(owner, ended, { method: "cash", amountCents: 25000 }, now)).toMatchObject({ kind: "paid" });
+    expect(decideMarkPaid(owner, ended, { method: "cash", amountCents: 13999 }, now)).toEqual({ kind: "refuse", problem: "below_minimum" });
+    expect(decideMarkPaid(owner, booking(), { method: "cash", amountCents: 21000 }, now)).toEqual({ kind: "refuse", problem: "not_payable" });
+    expect(decideMarkPaid(worker, ended, { method: "cash", amountCents: 21000 }, now)).toEqual({ kind: "refuse", problem: "not_found" });
+  });
+
+  it("takes only the ways the young person chose; a booking from before the question takes any of the four", () => {
+    const chose = booking({ ...ended, workerPayMethods: ["payshap", "cash"] });
+    expect(methodsFor(chose)).toEqual(["payshap", "cash"]);
+    expect(methodsFor(ended)).toEqual(["ewallet", "payshap", "cash_send", "cash"]);
+    expect(decideMarkPaid(owner, chose, { method: "ewallet", amountCents: 21000 }, now)).toEqual({ kind: "refuse", problem: "method_not_offered" });
+    expect(decideMarkPaid(owner, chose, { method: "payshap", amountCents: 21000 }, now).kind).toBe("paid");
+  });
+
+  it("keeps a reference for an electronic payment, trimmed to 40 characters, and never for cash", () => {
+    expect(decideMarkPaid(owner, ended, { method: "cash_send", amountCents: 21000, reference: "  FS-THABO-27OCT  " }, now)).toMatchObject({ payment: { reference: "FS-THABO-27OCT" } });
+    const long = decideMarkPaid(owner, ended, { method: "payshap", amountCents: 21000, reference: "x".repeat(60) }, now);
+    expect(long.kind === "paid" && long.payment.reference).toHaveLength(40);
+    const cash = decideMarkPaid(owner, ended, { method: "cash", amountCents: 21000, reference: "ignored" }, now);
+    expect(cash.kind === "paid" && "reference" in cash.payment).toBe(false);
+    const blank = decideMarkPaid(owner, ended, { method: "ewallet", amountCents: 21000, reference: "   " }, now);
+    expect(blank.kind === "paid" && "reference" in blank.payment).toBe(false);
   });
 
   it("lets the young person answer once paid: received, or not received, which opens a review", () => {
@@ -122,7 +140,27 @@ describe("payment deadlines, from the clock", () => {
   it("treats a late cancellation's 4 hours like any other day's pay", () => {
     const cancelled = booking({ status: "cancelled", owedCents: 14000, cancellation: { by: "business", byUid: "sipho", at: fromSast(2026, 10, 27, 7, 0), kind: "late", reliedOnGrace: false } });
     expect(deadlineActions("c1", cancelled, null, fromSast(2026, 10, 28, 0, 0)).pauseBusiness).toBe(true);
-    expect(decideMarkPaid(owner, cancelled, "ewallet", 14000, fromSast(2026, 10, 27, 8, 0)).kind).toBe("paid");
+    expect(decideMarkPaid(owner, cancelled, { method: "ewallet", amountCents: 14000 }, fromSast(2026, 10, 27, 8, 0)).kind).toBe("paid");
+  });
+});
+
+describe("Paid on time: each payment counts once", () => {
+  const due = fromSast(2026, 10, 27, 15, 0);
+  const ended = booking({ status: "ended", owedCents: 21000, ended: { at: due, reason: "completed", minutesWorked: 360 } });
+  const paidAt = (markedPaidAt: Date) => booking({ ...ended, payment: { state: "awaiting_confirmation", method: "ewallet", amountCents: 21000, markedPaidAt } });
+
+  it("counts Received as on time when it was marked paid by 23:59 on the day it was due", () => {
+    expect(payRecordCounters(paidAt(fromSast(2026, 10, 27, 23, 59)), "received")).toEqual(["payments", "paidOnTime"]);
+    expect(payRecordCounters(paidAt(fromSast(2026, 10, 28, 0, 0)), "received")).toEqual(["payments"]);
+  });
+
+  it("counts a pause for being unpaid, or Not received, as not on time", () => {
+    expect(payRecordCounters(ended, "paused_unpaid")).toEqual(["payments"]);
+    expect(payRecordCounters(paidAt(fromSast(2026, 10, 27, 15, 5)), "not_received")).toEqual(["payments"]);
+  });
+
+  it("never counts the same tryout twice", () => {
+    expect(payRecordCounters({ ...paidAt(fromSast(2026, 10, 27, 15, 5)), payCounted: true }, "received")).toBeNull();
   });
 });
 

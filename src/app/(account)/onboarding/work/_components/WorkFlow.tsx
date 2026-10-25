@@ -27,6 +27,7 @@ export function WorkFlow({ view }: { view: ProfileViewResponse }) {
     area: saved?.area ?? "",
     availability: saved?.availability ?? [],
     payoutPhone: saved?.payoutPhone ?? "",
+    payMethods: saved?.payMethods ?? [],
   });
 
   const go = (next: Step) => {

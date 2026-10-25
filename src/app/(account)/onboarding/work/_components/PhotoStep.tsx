@@ -4,6 +4,7 @@ import { PhotoStepForm } from "@/components/PhotoStepForm";
 import { SavedSummary } from "@/components/SavedSummary";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { PROFILE_MESSAGES } from "@/domain/messages";
+import { METHOD_LABELS } from "@/domain/paymentMethodCopy";
 import { availabilityText } from "./availability";
 import type { DetailsDraft } from "./DetailsStep";
 
@@ -22,6 +23,7 @@ export function PhotoStep({ details, idLastFour, focusHeading, onDone, onBack }:
     { term: "Area", value: details.area },
     { term: "When you can work", value: availabilityText(details.availability) },
     { term: "Cellphone for payments", value: details.payoutPhone },
+    { term: "How you can be paid", value: details.payMethods.map((method) => METHOD_LABELS[method]).join(", ") },
     { term: "ID number", value: `Ending in ${idLastFour}` },
   ];
   return (

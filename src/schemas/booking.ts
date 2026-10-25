@@ -100,9 +100,15 @@ export const BookingViewSchema = z.object({
     endReason: z.nullable(z.enum(CHECKOUT_REASONS)),
     owedCents: z.number(),
     owedMinimumCents: z.number(),
-    payment: z.nullable(z.object({ state: z.enum(["awaiting_payment", "awaiting_confirmation", "received", "not_received"]), method: z.nullable(z.enum(PAYMENT_METHODS)), amountCents: z.nullable(z.number()) })),
+    payment: z.nullable(
+      z.object({ state: z.enum(["awaiting_payment", "awaiting_confirmation", "received", "not_received"]), method: z.nullable(z.enum(PAYMENT_METHODS)), amountCents: z.nullable(z.number()), reference: z.nullable(z.string()) }),
+    ),
+    /** The ways the owner may pay: the ones the young person chose (day.ts, methodsFor). */
+    payMethods: z.array(z.enum(PAYMENT_METHODS)),
     door: z.nullable(z.object({ lastFour: z.string() })),
     remind: z.boolean(),
+    /** Proof, only after Not received: whether this side may still add theirs (evidence.ts). */
+    evidence: z.object({ canAdd: z.boolean(), sent: z.boolean() }),
   }),
 });
 
@@ -113,10 +119,6 @@ export const DoorCheckSchema = z.object({
   lastFourMatches: z.boolean(),
 });
 export const CheckOutSchema = z.object({ reason: z.enum(CHECKOUT_REASONS, { error: "Choose how the day ended." }) });
-export const MarkPaidSchema = z.object({
-  method: z.enum(PAYMENT_METHODS, { error: "Choose how you paid." }),
-  amountCents: z.int({ error: "Enter the amount in rand, like 210 or 210.00." }).check(z.positive("Enter the amount in rand, like 210 or 210.00."), z.lte(10_000_000)),
-});
 export const ConfirmSchema = z.object({ received: z.boolean() });
 export const StepResultSchema = z.object({ status: z.enum(["done", "unchanged"]) });
 export type BookingViewResponse = z.infer<typeof BookingViewSchema>;
