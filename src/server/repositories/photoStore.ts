@@ -4,4 +4,6 @@ import type { PhotoMeta } from "@/domain/profileDecisions";
 export interface PhotoStore {
   /** Null when there is no file at path. */
   metadata(path: string): Promise<PhotoMeta | null>;
+  /** The file's bytes and type, for a photo the viewer may see; null when there is no file. */
+  download(path: string): Promise<{ bytes: Uint8Array; contentType: string } | null>;
 }

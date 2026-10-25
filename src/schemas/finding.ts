@@ -33,6 +33,9 @@ export type NearbyResponse = z.infer<typeof NearbySchema>;
 const ApplyStateSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("can_apply") }),
   z.object({ kind: z.literal("applied") }),
+  z.object({ kind: z.literal("offered"), lapsesAt: z.string() }),
+  z.object({ kind: z.literal("booked"), bookingId: z.string() }),
+  z.object({ kind: z.literal("not_selected") }),
   z.object({ kind: z.literal("closed"), reason: z.enum(["booking_closed", "not_open"]) }),
   z.object({ kind: z.literal("not_eligible"), reason: z.enum(["not_young_person", "profile_incomplete", "account_paused", "overlaps_booking"]) }),
 ]);

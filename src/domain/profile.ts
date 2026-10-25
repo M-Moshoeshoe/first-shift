@@ -9,7 +9,9 @@ export type Availability = (typeof AVAILABILITY)[number];
 export const PHOTO_KINDS = ["profile", "shopfront"] as const;
 export type PhotoKind = (typeof PHOTO_KINDS)[number];
 
-export type AccountStatus = "active";
+/** Paused (an unpaid tryout, or a harassment or unsafe-work report) and suspended (three strikes) stop someone taking part (strikes.ts). */
+export const ACCOUNT_STATUSES = ["active", "paused", "suspended"] as const;
+export type AccountStatus = (typeof ACCOUNT_STATUSES)[number];
 export type Residency = IdCheck["residency"];
 
 /** A track record, set to 0 once when the account is created and never reset by a profile save. */
@@ -148,10 +150,11 @@ export function isDestination(path: string): path is Destination {
 }
 
 /** The other screens each home opens to, listed one by one (or by an exact pattern) so nothing else slips through. */
+// Ids have the same shape the routes accept (server/validate.ts, parseId).
+const BOOKING_PAGE = /^\/bookings\/[A-Za-z0-9_-]{1,128}$/;
 const SCREENS_OF: Partial<Record<Destination, readonly (string | RegExp)[]>> = {
-  "/business": ["/business/post"],
-  // A tryout's detail page; the id has the same shape the routes accept (schemas/tryout.ts, TryoutIdSchema).
-  "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/],
+  "/business": ["/business/post", /^\/business\/tryouts\/[A-Za-z0-9_-]{1,128}$/, BOOKING_PAGE],
+  "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/, "/work/applications", BOOKING_PAGE],
 };
 
 const opensTo = (destination: Destination, path: string): boolean =>

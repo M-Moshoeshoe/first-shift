@@ -10,6 +10,7 @@ import { CLOSED_MESSAGES, DETAIL_COPY, FINDING_MESSAGES, NOT_ELIGIBLE_MESSAGES }
 import { ApiError, apiPost } from "@/lib/api";
 import { shakeAndFocus } from "@/lib/forms";
 import { ApplicationResultSchema, ApplySchema, type ApplyStateResponse } from "@/schemas/finding";
+import { OfferAnswer } from "./OfferAnswer";
 
 const NOTE_ID = "application-note";
 const ERROR_ID = "application-error";
@@ -19,10 +20,12 @@ interface ApplyPanelProps {
   businessName: string;
   state: ApplyStateResponse;
   onState: (state: ApplyStateResponse) => void;
+  /** Reads the tryout again, after an answer to an offer. */
+  onReload: () => void;
 }
 
 /** Apply with an optional note, or withdraw; or why neither is possible. The server decides again every time. */
-export function ApplyPanel({ tryoutId, businessName, state, onState }: ApplyPanelProps) {
+export function ApplyPanel({ tryoutId, businessName, state, onState, onReload }: ApplyPanelProps) {
   const [note, setNote] = useState("");
   const [noteError, setNoteError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +57,7 @@ export function ApplyPanel({ tryoutId, businessName, state, onState }: ApplyPane
     void send("/api/applications", parsed.data, false);
   };
 
+  if (state.kind === "not_selected" || state.kind === "booked" || state.kind === "offered") return <OfferAnswer tryoutId={tryoutId} state={state} onReload={onReload} />;
   if (state.kind === "closed") return <p className="text-lg font-bold">{CLOSED_MESSAGES[state.reason]}</p>;
   if (state.kind === "not_eligible") return <FormError message={NOT_ELIGIBLE_MESSAGES[state.reason]} />;
 

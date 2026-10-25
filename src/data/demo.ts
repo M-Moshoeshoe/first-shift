@@ -1,4 +1,5 @@
 import type { AllowedCategory } from "@/domain/allowedWork";
+import type { ApplicationRecord } from "@/domain/applications";
 import type { CreditEntry } from "@/domain/credits";
 import type { CoidaAnswer } from "@/domain/injuryCover";
 import { newAccount, photoPath, type BusinessRecord, type UserRecord } from "@/domain/profile";
@@ -72,6 +73,11 @@ function tryout(slot: Slot, owners: Record<string, BusinessRecord>, now: Date): 
   const record = owner && decided.ok ? newTryout({ uid: slot.owner, demo: true }, owner, terms, decided.value, "published", slot.category) : null;
   if (!record) throw new Error(`demo tryout "${slot.title}" breaks a rule`);
   return record;
+}
+
+/** Thabo's application to the first of Sipho's tryouts, so a judge signed in as Sipho has someone to offer it to. */
+export function demoApplication(tryoutId: string, tryout: TryoutRecord, youngPersonUid: string): ApplicationRecord {
+  return { tryoutId, workerId: youngPersonUid, ownerId: tryout.ownerId, note: "I live in Ivory Park and can be there by 8:30.", status: "applied", demo: true, startAt: tryout.startAt, endAt: tryout.endAt, seenByOwner: false };
 }
 
 /** The whole demo world as of now: two complete profiles, three businesses and four live tryouts in the next three days. */

@@ -91,7 +91,7 @@ export function TryoutDetail() {
         ) : null}
       </section>
       <LineList id="safety-heading" heading={DETAIL_COPY.safety} lines={[...DETAIL_COPY.safetyLines, DETAIL_COPY.address]} />
-      <ApplyPanel tryoutId={item.id} businessName={item.businessName} state={state} onState={setState} />
+      <ApplyPanel tryoutId={item.id} businessName={item.businessName} state={state} onState={setState} onReload={() => setAttempt((count) => count + 1)} />
     </>
   );
 }

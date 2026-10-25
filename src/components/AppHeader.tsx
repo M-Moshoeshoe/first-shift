@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavItem } from "@/config/nav";
 import { useAuth } from "@/lib/auth/useAuth";
+import { NavLabel } from "./NavLabel";
 import { SignOutButton } from "./SignOutButton";
 
 /**
@@ -12,7 +13,7 @@ import { SignOutButton } from "./SignOutButton";
  * someone is signed in, including during onboarding, so nobody is stuck on
  * the wrong account.
  */
-export function AppHeader({ nav }: { nav: readonly NavItem[] }) {
+export function AppHeader({ nav, badge }: { nav: readonly NavItem[]; badge: number }) {
   const { user } = useAuth();
   const pathname = usePathname();
   return (
@@ -32,7 +33,7 @@ export function AppHeader({ nav }: { nav: readonly NavItem[] }) {
                       aria-current={pathname === item.href ? "page" : undefined}
                       className="inline-flex min-h-11 items-center font-bold text-muted aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:underline-offset-4"
                     >
-                      {item.label}
+                      <NavLabel item={item} count={badge} />
                     </Link>
                   </li>
                 ))}

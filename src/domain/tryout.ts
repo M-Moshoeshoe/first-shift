@@ -6,7 +6,7 @@ import { addMinutes, fromSast } from "./time";
 export const TRYOUT_STATUSES = ["review", "published", "booked", "completed", "withdrawn"] as const;
 export type TryoutStatus = (typeof TRYOUT_STATUSES)[number];
 
-export const TRYOUT_ACTIONS = ["approve", "reject", "withdraw", "book", "complete"] as const;
+export const TRYOUT_ACTIONS = ["approve", "reject", "withdraw", "book", "complete", "cancel"] as const;
 export type TryoutAction = (typeof TRYOUT_ACTIONS)[number];
 
 /**
@@ -17,7 +17,8 @@ export type TryoutAction = (typeof TRYOUT_ACTIONS)[number];
 const MOVES: Record<TryoutStatus, Partial<Record<TryoutAction, TryoutStatus>>> = {
   review: { approve: "published", reject: "withdrawn", withdraw: "withdrawn" },
   published: { book: "booked", withdraw: "withdrawn" },
-  booked: { complete: "completed" },
+  // A cancelled booking ends the tryout; the owner posts again if they still need someone.
+  booked: { complete: "completed", cancel: "withdrawn" },
   completed: {},
   withdrawn: {},
 };

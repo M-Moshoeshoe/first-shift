@@ -21,3 +21,11 @@ export async function parseBody<T>(request: Request, schema: $ZodType<T>): Promi
   const message = issue && issue.path.length > 0 ? issue.message : PROFILE_MESSAGES.fallback;
   throw new AppError(400, "invalid_input", message);
 }
+
+const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
+
+/** An id from a route's address. Anything that isn't one reads as not found, with the message the route chose. */
+export function parseId(raw: string, notFoundMessage: string): string {
+  if (!ID_PATTERN.test(raw)) throw new AppError(404, "not_found", notFoundMessage);
+  return raw;
+}

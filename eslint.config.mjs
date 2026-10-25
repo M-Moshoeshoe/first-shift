@@ -54,6 +54,13 @@ export default defineConfig([
     },
   },
   {
+    // Pages, layouts and their components never reach server code: only route handlers (route.ts) do (AGENTS.md).
+    files: ["src/app/**/*.tsx"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [noScripts, { group: ["@/server/*", "@/server/**", "server-only"], message: "Pages and components must not import server code; call a route handler instead." }] }],
+    },
+  },
+  {
     // Client helpers run in the browser; server code (secrets, Admin SDK) must never reach them.
     files: ["src/lib/**/*.{ts,tsx}"],
     rules: {

@@ -33,6 +33,20 @@ An owner can always pay more than the amount shown.
 | No double booking | A young person can't hold two tryouts that overlap | Accepting one withdraws their overlapping applications |
 | Locked once booked | Pay, time and tasks can't change after booking | To change them, the owner cancels under the rules below |
 
+## Offers and booking
+
+| Rule | Value | Code |
+| --- | --- | --- |
+| Ranking | The shortlist of 5 (`ranking.ts`), always with one place kept for someone with no record; then everyone else. Ranked on show-up likelihood (with its reasons) and distance; we don't ask about experience yet, so everyone gets the same fit | `applicantRanking.ts` |
+| One offer at a time | The owner offers the tryout to one applicant; another only after a decline or once the offer has lapsed | `offers.ts` |
+| Lapsing | An offer lapses at the booking cut-off, an hour before the start | `offerLapsesAt` |
+| Accepting books it | Checked again at that moment: booking still open, a credit the business can hold (it's held), no overlap with another booking, and the 24-hour line with this business | `decideAnswer` |
+| On booking | Everyone else who applied is "Not selected"; the young person's open applications that overlap are withdrawn | `overlappingApplications` |
+| The booking page | Both parties: the exact pin with "Open in maps", names and photos. The owner sees the payout number and can message on WhatsApp; the young person sees a 6-digit check-in code and can share their trip | `bookings.ts` |
+| Share my trip | A WhatsApp message with a link to a public status page at an unguessable token: first names, the business, the times and the status only, until midnight at the end of the tryout's day | `statusView` |
+| Report a problem | On every booking, from either side; harassment or unsafe work from the young person pauses the business at once | `decideReport` |
+| Photos | Your own; an applicant's face for the owner they applied to; each other's once booked. Through the server only | `mayViewPhoto` |
+
 ## Cancellations
 
 Cancelling is free until **12 hours before the start, or 15 minutes after booking, whichever is later**.

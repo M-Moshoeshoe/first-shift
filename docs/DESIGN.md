@@ -169,6 +169,10 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/work/tryouts/[id]` | 260 KB (the cap) | 247.9 KB, 15 scripts, measured on the one shell built ahead of time (`/work/tryouts/tryout`); every id loads the same scripts |
 | `/business` | 260 KB (the cap) | 244.5 KB, 15 scripts; the withdraw sheet (React Aria, 20.9 KB) and the Firestore listener (171.8 KB) load after the page has drawn |
 | `/business/post` | 260 KB (the cap) | 249.4 KB, 15 scripts |
+| `/business/tryouts/[id]` | 260 KB (the cap) | 256.0 KB, 17 scripts (the owner's tryout and applicants, 26 October 2026) |
+| `/work/applications` | 260 KB (the cap) | 249.0 KB, 16 scripts |
+| `/bookings/[id]` | 260 KB (the cap) | 256.5 KB, 16 scripts |
+| `/status/[token]` | 200 KB (a marketing page) | 198.7 KB, 10 scripts: no sign-in code; the status words have their own module (`bookingStatus.ts`) so the page loads none of the booking rules |
 
 A new page's budget is its measured size plus 10%, never above 260 KB.
 

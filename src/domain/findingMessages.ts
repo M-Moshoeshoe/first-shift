@@ -61,9 +61,11 @@ export const CLOSED_MESSAGES: Record<ClosedReason, string> = {
 export const FINDING_MESSAGES = {
   notFound: "We can't find that tryout. It may have been taken down. Go back to your tryouts and pick another one.",
   applicationNotFound: "We can't find that application. It may have been withdrawn already. Go back to your tryouts and check.",
+  applicationAnswered: "This application has moved on: the business made you an offer, booked you or picked someone else. Check Applications.",
   applyLimit: `You can apply for up to ${RULES.applicationsPerDay} tryouts a day. Apply for this one tomorrow.`,
   unknownArea: (area: string) => `We don't know where ${area} is yet, so we can't find tryouts near you. Contact us and we'll add it.`,
   feedUnavailable: `Tryouts didn't load. Check your connection, then tap ${BUTTON_LABELS.refresh}.`,
   detailUnavailable: `This tryout didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`,
+  reportNote: "Your report can be up to 1,000 characters. Make it shorter.",
   note: `Your note can be up to ${RULES.applicationNoteMaxChars} characters. Make it shorter.`,
 } as const;

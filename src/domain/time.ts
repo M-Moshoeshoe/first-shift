@@ -48,6 +48,12 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 /** The day of the week an instant falls on in South Africa, 0 for Sunday. */
 const sastWeekday = (date: Date): number => addMinutes(date, RULES.timezoneOffsetMinutes).getUTCDay();
 
+/** A South African clock time, "8:00", as the slips show times. */
+export function sastClock(date: Date): string {
+  const { hour, minute } = sastParts(date);
+  return `${hour}:${String(minute).padStart(2, "0")}`;
+}
+
 /** A tryout's day and hours as a slip shows them, in South African time: "Tue 27 Oct", "9:00 to 15:00". */
 export function sastSlot(start: Date, end: Date): { day: string; hours: string } {
   const from = sastParts(start);

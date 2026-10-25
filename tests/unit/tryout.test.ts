@@ -19,6 +19,8 @@ describe("transition", () => {
     "published book": "booked",
     "published withdraw": "withdrawn",
     "booked complete": "completed",
+    // A cancelled booking ends the tryout (bookings.ts, decideCancel).
+    "booked cancel": "withdrawn",
   };
 
   const moves = TRYOUT_STATUSES.flatMap((status) => TRYOUT_ACTIONS.map((action): [TryoutStatus, TryoutAction] => [status, action]));

@@ -9,7 +9,9 @@ service firebase.storage {
     }
 
     match /photos/{uid}/{fileName} {
-      allow read: if request.auth != null;
+      // Your own photos only. Anyone else's comes through the server, which checks you're linked
+      // (an application or a booking between you), so demo and real accounts never see each other's.
+      allow read: if request.auth != null && request.auth.uid == uid;
       // Demo accounts have public passwords, so nobody may put a photo of themselves on one.
       allow write: if request.auth != null
         && request.auth.token.get("demo", false) != true

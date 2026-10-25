@@ -1,7 +1,7 @@
 import "server-only";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
-import { AVAILABILITY, type BusinessRecord, type UserRecord } from "@/domain/profile";
+import { ACCOUNT_STATUSES, AVAILABILITY, type BusinessRecord, type UserRecord } from "@/domain/profile";
 import { COIDA_ANSWERS } from "@/domain/injuryCover";
 import { ROLES } from "@/domain/roles";
 import { adminDb } from "../firebaseAdmin";
@@ -14,7 +14,7 @@ const PhotoSchema = z.object({ path: z.string(), version: z.string() });
 
 const UserRecordSchema = z.object({
   role: z.enum(ROLES),
-  status: z.literal("active"),
+  status: z.enum(ACCOUNT_STATUSES),
   demo: z.boolean().optional(),
   completed: counter.optional(),
   onTime: counter.optional(),
@@ -31,7 +31,7 @@ const UserRecordSchema = z.object({
 
 const BusinessRecordSchema = z.object({
   ownerId: z.string(),
-  status: z.literal("active"),
+  status: z.enum(ACCOUNT_STATUSES),
   demo: z.boolean().optional(),
   completed: counter,
   onTime: counter,
@@ -45,8 +45,8 @@ const BusinessRecordSchema = z.object({
   coida: z.enum(COIDA_ANSWERS).optional(),
 });
 
-const parseUser = (data: unknown): UserRecord => UserRecordSchema.parse(data);
-const parseBusiness = (data: unknown): BusinessRecord => BusinessRecordSchema.parse(data);
+export const parseUser = (data: unknown): UserRecord => UserRecordSchema.parse(data);
+export const parseBusiness = (data: unknown): BusinessRecord => BusinessRecordSchema.parse(data);
 
 /** Firestore rejects undefined values; optional fields that aren't set are simply left out. */
 const defined = (record: object): Record<string, unknown> => Object.fromEntries(Object.entries(record).filter(([, value]) => value !== undefined));

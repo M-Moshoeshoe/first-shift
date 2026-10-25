@@ -48,6 +48,16 @@ describe("photo uploads", () => {
     await assertFails(upload("thabo", "photos/thabo/profile.jpg", new Uint8Array(TWO_MB), "image/jpeg"));
   });
 
+  it("lets a person read only their own photos: anyone else's comes through the server", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await context.storage().ref("photos/thabo/profile.jpg").put(JPEG, { contentType: "image/jpeg" });
+    });
+    await assertSucceeds(Promise.resolve(env.authenticatedContext("thabo").storage().ref("photos/thabo/profile.jpg").getMetadata()));
+    await assertFails(Promise.resolve(env.authenticatedContext("sipho").storage().ref("photos/thabo/profile.jpg").getMetadata()));
+    await assertFails(Promise.resolve(env.authenticatedContext("demo-sipho", { demo: true }).storage().ref("photos/thabo/profile.jpg").getMetadata()));
+    await assertFails(Promise.resolve(env.unauthenticatedContext().storage().ref("photos/thabo/profile.jpg").getMetadata()));
+  });
+
   it("refuses any upload from a demo account, even an image into its own folder", async () => {
     await assertFails(upload("demo-thabo", "photos/demo-thabo/profile.jpg", JPEG, "image/jpeg", { demo: true }));
     await assertSucceeds(upload("thabo", "photos/thabo/profile.jpg", JPEG, "image/jpeg", { demo: false }));

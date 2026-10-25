@@ -81,6 +81,8 @@ npx firebase deploy --only firestore:rules,storage
 
 It should finish with **Deploy complete!** and list `firestore` and `storage`.
 
+Phase 4 tightened `storage.rules` (each person reads only their own photos) and added rules for bookings; deploy both rules files with the command above whenever they change.
+
 The nearby feed needs one composite index (tryouts by `status`, then `location.geohash`), kept in `firestore.indexes.json`. Deploy it whenever that file changes:
 
 ```bash

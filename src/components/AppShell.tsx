@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useBadge } from "@/lib/useBadge";
 import { NAV_MIN_ITEMS, type NavItem } from "@/config/nav";
 import { AppHeader } from "./AppHeader";
 import { AppNav } from "./AppNav";
@@ -17,13 +20,14 @@ interface AppShellProps {
  */
 export function AppShell({ nav = [], children }: AppShellProps) {
   const items = nav.length >= NAV_MIN_ITEMS ? nav : [];
+  const badge = useBadge(items.length > 0);
   return (
     <div className="flex min-h-dvh flex-col">
-      <AppHeader nav={items} />
+      <AppHeader nav={items} badge={badge} />
       <main className={`flex-1 lg:bg-mist lg:px-5 lg:py-12 ${items.length > 0 ? "pb-16 lg:pb-12" : ""}`}>
         <div className="lg:mx-auto lg:max-w-md lg:border-2 lg:border-ink lg:bg-paper">{children}</div>
       </main>
-      {items.length > 0 ? <AppNav items={items} /> : null}
+      {items.length > 0 ? <AppNav items={items} badge={badge} /> : null}
     </div>
   );
 }

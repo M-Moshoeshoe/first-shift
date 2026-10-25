@@ -69,7 +69,7 @@ export function createFakeStore() {
     },
   };
 
-  const photoStore: PhotoStore = { metadata: async (path) => photos.get(path) ?? null };
+  const photoStore: PhotoStore = { metadata: async (path) => photos.get(path) ?? null, download: async () => null };
   const snapshot = () => JSON.stringify({ users: [...users], businesses: [...businesses], idHashes: [...idHashes], ledgers: [...ledgers], audit });
   return { users, businesses, idHashes, ledgers, audit, photos, repo, photoStore, snapshot };
 }

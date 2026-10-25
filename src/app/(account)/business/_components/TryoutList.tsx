@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ShiftSlip } from "@/components/ShiftSlip";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
@@ -80,8 +81,10 @@ export function TryoutList({ uid }: { uid: string }) {
                 area={tryout.area}
                 payCents={tryout.payCents}
                 footer={
-                  <div className="flex min-h-11 items-center justify-between gap-4">
-                    <p className="font-bold tabular-nums">{statusLine(tryout)}</p>
+                  <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-4">
+                    <Link href={`/business/tryouts/${tryout.id}`} aria-label={`${statusLine(tryout)}: open ${tryout.title} on ${day}`} className="inline-flex min-h-11 items-center font-bold underline underline-offset-4 tabular-nums">
+                      {statusLine(tryout)}
+                    </Link>
                     {canWithdraw(tryout.status) ? (
                       <Button variant="quiet" aria-label={`Withdraw ${tryout.title} on ${day}`} onClick={() => setWithdrawing(tryout.id)}>
                         Withdraw

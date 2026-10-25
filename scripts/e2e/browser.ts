@@ -2,6 +2,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser } from "playwright-core";
 import { business, youngPerson } from "./flows";
+import { bookingWalk } from "./bookingFlow";
 import { postingAndDashboard } from "./postingFlow";
 import { BASE, launchEdge, newPage, pathIs, recorder, signIn, throttle, type Recorder } from "./kit";
 import { clearEmulators, requireEmulators, run } from "./session";
@@ -34,6 +35,7 @@ async function walk(browser: Browser, width: number): Promise<{ rec: Recorder; t
     await youngPerson(rec, page);
     await business(rec, page);
     const timings = await postingAndDashboard(rec, page);
+    await bookingWalk(rec, page);
     return { rec, timings };
   } catch (error) {
     // The screen as it was when a step failed, next to the others.

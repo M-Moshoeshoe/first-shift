@@ -4,12 +4,17 @@
  * checks each has a page). The bar appears once a role has NAV_MIN_ITEMS.
  */
 export const NAV = {
-  young_person: [{ href: "/work", label: "Tryouts" }],
-  business: [
-    { href: "/business", label: "Tryouts" },
-    { href: "/business/post", label: "Post" },
+  young_person: [
+    { href: "/work", label: "Tryouts", badge: false },
+    // The badge counts offers waiting for an answer.
+    { href: "/work/applications", label: "Applications", badge: true },
   ],
-} as const satisfies Record<"young_person" | "business", readonly { href: string; label: string }[]>;
+  business: [
+    // The badge counts new applicants the owner hasn't looked at yet.
+    { href: "/business", label: "Tryouts", badge: true },
+    { href: "/business/post", label: "Post", badge: false },
+  ],
+} as const satisfies Record<"young_person" | "business", readonly { href: string; label: string; badge: boolean }[]>;
 
 export type NavItem = (typeof NAV)[keyof typeof NAV][number];
 

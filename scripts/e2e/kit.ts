@@ -135,6 +135,13 @@ export async function throttle(page: Page): Promise<void> {
   await cdp.send("Network.emulateNetworkConditions", SLOW_4G);
 }
 
+/** Back to the full-speed network after a throttled timing. */
+export async function unthrottle(page: Page): Promise<void> {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.enable");
+  await cdp.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+}
+
 export async function signIn(page: Page, account: string): Promise<void> {
   await page.getByLabel("Test account (emulators only)").fill(account);
   await page.getByRole("button", { name: "Sign in as test account" }).click();

@@ -23,7 +23,7 @@ export interface FindingServiceDeps {
 const notFound = () => new AppError(404, "not_found", FINDING_MESSAGES.notFound);
 
 /** How each refusal is reported over HTTP. The decision itself comes from src/domain (applications.ts). */
-function refusal(problem: Exclude<ApplyState, { kind: "can_apply" | "applied" }>["reason"] | "not_found"): AppError {
+function refusal(problem: Extract<ApplyState, { reason: unknown }>["reason"] | "not_found"): AppError {
   if (problem === "not_found") return notFound();
   if (problem === "booking_closed" || problem === "not_open") return new AppError(409, problem, CLOSED_MESSAGES[problem]);
   return new AppError(problem === "not_young_person" ? 403 : 409, problem, NOT_ELIGIBLE_MESSAGES[problem]);
@@ -94,6 +94,7 @@ export function createFindingService({ finding, profiles, consumeQuota, now }: F
       const user = await worker(viewer.uid);
       const status = await finding.transact<ApplicationResult["status"]>(tryoutId, viewer.uid, ({ application }) => {
         const decision = decideWithdrawApplication(viewer.uid, application);
+        if (decision.kind === "refuse" && decision.problem === "answered") throw new AppError(409, "answered", FINDING_MESSAGES.applicationAnswered);
         if (decision.kind === "refuse" || !application) throw new AppError(404, "not_found", FINDING_MESSAGES.applicationNotFound);
         if (decision.kind === "unchanged") return { write: null, result: "unchanged" };
         return { write: { application: { ...application, status: "withdrawn" }, applicantsDelta: -1, audit: "application_withdrawn" }, result: "withdrawn" };

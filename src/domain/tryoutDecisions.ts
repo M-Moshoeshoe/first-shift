@@ -44,6 +44,10 @@ export interface TryoutRecord {
   status: TryoutStatus;
   /** Posted by a demo account: seen only by demo accounts (demo.ts). */
   demo: boolean;
+  /** The offer waiting for an answer, if any (offers.ts). */
+  offer?: { workerId: string; at: Date } | null;
+  /** Set once someone accepts: the booking (bookings.ts). */
+  bookingId?: string | null;
 }
 
 export type PostingProblem = "not_business" | "profile_incomplete" | "account_paused" | "no_credits";

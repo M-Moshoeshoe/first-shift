@@ -1,0 +1,130 @@
+import "server-only";
+import { RULES } from "@/config/rules";
+import { BOOKING_COPY } from "@/domain/bookingMessages";
+import { cancelOutcome, decideCancel, type CancelOutcome, decideReport, mapsUrl, mayViewPhoto, partyOf, statusView, whatsAppUrl, type BookingRecord } from "@/domain/bookings";
+import type { Party } from "@/domain/cancellation";
+import type { ReportCategory } from "@/domain/cases";
+import type { Viewer } from "@/domain/demo";
+import { displayPhone, photoPath, type PhotoKind } from "@/domain/profile";
+import { settlementCredit } from "@/domain/settlement";
+import { addDays } from "@/domain/time";
+import type { BookingViewResponse } from "@/schemas/booking";
+import { AppError } from "../errors";
+import type { BookingRepository } from "../repositories/bookingRepository";
+import type { BookingSecrets } from "../repositories/offerRepository";
+import type { PhotoStore } from "../repositories/photoStore";
+
+export interface BookingServiceDeps {
+  bookings: BookingRepository;
+  photos: PhotoStore;
+  now: () => Date;
+}
+
+const notFound = () => new AppError(404, "not_found", BOOKING_COPY.notFound);
+const GRACE_WINDOW_DAYS = 30;
+
+/** What this party may see of the booking: the owner gets the payout number, the young person the check-in code. */
+function bookingView(bookingId: string, booking: BookingRecord, secrets: BookingSecrets, party: Party, outcome: CancelOutcome | null): BookingViewResponse {
+  const isOwner = party === "business";
+  return {
+    id: bookingId,
+    tryoutId: booking.tryoutId,
+    party,
+    title: booking.title,
+    businessName: booking.businessName,
+    businessArea: booking.businessArea,
+    workerFirstName: booking.workerFirstName,
+    startAt: booking.startAt.toISOString(),
+    endAt: booking.endAt.toISOString(),
+    hours: booking.hours,
+    rateCentsPerHour: booking.rateCentsPerHour,
+    payCents: booking.payCents,
+    status: booking.status,
+    mapsUrl: mapsUrl(booking.location),
+    pinAccuracyMetres: booking.location.accuracyMetres,
+    photo: isOwner ? { subject: booking.workerId, kind: "profile" } : { subject: booking.ownerId, kind: "shopfront" },
+    payoutPhone: isOwner ? displayPhone(booking.workerPayoutPhone) : null,
+    whatsappUrl: isOwner ? whatsAppUrl(booking.workerPayoutPhone) : null,
+    // The code is the young person's to show at the door: the owner never receives it.
+    checkInCode: isOwner ? null : secrets.checkInCode,
+    shareToken: isOwner ? null : secrets.shareToken,
+    cancel: outcome ? { kind: outcome.kind, owedCents: outcome.settlement.wage?.amountCents ?? 0 } : null,
+  };
+}
+
+/**
+ * The booking page for both parties, cancelling through settle(), reports,
+ * the public status page and photos between people who are linked. Every
+ * decision comes from src/domain (bookings.ts, settlement.ts).
+ */
+export function createBookingService({ bookings, photos, now }: BookingServiceDeps) {
+  const graceCancels = (uid: string) => bookings.graceCancelsSince(uid, addDays(now(), -GRACE_WINDOW_DAYS));
+
+  async function own(viewer: Viewer, bookingId: string) {
+    const found = await bookings.get(bookingId);
+    const party = partyOf(viewer, found?.booking ?? null);
+    if (!found || !party) throw notFound();
+    return { ...found, party };
+  }
+
+  return {
+    async view(viewer: Viewer, bookingId: string): Promise<BookingViewResponse> {
+      const { booking, secrets, party } = await own(viewer, bookingId);
+      const outcome = booking.status === "booked" ? cancelOutcome(party, booking, now(), await graceCancels(viewer.uid)) : null;
+      return bookingView(bookingId, booking, secrets, party, outcome);
+    },
+
+    /** Cancels, classified free or late by the cancellation rules and settled by settle(): wage, credit and strike together. */
+    async cancel(viewer: Viewer, bookingId: string): Promise<{ status: "cancelled" | "unchanged" }> {
+      const recent = await graceCancels(viewer.uid);
+      return bookings.transactEnding<{ status: "cancelled" | "unchanged" }>(bookingId, viewer.uid, ({ booking, ownerLedger }) => {
+        const at = now();
+        const decision = decideCancel(viewer, booking, at, recent);
+        if (decision.kind === "refuse") throw decision.problem === "not_found" ? notFound() : new AppError(409, "started", BOOKING_COPY.started);
+        if (decision.kind === "unchanged" || !booking) return { write: null, result: { status: "unchanged" } };
+        const { party, outcome } = decision;
+        const credit = settlementCredit(outcome.settlement, ownerLedger, booking.tryoutId);
+        const changes: Partial<BookingRecord> = {
+          status: "cancelled",
+          cancellation: { by: party, byUid: viewer.uid, at, kind: outcome.kind, reliedOnGrace: outcome.reliedOnGrace },
+          owedCents: outcome.settlement.wage?.amountCents ?? 0,
+        };
+        return {
+          write: {
+            booking: changes,
+            tryoutStatus: "withdrawn",
+            applicationStatus: party === "business" ? "cancelled" : "withdrawn",
+            ledger: credit.kind === "append" ? credit.entries : [],
+            strike: outcome.settlement.strike,
+            audit: `booking_cancelled_${outcome.kind}`,
+          },
+          result: { status: "cancelled" },
+        };
+      });
+    },
+
+    async report(viewer: Viewer, bookingId: string, category: ReportCategory, note: string): Promise<{ paused: boolean }> {
+      const found = await bookings.get(bookingId);
+      const decision = decideReport(viewer, found?.booking ?? null, found?.booking.tryoutId ?? "", category, note);
+      if (decision.kind === "refuse") throw notFound();
+      await bookings.report(decision.reviewCase, viewer.uid, decision.pauseBusiness);
+      return { paused: decision.pauseBusiness };
+    },
+
+    /** The public status page: null when the token is unknown or the link has expired, so the two look the same. */
+    async status(token: string) {
+      if (!/^[A-Za-z0-9_-]{16,64}$/.test(token)) return null;
+      const booking = await bookings.byShareToken(token);
+      return booking ? statusView(booking, now()) : null;
+    },
+
+    async photo(viewer: Viewer, subjectUid: string, kind: PhotoKind) {
+      const relation = viewer.uid === subjectUid ? { appliedToViewer: false, bookedTogether: false } : await bookings.relation(viewer.uid, subjectUid);
+      if (!mayViewPhoto(viewer.uid, subjectUid, kind, relation)) return null;
+      const file = await photos.download(photoPath(subjectUid, kind));
+      return file && RULES.photoContentTypes.some((type) => type === file.contentType) ? file : null;
+    },
+  };
+}
+
+export type BookingService = ReturnType<typeof createBookingService>;

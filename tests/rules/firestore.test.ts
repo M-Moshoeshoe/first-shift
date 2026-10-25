@@ -141,6 +141,13 @@ describe("reads", () => {
     }
   });
 
+  it("keeps a business record private to its owner", async () => {
+    await assertSucceeds(getDoc(doc(as("sipho"), "businesses/sipho-shop")));
+    await assertFails(getDoc(doc(as("thabo"), "businesses/sipho-shop")));
+  });
+});
+
+describe("applications and bookings, written only by the server (Phases 3 and 4)", () => {
   it("lets only the applicant and the tryout's owner read an application, and no client write one (Phase 3)", async () => {
     await assertSucceeds(getDoc(doc(as("thabo"), "applications/a1")));
     await assertSucceeds(getDoc(doc(as("sipho"), "applications/a1")));
@@ -156,8 +163,24 @@ describe("reads", () => {
     }
   });
 
-  it("keeps a business record private to its owner", async () => {
-    await assertSucceeds(getDoc(doc(as("sipho"), "businesses/sipho-shop")));
-    await assertFails(getDoc(doc(as("thabo"), "businesses/sipho-shop")));
+  it("lets only a booking's two parties read it, keeps its secrets and the status page server-only, and lets no client write (Phase 4)", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, "bookingSecrets/b1"), { bookingId: "b1", checkInCode: "123456", shareToken: "token-abcdefghijklmnop" });
+      await setDoc(doc(db, "cases/c1"), { kind: "report", category: "harassment", reporterId: "thabo", businessId: "sipho" });
+      await setDoc(doc(db, "strikes/s1"), { uid: "thabo", reason: "late_cancellation" });
+    });
+    await assertSucceeds(getDoc(doc(as("thabo"), "bookings/b1")));
+    await assertSucceeds(getDoc(doc(as("sipho"), "bookings/b1")));
+    for (const reader of [as("lerato"), as("demo-thabo", { demo: true }), anonymous()]) await assertFails(getDoc(doc(reader, "bookings/b1")));
+    for (const client of [as("thabo"), as("sipho"), anonymous()]) {
+      await assertFails(getDoc(doc(client, "bookingSecrets/b1")));
+      await assertFails(getDocs(query(collection(client, "bookingSecrets"), where("shareToken", "==", "token-abcdefghijklmnop"))));
+      await assertFails(getDoc(doc(client, "cases/c1")));
+      await assertFails(getDoc(doc(client, "strikes/s1")));
+      await assertFails(setDoc(doc(client, "bookings/b2"), { workerId: "thabo", ownerId: "sipho", status: "booked" }));
+      await assertFails(updateDoc(doc(client, "bookings/b1"), { status: "cancelled" }));
+      await assertFails(setDoc(doc(client, "cases/c2"), { kind: "report", reporterId: "thabo" }));
+    }
   });
 });

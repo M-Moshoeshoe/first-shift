@@ -26,6 +26,8 @@ const TryoutRecordSchema = z.object({
   status: z.enum(TRYOUT_STATUSES),
   // Tryouts posted before demo marking are all real.
   demo: z.boolean().default(false),
+  offer: z.object({ workerId: z.string(), at: instant }).nullable().optional(),
+  bookingId: z.string().nullable().optional(),
 });
 
 export const parseTryout = (data: unknown): TryoutRecord => TryoutRecordSchema.parse(data);

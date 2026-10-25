@@ -1,5 +1,5 @@
 import "server-only";
-import { FieldValue, Timestamp, type DocumentReference, type DocumentSnapshot, type Firestore, type Transaction } from "firebase-admin/firestore";
+import { FieldValue, type DocumentReference, type DocumentSnapshot, type Firestore, type Transaction } from "firebase-admin/firestore";
 import { z } from "zod";
 import { applicationId } from "@/domain/applications";
 import { COIDA_ANSWERS } from "@/domain/injuryCover";
@@ -7,20 +7,10 @@ import type { Listing } from "@/domain/nearby";
 import type { TryoutRecord } from "@/domain/tryoutDecisions";
 import { adminDb } from "../firebaseAdmin";
 import type { ApplicationState, FindingRepository } from "./findingRepository";
+import { instant, parseApplication } from "./firestoreRecords";
 import { parseTryout } from "./firestoreTryoutRepository";
 
 // Stored documents are parsed on the way in, so a malformed record fails loudly instead of being trusted.
-const instant = z.instanceof(Timestamp).transform((value) => value.toDate());
-const ApplicationSchema = z.object({
-  tryoutId: z.string(),
-  workerId: z.string(),
-  ownerId: z.string(),
-  note: z.string(),
-  status: z.enum(["applied", "withdrawn"]),
-  demo: z.boolean(),
-  startAt: instant,
-  endAt: instant,
-});
 const BookingSchema = z.object({ startAt: instant, endAt: instant });
 /** Only what the feed shows about a business: its track record and its injury cover answer. Never its pin. */
 const BusinessSummarySchema = z.object({ completed: z.number().int().min(0), coida: z.enum(COIDA_ANSWERS).optional() });
@@ -43,7 +33,7 @@ async function readState(db: Firestore, tryoutId: string, workerId: string, tx?:
   ]);
   return {
     tryout: tryout.exists ? parseTryout(tryout.data()) : null,
-    application: application.exists ? ApplicationSchema.parse(application.data()) : null,
+    application: application.exists ? parseApplication(application.data()) : null,
     bookings: bookings.docs.map((doc) => BookingSchema.parse(doc.data())).map(({ startAt, endAt }) => ({ start: startAt, end: endAt })),
   };
 }

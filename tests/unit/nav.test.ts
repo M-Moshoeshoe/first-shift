@@ -14,6 +14,12 @@ describe("navigation config", () => {
       for (const item of items) expect(existsSync(`src/app/(account)${item.href}/page.tsx`), item.href).toBe(true);
     }
   });
+
+  it("puts one badge on each role's bar: offers for a young person, applicants for an owner", () => {
+    for (const items of Object.values(NAV)) {
+      expect(items.filter((item) => item.badge)).toHaveLength(1);
+    }
+  });
 });
 
 describe("intent from the home page", () => {

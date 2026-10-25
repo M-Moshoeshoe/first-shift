@@ -54,6 +54,14 @@ describe("every account screen is open only while it's the person's destination"
     expect(redirectFor("/work/tryouts/", "/work")).toBe("/work");
     expect(redirectFor("/work/tryouts/a/b", "/work")).toBe("/work");
     expect(redirectFor("/work/tryouts/a.b", "/work")).toBe("/work");
+    expect(redirectFor("/work/applications", "/work")).toBeNull();
+    expect(redirectFor("/work/applications", "/business")).toBe("/business");
+    expect(redirectFor("/business/tryouts/t1", "/business")).toBeNull();
+    expect(redirectFor("/business/tryouts/t1", "/work")).toBe("/work");
+    // Both parties open the same booking page; the server shows each only their side.
+    expect(redirectFor("/bookings/b1", "/work")).toBeNull();
+    expect(redirectFor("/bookings/b1", "/business")).toBeNull();
+    expect(redirectFor("/bookings/b1", "/onboarding/work")).toBe("/onboarding/work");
   });
 
   it("only treats known screens as destinations", () => {
