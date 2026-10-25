@@ -10,7 +10,8 @@ const ID_NUMBER = "0001155800087"; // a valid adult citizen ID, born 2000-01-15
 export async function visit(rec: Recorder, page: Page, path: string, expected: string): Promise<void> {
   await page.goto(`${BASE}${path}`);
   await pathIs(page, expected);
-  await page.waitForLoadState("networkidle");
+  // The screen is ready when its heading is: a live Firestore listener means the network never goes quiet.
+  await page.locator("main h1").first().waitFor();
   if (new URL(page.url()).pathname !== expected) throw new Error(`${path}: expected ${expected}, got ${page.url()}`);
   await rec.check(page, `open ${path}, land on ${expected}`);
 }
@@ -28,7 +29,6 @@ export async function skeleton(rec: Recorder, page: Page, path: string): Promise
   await rec.check(page, `loading ${path}`, { heading: false });
   await release();
   await page.locator("main h1").first().waitFor();
-  await page.waitForLoadState("networkidle");
   const after = await measureLayout(page, "real");
   const titleOff = Math.abs(before.title - after.title);
   const bodyOff = before.body !== null && after.body !== null ? Math.abs(before.body - after.body) : before.body === after.body ? 0 : Infinity;

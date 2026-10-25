@@ -46,6 +46,6 @@ export async function askForJson<T>({ purpose, system, user, maxTokens, schema }
   } catch (error) {
     if (error instanceof AppError) throw error;
     log("error", "ai_request_failed", { purpose, reason: error instanceof Error ? error.message : "unknown" });
-    throw new AppError(502, "ai_unavailable", "We couldn't do that right now. Try again, or fill it in yourself.");
+    throw new AppError(502, "ai_unavailable", "We couldn't draft that right now. Try again in a minute.");
   }
 }

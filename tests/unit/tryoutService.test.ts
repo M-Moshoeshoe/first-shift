@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { RULES } from "@/config/rules";
 import { POSTING_PROBLEM_MESSAGES, TERMS_MESSAGES, TRYOUT_MESSAGES } from "@/domain/tryoutMessages";
 import { AppError } from "@/server/errors";
-import { createTryoutFakes, fakeCheckWork, PIN, shop, terms } from "./support/tryoutFakes";
+import { createTryoutFakes, fakeCheckWork, fakeDraft, PIN, shop, terms } from "./support/tryoutFakes";
 
 afterEach(() => vi.clearAllMocks());
 
@@ -26,6 +26,16 @@ describe("draft", () => {
     const result = await service.draft("lerato", "Fix the wiring in my shop");
     expect(result).toMatchObject({ outcome: "blocked", saferOption: expect.stringContaining("registered electrician") });
     expect(tryouts.size + audit.length).toBe(0);
+  });
+
+  it("answers blocked even when the draft itself fails, and fails closed when the safety check does", async () => {
+    const { service } = createTryoutFakes();
+    fakeDraft.mockRejectedValueOnce(new AppError(502, "ai_unavailable", "We couldn't do that right now."));
+    expect(await service.draft("lerato", "Fix the wiring in my shop")).toMatchObject({ outcome: "blocked" });
+    fakeCheckWork.mockRejectedValueOnce(new AppError(502, "ai_unavailable", "We couldn't do that right now."));
+    expect(await refusal(service.draft("lerato", "Help sorting stock please"))).toMatchObject({ status: 502, publicMessage: TRYOUT_MESSAGES.aiDraftUnavailable });
+    fakeDraft.mockRejectedValueOnce(new AppError(502, "ai_unavailable", "We couldn't do that right now."));
+    expect(await refusal(service.draft("lerato", "Help sorting stock please"))).toMatchObject({ status: 502, publicMessage: TRYOUT_MESSAGES.aiDraftUnavailable });
   });
 
   it("refuses a business with no credit left before any AI is used, with the top-up message", async () => {
@@ -112,7 +122,7 @@ describe("post", () => {
   it("fails closed when the AI check fails: nothing is written", async () => {
     const { service, tryouts, audit } = createTryoutFakes();
     fakeCheckWork.mockRejectedValueOnce(new AppError(502, "ai_unavailable", "We couldn't do that right now."));
-    await refusal(service.post("lerato", terms()));
+    expect(await refusal(service.post("lerato", terms()))).toMatchObject({ publicMessage: TRYOUT_MESSAGES.aiCheckUnavailable });
     expect(tryouts.size + audit.length).toBe(0);
   });
 });

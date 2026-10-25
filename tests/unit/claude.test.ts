@@ -52,6 +52,6 @@ describe("askForJson", () => {
     parse.mockRejectedValue(new Error("timeout"));
     const error = await askForJson(request).catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(AppError);
-    expect(error).toMatchObject({ status: 502, publicMessage: "We couldn't do that right now. Try again, or fill it in yourself." });
+    expect(error).toMatchObject({ status: 502, publicMessage: "We couldn't draft that right now. Try again in a minute." });
   });
 });

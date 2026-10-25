@@ -139,14 +139,20 @@ export function isDestination(path: string): path is Destination {
   return DESTINATIONS.some((destination) => destination === path);
 }
 
+/** The other screens each home opens to, listed one by one so nothing else slips through. */
+const SCREENS_OF: Partial<Record<Destination, readonly string[]>> = {
+  "/business": ["/business/post"],
+};
+
 /**
  * Where to send someone who opened path, or null when they belong there.
- * Every account screen is open only while it's the person's destination, so
- * nobody skips onboarding, opens the other role's screens or redoes a
- * finished profile. Server routes enforce everything again regardless.
+ * Every account screen is open only while it's the person's destination (or
+ * one of that destination's own screens, SCREENS_OF), so nobody skips
+ * onboarding, opens the other role's screens or redoes a finished profile.
+ * Server routes enforce everything again regardless.
  */
-export function redirectFor(path: Destination, destination: Destination): Destination | null {
-  return path === destination ? null : destination;
+export function redirectFor(path: string, destination: Destination): Destination | null {
+  return path === destination || (SCREENS_OF[destination]?.includes(path) ?? false) ? null : destination;
 }
 
 /** Where a person belongs right now. Screens redirect with this; server routes enforce everything again. */

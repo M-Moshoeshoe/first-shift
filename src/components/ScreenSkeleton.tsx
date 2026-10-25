@@ -1,22 +1,22 @@
-import type { Destination } from "@/domain/profile";
-
 /** Lines of text at 360 px and at the desktop column width: each skeleton line stands in for one. */
 type Lines = { phone: number; desktop: number };
 
 interface Spec {
   title: Lines;
   intro: Lines;
-  body: "role" | "form" | "none";
+  body: "role" | "form" | "dashboard" | "none";
 }
 
 // Line counts measured on the real screens at 360 px and in the 1280 px desktop column; npm run e2e:browser
 // checks each skeleton against its screen to within 2 px, so nothing jumps when the profile arrives.
-const SPECS: Partial<Record<Destination, Spec>> = {
+// Keyed by address: the gated destinations and their own screens (domain/profile.ts, SCREENS_OF).
+const SPECS: Record<string, Spec> = {
   "/onboarding/role": { title: { phone: 2, desktop: 2 }, intro: { phone: 2, desktop: 2 }, body: "role" },
   "/onboarding/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 2 }, body: "form" },
   "/onboarding/business": { title: { phone: 2, desktop: 1 }, intro: { phone: 3, desktop: 2 }, body: "form" },
   "/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "none" },
-  "/business": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "none" },
+  "/business": { title: { phone: 1, desktop: 1 }, intro: { phone: 1, desktop: 1 }, body: "dashboard" },
+  "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 4, desktop: 3 }, body: "form" },
 };
 
 const block = "animate-skeleton bg-mist";
@@ -54,7 +54,7 @@ function FieldBars({ hint }: { hint: boolean }) {
  * controls. Never a spinner.
  */
 export function ScreenSkeleton({ path }: { path: string }) {
-  const spec = SPECS[path as Destination] ?? SPECS["/work"];
+  const spec = SPECS[path] ?? SPECS["/work"];
   if (!spec) return null;
   return (
     <div role="status" aria-label="Loading your page" className="flex flex-col gap-6">
@@ -83,6 +83,13 @@ export function ScreenSkeleton({ path }: { path: string }) {
             <FieldBars hint={false} />
             <FieldBars hint />
           </div>
+        </div>
+      ) : null}
+      {spec.body === "dashboard" ? (
+        <div className="flex flex-col gap-6">
+          <div className={`h-36 ${block}`} />
+          <div className={`h-13 ${block}`} />
+          <div className={`h-7 w-40 ${block}`} />
         </div>
       ) : null}
     </div>

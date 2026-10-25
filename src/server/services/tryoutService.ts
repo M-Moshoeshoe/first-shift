@@ -28,6 +28,11 @@ export interface TryoutServiceDeps {
  * classifies, and every write happens in one repository transaction with its
  * audit entry. Anything that fails, fails closed: nothing is written.
  */
+/** An AI failure, reworded for what the owner tapped; anything else passes through unchanged. */
+function inContext(error: unknown, message: string): unknown {
+  return error instanceof AppError && error.code === "ai_unavailable" ? new AppError(error.status, error.code, message) : error;
+}
+
 export function createTryoutService({ tryouts, profiles, draftTryout, checkWork, consumeQuota, aiDailyLimit, now }: TryoutServiceDeps) {
   /** The poster's own records, read in a transaction that writes nothing; refused unless they may post. */
   async function poster(uid: string): Promise<StoredProfile> {
@@ -42,11 +47,16 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
     async draft(uid: string, description: string): Promise<DraftResult> {
       await poster(uid);
       await consumeQuota(uid, "ai", aiDailyLimit, { message: TRYOUT_MESSAGES.aiLimit });
-      const [work, draft] = await Promise.all([checkWork(checkText("", [], description)), draftTryout(description)]);
+      const [checked, drafted] = await Promise.allSettled([checkWork(checkText("", [], description)), draftTryout(description)]);
+      // Fail closed: no safety answer, no draft. A blocked answer stands whatever happened to the draft.
+      if (checked.status === "rejected") throw inContext(checked.reason, TRYOUT_MESSAGES.aiDraftUnavailable);
+      const work = checked.value;
       if (work.decision === "blocked") {
         log("warn", "tryout_draft_blocked", { uid, category: work.category });
         return { outcome: "blocked", saferOption: work.saferOption };
       }
+      if (drafted.status === "rejected") throw inContext(drafted.reason, TRYOUT_MESSAGES.aiDraftUnavailable);
+      const draft = drafted.value;
       return { outcome: work.decision, draft: { title: draft.title, tasks: draft.tasks, hours: suggestHours(draft.hours) } };
     },
 
@@ -62,7 +72,9 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
       if (!decided.ok) throw new AppError(422, "tryout_terms", termsMessage(decided.error));
 
       await consumeQuota(uid, "posts", RULES.postsPerDay, { message: TRYOUT_MESSAGES.postsLimit });
-      const work = await checkWork(checkText(terms.title, terms.tasks, terms.description));
+      const work = await checkWork(checkText(terms.title, terms.tasks, terms.description)).catch((error: unknown) => {
+        throw inContext(error, TRYOUT_MESSAGES.aiCheckUnavailable);
+      });
       const posted = postedStatus(work);
       if (!posted.ok) {
         log("warn", "tryout_post_blocked", { uid, category: posted.error.category });

@@ -5,8 +5,10 @@ import { AI_CASES, type AiCase } from "../tests/fixtures/aiCases";
 
 /**
  * Runs every case in tests/fixtures/aiCases.ts against the real Claude API
- * and prints a pass or fail table. Exits non-zero on any failure. Never run in
- * CI: it needs a real key and costs money (a few cents on Claude Haiku 5.5).
+ * and prints a pass or fail table. Each allowed case is checked twice: the
+ * request, then its own draft as the owner would post it unedited. Exits
+ * non-zero on any failure. Never run in CI: it needs a real key and costs
+ * money (a few cents on Claude Haiku 5.5).
  *
  *   npm run eval:ai   (reads ANTHROPIC_API_KEY from .env.local)
  */
@@ -43,11 +45,16 @@ async function runCase(aiCase: AiCase): Promise<Row> {
   const draftText = draft.status === "fulfilled" ? [draft.value.title, ...draft.value.tasks].join(" ") : null;
   const draftNote = draftText === null ? "error" : MONEY.test(draftText) ? "mentions money" : `${draft.status === "fulfilled" ? draft.value.tasks.length : 0} tasks`;
 
+  // An allowed request's own draft must pass the check again at publish, as the owner would post it unedited.
+  const published = aiCase.expect.outcome === "allowed" && draft.status === "fulfilled" ? await checkWork(checkText(draft.value.title, draft.value.tasks, aiCase.text)) : null;
+  const publishNote = published && published.decision !== "allowed" ? `, at publish: ${published.decision === "blocked" ? `blocked (${published.category})` : "review"}` : "";
+
   const outcomeOk =
     aiCase.expect.outcome === "allowed" ? work.decision === "allowed" : aiCase.expect.outcome === "blocked" ? work.decision === "blocked" : work.decision !== "allowed";
   // An allowed request must also draft cleanly; no draft may ever talk about money (pay is set by the owner, checked by code).
   const draftOk = draftText === null ? aiCase.expect.outcome !== "allowed" : !MONEY.test(draftText);
-  return { ...base, got, draft: draftNote, result: outcomeOk && draftOk ? "pass" : "FAIL" };
+  const publishOk = published === null || published.decision === "allowed";
+  return { ...base, got: got + publishNote, draft: draftNote, result: outcomeOk && draftOk && publishOk ? "pass" : "FAIL" };
 }
 
 async function main(): Promise<void> {

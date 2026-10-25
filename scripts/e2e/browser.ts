@@ -2,8 +2,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Browser } from "playwright-core";
 import { business, youngPerson } from "./flows";
+import { postingAndDashboard } from "./postingFlow";
 import { BASE, launchEdge, newPage, pathIs, recorder, signIn, throttle, type Recorder } from "./kit";
 import { clearEmulators, requireEmulators, run } from "./session";
+
+type Timing = { timing: string; seconds: string };
 
 /**
  * Every route, walked like a real person in Microsoft Edge, as the quality
@@ -11,7 +14,8 @@ import { clearEmulators, requireEmulators, run } from "./session";
  *  1. at 360 px and at 1280 px: both onboarding journeys, every routing
  *     path, skeletons measured against the real screens, axe-core on every
  *     screen (zero serious or critical issues) and a screenshot of each;
- *  2. Slow 4G timings for the home page and both onboarding journeys.
+ *     then posting a tryout (with the real model) and the dashboard, every state;
+ *  2. Slow 4G timings for the home page, both onboarding journeys and both business pages.
  * Signs in with the test-only emulator sign-in, which exists only in development.
  *
  *   npm run emulators   then   npm run dev   then   npm run e2e:browser
@@ -22,17 +26,25 @@ requireEmulators(["FIRESTORE_EMULATOR_HOST", "FIREBASE_AUTH_EMULATOR_HOST", "FIR
 const SHOTS = process.env.E2E_SHOTS ?? join(tmpdir(), "first-shift-e2e");
 const PROD = process.env.E2E_PROD_BASE_URL;
 
-async function walk(browser: Browser, width: number): Promise<Recorder> {
+async function walk(browser: Browser, width: number): Promise<{ rec: Recorder; timings: Timing[] }> {
   await clearEmulators();
   const rec = recorder(width, SHOTS);
   const page = await newPage(browser, width, { geolocation: true });
-  await youngPerson(rec, page);
-  await business(rec, page);
-  await page.context().close();
-  return rec;
+  try {
+    await youngPerson(rec, page);
+    await business(rec, page);
+    const timings = await postingAndDashboard(rec, page);
+    return { rec, timings };
+  } catch (error) {
+    // The screen as it was when a step failed, next to the others.
+    await page.screenshot({ path: join(SHOTS, `${width}-failure.png`), fullPage: true }).catch(() => undefined);
+    console.error(`Failed at ${page.url()} after: ${rec.rows.at(-1)?.step ?? "the start"}. Screenshot: ${join(SHOTS, `${width}-failure.png`)}`);
+    throw error;
+  } finally {
+    await page.context().close();
+  }
 }
 
-type Timing = { timing: string; seconds: string };
 
 async function timed(label: string, action: () => Promise<void>): Promise<Timing> {
   const start = Date.now();
@@ -80,8 +92,10 @@ async function slow4g(browser: Browser): Promise<Timing[]> {
 run(async () => {
   const browser = await launchEdge();
   try {
-    const recs = [await walk(browser, 360), await walk(browser, 1280)];
-    const timings = await slow4g(browser);
+    const phone = await walk(browser, 360);
+    const desktop = await walk(browser, 1280);
+    const recs = [phone.rec, desktop.rec];
+    const timings = [...(await slow4g(browser)), ...phone.timings];
     console.table(recs.flatMap((rec) => rec.rows));
     console.table(timings);
     console.log(`Screenshots: ${SHOTS}`);

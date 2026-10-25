@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, MouseEvent } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "quiet";
+export type ButtonVariant = "primary" | "secondary" | "stop" | "quiet";
 
 // Press feedback is the first of the allowed motions (docs/DESIGN.md).
 const base = "flex items-center justify-center font-bold transition-transform duration-(--dur-fast) ease-out active:scale-97 disabled:cursor-not-allowed";
@@ -9,6 +9,8 @@ const variants: Record<ButtonVariant, string> = {
   // The only place primary green is applied (docs/DESIGN.md).
   primary: "min-h-13 w-full bg-primary px-5 text-lg text-on-primary",
   secondary: "min-h-11 w-full border-2 border-ink px-5 text-lg text-ink",
+  // Undoing something: a stop-coloured outline, never a filled red button (docs/DESIGN.md, Colour).
+  stop: "min-h-11 w-full border-2 border-stop px-5 text-lg text-stop",
   // A text action in the header: still a 44 px target, underlined so it reads as tappable.
   quiet: "min-h-11 px-1 text-base text-ink underline underline-offset-4",
 };

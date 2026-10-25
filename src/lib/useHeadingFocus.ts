@@ -7,8 +7,8 @@ import { useEffect, useRef } from "react";
  * so a screen reader announces where they are. Not on first load, where focus
  * stays at the top of the page.
  */
-export function useHeadingFocus(enabled: boolean) {
-  const heading = useRef<HTMLHeadingElement>(null);
+export function useHeadingFocus<T extends HTMLElement = HTMLHeadingElement>(enabled: boolean) {
+  const heading = useRef<T>(null);
   useEffect(() => {
     if (enabled) heading.current?.focus();
   }, [enabled]);

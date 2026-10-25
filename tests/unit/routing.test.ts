@@ -42,6 +42,14 @@ describe("every account screen is open only while it's the person's destination"
     expect(redirectFor("/sign-in", destinationFor(true, finishedWorker, null))).toBe("/work");
   });
 
+  it("opens a finished business's own screens, and nobody else's", () => {
+    expect(redirectFor("/business/post", "/business")).toBeNull();
+    expect(redirectFor("/business/post", "/work")).toBe("/work");
+    expect(redirectFor("/business/post", "/onboarding/business")).toBe("/onboarding/business");
+    expect(redirectFor("/business/anything-else", "/business")).toBe("/business");
+    expect(redirectFor("/business/post/../admin", "/business")).toBe("/business");
+  });
+
   it("only treats known screens as destinations", () => {
     expect(isDestination("/work")).toBe(true);
     expect(isDestination("/work/../admin")).toBe(false);

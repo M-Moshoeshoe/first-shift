@@ -35,6 +35,9 @@ export const TERMS_MESSAGES: Record<TermsProblem, string> = {
 export const TRYOUT_MESSAGES = {
   postsLimit: `You can post up to ${RULES.postsPerDay} tryouts a day. Post this one tomorrow.`,
   aiLimit: "You've used today's drafting help. Try again tomorrow.",
+  // When the AI doesn't answer: drafting says so, and posting (which only checks the work) says that instead.
+  aiDraftUnavailable: "We couldn't draft that right now. Try again in a minute.",
+  aiCheckUnavailable: "We couldn't check your tryout right now. Try again in a minute.",
   notFound: "We can't find that tryout. It may have been withdrawn already. Go back to your tryouts and check.",
   booked: `Someone is booked on this tryout, so it can't be withdrawn. Contact us if you need to cancel.`,
   finished: "This tryout has already happened, so it can't be withdrawn.",

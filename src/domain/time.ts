@@ -41,3 +41,17 @@ export function sameSastDay(a: Date, b: Date): boolean {
   const y = sastParts(b);
   return x.year === y.year && x.month === y.month && x.day === y.day;
 }
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
+/** The day of the week an instant falls on in South Africa, 0 for Sunday. */
+const sastWeekday = (date: Date): number => addMinutes(date, RULES.timezoneOffsetMinutes).getUTCDay();
+
+/** A tryout's day and hours as a slip shows them, in South African time: "Tue 27 Oct", "9:00 to 15:00". */
+export function sastSlot(start: Date, end: Date): { day: string; hours: string } {
+  const from = sastParts(start);
+  const to = sastParts(end);
+  const clock = (parts: { hour: number; minute: number }) => `${parts.hour}:${String(parts.minute).padStart(2, "0")}`;
+  return { day: `${DAYS[sastWeekday(start)]} ${from.day} ${MONTHS[from.month - 1]}`, hours: `${clock(from)} to ${clock(to)}` };
+}

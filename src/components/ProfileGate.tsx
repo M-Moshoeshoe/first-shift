@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Band } from "@/components/ui/Band";
 import { NAV } from "@/config/nav";
 import { readIntent, withIntent } from "@/domain/intent";
-import { destinationFor, isDestination, redirectFor } from "@/domain/profile";
+import { destinationFor, redirectFor } from "@/domain/profile";
 import { GatedProfileContext } from "@/lib/auth/gatedProfile";
 import { useOwnProfile } from "@/lib/auth/useOwnProfile";
 import { AppShell } from "./AppShell";
@@ -33,9 +33,7 @@ export function ProfileGate({ children }: { children: ReactNode }) {
     profile.status === "signed_out"
       ? destinationFor(false, null, null)
       : profile.status === "ready"
-        ? isDestination(pathname)
-          ? redirectFor(pathname, profile.view.destination)
-          : profile.view.destination
+        ? redirectFor(pathname, profile.view.destination)
         : null;
 
   useEffect(() => {

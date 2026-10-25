@@ -83,6 +83,7 @@ The worst outcome isn't a data leak. It's a fake tryout that puts a young person
    | Date | Model and effort | Allowed | Blocked refused | Hostile resisted | Result |
    | --- | --- | --- | --- | --- | --- |
    | 25 October 2026 | `claude-haiku-5-5`, effort low | 8 of 8 | 8 of 8 | 4 of 4 | **20 of 20 passed**, on the first run, with no prompt changes. Every blocked and hostile case was sorted into its exact expected category, except the R5-an-hour instruction, which went to review (not allowed, as required); the pay floor is enforced in code whatever the model says |
+   | 25 October 2026, after two prompt changes | `claude-haiku-5-5`, effort low | 8 of 8, each allowed draft also passing the check again at publish, unedited | 8 of 8 | 4 of 4 | **20 of 20 passed.** The changes: the draft prompt now names lengths (title under 50 characters, tasks under 100), and lists the blocked kinds of work to leave out, from the same definitions the check uses. The browser walkthrough had caught a drafted "learn the till" task that the publish check then refused. The eval now checks every allowed draft at publish, so this kind of problem fails it |
 
 ## Reporting a vulnerability
 

@@ -110,6 +110,8 @@ The side gutter stays 20 px (`px-5`), a layout value rather than a spacing step:
 Native first, because the phone's own controls cost no JavaScript and work the way people already know.
 
 - **Dates and times:** native `type="date"` and `type="time"` inputs, which open the phone's own pickers.
+- **Hours:** a row of five square chips, 4 to 8, 48 px each: real radio inputs, visually hidden; the chosen chip is filled `ink` with `paper` text.
+- **Undo buttons:** withdrawing or anything else that takes something down uses the `stop` button, a 2 px `stop` outline with `stop` text, never a filled red button.
 - **Invalid fields:** a 2 px `stop` border. Focused, a valid field gets the 3 px `ink` focus outline 2 px out; an invalid one gets a 3 px `stop` outline flush against its border instead, so it shows one thick red edge, not two outlines.
 - **Areas:** `AreaField`, a text input with a native `<datalist>` of known areas from `src/config/areas.ts`. The phone suggests them as you type, and any other area can still be typed. React Aria's ComboBox was measured against this and lost: it would add JavaScript to onboarding pages already close to their cap, for behaviour the phone gives for free.
 - **React Aria Components** is used once only: the withdraw confirmation sheet on `/business` (Modal and Dialog), styled with our tokens through its data attributes (`[data-entering]`, `[data-exiting]`, `[data-pressed]`, `[data-focus-visible]`) and moving only with sheet-enter and sheet-exit. No default React Aria styles and no other React Aria component (`AGENTS.md`).
@@ -136,7 +138,7 @@ Responses to what the person did, or to new data. App screens never use scroll r
 
 1. **Press feedback.** Every `Button`, and every link styled with `buttonClass()`, scales to 0.97 while pressed, over `--dur-fast`.
 2. **The Stamp**, the signature moment. Gold fill, `ink` text, 2 px `ink` border, square, rotated -8 degrees. It lands from scale 1.4 and opacity 0 to scale 1 and opacity 1 over `--dur-slow` with `--ease-spring` (`animate-stamp`). Its label is one of "Paid", "Received", "Booked", "Profile done" or "Posted" (a tryout that went live), and nothing else. When it lands, the phone gives one 15 ms vibration if it supports it, the person has tapped the page, and reduced motion is off.
-3. **Sheet enter, sheet exit and item enter.** A sheet slides up from 24 px below over `--dur-slow` with `--ease-out` (`animate-sheet-enter`). Closing, it does the reverse: it slides 24 px down over `--dur-base` with `--ease-out` (`animate-sheet-exit`), so it never vanishes in a frame, which reads as broken. A new item in a live feed fades in from 8 px above over `--dur-base` with `--ease-out` (`animate-item-enter`).
+3. **Sheet enter, sheet exit and item enter.** A sheet slides up from 24 px below over `--dur-slow` with `--ease-out` (`animate-sheet-enter`). Closing, it does the reverse: it slides 24 px down and fades out over `--dur-base` with `--ease-out` (`animate-sheet-exit`), so it never vanishes in a frame, which reads as broken. The scrim behind it (`ink` at 40%) fades in and out with it (`animate-scrim-in`, `animate-scrim-out`). A new item in a live feed fades in from 8 px above over `--dur-base` with `--ease-out` (`animate-item-enter`).
 4. **Field error.** When a submit fails validation, the first invalid field shakes once, 3 px left and right twice, 200 ms in all (`animate-field-shake`), and focus moves to it. Its error text fades in over `--dur-base` (`animate-error-in`, built into `FormError`).
 5. **Step progress.** Onboarding shows a thin bar that fills with `transform: scaleX()` over `--dur-slow` with `--ease-out` as each step completes.
 6. **Loading skeletons.** Placeholder blocks sized exactly like the content they stand for, so nothing jumps when data arrives, with a gentle opacity pulse from 1 to 0.55 and back over 1.4 s, ease-in-out (`animate-skeleton`). Loading states only.
@@ -164,7 +166,8 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/onboarding/business` | 260 KB (the cap) | 249.7 KB, 15 scripts |
 | `/onboarding/role` | 260 KB (the cap) | 239.8 KB, 14 scripts |
 | `/work` | 260 KB (the cap) | 239.4 KB, 14 scripts |
-| `/business` | 260 KB (the cap) | 239.4 KB, 14 scripts |
+| `/business` | 260 KB (the cap) | 244.5 KB, 15 scripts; the withdraw sheet (React Aria, 20.9 KB) and the Firestore listener (171.8 KB) load after the page has drawn |
+| `/business/post` | 260 KB (the cap) | 249.4 KB, 15 scripts |
 
 A new page's budget is its measured size plus 10%, never above 260 KB.
 

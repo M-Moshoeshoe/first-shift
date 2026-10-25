@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatRand } from "@/domain/money";
+import { formatRand, parseRand } from "@/domain/money";
 import { agreedPayCents, billableHours, isAcceptedAmount, payOwed } from "@/domain/pay";
 
 const rate = 3023;
@@ -52,5 +52,22 @@ describe("payOwed", () => {
 
   it("always allows an owner to pay more than the minimum", () => {
     expect(isAcceptedAmount(30000, payOwed({ ...base, minutesWorked: 480, endReason: "completed" }))).toBe(true);
+  });
+});
+
+describe("parseRand", () => {
+  it.each([
+    ["30.23", 3023],
+    ["R30.23", 3023],
+    ["r 30,23", 3023],
+    [" 35 ", 3500],
+    ["35.5", 3550],
+    ["0", 0],
+  ])("reads %j as %d cents", (typed, cents) => {
+    expect(parseRand(typed)).toBe(cents);
+  });
+
+  it.each(["", "R", "30.234", "-30", "30.2.3", "thirty", "1e3", "1234567"])("refuses %j", (typed) => {
+    expect(parseRand(typed)).toBeNull();
   });
 });

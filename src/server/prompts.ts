@@ -17,20 +17,6 @@ const DATA_RULE =
 export const wrap = (text: string): string =>
   `<owner_text>${text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</owner_text>`;
 
-export function draftTryoutPrompt(description: string): { system: string; user: string } {
-  return {
-    system: [
-      "You help owners of small South African businesses describe a one-day paid tryout for a young person who has never done this work before.",
-      DATA_RULE,
-      "Write a short title and 3 to 6 tasks. Each task is one concrete thing a first-timer can learn and finish at the business, with the owner there, in the hours you suggest.",
-      'Start each task with a verb and name the actual thing, like "Pack bread and cool drinks onto the front shelves". Never write vague tasks like "help out" or "assist where needed".',
-      "Use plain English a 19-year-old would use. Describe only the kind of work the owner asked for. Never mention pay, rates or money.",
-      "Suggest how many hours, from 4 to 8, the work needs.",
-    ].join(" "),
-    user: wrap(description),
-  };
-}
-
 /** What each category means, so the model sorts work the same way every time. */
 const CATEGORY_MEANINGS: Record<WorkCategory, string> = {
   customer_service: "serving and helping customers in a shop, salon or stall, with the owner there",
@@ -53,6 +39,26 @@ const CATEGORY_MEANINGS: Record<WorkCategory, string> = {
   private_home: "any work at someone's home rather than at business premises",
   overnight_or_alone: "work at night, or alone without the owner on site",
 };
+
+/**
+ * The draft leaves out work the check would refuse, so an owner who accepts
+ * the draft isn't then turned away. Guidance only: the check still decides,
+ * in code, on the final text (domain/allowedWork.ts).
+ */
+export function draftTryoutPrompt(description: string): { system: string; user: string } {
+  return {
+    system: [
+      "You help owners of small South African businesses describe a one-day paid tryout for a young person who has never done this work before.",
+      DATA_RULE,
+      "Write a short title, under 50 characters, and 3 to 6 tasks, each under 100 characters. Each task is one concrete thing a first-timer can learn and finish at the business, with the owner there, in the hours you suggest.",
+      'Start each task with a verb and name the actual thing, like "Pack bread and cool drinks onto the front shelves". Never write vague tasks like "help out" or "assist where needed".',
+      "Use plain English a 19-year-old would use. Describe only the kind of work the owner asked for. Never mention pay, rates or money.",
+      `Never add a task that is any of this work, even if the request hints at it: ${BLOCKED_CATEGORIES.map((category) => CATEGORY_MEANINGS[category]).join("; ")}.`,
+      "Suggest how many hours, from 4 to 8, the work needs.",
+    ].join(" "),
+    user: wrap(description),
+  };
+}
 
 export function classifyWorkPrompt(description: string): { system: string; user: string } {
   const categories = [...ALLOWED_CATEGORIES, ...BLOCKED_CATEGORIES].map((category) => `${category}: ${CATEGORY_MEANINGS[category]}`).join("\n");
