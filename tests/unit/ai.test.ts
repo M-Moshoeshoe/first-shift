@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AI_LIMITS } from "@/config/ai";
 import { ALLOWED_CATEGORIES, BLOCKED_CATEGORIES } from "@/domain/allowedWork";
 import { WorkClassificationSchema } from "@/schemas/ai";
-import { PostTryoutSchema } from "@/schemas/tryout";
+import { DraftRequestSchema } from "@/schemas/tryout";
 import { checkWork, draftTryout } from "@/server/ai";
 import { AppError } from "@/server/errors";
 import { classifyWorkPrompt, draftTryoutPrompt, wrap } from "@/server/prompts";
@@ -97,6 +97,6 @@ describe("the eval set", () => {
   });
 
   it("only uses text an owner could really send", () => {
-    for (const aiCase of AI_CASES) expect(PostTryoutSchema.shape.description.safeParse(aiCase.text).success).toBe(true);
+    for (const aiCase of AI_CASES) expect(DraftRequestSchema.safeParse({ description: aiCase.text }).success).toBe(true);
   });
 });

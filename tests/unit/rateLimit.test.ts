@@ -32,13 +32,13 @@ describe("sastDateKey", () => {
 describe("consumeDailyQuota", () => {
   it("counts 23:30 and 00:30 SAST on different days, so a new day starts at midnight SAST", async () => {
     store.clear();
-    await consumeDailyQuota("lerato", "posts", 1, sast("2026-10-25T23:30:00"));
-    await expect(consumeDailyQuota("lerato", "posts", 1, sast("2026-10-26T00:30:00"))).resolves.toBeUndefined();
+    await consumeDailyQuota("lerato", "posts", 1, { now: sast("2026-10-25T23:30:00") });
+    await expect(consumeDailyQuota("lerato", "posts", 1, { now: sast("2026-10-26T00:30:00") })).resolves.toBeUndefined();
   });
 
   it("refuses the request past the limit on the same SAST day", async () => {
     store.clear();
-    await consumeDailyQuota("lerato", "posts", 1, sast("2026-10-26T00:30:00"));
-    await expect(consumeDailyQuota("lerato", "posts", 1, sast("2026-10-26T23:30:00"))).rejects.toMatchObject({ status: 429, code: "daily_limit" });
+    await consumeDailyQuota("lerato", "posts", 1, { now: sast("2026-10-26T00:30:00") });
+    await expect(consumeDailyQuota("lerato", "posts", 1, { now: sast("2026-10-26T23:30:00"), message: "Post this one tomorrow." })).rejects.toMatchObject({ status: 429, code: "daily_limit", publicMessage: "Post this one tomorrow." });
   });
 });

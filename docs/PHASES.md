@@ -11,10 +11,10 @@ Work one item at a time, in order. Each item ends with `npm run check` passing, 
 | # | Item | What "done" means | Budget | State |
 | --- | --- | --- | --- | --- |
 | A | Re-plan | The audit committed; this plan | 0.5 h | Done |
-| B | Cleanup from the audit | Env docs match how Next.js loads files; pinned `firebase-tools`; rate limits count days in SAST; SECURITY.md honest; shared `PageTitle` and saved-details components; more lint boundaries; stale demo data removed | 2 h | |
-| C | Real services | `docs/DEPLOY.md` written, then followed in the consoles: GitHub, Firebase (Auth, Firestore, Storage, rules), Netlify, the Anthropic key, `npm run eval:ai` passing | 2 h | |
-| D | UI foundation v3 | Spacing scale, app shell (header with Sign out, role nav), deliberate desktop layouts, branded 404 and error pages, matching skeletons, home intent, axe and Slow 4G gates in the e2e script | 3 h | |
-| E | Posting, server | Tryout repository, service, routes (draft, post, withdraw) with rate limits, and tests | 2.5 h | |
+| B | Cleanup from the audit | Env docs match how Next.js loads files; pinned `firebase-tools`; rate limits count days in SAST; SECURITY.md honest; shared `PageTitle` and saved-details components; more lint boundaries; stale demo data removed | 2 h | Done |
+| C | Real services | `docs/DEPLOY.md` written, then followed in the consoles: GitHub, Firebase (Auth, Firestore, Storage, rules), Netlify, the Anthropic key, `npm run eval:ai` passing | 2 h | Guide written; console steps with the owner |
+| D | UI foundation v3 | Spacing scale, app shell (header with Sign out, role nav), deliberate desktop layouts, branded 404 and error pages, matching skeletons, home intent, axe and Slow 4G gates in the e2e script | 3 h | Done |
+| E | Posting, server | Tryout repository, service, routes (draft, post, withdraw) with rate limits, and tests | 2.5 h | Built, waiting for review |
 | F | Posting, screens | Posting screen and business dashboard, from the reference design (`reference/prototype.html`) | 3 h | |
 | G | Finding | Nearby list by geohash cell (no push alerts), tryout detail with fares, applying with the daily limit | 4 h | |
 | H | Booking | Ranked short list, booking, check-in code, WhatsApp chat and trip share as plain `wa.me` links | 3 h | |

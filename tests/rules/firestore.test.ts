@@ -25,6 +25,7 @@ beforeEach(async () => {
     await setDoc(doc(db, "auditLog/entry-1"), { uid: "thabo", action: "role_set" });
     await setDoc(doc(db, "tryouts/live"), { status: "published", ownerId: "sipho" });
     await setDoc(doc(db, "tryouts/draft"), { status: "draft", ownerId: "sipho" });
+    await setDoc(doc(db, "tryouts/in-review"), { status: "review", ownerId: "sipho", businessName: "Sipho's Phone Repairs" });
     await setDoc(doc(db, "applications/a1"), { workerId: "thabo", ownerId: "sipho" });
     await setDoc(doc(db, "bookings/b1"), { workerId: "thabo", ownerId: "sipho" });
     await setDoc(doc(db, "payments/p1"), { workerId: "thabo", ownerId: "sipho" });
@@ -90,6 +91,21 @@ describe("reads", () => {
     await assertSucceeds(getDoc(doc(as("thabo"), "tryouts/live")));
     await assertFails(getDoc(doc(as("thabo"), "tryouts/draft")));
     await assertSucceeds(getDoc(doc(as("sipho"), "tryouts/draft")));
+  });
+
+  it("shows a tryout waiting for review only to its owner (Phase 2)", async () => {
+    await assertSucceeds(getDoc(doc(as("sipho"), "tryouts/in-review")));
+    await assertFails(getDoc(doc(as("thabo"), "tryouts/in-review")));
+    await assertFails(getDoc(doc(anonymous(), "tryouts/in-review")));
+  });
+
+  it("never lets a client create, change or delete a tryout, not even the owner (Phase 2)", async () => {
+    for (const writer of [as("sipho"), as("thabo")]) {
+      await assertFails(setDoc(doc(writer, "tryouts/new"), { status: "published", ownerId: "sipho" }));
+      await assertFails(updateDoc(doc(writer, "tryouts/live"), { status: "withdrawn" }));
+      await assertFails(updateDoc(doc(writer, "tryouts/in-review"), { status: "published" }));
+      await assertFails(deleteDoc(doc(writer, "tryouts/live")));
+    }
   });
 
   it("limits applications, bookings and payments to the two people involved", async () => {
