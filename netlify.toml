@@ -1,5 +1,7 @@
 [build]
-  command = "npm run build"
+  # Every deploy, preview or production, must pass lint, typecheck, unit tests, the build, the
+  # JavaScript budgets and npm audit first: a failure stops the deploy (GitHub Actions is paused, see SECURITY.md).
+  command = "npm run verify"
   publish = ".next"
 
 [build.environment]
