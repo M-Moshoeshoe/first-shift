@@ -43,6 +43,11 @@ export const TRYOUT_MESSAGES = {
   finished: "This tryout has already happened, so it can't be withdrawn.",
 } as const;
 
+/** Booking (Phase 4). Approved copy; a question, because the answer is the owner's choice. */
+export const BOOKING_MESSAGES = {
+  regularEmployment: "Another tryout would make this regular employment, which brings UIF and leave rules. Offer them a job instead?",
+} as const;
+
 /** Shape problems in what the form sends, one per field (schemas/tryout.ts). */
 export const TRYOUT_FIELD_MESSAGES = {
   description: "Describe the work in one sentence, like \"Help sorting stock and serving customers on Saturday\".",

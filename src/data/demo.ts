@@ -1,5 +1,6 @@
 import type { AllowedCategory } from "@/domain/allowedWork";
 import type { CreditEntry } from "@/domain/credits";
+import type { CoidaAnswer } from "@/domain/injuryCover";
 import { newAccount, photoPath, type BusinessRecord, type UserRecord } from "@/domain/profile";
 import { checkTerms, newTryout, type TryoutRecord, type TryoutTerms } from "@/domain/tryoutDecisions";
 import { RULES } from "@/config/rules";
@@ -29,7 +30,7 @@ export const DEMO_EXTRA_OWNERS = ["demo-lerato", "demo-ayanda"] as const;
 
 const photo = (uid: string, kind: "profile" | "shopfront") => ({ path: photoPath(uid, kind), version: "demo" });
 
-function business(uid: string, details: { name: string; area: string; latitude: number; longitude: number; completed: number }): BusinessRecord {
+function business(uid: string, details: { name: string; area: string; latitude: number; longitude: number; completed: number; coida: CoidaAnswer }): BusinessRecord {
   const base = newAccount(uid, "business", true).business;
   if (!base) throw new Error("a business account always has a business record");
   return {
@@ -41,6 +42,7 @@ function business(uid: string, details: { name: string; area: string; latitude: 
     openingHours: "Monday to Saturday, 8:00 to 17:00",
     location: { latitude: details.latitude, longitude: details.longitude, accuracyMetres: 15 },
     shopfrontPhoto: photo(uid, "shopfront"),
+    coida: details.coida,
   };
 }
 
@@ -76,9 +78,9 @@ function tryout(slot: Slot, owners: Record<string, BusinessRecord>, now: Date): 
 export function demoState(uids: DemoUids, now: Date): DemoState {
   const [lerato, ayanda] = DEMO_EXTRA_OWNERS;
   const businesses: Record<string, BusinessRecord> = {
-    [uids.business]: business(uids.business, { name: "Sipho's Phone Repairs", area: "Midrand", latitude: -25.9992, longitude: 28.1263, completed: 0 }),
-    [lerato]: business(lerato, { name: "Lerato's Spaza", area: "Tembisa", latitude: -25.9964, longitude: 28.2268, completed: 6 }),
-    [ayanda]: business(ayanda, { name: "Ayanda's Car Wash", area: "Ivory Park", latitude: -25.9861, longitude: 28.1958, completed: 2 }),
+    [uids.business]: business(uids.business, { name: "Sipho's Phone Repairs", area: "Midrand", latitude: -25.9992, longitude: 28.1263, completed: 0, coida: "registered" }),
+    [lerato]: business(lerato, { name: "Lerato's Spaza", area: "Tembisa", latitude: -25.9964, longitude: 28.2268, completed: 6, coida: "registered" }),
+    [ayanda]: business(ayanda, { name: "Ayanda's Car Wash", area: "Ivory Park", latitude: -25.9861, longitude: 28.1958, completed: 2, coida: "not_sure" }),
   };
   const thabo: UserRecord = {
     ...newAccount(uids.youngPerson, "young_person", true).user,

@@ -86,7 +86,7 @@ export function decideWorkerSave(
   return { kind: "save", next: { user: next, claimId: claim.kind === "claim" } };
 }
 
-/** Saves a business's details. A save without a pin keeps any pin already set. */
+/** Saves a business's details. A save without a pin, or without the COIDA answer, keeps the one already set. */
 export function decideBusinessSave(user: UserRecord | null, business: BusinessRecord | null, input: BusinessDetails): SaveDecision<BusinessRecord> {
   const problem = roleProblem(user, "business");
   if (problem) return { kind: "refuse", problem };
@@ -95,7 +95,9 @@ export function decideBusinessSave(user: UserRecord | null, business: BusinessRe
   if (details.location && !pinPreciseEnough(details.location.accuracyMetres)) return { kind: "refuse", problem: { code: "pin_imprecise" } };
 
   const location = details.location ?? business.location;
+  const coida = details.coida ?? business.coida;
   const unchanged =
+    business.coida === coida &&
     business.name === details.name &&
     business.area === details.area &&
     business.openingHours === details.openingHours &&
@@ -103,7 +105,7 @@ export function decideBusinessSave(user: UserRecord | null, business: BusinessRe
     business.location?.longitude === location?.longitude &&
     business.location?.accuracyMetres === location?.accuracyMetres;
   if (unchanged) return { kind: "unchanged" };
-  return { kind: "save", next: { ...business, name: details.name, area: details.area, openingHours: details.openingHours, location } };
+  return { kind: "save", next: { ...business, name: details.name, area: details.area, openingHours: details.openingHours, location, coida } };
 }
 
 export interface PhotoMeta {

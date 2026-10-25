@@ -2,6 +2,7 @@ import "server-only";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 import { AVAILABILITY, type BusinessRecord, type UserRecord } from "@/domain/profile";
+import { COIDA_ANSWERS } from "@/domain/injuryCover";
 import { ROLES } from "@/domain/roles";
 import { adminDb } from "../firebaseAdmin";
 import { appendLedger, readLedger } from "./firestoreLedger";
@@ -41,6 +42,7 @@ const BusinessRecordSchema = z.object({
   openingHours: z.string().optional(),
   location: z.object({ latitude: z.number(), longitude: z.number(), accuracyMetres: z.number() }).optional(),
   shopfrontPhoto: PhotoSchema.optional(),
+  coida: z.enum(COIDA_ANSWERS).optional(),
 });
 
 const parseUser = (data: unknown): UserRecord => UserRecordSchema.parse(data);

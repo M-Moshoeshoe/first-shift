@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { FIELD_MESSAGES, ID_HINT, ID_PROBLEM_MESSAGES, LOCATION_MESSAGES, PROFILE_MESSAGES, UPLOAD_COPY, pinPrecisionText, signInErrorMessage, demoSignInErrorMessage, splitContactLink, DEMO_MESSAGES } from "@/domain/messages";
 import { PHOTO_KINDS } from "@/domain/profile";
-import { POSTING_PROBLEM_MESSAGES, TERMS_MESSAGES, TRYOUT_FIELD_MESSAGES, TRYOUT_MESSAGES } from "@/domain/tryoutMessages";
+import { BOOKING_MESSAGES, POSTING_PROBLEM_MESSAGES, TERMS_MESSAGES, TRYOUT_FIELD_MESSAGES, TRYOUT_MESSAGES } from "@/domain/tryoutMessages";
 
 const DEMO_CODES = ["auth/invalid-custom-token", "auth/user-disabled", "auth/too-many-requests", "auth/network-request-failed", "auth/x"];
 const SIGN_IN_CODES = ["auth/popup-blocked", "auth/popup-closed-by-user", "auth/network-request-failed", "auth/too-many-requests", "auth/x"];
@@ -22,6 +22,7 @@ const everyMessage = [
   ...Object.values(TERMS_MESSAGES),
   ...Object.values(TRYOUT_MESSAGES),
   ...Object.values(TRYOUT_FIELD_MESSAGES),
+  ...Object.values(BOOKING_MESSAGES),
   pinPrecisionText(20),
   UPLOAD_COPY.slow,
 ];
@@ -29,7 +30,8 @@ const everyMessage = [
 describe("error copy follows the copy rules", () => {
   it.each(everyMessage)("%s", (message) => {
     expect(message).not.toMatch(/—|sorry|apolog|unfortunately|oops|!/i);
-    expect(message).toMatch(/\.$/);
+    // A question only where the answer is the person's choice ("Offer them a job instead?").
+    expect(message).toMatch(/[.?]$/);
   });
 
   it("names buttons only by their exact labels", () => {

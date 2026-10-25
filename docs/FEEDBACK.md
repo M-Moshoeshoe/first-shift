@@ -1,0 +1,23 @@
+# Panel feedback and our response
+
+From the Geekulcha panel review, October 2026. "Built" means it's in the product and tested now; "Rule" means the rule is in code with tests and its screen is in the plan; "Plan" means it's in `docs/PHASES.md` with a phase and a budget.
+
+## What the panel praised, and we kept
+
+Two-sided design, transport costs, daylight-only tryouts, trusted-contact sharing and same-day pay. None of these changed.
+
+## What the panel asked for
+
+| Panel point | Our response | Where it lives | State |
+| --- | --- | --- | --- |
+| Show the whole loop working, start to finish | Two demo accounts a judge can sign in to with an email and password (the business and the young person), safe to share because demo and real never meet. `npm run demo:reset` puts the demo world back to a known state with live tryouts | `SECURITY.md` (Demo isolation), `src/domain/demo.ts`, `src/data/demo.ts`, `docs/PHASES.md` K | Built; more stages with K |
+| References on clear, consistent criteria the worker can review, challenge and approve before sharing | Every reference rests on the same three answers from the owner (on time, did the work, would hire again) and the tryout's tasks. The young person sees the three answers as the criteria and the wording labelled "Written with AI", then taps "Add to my record" or "Challenge it". Only approved references are shareable; a challenge opens a review case | `src/domain/references.ts`, `docs/PHASES.md` J | Rule; screens in J |
+| Clarify non-payment | Payment is due at check-out; a business not marked Paid by 23:59 that day is paused; the young person confirms Received or Not received, and Not received goes to review. A "not paid" report opens a case | `docs/RULES.md` (Payment confirmation), `paymentFlow.ts`, `cases.ts` | Rule |
+| Clarify cancellations | Free until 12 hours before, or 15 minutes after booking, whichever is later; late is a strike, and a business that cancels late owes 4 hours' pay | `docs/RULES.md`, `cancellation.ts`, `docs/MONEY.md` | Rule |
+| Clarify injuries | The business is the employer on the day, and COIDA covers casual employees. Business onboarding asks about Compensation Fund registration; every tryout says "Injury cover: confirmed by the business" or "Injury cover: not confirmed" | `docs/COMPLIANCE.md` (COIDA), `src/domain/injuryCover.ts`, business onboarding | Built (the question); the line shows with G |
+| Clarify harassment | "Report a problem" on every booking, with harassment, unsafe work, not paid and other. Harassment and unsafe work pause the business at once, before review | `src/domain/cases.ts`, `docs/PHASES.md` H | Rule; button in H |
+| Clarify disputes | Every dispute, report, reference challenge and no-show becomes a review case decided by a person; strikes can be appealed | `cases.ts`, `strikes.ts`, `docs/RULES.md` | Rule; review screen is roadmap |
+| Clarify identity checks | We check the SA ID number's structure, age 18 or older and one ID per account, and the owner checks the face and ID card at the door. We don't yet run a licensed identity check or accept refugee and permit documents, and we say so on the Safety and fair play page | `docs/RULES.md` (Eligibility and identity), `docs/PHASES.md` L | Built (ID rules); page in L |
+| Validate labour, minimum-wage, tax and worker-protection law; don't assume "tryout" changes anything | Our reading, with sources: minimum wage on every hour, enforced in code; the 24-hour line for UIF and the BCEA; COIDA from the first hour; PAYE only above R99,000 a year; the Employment Tax Incentive as a benefit of hiring; First Shift isn't the employer or a labour broker. A booking that would cross 24 hours a month with the same business is refused: "Offer them a job instead?" | `docs/COMPLIANCE.md`, `src/domain/regularEmployment.ts` | Rule; booking in H. Lawyer review before the pilot |
+| Be transparent that businesses initiate eWallet payments themselves | One line wherever payment appears: "You send the payment yourself, from your FNB app, your bank or in cash. First Shift doesn't move money. It records the payment, and the young person confirms they received it." The home page and onboarding already say the business pays | `docs/COMPLIANCE.md`, `docs/PHASES.md` I | Built (home, onboarding); the line in I |
+| Plan a small pilot with clear metrics | Six weeks, three areas, 10 to 15 businesses and 50 young people. `npm run pilot:metrics`: completed and paid tryouts, repeat businesses, safety reports, references approved, job offers made, each with a target | `docs/PHASES.md` (Pilot) | Plan |

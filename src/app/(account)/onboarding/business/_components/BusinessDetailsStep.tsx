@@ -4,8 +4,10 @@ import { useState, type FormEvent } from "react";
 import { AreaField } from "@/components/ui/AreaField";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
+import { RadioGroup } from "@/components/ui/RadioGroup";
 import { TextField } from "@/components/ui/TextField";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { COIDA_ANSWERS, COIDA_OPTION_LABELS, COIDA_QUESTION, type CoidaAnswer } from "@/domain/injuryCover";
 import { PROFILE_MESSAGES } from "@/domain/messages";
 import { ApiError, apiPost } from "@/lib/api";
 import { fieldErrors, firstInvalid, shakeAndFocus } from "@/lib/forms";
@@ -16,9 +18,11 @@ export interface BusinessDraft {
   name: string;
   area: string;
   openingHours: string;
+  coida?: CoidaAnswer;
 }
 
-const FIELDS = ["name", "area", "openingHours"] as const;
+const FIELDS = ["name", "area", "openingHours", "coida"] as const;
+const COIDA_OPTIONS = COIDA_ANSWERS.map((value) => ({ value, label: COIDA_OPTION_LABELS[value] }));
 type Field = (typeof FIELDS)[number];
 const fieldId = (field: Field) => `business-${field}`;
 const FORM_ERROR_ID = "business-details-form-error";
@@ -37,7 +41,7 @@ export function BusinessDetailsStep({ initial, focusHeading, onSaved }: Business
   const [busy, setBusy] = useState(false);
   const heading = useHeadingFocus(focusHeading);
 
-  const update = (field: Field, value: string) => {
+  const update = <F extends Field>(field: F, value: BusinessDraft[F]) => {
     setDraft((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
   };
@@ -79,6 +83,15 @@ export function BusinessDetailsStep({ initial, focusHeading, onSaved }: Business
         value={draft.openingHours}
         error={errors.openingHours}
         onChange={(event) => update("openingHours", event.target.value)}
+      />
+      <RadioGroup
+        id={fieldId("coida")}
+        legend={COIDA_QUESTION.legend}
+        hint={COIDA_QUESTION.hint}
+        options={COIDA_OPTIONS}
+        value={draft.coida}
+        error={errors.coida}
+        onChange={(value) => update("coida", value)}
       />
       <div className="flex flex-col gap-3">
         <Button type="submit" busy={busy} busyLabel="Saving your details" aria-describedby={FORM_ERROR_ID}>

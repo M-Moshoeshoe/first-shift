@@ -1,4 +1,5 @@
 import { creditBalance, type CreditEntry } from "./credits";
+import type { CoidaAnswer } from "./injuryCover";
 import type { Role } from "./roles";
 import type { IdCheck } from "./saId";
 
@@ -48,6 +49,8 @@ export interface BusinessDetails {
   area: string;
   openingHours: string;
   location?: Location;
+  /** Registered with the Compensation Fund, as the owner says (injuryCover.ts). Asked in onboarding; older profiles may not have it. */
+  coida?: CoidaAnswer;
 }
 
 /** users/{uid}. Readable by its owner, so it never holds the ID hash. */
@@ -129,6 +132,7 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
           area: business.area,
           openingHours: business.openingHours,
           location: business.location,
+          coida: business.coida,
           hasPhoto: Boolean(business.shopfrontPhoto),
           credits: { available: balance.available, onlyFree: balance.onlyFree },
         }

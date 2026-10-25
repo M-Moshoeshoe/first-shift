@@ -11,6 +11,7 @@ First Shift connects young South Africans with paid one-day tryouts at small bus
 - `docs/RULES.md` explains every product rule in plain language.
 - `docs/MONEY.md` explains how money and credits move when a tryout ends (one rule, `src/domain/settlement.ts`) and the unit economics.
 - `src/config/rules.ts` holds every rule as a value. Domain code reads these values and never hard-codes them.
+- `docs/COMPLIANCE.md` is our reading of labour, tax and worker-protection law, with sources; `docs/FEEDBACK.md` maps the panel's feedback to where each answer lives.
 - `docs/DESIGN.md` holds the design tokens, type scale and copy rules.
 - `docs/PHASES.md` defines the build order. Work one phase at a time.
 - `SECURITY.md` is the SSDLC. Keep it in step with the code.

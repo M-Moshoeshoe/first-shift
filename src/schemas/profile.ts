@@ -1,6 +1,7 @@
 import * as z from "zod/mini";
 import { FIELD_MESSAGES, ID_PROBLEM_MESSAGES, PROFILE_MESSAGES } from "@/domain/messages";
 import { AVAILABILITY, DESTINATIONS, PHOTO_KINDS } from "@/domain/profile";
+import { COIDA_ANSWERS } from "@/domain/injuryCover";
 import { ROLES } from "@/domain/roles";
 
 // Zod's small build (zod/mini): these schemas run in the browser as well as on
@@ -71,6 +72,7 @@ export const ProfileViewSchema = z.object({
       area: z.optional(z.string()),
       openingHours: z.optional(z.string()),
       location: z.optional(z.object({ latitude: z.number(), longitude: z.number(), accuracyMetres: z.number() })),
+      coida: z.optional(z.enum(COIDA_ANSWERS)),
       hasPhoto: z.boolean(),
       credits: z.object({ available: z.number(), onlyFree: z.boolean() }),
     }),
@@ -97,8 +99,12 @@ export const BusinessProfileSchema = z.object({
   area: text(2, 60, FIELD_MESSAGES.businessArea),
   openingHours: text(3, 120, FIELD_MESSAGES.openingHours),
   location: z.optional(LocationSchema),
+  // Optional on the wire, so a save from the pin step keeps the answer already given (decideBusinessSave).
+  coida: z.optional(z.enum(COIDA_ANSWERS, { error: FIELD_MESSAGES.coida })),
 });
 export type BusinessProfileInput = z.infer<typeof BusinessProfileSchema>;
 
 /** Step 1 of the business form, checked in the browser before saving. */
-export const BusinessDetailsSchema = z.pick(BusinessProfileSchema, { name: true, area: true, openingHours: true });
+export const BusinessDetailsSchema = z.extend(z.pick(BusinessProfileSchema, { name: true, area: true, openingHours: true }), {
+  coida: z.enum(COIDA_ANSWERS, { error: FIELD_MESSAGES.coida }),
+});

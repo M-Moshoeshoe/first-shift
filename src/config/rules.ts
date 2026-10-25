@@ -46,6 +46,12 @@ export const RULES = {
   postsPerDay: 5,
 
   hirePromptAfterTryouts: 3,
+  /**
+   * From this many hours a month with the same employer, UIF and the BCEA's
+   * working-time and leave chapters apply in full (docs/COMPLIANCE.md). A
+   * booking that would reach it is refused: that's a job, not a tryout.
+   */
+  regularEmploymentHoursPerMonth: 24,
   /** Prepaid tryout credits: each completed tryout uses one, bought at this price. */
   creditPriceCents: 2500,
   /** Granted once, when a business profile is first complete. */

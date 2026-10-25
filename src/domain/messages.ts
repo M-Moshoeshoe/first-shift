@@ -117,6 +117,7 @@ export const FIELD_MESSAGES = {
   businessName: "Enter your business name.",
   businessArea: "Enter the area your business is in, like Midrand.",
   openingHours: "Enter your opening hours, like Monday to Saturday, 8:00 to 17:00.",
+  coida: "Choose whether you're registered with the Compensation Fund. If you don't know, choose I'm not sure.",
   pinOutsideSa: `That location isn't in South Africa. Tap ${BUTTON_LABELS.useMyLocation} again while you're at the business.`,
 } as const;
 

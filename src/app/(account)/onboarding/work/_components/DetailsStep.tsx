@@ -61,7 +61,7 @@ export function DetailsStep({ initial, focusHeading, onNext }: DetailsStepProps)
       <TextField
         id={fieldId("payoutPhone")}
         label="Cellphone number for payments"
-        hint="Businesses can pay you by FNB eWallet to this number."
+        hint="Businesses pay you themselves, for example by FNB eWallet to this number."
         type="tel"
         inputMode="tel"
         autoComplete="tel"

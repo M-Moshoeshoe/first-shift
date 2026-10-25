@@ -143,6 +143,11 @@ export async function business(rec: Recorder, page: Page): Promise<void> {
   await page.getByLabel("Business name").fill("Lerato's Spaza");
   await page.getByLabel("Area", { exact: true }).fill("thembisa");
   await page.getByLabel("Opening hours").fill("Monday to Saturday, 8:00 to 17:00");
+  // Next without the COIDA answer: the question shows its error and takes focus.
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByText("Choose whether you're registered with the Compensation Fund.", { exact: false }).waitFor();
+  await rec.check(page, "business step 1, COIDA not answered");
+  await page.getByLabel("Yes, we're registered").check();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("heading", { name: "Your premises pin" }).waitFor();
   await page.getByRole("button", { name: "Back" }).click();

@@ -20,7 +20,7 @@ type Step = 1 | 2 | 3;
  */
 export function BusinessFlow({ view }: { view: ProfileViewResponse }) {
   const saved = view.business;
-  const [details, setDetails] = useState<BusinessDraft>({ name: saved?.name ?? "", area: saved?.area ?? "", openingHours: saved?.openingHours ?? "" });
+  const [details, setDetails] = useState<BusinessDraft>({ name: saved?.name ?? "", area: saved?.area ?? "", openingHours: saved?.openingHours ?? "", coida: saved?.coida });
   const [detailsSaved, setDetailsSaved] = useState(Boolean(saved?.name && saved.area && saved.openingHours));
   const [pin, setPin] = useState<Location | null>(saved?.location ?? null);
   const [hasPhoto, setHasPhoto] = useState(saved?.hasPhoto ?? false);

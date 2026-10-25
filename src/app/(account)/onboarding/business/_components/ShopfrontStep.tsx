@@ -6,6 +6,7 @@ import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { LOCATION_COPY, PROFILE_MESSAGES, pinPrecisionText } from "@/domain/messages";
 import type { Location } from "@/domain/profile";
 import type { BusinessDraft } from "./BusinessDetailsStep";
+import { COIDA_OPTION_LABELS } from "@/domain/injuryCover";
 
 interface ShopfrontStepProps {
   details: BusinessDraft;
@@ -21,6 +22,7 @@ export function ShopfrontStep({ details, pin, focusHeading, onSaved, onBack }: S
     { term: "Business name", value: details.name },
     { term: "Area", value: details.area },
     { term: "Opening hours", value: details.openingHours },
+    { term: "Injury cover", value: details.coida ? COIDA_OPTION_LABELS[details.coida] : "Not answered" },
     { term: "Premises pin", value: pin ? pinPrecisionText(pin.accuracyMetres) : LOCATION_COPY.notPinned },
   ];
   return (
