@@ -28,6 +28,12 @@ export const RULES = {
 
   /** After the start, an owner can mark a no-show once this much time has passed. */
   noShowAfterMinutes: 30,
+  /** Check-in opens this long before the start, for someone who arrives early. */
+  checkInOpensMinutesBefore: 60,
+  /** Checked in within this long after the start counts as on time. */
+  onTimeGraceMinutes: 10,
+  /** Wrong check-in codes allowed on one booking before it locks, so a code can't be guessed. */
+  checkInCodeAttempts: 5,
 
   strikeWindowDays: 90,
   strikesToSuspend: 3,

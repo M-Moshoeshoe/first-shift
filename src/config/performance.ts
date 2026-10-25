@@ -26,7 +26,7 @@ export const JS_BUDGETS_KB = {
   // Measured 249.3 KB (25 October 2026); measured + 10% is 274.2, capped at 260.
   "/business/post": 260,
   // Phase 4, each measured on its one shell built ahead of time (generateStaticParams), 26 October 2026: the owner's
-  // tryout page 256.0 KB, Applications 249.0 KB, the booking page 256.5 KB. + 10% is over the cap for each.
+  // tryout page 256.0 KB, Applications 249.0 KB, the booking page 256.5 KB (257.8 KB with Phase 5; the day's panels load lazily). + 10% is over the cap for each.
   "/business/tryouts/tryout": 260,
   "/work/applications": 260,
   "/bookings/booking": 260,

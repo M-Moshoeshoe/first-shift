@@ -1,6 +1,8 @@
 import * as z from "zod/mini";
 import { APPLICATION_STATUSES } from "@/domain/applications";
+import { CHECKOUT_REASONS } from "@/domain/bookings";
 import { BOOKING_STATUSES } from "@/domain/bookingStatus";
+import { PAYMENT_METHODS } from "@/domain/paymentFlow";
 import { REPORT_CATEGORIES } from "@/domain/cases";
 import { TRYOUT_STATUSES } from "@/domain/tryout";
 import { FINDING_MESSAGES } from "@/domain/findingMessages";
@@ -88,7 +90,35 @@ export const BookingViewSchema = z.object({
   checkInCode: z.nullable(z.string()),
   shareToken: z.nullable(z.string()),
   cancel: z.nullable(z.object({ kind: z.enum(["free", "late"]), owedCents: z.number() })),
+  day: z.object({
+    canCheckIn: z.boolean(),
+    canNoShow: z.boolean(),
+    canReportNotOpen: z.boolean(),
+    canCheckOut: z.boolean(),
+    payable: z.boolean(),
+    checkedInAt: z.nullable(z.string()),
+    endReason: z.nullable(z.enum(CHECKOUT_REASONS)),
+    owedCents: z.number(),
+    owedMinimumCents: z.number(),
+    payment: z.nullable(z.object({ state: z.enum(["awaiting_payment", "awaiting_confirmation", "received", "not_received"]), method: z.nullable(z.enum(PAYMENT_METHODS)), amountCents: z.nullable(z.number()) })),
+    door: z.nullable(z.object({ lastFour: z.string() })),
+    remind: z.boolean(),
+  }),
 });
+
+export const DoorCheckSchema = z.object({
+  code: z.string({ error: "Type their six-digit check-in code." }).check(z.trim(), z.regex(/^\d{3} ?\d{3}$/, "Type their six-digit check-in code.")),
+  faceMatches: z.boolean(),
+  nameMatches: z.boolean(),
+  lastFourMatches: z.boolean(),
+});
+export const CheckOutSchema = z.object({ reason: z.enum(CHECKOUT_REASONS, { error: "Choose how the day ended." }) });
+export const MarkPaidSchema = z.object({
+  method: z.enum(PAYMENT_METHODS, { error: "Choose how you paid." }),
+  amountCents: z.int({ error: "Enter the amount in rand, like 210 or 210.00." }).check(z.positive("Enter the amount in rand, like 210 or 210.00."), z.lte(10_000_000)),
+});
+export const ConfirmSchema = z.object({ received: z.boolean() });
+export const StepResultSchema = z.object({ status: z.enum(["done", "unchanged"]) });
 export type BookingViewResponse = z.infer<typeof BookingViewSchema>;
 
 export const CancelResultSchema = z.object({ status: z.enum(["cancelled", "unchanged"]) });

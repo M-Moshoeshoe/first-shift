@@ -65,6 +65,20 @@ Consequences:
 - A business that cancels late also owes the young person 4 hours at the agreed rate. It's shown on the business dashboard and handled like any other payment, so the business is paused until it's paid and confirmed.
 - After the start, it's no longer a cancellation. An owner can mark a no-show 30 minutes after the start. A young person can report that the business wasn't open. Both go to review.
 
+## The day
+
+| Step | Rule | Code |
+| --- | --- | --- |
+| Check-in | The owner confirms the door check (the face matches the photo; the ID card's name and last four digits match) and types the 6-digit code the young person shows. From an hour before the start until the end | `day.ts`, `decideCheckIn` |
+| Wrong codes | Counted on the booking; after 5 the booking locks and goes to support, so a code can't be guessed without the young person there | `RULES.checkInCodeAttempts` |
+| On time | Checked in by 10 minutes after the start | `wasOnTime` |
+| No-show | The owner can record one from 30 minutes after the start if nobody checked in: nothing owed, the credit comes back, a strike for the young person, and a review | `decideNoShow`, `settle()` |
+| Business not open | The young person can say so any time after the start if nobody checked them in. It goes to review; nothing is settled until then | `decideBusinessNotOpen` |
+| Check-out | The owner picks how it ended: finished the work, done early, the young person left early, I ended it early, or safety. `settle()` works out what's owed and uses the credit; a safety stop goes to review | `decideCheckOut` |
+| Paying | The owner sends it themselves, then taps Paid with the method and the amount: at least what's owed, lower only when the young person left early, never below 4 hours | `decideMarkPaid` |
+| Confirming | The young person checks their real balance (`*120*277#`, or the free `*130*277#`, for eWallet), then taps Received or Not received. Not received opens a review and pauses the business | `decideConfirm` |
+| Deadlines | Checked whenever either party opens a screen, not by a scheduled job: unpaid by 23:59 pauses the business from 00:00 (lifted when it pays), a reminder at 24 hours, a review at 72 hours. Each acts once | `deadlineActions` |
+
 ## Payment confirmation
 
 | Step | Rule |

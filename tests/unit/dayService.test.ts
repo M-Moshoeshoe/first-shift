@@ -1,0 +1,115 @@
+import { describe, expect, it } from "vitest";
+import { applicationId } from "@/domain/applications";
+import { CHECK_IN_MESSAGES, MARK_PAID_MESSAGES } from "@/domain/dayMessages";
+import { fromSast } from "@/domain/time";
+import { AppError } from "@/server/errors";
+import { createBookingFakes } from "./support/bookingFakes";
+import { thabo, tryoutAt } from "./support/findingFakes";
+import { shop } from "./support/tryoutFakes";
+
+let clock = fromSast(2026, 10, 26, 8, 0);
+const sipho = { uid: "sipho", demo: false };
+const thaboViewer = { uid: "thabo", demo: false };
+
+const refusal = async (call: Promise<unknown>) => {
+  const error = await call.then(() => null, (caught: unknown) => caught);
+  expect(error).toBeInstanceOf(AppError);
+  return error as AppError;
+};
+
+/** Sipho's tryout tomorrow 09:00 to 15:00, offered to Thabo and accepted: booking-1. */
+async function booked() {
+  clock = fromSast(2026, 10, 26, 8, 0);
+  const fakes = createBookingFakes(() => clock);
+  fakes.store.users.set("sipho", { role: "business", status: "active" });
+  fakes.store.businesses.set("sipho", { ...shop, ownerId: "sipho", name: "Sipho's Phone Repairs", area: "Randburg" });
+  fakes.store.ledgers.set("sipho", [{ kind: "grant", amount: 3, reason: "welcome" }]);
+  fakes.store.users.set("thabo", thabo);
+  const window = { startAt: fromSast(2026, 10, 27, 9, 0), endAt: fromSast(2026, 10, 27, 15, 0) };
+  fakes.tryouts.set("t1", tryoutAt(-26.0939, 28.0071, { ...window, area: "Randburg" }));
+  fakes.applications.set(applicationId("t1", "thabo"), { tryoutId: "t1", workerId: "thabo", ownerId: "sipho", note: "", status: "applied", demo: false, ...window });
+  await fakes.offerService.offer(sipho, "t1", "thabo");
+  await fakes.offerService.answer(thaboViewer, "t1", "accept");
+  const code = fakes.secrets.get("booking-1")?.checkInCode ?? "";
+  return { ...fakes, code, door: { code, faceMatches: true, nameMatches: true, lastFourMatches: true } };
+}
+
+describe("a full tryout, from the door to Received", () => {
+  it("checks in, checks out, uses the credit, records the payment, and confirms it", async () => {
+    const { dayService, bookingService, bookings, store, tryouts, door, cases, secrets } = await booked();
+    clock = fromSast(2026, 10, 27, 8, 55);
+    expect(await dayService.checkIn(sipho, "booking-1", door)).toEqual({ status: "done" });
+    expect(bookings.get("booking-1")).toMatchObject({ status: "checked_in", checkedInAt: clock });
+    // The trusted contact's status page follows along.
+    expect(await bookingService.status(secrets.get("booking-1")?.shareToken ?? "")).toMatchObject({ status: "checked_in" });
+
+    clock = fromSast(2026, 10, 27, 15, 0);
+    expect(await dayService.checkOut(sipho, "booking-1", "completed")).toEqual({ status: "done" });
+    expect(bookings.get("booking-1")).toMatchObject({ status: "ended", owedCents: 21000, payment: { state: "awaiting_payment" } });
+    expect(store.ledgers.get("sipho")?.at(-1)).toEqual({ kind: "use", tryoutId: "t1" });
+    expect(tryouts.get("t1")?.status).toBe("completed");
+    expect(store.users.get("thabo")).toMatchObject({ completed: 1, onTime: 1 });
+    expect(store.businesses.get("sipho")?.completed).toBe(1);
+
+    expect(await refusal(dayService.markPaid(sipho, "booking-1", "ewallet", 20000))).toMatchObject({ publicMessage: MARK_PAID_MESSAGES.below_minimum });
+    expect(await dayService.markPaid(sipho, "booking-1", "ewallet", 21000)).toEqual({ status: "done" });
+    expect((await bookingService.view(thaboViewer, "booking-1")).day.payment).toEqual({ state: "awaiting_confirmation", method: "ewallet", amountCents: 21000 });
+    expect(await dayService.confirm(thaboViewer, "booking-1", true)).toEqual({ status: "done" });
+    expect(bookings.get("booking-1")?.payment?.state).toBe("received");
+    expect(cases).toEqual([]);
+  });
+
+  it("counts wrong check-in codes and locks after five", async () => {
+    const { dayService, door, secrets } = await booked();
+    clock = fromSast(2026, 10, 27, 9, 0);
+    const wrong = door.code === "000000" ? "111111" : "000000";
+    for (let i = 0; i < 5; i += 1) expect(await refusal(dayService.checkIn(sipho, "booking-1", { ...door, code: wrong }))).toMatchObject({ publicMessage: CHECK_IN_MESSAGES.wrong_code });
+    expect(secrets.get("booking-1")?.codeAttempts).toBe(5);
+    expect(await refusal(dayService.checkIn(sipho, "booking-1", door))).toMatchObject({ publicMessage: CHECK_IN_MESSAGES.locked });
+  });
+
+  it("records a no-show: the credit back, a strike for the young person, and a review", async () => {
+    const { dayService, store, strikes, cases } = await booked();
+    clock = fromSast(2026, 10, 27, 9, 30);
+    expect(await dayService.noShow(sipho, "booking-1")).toEqual({ status: "done" });
+    expect(store.ledgers.get("sipho")?.at(-1)).toEqual({ kind: "release", tryoutId: "t1" });
+    expect(strikes).toEqual([{ uid: "thabo", reason: "no_show" }]);
+    expect(cases).toMatchObject([{ kind: "booking_review", reason: "no_show_marked" }]);
+  });
+
+  it("sends 'the business wasn't open' to review without settling anything yet", async () => {
+    const { dayService, cases, store } = await booked();
+    clock = fromSast(2026, 10, 27, 9, 20);
+    expect(await dayService.businessNotOpen(thaboViewer, "booking-1")).toEqual({ status: "done" });
+    expect(cases).toMatchObject([{ reason: "business_not_open" }]);
+    expect(store.ledgers.get("sipho")?.at(-1)).toEqual({ kind: "hold", tryoutId: "t1" });
+  });
+
+  it("pauses an unpaid business at 00:00, lifts it when it pays, and pauses it again on Not received", async () => {
+    const { dayService, store, door, cases } = await booked();
+    clock = fromSast(2026, 10, 27, 9, 0);
+    await dayService.checkIn(sipho, "booking-1", door);
+    clock = fromSast(2026, 10, 27, 15, 0);
+    await dayService.checkOut(sipho, "booking-1", "completed");
+    clock = fromSast(2026, 10, 28, 0, 1);
+    await dayService.sweepDeadlines(thaboViewer);
+    expect(store.businesses.get("sipho")).toMatchObject({ status: "paused", pausedFor: "unpaid:booking-1" });
+    await dayService.markPaid(sipho, "booking-1", "cash", 21000);
+    expect(store.businesses.get("sipho")).toMatchObject({ status: "active", pausedFor: null });
+    await dayService.confirm(thaboViewer, "booking-1", false);
+    expect(store.businesses.get("sipho")?.status).toBe("paused");
+    expect(cases).toMatchObject([{ reason: "not_received" }]);
+  });
+
+  it("reminds the young person a day after Paid with no answer", async () => {
+    const { dayService, door } = await booked();
+    clock = fromSast(2026, 10, 27, 9, 0);
+    await dayService.checkIn(sipho, "booking-1", door);
+    clock = fromSast(2026, 10, 27, 15, 0);
+    await dayService.checkOut(sipho, "booking-1", "completed");
+    await dayService.markPaid(sipho, "booking-1", "ewallet", 21000);
+    clock = fromSast(2026, 10, 28, 15, 1);
+    expect(await dayService.sweepDeadlines(thaboViewer)).toEqual(["booking-1"]);
+  });
+});
+

@@ -6,7 +6,9 @@ import { clientAuth } from "../../src/lib/firebaseClient";
 import { ApplicationResultSchema, NearbySchema, TryoutDetailSchema } from "../../src/schemas/finding";
 import { ProfileViewSchema } from "../../src/schemas/profile";
 import { DemoTokenSchema } from "../../src/schemas/demo";
-import { clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser } from "./session";
+import * as z from "zod/mini";
+import { ApplicationsSchema, BookingViewSchema, StepResultSchema } from "../../src/schemas/booking";
+import { clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser, startNow } from "./session";
 
 /**
  * The demo accounts, attacked the way anyone holding their public password
@@ -21,6 +23,7 @@ standInForBrowser();
 
 // Throwaway accounts for this check: the real demo passwords never appear in the repo.
 const THABO = { email: "e2e-thabo@firstshift.demo", password: randomBytes(12).toString("base64url") };
+const SIPHO = { email: "e2e-sipho@firstshift.demo", password: randomBytes(12).toString("base64url") };
 // Fixed arguments only, never input: one command line works on Windows and elsewhere.
 const script = (name: string, args: string[] = []) => execSync(["npm run --silent", name, "--", ...args].join(" "), { stdio: "inherit" });
 
@@ -52,9 +55,45 @@ async function feedIsolation(steps: Record<string, unknown>): Promise<void> {
   steps["12. real applies to a demo tryout"] = await refusal(() => apiPost("/api/applications", { tryoutId: first.id }, ApplicationResultSchema));
 }
 
+const AnswerSchema = z.object({ status: z.string(), state: z.object({ kind: z.string(), bookingId: z.optional(z.string()) }) });
+const step = (path: string, body: unknown = {}) => apiPost(path, body, StepResultSchema);
+
+/** A whole demo tryout, as a judge would walk it: Sipho offers it to Thabo, Thabo accepts, the day runs, Sipho pays, Thabo confirms. */
+async function demoDay(steps: Record<string, unknown>): Promise<void> {
+  await signOut(clientAuth());
+  await demoSignIn(THABO.email, THABO.password);
+  const thaboUid = clientAuth().currentUser?.uid ?? "";
+  const seeded = (await apiGet("/api/applications", ApplicationsSchema)).items.find((item) => item.businessName === "Sipho's Phone Repairs" && item.status === "applied");
+  if (!seeded) throw new Error("demo:reset should leave Thabo's application to Sipho's first tryout");
+
+  await signOut(clientAuth());
+  await demoSignIn(SIPHO.email, SIPHO.password);
+  await apiPost(`/api/tryouts/${seeded.tryoutId}/offer`, { workerId: thaboUid }, z.object({ status: z.string() }));
+
+  await signOut(clientAuth());
+  await demoSignIn(THABO.email, THABO.password);
+  const answered = await apiPost(`/api/applications/${seeded.tryoutId}/answer`, { answer: "accept" }, AnswerSchema);
+  const bookingId = answered.state.bookingId ?? "";
+  const code = await startNow(bookingId);
+
+  await signOut(clientAuth());
+  await demoSignIn(SIPHO.email, SIPHO.password);
+  await step(`/api/bookings/${bookingId}/check-in`, { code, faceMatches: true, nameMatches: true, lastFourMatches: true });
+  await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed" });
+  const owed = (await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema)).day.owedCents;
+  await step(`/api/bookings/${bookingId}/paid`, { method: "ewallet", amountCents: owed });
+
+  await signOut(clientAuth());
+  await demoSignIn(THABO.email, THABO.password);
+  await step(`/api/bookings/${bookingId}/confirm`, { received: true });
+  const final = await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema);
+  steps["13. demo tryout, offer to Received"] = { booked: answered.status, status: final.status, owed: final.day.owedCents, payment: final.day.payment?.state };
+  if (final.day.payment?.state !== "received") throw new Error("The demo tryout should end at Received.");
+}
+
 run(async () => {
   await clearEmulators();
-  script("demo:accounts", ["--business-email", "e2e-sipho@firstshift.demo", "--business-password", randomBytes(12).toString("base64url"), "--young-person-email", THABO.email, "--young-person-password", THABO.password]);
+  script("demo:accounts", ["--business-email", SIPHO.email, "--business-password", SIPHO.password, "--young-person-email", THABO.email, "--young-person-password", THABO.password]);
   script("demo:reset");
   const steps: Record<string, unknown> = {};
 
@@ -88,6 +127,7 @@ run(async () => {
   steps["7. next sign-in puts the email back"] = { email: clientAuth().currentUser?.email, destination: (await profile()).destination };
 
   await feedIsolation(steps);
+  await demoDay(steps);
 
   console.log(JSON.stringify(steps, null, 2));
   const refused = ["1. wrong password", "3. edit the demo profile", "4. Firebase password changed, then used", "6. email moved off the demo domain", "11. real opens a demo tryout", "12. real applies to a demo tryout"].map((key) => (steps[key] as { status: number }).status);

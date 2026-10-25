@@ -11,6 +11,8 @@ export interface BookingSecrets {
   checkInCode: string;
   shareToken: string;
   expiresAt: Date;
+  /** Wrong check-in codes tried so far (day.ts, decideCheckIn). */
+  codeAttempts?: number;
 }
 
 export interface OfferState {

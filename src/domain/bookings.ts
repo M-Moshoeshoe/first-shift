@@ -4,6 +4,7 @@ import { newReport, pausesBusinessAtOnce, type ReportCategory, type ReviewCase }
 import type { BusinessRecord, Location, UserRecord } from "./profile";
 import { settle, type SettleEvent, type Settlement } from "./settlement";
 import { addDays, atSastTime } from "./time";
+import type { PaymentMethod, PaymentState } from "./paymentFlow";
 import type { TryoutRecord } from "./tryoutDecisions";
 
 import type { BookingStatus } from "./bookingStatus";
@@ -37,11 +38,31 @@ export interface BookingRecord {
   cancellation?: { by: Party; byUid: string; at: Date; kind: Exclude<CancellationKind, "after_start">; reliedOnGrace: boolean } | null;
   /** What the business owes the young person after the booking ended, from settle(); null while nothing is settled. */
   owedCents?: number | null;
+  /** The lowest the owner may pay (pay.ts): below the full amount only when the young person left early. */
+  owedMinimumCents?: number | null;
+  /** For the door check: the last four digits on the young person's ID card. Shown to the owner only at check-in. */
+  workerIdLastFour: string;
+  checkedInAt?: Date | null;
+  ended?: { at: Date; reason: CheckoutReason; minutesWorked: number } | null;
+  payment?: Payment | null;
+  /** Each deadline acts once (day.ts, deadlineActions). */
+  reviewOpened?: boolean;
+}
+
+export const CHECKOUT_REASONS = ["completed", "finished_early", "worker_left_early", "business_ended_early", "safety"] as const;
+export type CheckoutReason = (typeof CHECKOUT_REASONS)[number];
+
+export interface Payment {
+  state: PaymentState;
+  method?: PaymentMethod;
+  amountCents?: number;
+  markedPaidAt?: Date;
+  answeredAt?: Date;
 }
 
 /** The booking an accepted offer makes. Null if either profile lacks what the day needs (a complete profile always has it). */
 export function newBooking(tryoutId: string, tryout: TryoutRecord, business: BusinessRecord | null, workerId: string, worker: UserRecord | null, now: Date): BookingRecord | null {
-  if (!business?.location || !business.name || !worker?.firstName || !worker.area || !worker.payoutPhone) return null;
+  if (!business?.location || !business.name || !worker?.firstName || !worker.area || !worker.payoutPhone || !worker.idLastFour) return null;
   return {
     tryoutId,
     ownerId: tryout.ownerId,
@@ -54,6 +75,7 @@ export function newBooking(tryoutId: string, tryout: TryoutRecord, business: Bus
     workerFirstName: worker.firstName,
     workerArea: worker.area,
     workerPayoutPhone: worker.payoutPhone,
+    workerIdLastFour: worker.idLastFour,
     startAt: tryout.startAt,
     endAt: tryout.endAt,
     hours: tryout.hours,

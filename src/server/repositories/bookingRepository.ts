@@ -1,24 +1,34 @@
+import type { ApplicationStatus } from "@/domain/applications";
 import type { BookingRecord } from "@/domain/bookings";
 import type { Party } from "@/domain/cancellation";
 import type { ReviewCase } from "@/domain/cases";
 import type { CreditEntry } from "@/domain/credits";
 import type { StrikeReason } from "@/domain/strikes";
+import type { TryoutStatus } from "@/domain/tryout";
 import type { BookingSecrets, Planned } from "./offerRepository";
 
 export interface BookingState {
   booking: BookingRecord | null;
+  secrets: BookingSecrets | null;
   ownerLedger: CreditEntry[];
+  /** What the business is paused for, if it is (day.ts, unpaidPause). */
+  businessPausedFor: string | null;
 }
 
-/** What a cancellation (or, in Phase 5, any ending) writes, all in one transaction with its audit entries. */
-export interface EndingWrite {
-  booking: Partial<BookingRecord>;
-  /** The tryout's new status. */
-  tryoutStatus: "withdrawn" | "completed";
-  /** The young person's application, after this ending. */
-  applicationStatus: "cancelled" | "withdrawn" | "booked";
-  ledger: CreditEntry[];
-  strike: { party: Party; reason: StrikeReason } | null;
+export type Counter = "completed" | "onTime" | "noShows";
+
+/** What one step of a booking writes (cancel, check-in, no-show, check-out, Paid, Received), all in one transaction with its audit entry. */
+export interface BookingWrite {
+  booking?: Partial<BookingRecord>;
+  /** One more wrong check-in code. */
+  codeAttempt?: boolean;
+  tryoutStatus?: TryoutStatus;
+  applicationStatus?: ApplicationStatus;
+  ledger?: CreditEntry[];
+  strike?: { party: Party; reason: StrikeReason } | null;
+  review?: ReviewCase | null;
+  business?: { status: "active" | "paused"; pausedFor: string | null };
+  counters?: { worker?: Counter[]; business?: Counter[] };
   audit: string;
 }
 
@@ -27,7 +37,9 @@ export interface BookingRepository {
   get(bookingId: string): Promise<{ booking: BookingRecord; secrets: BookingSecrets } | null>;
   /** Free cancellations by this person since the given time that were free only because of the grace period. */
   graceCancelsSince(uid: string, since: Date): Promise<number>;
-  transactEnding<R>(bookingId: string, actorUid: string, plan: Planned<BookingState, EndingWrite, R>): Promise<R>;
+  transactBooking<R>(bookingId: string, actorUid: string, plan: Planned<BookingState, BookingWrite, R>): Promise<R>;
+  /** The bookings this person is a party to that still have money moving: for the payment deadlines. */
+  awaitingPayment(uid: string): Promise<{ id: string; booking: BookingRecord }[]>;
   /** Saves a report as a review case, and pauses the business if it must be paused, with audit entries. */
   report(reviewCase: ReviewCase, reporterUid: string, pauseBusiness: boolean): Promise<string>;
   byShareToken(token: string): Promise<BookingRecord | null>;

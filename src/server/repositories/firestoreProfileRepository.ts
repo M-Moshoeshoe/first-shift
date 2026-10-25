@@ -32,6 +32,7 @@ const UserRecordSchema = z.object({
 const BusinessRecordSchema = z.object({
   ownerId: z.string(),
   status: z.enum(ACCOUNT_STATUSES),
+  pausedFor: z.string().nullable().optional(),
   demo: z.boolean().optional(),
   completed: counter,
   onTime: counter,

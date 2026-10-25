@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { lazy, Suspense } from "react";
 import { PersonPhoto } from "@/components/PersonPhoto";
 import { ShiftSlip } from "@/components/ShiftSlip";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
@@ -13,12 +14,19 @@ import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { sastSlot } from "@/domain/time";
 import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
-import { BookingViewSchema } from "@/schemas/booking";
+import { BookingViewSchema, type BookingViewResponse } from "@/schemas/booking";
 import { BookingActions } from "./BookingActions";
 import { CancelPanel } from "./CancelPanel";
 import { ReportForm } from "./ReportForm";
 
+// The day's tools load only once the day has begun (or money is owed), so the booking page stays inside its budget.
+const DayPanel = lazy(() => import("./day/DayPanel").then((module) => ({ default: module.DayPanel })));
+
 const FALLBACK = `This booking didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
+
+/** Whether there's anything for the day panel to show yet. */
+const hasDay = ({ day, status }: BookingViewResponse): boolean =>
+  day.canCheckIn || day.canNoShow || day.canReportNotOpen || day.canCheckOut || day.payable || day.checkedInAt !== null || status === "no_show";
 
 /** The booking, for either party: when and where, who, and what each can do. The server decides what each side sees. */
 export function BookingDetail() {
@@ -79,6 +87,11 @@ export function BookingDetail() {
           {BOOKING_COPY.openMaps}
         </a>
       </section>
+      {hasDay(booking) ? (
+        <Suspense fallback={<div role="status" aria-label="Loading the day" className="h-44 animate-skeleton bg-mist" />}>
+          <DayPanel booking={booking} reload={reload} />
+        </Suspense>
+      ) : null}
       <BookingActions booking={booking} when={`${day}, ${hours}`} />
       {booking.status === "booked" || booking.status === "checked_in" ? <ReportForm bookingId={booking.id} /> : null}
       {booking.cancel ? <CancelPanel bookingId={booking.id} cancel={booking.cancel} onCancelled={reload} /> : null}

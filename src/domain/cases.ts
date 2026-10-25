@@ -9,9 +9,23 @@ export type ReportCategory = (typeof REPORT_CATEGORIES)[number];
 
 export type CaseStatus = "open" | "closed";
 
+/** Why the day itself needs a person to look (docs/RULES.md): each of these always goes to review. */
+export const BOOKING_REVIEW_REASONS = ["no_show_marked", "business_not_open", "safety_stop", "not_received", "unconfirmed"] as const;
+export type BookingReviewReason = (typeof BOOKING_REVIEW_REASONS)[number];
+
 export type ReviewCase =
   | { kind: "reference_challenge"; referenceId: string; workerId: string; ownerId: string; reason: string; status: CaseStatus }
-  | { kind: "report"; category: ReportCategory; tryoutId: string; reporterId: string; businessId: string; note: string; status: CaseStatus };
+  | { kind: "report"; category: ReportCategory; tryoutId: string; reporterId: string; businessId: string; note: string; status: CaseStatus }
+  | { kind: "booking_review"; reason: BookingReviewReason; bookingId: string; businessId: string; workerId: string; status: CaseStatus };
+
+export const bookingReview = (reason: BookingReviewReason, booking: { bookingId: string; ownerId: string; workerId: string }): ReviewCase => ({
+  kind: "booking_review",
+  reason,
+  bookingId: booking.bookingId,
+  businessId: booking.ownerId,
+  workerId: booking.workerId,
+  status: "open",
+});
 
 /**
  * Harassment and unsafe work pause the business at once, before anyone has

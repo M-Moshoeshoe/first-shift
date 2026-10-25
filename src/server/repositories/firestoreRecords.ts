@@ -2,7 +2,7 @@ import "server-only";
 import { Timestamp } from "firebase-admin/firestore";
 import { z } from "zod";
 import { APPLICATION_STATUSES, type ApplicationRecord } from "@/domain/applications";
-import type { BookingRecord } from "@/domain/bookings";
+import { CHECKOUT_REASONS, type BookingRecord } from "@/domain/bookings";
 import { BOOKING_STATUSES } from "@/domain/bookingStatus";
 import type { BookingSecrets } from "./offerRepository";
 
@@ -49,9 +49,25 @@ const BookingSchema = z.object({
     .nullable()
     .optional(),
   owedCents: z.number().int().nullable().optional(),
+  owedMinimumCents: z.number().int().nullable().optional(),
+  // Bookings made before the door check carried it: none on the live site yet, so required.
+  workerIdLastFour: z.string(),
+  checkedInAt: instant.nullable().optional(),
+  ended: z.object({ at: instant, reason: z.enum(CHECKOUT_REASONS), minutesWorked: z.number() }).nullable().optional(),
+  payment: z
+    .object({
+      state: z.enum(["awaiting_payment", "awaiting_confirmation", "received", "not_received"]),
+      method: z.enum(["ewallet", "bank_transfer", "cash"]).optional(),
+      amountCents: z.number().int().optional(),
+      markedPaidAt: instant.optional(),
+      answeredAt: instant.optional(),
+    })
+    .nullable()
+    .optional(),
+  reviewOpened: z.boolean().optional(),
 });
 
-const SecretsSchema = z.object({ checkInCode: z.string(), shareToken: z.string(), expiresAt: instant });
+const SecretsSchema = z.object({ checkInCode: z.string(), shareToken: z.string(), expiresAt: instant, codeAttempts: z.number().int().optional() });
 
 export const parseApplication = (data: unknown): ApplicationRecord => ApplicationSchema.parse(data);
 // The day's fields (check-in, check-out, payment) are added in Phase 5 and pass through untouched here.

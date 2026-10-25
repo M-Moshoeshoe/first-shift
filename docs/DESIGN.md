@@ -171,7 +171,7 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/business/post` | 260 KB (the cap) | 249.4 KB, 15 scripts |
 | `/business/tryouts/[id]` | 260 KB (the cap) | 256.0 KB, 17 scripts (the owner's tryout and applicants, 26 October 2026) |
 | `/work/applications` | 260 KB (the cap) | 249.0 KB, 16 scripts |
-| `/bookings/[id]` | 260 KB (the cap) | 256.5 KB, 16 scripts |
+| `/bookings/[id]` | 260 KB (the cap) | 257.8 KB, 17 scripts; the day's panels (check-in, check-out, paying, confirming) load only once the day has begun |
 | `/status/[token]` | 200 KB (a marketing page) | 198.7 KB, 10 scripts: no sign-in code; the status words have their own module (`bookingStatus.ts`) so the page loads none of the booking rules |
 
 A new page's budget is its measured size plus 10%, never above 260 KB.

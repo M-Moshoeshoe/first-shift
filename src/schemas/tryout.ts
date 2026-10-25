@@ -56,8 +56,3 @@ export const OwnerAnswersSchema = z.object({
 });
 export type OwnerAnswers = z.infer<typeof OwnerAnswersSchema>;
 
-export const MarkPaidSchema = z.object({
-  bookingId: z.string().check(z.minLength(1), z.maxLength(128)),
-  method: z.enum(["ewallet", "bank_transfer", "cash"]),
-  amountCents: z.int().check(z.positive()),
-});

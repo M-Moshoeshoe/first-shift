@@ -4,6 +4,7 @@ import { BOOKING_COPY } from "@/domain/bookingMessages";
 import { cancelOutcome, decideCancel, type CancelOutcome, decideReport, mapsUrl, mayViewPhoto, partyOf, statusView, whatsAppUrl, type BookingRecord } from "@/domain/bookings";
 import type { Party } from "@/domain/cancellation";
 import type { ReportCategory } from "@/domain/cases";
+import { dayOptions } from "@/domain/day";
 import type { Viewer } from "@/domain/demo";
 import { displayPhone, photoPath, type PhotoKind } from "@/domain/profile";
 import { settlementCredit } from "@/domain/settlement";
@@ -24,7 +25,7 @@ const notFound = () => new AppError(404, "not_found", BOOKING_COPY.notFound);
 const GRACE_WINDOW_DAYS = 30;
 
 /** What this party may see of the booking: the owner gets the payout number, the young person the check-in code. */
-function bookingView(bookingId: string, booking: BookingRecord, secrets: BookingSecrets, party: Party, outcome: CancelOutcome | null): BookingViewResponse {
+function bookingView(bookingId: string, booking: BookingRecord, secrets: BookingSecrets, party: Party, outcome: CancelOutcome | null, now: Date, remind: boolean): BookingViewResponse {
   const isOwner = party === "business";
   return {
     id: bookingId,
@@ -49,6 +50,17 @@ function bookingView(bookingId: string, booking: BookingRecord, secrets: Booking
     checkInCode: isOwner ? null : secrets.checkInCode,
     shareToken: isOwner ? null : secrets.shareToken,
     cancel: outcome ? { kind: outcome.kind, owedCents: outcome.settlement.wage?.amountCents ?? 0 } : null,
+    day: {
+      ...dayOptions(party, booking, now),
+      checkedInAt: booking.checkedInAt?.toISOString() ?? null,
+      endReason: booking.ended?.reason ?? null,
+      owedCents: booking.owedCents ?? 0,
+      owedMinimumCents: booking.owedMinimumCents ?? booking.owedCents ?? 0,
+      payment: booking.payment ? { state: booking.payment.state, method: booking.payment.method ?? null, amountCents: booking.payment.amountCents ?? null } : null,
+      // The door check's two facts, for the owner only, and only while they're needed.
+      door: isOwner && booking.status === "booked" ? { lastFour: booking.workerIdLastFour } : null,
+      remind,
+    },
   };
 }
 
@@ -68,16 +80,17 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
   }
 
   return {
-    async view(viewer: Viewer, bookingId: string): Promise<BookingViewResponse> {
+    /** reminders: the bookings the deadline sweep says the young person should be reminded about (dayService.ts). */
+    async view(viewer: Viewer, bookingId: string, reminders: readonly string[] = []): Promise<BookingViewResponse> {
       const { booking, secrets, party } = await own(viewer, bookingId);
       const outcome = booking.status === "booked" ? cancelOutcome(party, booking, now(), await graceCancels(viewer.uid)) : null;
-      return bookingView(bookingId, booking, secrets, party, outcome);
+      return bookingView(bookingId, booking, secrets, party, outcome, now(), reminders.includes(bookingId));
     },
 
     /** Cancels, classified free or late by the cancellation rules and settled by settle(): wage, credit and strike together. */
     async cancel(viewer: Viewer, bookingId: string): Promise<{ status: "cancelled" | "unchanged" }> {
       const recent = await graceCancels(viewer.uid);
-      return bookings.transactEnding<{ status: "cancelled" | "unchanged" }>(bookingId, viewer.uid, ({ booking, ownerLedger }) => {
+      return bookings.transactBooking<{ status: "cancelled" | "unchanged" }>(bookingId, viewer.uid, ({ booking, ownerLedger }) => {
         const at = now();
         const decision = decideCancel(viewer, booking, at, recent);
         if (decision.kind === "refuse") throw decision.problem === "not_found" ? notFound() : new AppError(409, "started", BOOKING_COPY.started);
@@ -88,6 +101,9 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
           status: "cancelled",
           cancellation: { by: party, byUid: viewer.uid, at, kind: outcome.kind, reliedOnGrace: outcome.reliedOnGrace },
           owedCents: outcome.settlement.wage?.amountCents ?? 0,
+          owedMinimumCents: outcome.settlement.wage?.minimumCents ?? 0,
+          // A business that cancels late owes 4 hours, paid and confirmed like any other day (day.ts).
+          payment: outcome.settlement.wage ? { state: "awaiting_payment" } : null,
         };
         return {
           write: {

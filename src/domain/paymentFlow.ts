@@ -1,7 +1,8 @@
 import { RULES } from "@/config/rules";
 import { addHours, addMinutes, atSastTime } from "./time";
 
-export type PaymentMethod = "ewallet" | "bank_transfer" | "cash";
+export const PAYMENT_METHODS = ["ewallet", "bank_transfer", "cash"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export type PaymentState = "awaiting_payment" | "awaiting_confirmation" | "received" | "not_received";
 

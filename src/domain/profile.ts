@@ -70,6 +70,8 @@ export interface UserRecord extends Partial<Counters>, Partial<WorkerDetails> {
 export interface BusinessRecord extends Counters, Partial<Omit<BusinessDetails, "location">> {
   ownerId: string;
   status: AccountStatus;
+  /** Why it's paused, when it is: an unpaid tryout (day.ts, unpaidPause) or a report's case id. */
+  pausedFor?: string | null;
   demo?: boolean;
   location?: Location;
   shopfrontPhoto?: StoredPhoto;

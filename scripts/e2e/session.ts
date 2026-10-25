@@ -1,4 +1,5 @@
 import { getApps, initializeApp as initializeAdmin } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 import { GoogleAuthProvider, signInWithCredential, signOut } from "firebase/auth";
 import { ApiError, apiPost } from "../../src/lib/api";
 import { clientAuth } from "../../src/lib/firebaseClient";
@@ -73,4 +74,17 @@ export function run(main: () => Promise<void>): void {
       console.error(error);
       process.exit(1);
     });
+}
+
+/**
+ * Moves a booking so its day starts now, in the emulator only. The rules
+ * about time are tested in tests/unit/day.test.ts; this lets the walk reach
+ * the door without waiting until tomorrow.
+ */
+export async function startNow(bookingId: string): Promise<string> {
+  const db = getFirestore(adminApp());
+  const now = Date.now();
+  await db.collection("bookings").doc(bookingId).update({ startAt: new Date(now - 5 * 60_000), endAt: new Date(now + 6 * 3600_000 - 5 * 60_000) });
+  const secrets = await db.collection("bookingSecrets").doc(bookingId).get();
+  return String(secrets.get("checkInCode"));
 }

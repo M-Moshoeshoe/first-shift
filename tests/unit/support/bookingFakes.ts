@@ -6,6 +6,7 @@ import type { TryoutRecord } from "@/domain/tryoutDecisions";
 import type { BookingRepository } from "@/server/repositories/bookingRepository";
 import type { BookingSecrets, OfferRepository } from "@/server/repositories/offerRepository";
 import { createBookingService } from "@/server/services/bookingService";
+import { createDayService } from "@/server/services/dayService";
 import { createOfferService } from "@/server/services/offerService";
 import { createFakeStore } from "./profileFakes";
 
@@ -46,7 +47,8 @@ export function createBookingFakes(now: () => Date) {
   };
   const offerService = createOfferService({ offers, profiles: store.repo, newSecrets, now });
   const bookingService = createBookingService({ bookings: bookingRepo, photos: { metadata: async () => null, download: async () => null }, now });
-  return { store, tryouts, applications, bookings, secrets, cases, strikes, audit, offerService, bookingService };
+  const dayService = createDayService({ bookings: bookingRepo, now });
+  return { store, tryouts, applications, bookings, secrets, cases, strikes, audit, offerService, bookingService, dayService };
 }
 
 export type BookingFakes = ReturnType<typeof createBookingFakes>;
@@ -79,17 +81,34 @@ function fakeBookingRepository({ store, applications, bookings, secrets, cases, 
     async graceCancelsSince(uid, since) {
       return [...bookings.values()].filter((b) => b.cancellation?.byUid === uid && b.cancellation.reliedOnGrace && b.cancellation.at >= since).length;
     },
-    async transactEnding(id, actor, plan) {
+    async transactBooking(id, _actor, plan) {
       const booking = bookings.get(id) ?? null;
-      const { write, result } = plan(structuredClone({ booking, ownerLedger: booking ? ledger(booking.ownerId) : [] }));
+      const business = booking ? store.businesses.get(booking.ownerId) : undefined;
+      const pausedFor = business?.pausedFor ?? null;
+      const state = structuredClone({ booking, secrets: secrets.get(id) ?? null, ownerLedger: booking ? ledger(booking.ownerId) : [], businessPausedFor: pausedFor });
+      const { write, result } = plan(state);
       if (!write || !booking) return result;
       bookings.set(id, { ...booking, ...write.booking });
-      updateTryout(booking.tryoutId, { status: write.tryoutStatus });
-      updateApp(booking, write.applicationStatus);
-      appendLedger(booking.ownerId, write.ledger);
+      const secret = secrets.get(id);
+      if (write.codeAttempt && secret) secrets.set(id, { ...secret, codeAttempts: (secret.codeAttempts ?? 0) + 1 });
+      if (write.tryoutStatus) updateTryout(booking.tryoutId, { status: write.tryoutStatus });
+      if (write.applicationStatus) updateApp(booking, write.applicationStatus);
+      appendLedger(booking.ownerId, write.ledger ?? []);
       if (write.strike) strikes.push({ uid: write.strike.party === "business" ? booking.ownerId : booking.workerId, reason: write.strike.reason });
+      if (write.review) cases.push(structuredClone(write.review));
+      const owner = store.businesses.get(booking.ownerId);
+      if (write.business && owner) store.businesses.set(booking.ownerId, { ...owner, ...write.business });
+      const bump = <T extends object>(record: T | undefined, names: readonly string[] | undefined): T | undefined =>
+        record && names ? { ...record, ...Object.fromEntries(names.map((name) => [name, Number((record as Record<string, unknown>)[name] ?? 0) + 1])) } : record;
+      const worker = bump(store.users.get(booking.workerId), write.counters?.worker);
+      if (worker) store.users.set(booking.workerId, worker);
+      const shop = bump(store.businesses.get(booking.ownerId), write.counters?.business);
+      if (shop) store.businesses.set(booking.ownerId, shop);
       audit.push(write.audit);
       return result;
+    },
+    async awaitingPayment(uid) {
+      return [...bookings].filter(([, b]) => (b.ownerId === uid || b.workerId === uid) && (b.owedCents ?? 0) > 0 && b.payment?.state !== "received").map(([id, booking]) => structuredClone({ id, booking }));
     },
     async report(reviewCase, _reporter, pauseBusiness) {
       cases.push(structuredClone(reviewCase));
