@@ -3,6 +3,7 @@ import { RULES } from "@/config/rules";
 import { applyState, decideApply, decideWithdrawApplication, type ApplyState } from "@/domain/applications";
 import { areaCentre } from "@/domain/areas";
 import { sameWorld, type Viewer } from "@/domain/demo";
+import { fareRouteAreas } from "@/domain/fares";
 import { CLOSED_MESSAGES, FINDING_MESSAGES, NOT_ELIGIBLE_MESSAGES } from "@/domain/findingMessages";
 import { feedItem, nearbyFeed, searchBounds } from "@/domain/nearby";
 import type { UserRecord } from "@/domain/profile";
@@ -57,7 +58,7 @@ export function createFindingService({ finding, profiles, consumeQuota, now }: F
       if (user?.role !== "young_person" || !user.area) throw refusal("not_young_person");
       const centre = areaCentre(user.area);
       if (!centre) return { status: "unknown_area", area: user.area };
-      const listings = await finding.publishedIn(searchBounds(centre));
+      const listings = await finding.publishedIn(searchBounds(centre), fareRouteAreas(user.area));
       return { status: "ok", area: user.area, items: nearbyFeed(viewer, { area: user.area, centre }, listings, now()) };
     },
 

@@ -67,15 +67,24 @@ export function feedItem(listing: Listing, from: { area: string; centre: Point |
 }
 
 /**
- * The feed: published tryouts still open for booking, within the radius, in
+ * Where a young person can get to: within the radius of their area's centre,
+ * or anywhere with a published direct taxi fare from their area, because a
+ * published fare means people make that trip every day (Ivory Park to
+ * Randburg is about 21 km, and R56 return).
+ */
+export const withinReach = (from: { area: string; centre: Point }, tryout: Pick<TryoutRecord, "area" | "location">): boolean =>
+  distanceKm(from.centre, tryout.location) <= RULES.nearbyRadiusKm || returnFare(from.area, tryout.area) !== null;
+
+/**
+ * The feed: published tryouts still open for booking, within reach, in
  * the viewer's world only (demo or real), soonest first. Listings come from
- * the geohash range queries, which may overlap and over-cover; each is kept
- * once and checked here.
+ * the geohash range queries and the route areas, which may overlap and
+ * over-cover; each is kept once and checked here.
  */
 export function nearbyFeed(viewer: Viewer, from: { area: string; centre: Point }, listings: readonly Listing[], now: Date): FeedItem[] {
   const unique = [...new Map(listings.map((listing) => [listing.id, listing])).values()];
   return unique
-    .filter(({ tryout }) => sameWorld(viewer, tryout) && bookingOpen(tryout, now) && distanceKm(from.centre, tryout.location) <= RULES.nearbyRadiusKm)
+    .filter(({ tryout }) => sameWorld(viewer, tryout) && bookingOpen(tryout, now) && withinReach(from, tryout))
     .sort((a, b) => a.tryout.startAt.getTime() - b.tryout.startAt.getTime())
     .map((listing) => feedItem(listing, from));
 }

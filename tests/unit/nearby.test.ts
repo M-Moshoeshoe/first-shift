@@ -45,9 +45,18 @@ describe("distance", () => {
 describe("nearbyFeed", () => {
   it("keeps published tryouts within the radius that are open for booking, once each, soonest first", () => {
     const later = listing("later", { startAt: new Date("2026-10-28T07:00:00Z"), endAt: new Date("2026-10-28T13:00:00Z") });
-    const items = nearbyFeed(real, from, [later, listing("soon"), listing("soon"), listing("far", {}, [-26.1, 28.233])], NOW);
+    const items = nearbyFeed(real, from, [later, listing("soon"), listing("soon"), listing("far", { area: "Kempton Park" }, [-26.1, 28.233])], NOW);
     expect(items.map((item) => item.id)).toEqual(["soon", "later"]);
     expect(distanceKm(IVORY_PARK, { lat: -26.1, lng: 28.233 })).toBeGreaterThan(RULES.nearbyRadiusKm);
+  });
+
+  it("reaches past the radius only to an area with a published taxi fare from the young person's area", () => {
+    // Randburg is about 21 km from Ivory Park, with a published fare; Sandton is about as far, with none.
+    const randburg = listing("randburg", { area: "Randburg" }, [-26.0939, 28.0071]);
+    const sandton = listing("sandton", { area: "Sandton" }, [-26.107, 28.0517]);
+    const items = nearbyFeed(real, from, [randburg, sandton], NOW);
+    expect(items.map((item) => item.id)).toEqual(["randburg"]);
+    expect(items[0]).toMatchObject({ distance: "about 21 km", returnFareCents: 5600 });
   });
 
   it("drops tryouts whose booking has closed, that aren't published, or that are from the other world", () => {

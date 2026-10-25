@@ -21,8 +21,12 @@ export interface ApplicationPlan<R> {
 
 /** Reading published tryouts for young people, and applying. Firestore in production; fakes in tests. */
 export interface FindingRepository {
-  /** Published tryouts whose cell is in any of these geohash ranges, each with its business's track record and injury cover. */
-  publishedIn(bounds: readonly [string, string][]): Promise<Listing[]>;
+  /**
+   * Published tryouts whose cell is in any of these geohash ranges, or whose
+   * area is one of these (the young person's taxi routes), each with its
+   * business's track record and injury cover.
+   */
+  publishedIn(bounds: readonly [string, string][], areas: readonly string[]): Promise<Listing[]>;
   /** One tryout, whatever its status, with its business; null if there's no such tryout. */
   listing(id: string): Promise<Listing | null>;
   /** The tryout, this young person's application to it, and their bookings, read together. */

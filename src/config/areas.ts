@@ -6,19 +6,25 @@
  * numbers ("Ivory Park Ext 2"), so list only spellings that differ beyond that.
  *
  * Each centre is the area's approximate middle, from its Wikipedia
- * coordinates (25 October 2026): a young person's search point for nearby
- * tryouts, never anyone's address.
+ * coordinates (25 October 2026; Lonehill from OpenStreetMap, Riverside View
+ * from map listings): a young person's search point for nearby tryouts,
+ * never anyone's address.
  */
 export const AREAS: readonly { name: string; aliases: readonly string[]; centre: { lat: number; lng: number } }[] = [
   { name: "Alexandra", aliases: ["alex"], centre: { lat: -26.1038, lng: 28.0962 } },
   { name: "Diepsloot", aliases: [], centre: { lat: -25.9347, lng: 28.0125 } },
   { name: "Ebony Park", aliases: [], centre: { lat: -25.999, lng: 28.177 } },
+  { name: "Fourways", aliases: ["four ways"], centre: { lat: -26.0211, lng: 28.0092 } },
   { name: "Halfway House", aliases: [], centre: { lat: -25.993, lng: 28.132 } },
   { name: "Ivory Park", aliases: ["ivory prk", "ivorypark"], centre: { lat: -25.999, lng: 28.196 } },
   { name: "Kaalfontein", aliases: [], centre: { lat: -26.0353, lng: 28.2544 } },
   { name: "Kempton Park", aliases: ["kempton"], centre: { lat: -26.1, lng: 28.233 } },
+  { name: "Lonehill", aliases: ["lone hill"], centre: { lat: -26.0148, lng: 28.0269 } },
   { name: "Midrand", aliases: ["mid rand"], centre: { lat: -25.9992, lng: 28.1264 } },
   { name: "Olifantsfontein", aliases: ["olifantsfontain"], centre: { lat: -25.9581, lng: 28.2164 } },
   { name: "Rabie Ridge", aliases: [], centre: { lat: -26.022, lng: 28.174 } },
+  { name: "Randburg", aliases: [], centre: { lat: -26.0936, lng: 28.0064 } },
+  { name: "Riverside View", aliases: [], centre: { lat: -25.96, lng: 28.006 } },
+  { name: "Sandton", aliases: [], centre: { lat: -26.107, lng: 28.0517 } },
   { name: "Tembisa", aliases: ["thembisa", "tembisa township"], centre: { lat: -26.0055, lng: 28.2102 } },
 ];

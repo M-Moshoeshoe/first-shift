@@ -1,3 +1,5 @@
+import { TAXI_ROUTES } from "@/config/fares";
+import { canonicaliseArea } from "./areas";
 import type { Cents } from "./money";
 
 export interface ReturnFare {
@@ -5,30 +7,24 @@ export interface ReturnFare {
   source: string;
 }
 
-const IVORY_PARK_SOURCE = "Ivory Park Taxi Association fares from 4 May 2026, reported by The Citizen";
+/** Matching ignores case and spacing, and known areas match under any spelling ("ivory prk" is Ivory Park). */
+const key = (area: string): string => canonicaliseArea(area).trim().toLowerCase().replace(/\s+/g, " ");
 
-/** One-way minibus taxi fares from Ivory Park Ext 2, in cents. */
-const FROM_IVORY_PARK: Record<string, Cents> = {
-  midrand: 1800,
-  fourways: 2700,
-  rosebank: 2700,
-  randburg: 2800,
-  "johannesburg cbd": 2800,
-};
-
-const normalise = (area: string): string => area.trim().toLowerCase().replace(/\s+/g, " ");
+const ONE_WAY = new Map(TAXI_ROUTES.flatMap((route) => [[`${key(route.a)}|${key(route.b)}`, route], [`${key(route.b)}|${key(route.a)}`, route]] as const));
 
 /**
  * The return fare for a known route, or null when we have no published fare.
  * We never invent a fare: the screen says the fare isn't known instead.
  */
 export function returnFare(fromArea: string, toArea: string): ReturnFare | null {
-  const from = normalise(fromArea);
-  const to = normalise(toArea);
-  if (from === to) return null;
+  const route = ONE_WAY.get(`${key(fromArea)}|${key(toArea)}`);
+  return route ? { returnCents: route.oneWayCents * 2, source: route.source } : null;
+}
 
-  const oneWay = from === "ivory park" ? FROM_IVORY_PARK[to] : to === "ivory park" ? FROM_IVORY_PARK[from] : undefined;
-  return oneWay === undefined ? null : { returnCents: oneWay * 2, source: IVORY_PARK_SOURCE };
+/** Every area with a published fare from this one, by the name a tryout stores (its business's official area). */
+export function fareRouteAreas(fromArea: string): string[] {
+  const from = key(fromArea);
+  return TAXI_ROUTES.flatMap((route) => (key(route.a) === from ? [route.b] : key(route.b) === from ? [route.a] : []));
 }
 
 /** What the young person keeps after the return taxi fare, or null when the fare isn't known. Never below zero. */

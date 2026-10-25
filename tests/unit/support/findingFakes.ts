@@ -74,12 +74,13 @@ export function createFindingFakes() {
   });
 
   const finding: FindingRepository = {
-    async publishedIn(bounds) {
+    async publishedIn(bounds, areas) {
       rangeQueries += bounds.length;
-      // Like the range queries: every published tryout whose cell falls in a range, possibly more than once.
-      return bounds.flatMap(([start, end]) =>
-        [...tryouts].filter(([, tryout]) => tryout.status === "published" && tryout.location.geohash >= start && tryout.location.geohash <= end).flatMap(([id]) => listing(id) ?? []),
-      );
+      // Like the queries: every published tryout whose cell falls in a range or whose area is listed, possibly more than once.
+      const published = [...tryouts].filter(([, tryout]) => tryout.status === "published");
+      const inRange = bounds.flatMap(([start, end]) => published.filter(([, tryout]) => tryout.location.geohash >= start && tryout.location.geohash <= end));
+      const onRoute = published.filter(([, tryout]) => areas.includes(tryout.area));
+      return [...inRange, ...onRoute].flatMap(([id]) => listing(id) ?? []);
     },
     async listing(id) {
       return listing(id);

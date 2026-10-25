@@ -113,7 +113,8 @@ A tryout shows where it is as a cell about 1 km across (a 6-character geohash) a
 | Rule | Value | Code |
 | --- | --- | --- |
 | Search point | The young person's area's approximate centre (`src/config/areas.ts`); an area we don't know gives no feed, and the screen says so | `areas.ts` |
-| Radius | 10 km, measured to the tryout's cell centre, shown as "about 4 km" | `nearby.ts` |
+| Within reach | 10 km of the area's centre, measured to the tryout's cell centre and shown as "about 4 km"; or any area with a published direct taxi fare from the young person's area, however far, because people make that trip every day (Ivory Park to Randburg: about 21 km, R56 return) | `nearby.ts`, `withinReach` |
+| Taxi fares | Published one-way fares only, both directions, each with its source (`src/config/fares.ts`); a route we have no fare for shows "Fare not known" | `fares.ts` |
 | What the feed shows | Published tryouts still open for booking, soonest first, in the viewer's world only (demo or real) | `nearby.ts`, `demo.ts` |
 | Who may apply | A young person with a complete, active profile | `applications.ts` |
 | When | While the tryout is published and booking is open (until 1 hour before the start) | `applications.ts` |

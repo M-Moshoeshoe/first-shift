@@ -49,12 +49,15 @@ async function readState(db: Firestore, tryoutId: string, workerId: string, tx?:
 }
 
 export const firestoreFindingRepository: FindingRepository = {
-  async publishedIn(bounds) {
+  async publishedIn(bounds, areas) {
     const db = adminDb();
-    // One range query per geohash range (status equality plus a range on the cell: firestore.indexes.json).
-    const snapshots = await Promise.all(
-      bounds.map(([start, end]) => db.collection("tryouts").where("status", "==", "published").orderBy("location.geohash").startAt(start).endAt(end).get()),
-    );
+    const published = db.collection("tryouts").where("status", "==", "published");
+    // One range query per geohash range, and one for the route areas (both indexed: firestore.indexes.json).
+    // Firestore takes up to 30 values in one "in"; nobody's area has that many routes.
+    const snapshots = await Promise.all([
+      ...bounds.map(([start, end]) => published.orderBy("location.geohash").startAt(start).endAt(end).get()),
+      ...(areas.length > 0 ? [published.where("area", "in", areas.slice(0, 30)).get()] : []),
+    ]);
     const tryouts = snapshots.flatMap((snapshot) => snapshot.docs.map((doc) => ({ id: doc.id, tryout: parseTryout(doc.data()) })));
     return withBusinesses(db, tryouts);
   },

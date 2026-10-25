@@ -78,7 +78,8 @@ function tryout(slot: Slot, owners: Record<string, BusinessRecord>, now: Date): 
 export function demoState(uids: DemoUids, now: Date): DemoState {
   const [lerato, ayanda] = DEMO_EXTRA_OWNERS;
   const businesses: Record<string, BusinessRecord> = {
-    [uids.business]: business(uids.business, { name: "Sipho's Phone Repairs", area: "Midrand", latitude: -25.9992, longitude: 28.1263, completed: 0, coida: "registered" }),
+    // Randburg: about 21 km from Thabo in Ivory Park, on a direct taxi route (R28 each way).
+    [uids.business]: business(uids.business, { name: "Sipho's Phone Repairs", area: "Randburg", latitude: -26.0939, longitude: 28.0071, completed: 0, coida: "registered" }),
     [lerato]: business(lerato, { name: "Lerato's Spaza", area: "Tembisa", latitude: -25.9964, longitude: 28.2268, completed: 6, coida: "registered" }),
     [ayanda]: business(ayanda, { name: "Ayanda's Car Wash", area: "Ivory Park", latitude: -25.9861, longitude: 28.1958, completed: 2, coida: "not_sure" }),
   };
