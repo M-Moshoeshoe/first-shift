@@ -226,6 +226,21 @@ Every value under `configured` must be `true`, and `"emulators"` must be `false`
 
    It prints a table of 20 cases and ends with **All 20 cases passed.** Copy the whole table and send it to me, pass or fail; I record it in SECURITY.md. If any case fails, don't change the prompts yourself: send the table.
 
+## 5b. Demo accounts for judges (10 minutes)
+
+Judges sign in with an email and password instead of Google. Only the two accounts you create here can do that.
+
+1. Firebase console > **Build** > **Authentication** > **Sign-in method** tab > **Add new provider** > **Email/Password**. Switch **Email/Password** on. Leave **Email link (passwordless sign-in)** off. **Save**.
+2. Still in **Authentication**, open the **Settings** tab > **User actions**. Untick **Enable create (sign-up)**, so nobody can register with a password. Leave **Enable deletion** as it is. **Save**.
+3. On the laptop, run:
+
+   ```bash
+   npm run demo:accounts
+   ```
+
+   It says `Target: the LIVE project first-shift-a5388`, creates a business and a young person account, and prints both passwords once. Copy them straight into your password manager: they aren't stored anywhere else. Running it again changes nothing; `npm run demo:accounts -- --reset business` (or `young_person`) gives one a new password.
+4. On https://firstshiftza.netlify.app/sign-in, tap **Judges and testers: use a demo account** and sign in with each. Each starts at the role screen until demo mode fills in their profiles.
+
 ## 6. Final checks
 
 Tick each one, on the live site unless it says otherwise:

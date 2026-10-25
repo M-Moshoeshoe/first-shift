@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
-import { FIELD_MESSAGES, ID_HINT, ID_PROBLEM_MESSAGES, LOCATION_MESSAGES, PROFILE_MESSAGES, UPLOAD_COPY, pinPrecisionText, signInErrorMessage, splitContactLink } from "@/domain/messages";
+import { FIELD_MESSAGES, ID_HINT, ID_PROBLEM_MESSAGES, LOCATION_MESSAGES, PROFILE_MESSAGES, UPLOAD_COPY, pinPrecisionText, signInErrorMessage, demoSignInErrorMessage, splitContactLink } from "@/domain/messages";
 import { PHOTO_KINDS } from "@/domain/profile";
 import { POSTING_PROBLEM_MESSAGES, TERMS_MESSAGES, TRYOUT_FIELD_MESSAGES, TRYOUT_MESSAGES } from "@/domain/tryoutMessages";
 
+const DEMO_CODES = ["auth/invalid-credential", "auth/invalid-email", "auth/user-disabled", "auth/too-many-requests", "auth/network-request-failed", "auth/x"];
 const SIGN_IN_CODES = ["auth/popup-blocked", "auth/popup-closed-by-user", "auth/network-request-failed", "auth/too-many-requests", "auth/x"];
 
 const everyMessage = [
@@ -14,6 +15,7 @@ const everyMessage = [
   ...PHOTO_KINDS.map((kind) => PROFILE_MESSAGES.photoMissing(kind)),
   ...Object.values(PROFILE_MESSAGES).flatMap((value) => (typeof value === "string" ? [value] : [])),
   ...SIGN_IN_CODES.map(signInErrorMessage),
+  ...DEMO_CODES.map(demoSignInErrorMessage),
   ...Object.values(LOCATION_MESSAGES),
   ...Object.values(POSTING_PROBLEM_MESSAGES),
   ...Object.values(TERMS_MESSAGES),

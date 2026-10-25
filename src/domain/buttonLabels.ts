@@ -5,6 +5,7 @@
  */
 export const BUTTON_LABELS = {
   continueWithGoogle: "Continue with Google",
+  signInToDemo: "Sign in to the demo account",
   saveMyProfile: "Save my profile",
   saveMyBusiness: "Save my business",
   useMyLocation: "Use my location",

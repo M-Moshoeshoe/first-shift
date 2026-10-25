@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ComponentType } from "react";
+import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 import { ProfileErrorState } from "@/components/ProfileErrorState";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -15,6 +15,9 @@ import { signInWithGoogle } from "@/lib/auth/signInWithGoogle";
 import { testSignInAllowed } from "@/lib/emulators";
 
 const ERROR_ID = "sign-in-error";
+
+// Judges and testers only, so it loads when someone asks for it and the page stays light.
+const DemoSignIn = lazy(() => import("./DemoSignIn").then((module) => ({ default: module.DemoSignIn })));
 
 // Development builds only. In production this folds to null and the import is left out of the build.
 const loadTestSignIn = process.env.NODE_ENV === "production" ? null : () => import("./TestSignIn");
@@ -32,6 +35,7 @@ export function SignInPanel() {
   const [profileError, setProfileError] = useState<{ uid: string; message: string } | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [TestSignIn, setTestSignIn] = useState<ComponentType | null>(null);
+  const [showDemo, setShowDemo] = useState(false);
 
   useEffect(() => {
     if (!loadTestSignIn || !testSignInAllowed(process.env.NODE_ENV, process.env.NEXT_PUBLIC_USE_EMULATORS, window.location.hostname)) return;
@@ -84,6 +88,17 @@ export function SignInPanel() {
         </Button>
         <FormError id={ERROR_ID} message={message} />
       </div>
+      {showDemo ? (
+        <Suspense fallback={<div role="status" aria-label="Opening the demo sign-in" className="h-64 animate-skeleton bg-mist" />}>
+          <DemoSignIn />
+        </Suspense>
+      ) : (
+        <div>
+          <Button variant="quiet" onClick={() => setShowDemo(true)}>
+            Judges and testers: use a demo account
+          </Button>
+        </div>
+      )}
       {TestSignIn ? <TestSignIn /> : null}
     </div>
   );

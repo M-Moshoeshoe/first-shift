@@ -131,6 +131,19 @@ export function signInErrorMessage(code: string): string {
   return SIGN_IN_MESSAGES[code] ?? `Google sign-in didn't finish. Tap ${BUTTON_LABELS.continueWithGoogle} to try again.`;
 }
 
+const DEMO_SIGN_IN_MESSAGES: Record<string, string> = {
+  "auth/invalid-credential": "That email and password don't match a demo account. Check them, then try again.",
+  "auth/invalid-email": "That doesn't look like an email address. Check it, then try again.",
+  "auth/user-disabled": "That demo account is switched off. Ask the First Shift team for a working one.",
+  "auth/too-many-requests": "There have been too many sign-in attempts from this phone. Wait a few minutes, then try again.",
+  "auth/network-request-failed": `We couldn't reach First Shift. Check your connection, then tap ${BUTTON_LABELS.signInToDemo} again.`,
+};
+
+/** The same for the demo accounts' email and password sign-in. */
+export function demoSignInErrorMessage(code: string): string {
+  return DEMO_SIGN_IN_MESSAGES[code] ?? `The demo sign-in didn't finish. Tap ${BUTTON_LABELS.signInToDemo} to try again.`;
+}
+
 /** Splits a message around "contact us" (any case) so the UI can make it a link. Null when it isn't there. */
 export function splitContactLink(message: string): { before: string; phrase: string; after: string } | null {
   const at = message.toLowerCase().indexOf(CONTACT_PHRASE);
