@@ -32,7 +32,7 @@ src/server/          server-only adapters: Firebase Admin, auth, Claude, rate li
 src/server/services/       coordinate one use case: call domain to decide, a repository to write
 src/server/repositories/   storage behind small interfaces (Firestore, Storage); fakes in tests
 src/lib/             client-only helpers (Firebase web SDK)
-src/data/            demo data, always marked demo: true (rebuilt with demo mode, docs/PHASES.md item K)
+src/data/            demo data, always marked demo: true; npm run demo:reset restores it
 tests/unit/          domain tests
 tests/rules/         security rules tests
 ```
@@ -85,6 +85,7 @@ Folders and files:
 - No silent failures. Every rejected write and every AI failure is logged with `log()` and shown to the user with a clear next step. Fail closed: an error blocks the action, it never skips a check.
 - POPIA: collect the minimum. ID numbers are stored only as an HMAC hash plus the last four digits. No face matching. No personal data in logs (`log()` redacts it) or in AI prompts.
 - Rate limits on every AI route and on applying and posting, from `RULES`.
+- Demo isolation: the demo accounts' passwords are public. Everything a demo account creates is marked `demo: true`, and every route that reads someone else's data filters with `sameWorld` (`src/domain/demo.ts`), so demo and real never meet. Demo profiles never change from the app. The real demo passwords never appear in the repo, tests included.
 - Dependencies: exact versions and a committed lockfile. Don't adopt a release newer than 14 days, except a patch that fixes a published security advisory, which we take immediately. When a library pins a vulnerable package we can't upgrade directly, use an `overrides` entry in `package.json` and note why in `SECURITY.md`. `npm audit` must report zero vulnerabilities before every push. `.npmrc` sets `legacy-peer-deps=true`, added to work around an npm resolver bug with optional peer dependencies (README, Troubleshooting); because npm then stays silent about peer mismatches, check a new package's peer requirements by hand. Run the Firebase CLI from the pinned dev dependency (`npx firebase`, or the npm scripts), never a global install.
 
 ## AI rules
@@ -121,7 +122,7 @@ Folders and files:
 - Checks, while GitHub Actions is paused for a billing issue on the account (the workflows in `.github/workflows` stay, and resume once it's fixed): `npm run verify` (lint, typecheck, unit tests, build, budgets, `npm audit`) is Netlify's build command, so every deploy runs it and a failure stops the deploy; `npm run rules` needs Java and the emulators, so it runs locally before every push. Nothing claims CI ran when it didn't.
 - Branches, to save Netlify credits: day-to-day work happens on `dev`, which Netlify doesn't build. Merge `dev` into `main` only for a deliberate deploy, after `npm run verify` and `npm run rules` pass locally. Netlify builds `main` for production.
 - Small commits with plain messages ("Add tryout posting route"), one concern each.
-- Git workflow: work one step at a time; show the step's changes with `git diff`; commit at the end of the step only after the go-ahead, with a plain message naming the step ("Phase 1 step 5: young person onboarding"). Before every commit, check `git status` and the staged content: no `.env.local`, service account or keystore files, and no secret in any staged file: a PEM private key block, a Google API key or an Anthropic key.
+- Git workflow: work one step at a time; show the step's changes with `git diff`; commit at the end of the step only after the go-ahead, with a plain message naming the step ("Phase 1 step 5: young person onboarding"). Before every commit, check `git status` and the staged content: no `.env.local`, service account or keystore files, and no secret in any staged file: a PEM private key block, a Google API key, an Anthropic key or a demo account password from `.env.demo.local`.
 - Never commit `.env.local`, keystores or service account files.
 - Definition of done for any phase: lint, typecheck, unit tests and build pass; new rules have tests; the screen works on a 360 px wide viewport with a throttled connection; copy follows the rules above.
 

@@ -14,6 +14,7 @@ const PhotoSchema = z.object({ path: z.string(), version: z.string() });
 const UserRecordSchema = z.object({
   role: z.enum(ROLES),
   status: z.literal("active"),
+  demo: z.boolean().optional(),
   completed: counter.optional(),
   onTime: counter.optional(),
   lateCancellations: counter.optional(),
@@ -30,6 +31,7 @@ const UserRecordSchema = z.object({
 const BusinessRecordSchema = z.object({
   ownerId: z.string(),
   status: z.literal("active"),
+  demo: z.boolean().optional(),
   completed: counter,
   onTime: counter,
   lateCancellations: counter,

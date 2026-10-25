@@ -8,9 +8,9 @@ import { parseBody } from "@/server/validate";
 /** Saves a young person's details and claims their ID. The full ID number is never stored, logged or returned. */
 export async function POST(request: Request) {
   try {
-    const { uid } = await requireUser(request);
+    const viewer = await requireUser(request);
     const input = await parseBody(request, YoungPersonProfileSchema);
-    return NextResponse.json(await liveProfileService().saveWorker(uid, input));
+    return NextResponse.json(await liveProfileService().saveWorker(viewer, input));
   } catch (error) {
     return toErrorResponse(error, "POST /api/profile/worker");
   }

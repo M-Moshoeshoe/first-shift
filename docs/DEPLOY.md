@@ -228,18 +228,29 @@ Every value under `configured` must be `true`, and `"emulators"` must be `false`
 
 ## 5b. Demo accounts for judges (10 minutes)
 
-Judges sign in with an email and password instead of Google. Only the two accounts you create here can do that.
+Judges sign in with an email and password instead of Google. The details are public (they go in the slides), so what protects real people is demo isolation (SECURITY.md), not the password. Never put them in the repo, an issue or a commit.
 
-1. Firebase console > **Build** > **Authentication** > **Sign-in method** tab > **Add new provider** > **Email/Password**. Switch **Email/Password** on. Leave **Email link (passwordless sign-in)** off. **Save**.
-2. Still in **Authentication**, open the **Settings** tab > **User actions**. Untick **Enable create (sign-up)**, so nobody can register with a password. Leave **Enable deletion** as it is. **Save**.
-3. On the laptop, run:
+1. In the project folder, create `.env.demo.local` (Git ignores it, Next.js never reads it) with the four values from the slides:
+
+   ```bash
+   DEMO_BUSINESS_EMAIL=...@firstshift.demo
+   DEMO_BUSINESS_PASSWORD=...
+   DEMO_YOUNG_PERSON_EMAIL=...@firstshift.demo
+   DEMO_YOUNG_PERSON_PASSWORD=...
+   ```
+
+   Both emails must end in `@firstshift.demo`, and each password must be at least 8 characters. Flags work too: `npm run demo:accounts -- --business-email ... --business-password ... --young-person-email ... --young-person-password ...`.
+2. Run:
 
    ```bash
    npm run demo:accounts
+   npm run demo:reset
    ```
 
-   It says `Target: the LIVE project first-shift-a5388`, creates a business and a young person account, and prints both passwords once. Copy them straight into your password manager: they aren't stored anywhere else. Running it again changes nothing; `npm run demo:accounts -- --reset business` (or `young_person`) gives one a new password.
-4. On https://firstshiftza.netlify.app/sign-in, tap **Judges and testers: use a demo account** and sign in with each. Each starts at the role screen until demo mode fills in their profiles.
+   The first says `Target: the LIVE project first-shift-a5388`, creates or updates both accounts (existing ones keep their uid), stores a hash of each password in `demoAccounts`, and switches off, for the whole project, Email/Password sign-in, sign-up, and deleting an account from the browser. Everyone still signs in with Google, and the demo accounts through our server. If it says it couldn't change the sign-in settings, do it by hand: **Authentication** > **Sign-in method** > **Email/Password** off; **Settings** > **User actions**: untick **Enable create (sign-up)** and **Enable deletion**.
+
+   The second gives both accounts their demo data: Sipho's complete business with 3 free credits, Thabo's complete profile, and four live demo tryouts over the next three days. Run it again before judging, and whenever the demo needs a clean start. It touches only demo records.
+3. On https://firstshiftza.netlify.app/sign-in, tap **Judges and testers: use a demo account** and sign in with each. The business lands on its dashboard and the young person on their tryouts.
 
 ## 6. Final checks
 

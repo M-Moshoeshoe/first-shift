@@ -30,11 +30,12 @@ beforeEach(async () => {
     await setDoc(doc(db, "bookings/b1"), { workerId: "thabo", ownerId: "sipho" });
     await setDoc(doc(db, "payments/p1"), { workerId: "thabo", ownerId: "sipho" });
     await setDoc(doc(db, "references/r1"), { workerId: "thabo", ownerId: "sipho" });
+    await setDoc(doc(db, "demoAccounts/young_person"), { uid: "demo-thabo", email: "thabo@firstshift.demo", salt: "00", hash: "00" });
     await setDoc(doc(db, "creditLedger/sipho_000001"), { businessId: "sipho", seq: 1, kind: "grant", amount: 3, reason: "welcome" });
   });
 });
 
-const as = (uid: string) => env.authenticatedContext(uid).firestore();
+const as = (uid: string, claims: { demo?: boolean } = {}) => env.authenticatedContext(uid, claims).firestore();
 const anonymous = () => env.unauthenticatedContext().firestore();
 
 describe("profile data written only by the server (Phase 1)", () => {
@@ -88,10 +89,23 @@ describe("reads", () => {
     await assertFails(getDoc(doc(as("sipho"), "users/thabo")));
   });
 
-  it("shows published tryouts to signed-in users, and drafts only to the owner", async () => {
-    await assertSucceeds(getDoc(doc(as("thabo"), "tryouts/live")));
-    await assertFails(getDoc(doc(as("thabo"), "tryouts/draft")));
+  it("lets only the owner read a tryout, even a published one: everyone else gets tryouts from the server", async () => {
+    await assertSucceeds(getDoc(doc(as("sipho"), "tryouts/live")));
     await assertSucceeds(getDoc(doc(as("sipho"), "tryouts/draft")));
+    await assertSucceeds(getDocs(query(collection(as("sipho"), "tryouts"), where("ownerId", "==", "sipho"))));
+    for (const reader of [as("thabo"), as("demo-thabo", { demo: true }), anonymous()]) {
+      await assertFails(getDoc(doc(reader, "tryouts/live")));
+      await assertFails(getDoc(doc(reader, "tryouts/draft")));
+      await assertFails(getDocs(query(collection(reader, "tryouts"), where("status", "==", "published"))));
+    }
+  });
+
+  it("keeps the demo accounts' password hashes server-only, even from the demo accounts", async () => {
+    for (const client of [as("demo-thabo", { demo: true }), as("thabo"), anonymous()]) {
+      await assertFails(getDoc(doc(client, "demoAccounts/young_person")));
+      await assertFails(getDocs(collection(client, "demoAccounts")));
+      await assertFails(setDoc(doc(client, "demoAccounts/young_person"), { uid: "demo-thabo", email: "thabo@firstshift.demo" }));
+    }
   });
 
   it("shows a tryout waiting for review only to its owner (Phase 2)", async () => {

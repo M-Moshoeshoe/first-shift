@@ -24,6 +24,8 @@ const TryoutRecordSchema = z.object({
   rateCentsPerHour: z.number().int(),
   payCents: z.number().int(),
   status: z.enum(TRYOUT_STATUSES),
+  // Tryouts posted before demo marking are all real.
+  demo: z.boolean().default(false),
 });
 
 const parseTryout = (data: unknown): TryoutRecord => TryoutRecordSchema.parse(data);

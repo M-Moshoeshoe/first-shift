@@ -18,6 +18,9 @@ export const BAD_IDS = {
 } as const;
 
 export const NOW = new Date("2026-10-24T08:00:00Z");
+
+/** A real (not demo) person, as requireUser hands them to a service. */
+export const real = (uid: string) => ({ uid, demo: false });
 export const testHash = (digits: string): string => createHmac("sha256", "test-secret-for-unit-tests-only-32").update(digits).digest("hex");
 
 export const workerInput = (overrides: Partial<{ firstName: string; area: string; idNumber: string }> = {}) => ({

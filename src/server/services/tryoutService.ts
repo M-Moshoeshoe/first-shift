@@ -1,6 +1,7 @@
 import "server-only";
 import { RULES } from "@/config/rules";
 import type { WorkDecision } from "@/domain/allowedWork";
+import type { Viewer } from "@/domain/demo";
 import { checkText, suggestHours } from "@/domain/tryout";
 import { checkTerms, decideWithdraw, newTryout, postedStatus, postingProblem, type TryoutTerms } from "@/domain/tryoutDecisions";
 import { POSTING_PROBLEM_MESSAGES, TRYOUT_MESSAGES, termsMessage } from "@/domain/tryoutMessages";
@@ -66,7 +67,8 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
      * because the owner may have edited them after the draft. Allowed is saved
      * as published, unclear as review; blocked writes nothing.
      */
-    async post(uid: string, terms: TryoutTerms): Promise<PostResult> {
+    async post(viewer: Viewer, terms: TryoutTerms): Promise<PostResult> {
+      const { uid } = viewer;
       const { business } = await poster(uid);
       const decided = checkTerms(now(), terms);
       if (!decided.ok) throw new AppError(422, "tryout_terms", termsMessage(decided.error));
@@ -81,7 +83,7 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
         return { outcome: "blocked", saferOption: posted.error.saferOption };
       }
 
-      const record = business ? newTryout(uid, business, terms, decided.value, posted.value.status, posted.value.category) : null;
+      const record = business ? newTryout(viewer, business, terms, decided.value, posted.value.status, posted.value.category) : null;
       // postingProblem has already checked the profile is complete; a missing field here is a broken record.
       if (!record) throw new Error("business_record_incomplete");
       const id = await tryouts.create(record, posted.value.status === "published" ? "tryout_posted" : "tryout_sent_to_review");

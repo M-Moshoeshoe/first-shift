@@ -6,7 +6,7 @@ import { decideBusinessSave, pinPreciseEnough } from "@/domain/profileDecisions"
 import { AppError } from "@/server/errors";
 import { LOCATION_OPTIONS, pinFromReading, problemFromCode } from "@/lib/location";
 import { BusinessProfileSchema } from "@/schemas/profile";
-import { createFakeStore, fakeService } from "./support/profileFakes";
+import { createFakeStore, fakeService, real } from "./support/profileFakes";
 
 const IVORY_PARK = { latitude: -25.9992, longitude: 28.1916 };
 
@@ -50,9 +50,9 @@ describe("the server enforces the pin rule too", () => {
     expect(decideBusinessSave(owner, shop, { ...details, location: { ...IVORY_PARK, accuracyMetres: 900 } })).toEqual({ kind: "refuse", problem: { code: "pin_imprecise" } });
     const store = createFakeStore();
     const service = fakeService(store);
-    await service.setRole("sipho", "business");
+    await service.setRole(real("sipho"), "business");
     const before = store.snapshot();
-    const error = await service.saveBusiness("sipho", { ...details, location: { ...IVORY_PARK, accuracyMetres: 900 } }).catch((caught: unknown) => caught);
+    const error = await service.saveBusiness(real("sipho"), { ...details, location: { ...IVORY_PARK, accuracyMetres: 900 } }).catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(AppError);
     expect((error as AppError).publicMessage).toBe(PROFILE_MESSAGES.pinImprecise);
     expect(store.snapshot()).toBe(before);

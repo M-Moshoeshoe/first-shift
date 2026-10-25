@@ -1,0 +1,47 @@
+import "server-only";
+import type { DemoRole } from "@/config/demo";
+import { isDemoEmail } from "@/domain/demo";
+import { DEMO_MESSAGES } from "@/domain/messages";
+import { demoPasswordMatches, type DemoPasswordHash } from "../demoPassword";
+import { AppError } from "../errors";
+import { log } from "../log";
+
+/** demoAccounts/{role}: one per demo role, written only by scripts/createDemoAccounts.ts. */
+export interface DemoAccount extends DemoPasswordHash {
+  uid: string;
+  email: string;
+  role: DemoRole;
+}
+
+export interface DemoSignInDeps {
+  findByEmail: (email: string) => Promise<DemoAccount | null>;
+  /** Puts the Firebase account back as the script made it: its email, its demo claims, switched on, recreated if deleted. */
+  restore: (account: DemoAccount) => Promise<void>;
+  /** A custom token for the account, minted with the server's own credentials. */
+  mintToken: (uid: string) => Promise<string>;
+}
+
+/**
+ * Judges sign in to the demo accounts through here, never with Firebase's own
+ * password sign-in (domain/signIn.ts refuses that). The password is public, so
+ * this isn't a secret check: it makes the demo accounts impossible to take
+ * over. Changing the Firebase password gains nothing, and an email or claim
+ * someone changed from the browser is put back at the next sign-in.
+ */
+export function createDemoSignInService({ findByEmail, restore, mintToken }: DemoSignInDeps) {
+  return {
+    async signIn(email: string, password: string): Promise<{ token: string }> {
+      const normalised = email.trim().toLowerCase();
+      const account = isDemoEmail(normalised) ? await findByEmail(normalised) : null;
+      if (!account || !demoPasswordMatches(password, account)) {
+        log("warn", "demo_sign_in_refused", { found: account !== null });
+        throw new AppError(401, "demo_credentials", DEMO_MESSAGES.wrongCredentials);
+      }
+      await restore(account);
+      log("info", "demo_sign_in", { role: account.role });
+      return { token: await mintToken(account.uid) };
+    },
+  };
+}
+
+export type DemoSignInService = ReturnType<typeof createDemoSignInService>;

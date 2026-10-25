@@ -12,7 +12,17 @@ export type ProfileProblem =
   | { code: "photo_missing"; kind: PhotoKind }
   | { code: "photo_wrong_type" }
   | { code: "photo_too_big" }
-  | { code: "pin_imprecise" };
+  | { code: "pin_imprecise" }
+  | { code: "demo_locked" };
+
+/**
+ * A demo account's profile is set up by npm run demo:reset and never changed
+ * from the app: its password is public, so anyone could otherwise put their
+ * own name, photo or ID number on it. Refused before anything is read.
+ */
+export function profileEditProblem(viewer: { demo: boolean }): ProfileProblem | null {
+  return viewer.demo ? { code: "demo_locked" } : null;
+}
 
 /** A pin counts only if the phone reports it precisely enough to find the door. */
 export function pinPreciseEnough(accuracyMetres: number): boolean {

@@ -8,9 +8,9 @@ import { parseBody } from "@/server/validate";
 /** Sets the account's role, once. Asking again for the same role changes nothing. */
 export async function POST(request: Request) {
   try {
-    const { uid } = await requireUser(request);
+    const viewer = await requireUser(request);
     const { role } = await parseBody(request, RoleSchema);
-    return NextResponse.json(await liveProfileService().setRole(uid, role));
+    return NextResponse.json(await liveProfileService().setRole(viewer, role));
   } catch (error) {
     return toErrorResponse(error, "POST /api/profile/role");
   }

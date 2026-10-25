@@ -1,0 +1,21 @@
+import { DEMO_EMAIL_DOMAIN } from "@/config/demo";
+
+/**
+ * Who is asking: the signed-in uid, and whether it's one of the demo accounts
+ * (the demo claim on the ID token, which only the server can set).
+ */
+export interface Viewer {
+  uid: string;
+  demo: boolean;
+}
+
+/**
+ * Demo and real never meet. Every record a demo account creates is marked
+ * demo, and a demo account sees and touches only demo records, while real
+ * people see and touch only real ones. A record stored before demo marking
+ * existed has no flag and counts as real.
+ */
+export const sameWorld = (viewer: Pick<Viewer, "demo">, record: { demo?: boolean }): boolean => viewer.demo === (record.demo === true);
+
+/** A demo account's email must stay on the demo domain; one moved anywhere else is refused (signIn.ts). */
+export const isDemoEmail = (email: string | undefined): boolean => typeof email === "string" && email.toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`);

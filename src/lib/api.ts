@@ -33,16 +33,16 @@ export function errorFromResponse(status: number, body: unknown): ApiError {
  * becomes an ApiError with a message to show the person. Components never
  * call fetch directly; they use apiGet and apiPost.
  */
-async function request<T>(method: "GET" | "POST", path: string, schema: $ZodType<T>, body?: unknown): Promise<T> {
-  const user = clientAuth().currentUser;
-  if (!user) throw new ApiError(401, "not_signed_in", "Sign in to continue.");
+async function request<T>(method: "GET" | "POST", path: string, schema: $ZodType<T>, body?: unknown, signedIn = true): Promise<T> {
+  const user = signedIn ? clientAuth().currentUser : null;
+  if (signedIn && !user) throw new ApiError(401, "not_signed_in", "Sign in to continue.");
 
   let response: Response;
   try {
-    const authorization = `Bearer ${await user.getIdToken()}`;
+    const authorization: Record<string, string> = user ? { authorization: `Bearer ${await user.getIdToken()}` } : {};
     response = await fetch(path, {
       method,
-      headers: method === "POST" ? { "content-type": "application/json", authorization } : { authorization },
+      headers: method === "POST" ? { "content-type": "application/json", ...authorization } : authorization,
       body: method === "POST" ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
@@ -61,3 +61,5 @@ async function request<T>(method: "GET" | "POST", path: string, schema: $ZodType
 
 export const apiGet = <T>(path: string, schema: $ZodType<T>): Promise<T> => request("GET", path, schema);
 export const apiPost = <T>(path: string, body: unknown, schema: $ZodType<T>): Promise<T> => request("POST", path, schema, body);
+/** The one call made before anyone is signed in: the demo sign-in. */
+export const apiPostSignedOut = <T>(path: string, body: unknown, schema: $ZodType<T>): Promise<T> => request("POST", path, schema, body, false);

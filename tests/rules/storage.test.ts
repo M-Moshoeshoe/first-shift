@@ -23,8 +23,8 @@ const TWO_MB = 2 * 1024 * 1024;
 const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0xff, 0xd9]);
 
 /** Uploads as the given person (or signed out) through the browser SDK, as the onboarding forms do. */
-function upload(uid: string | null, path: string, bytes: Uint8Array, contentType: string): Promise<unknown> {
-  const storage = uid ? env.authenticatedContext(uid).storage() : env.unauthenticatedContext().storage();
+function upload(uid: string | null, path: string, bytes: Uint8Array, contentType: string, claims: { demo?: boolean } = {}): Promise<unknown> {
+  const storage = uid ? env.authenticatedContext(uid, claims).storage() : env.unauthenticatedContext().storage();
   return Promise.resolve(storage.ref(path).put(bytes, { contentType }));
 }
 
@@ -46,6 +46,11 @@ describe("photo uploads", () => {
   it("refuses a file of 2 MB or more", async () => {
     await assertFails(upload("thabo", "photos/thabo/profile.jpg", new Uint8Array(TWO_MB + 1), "image/jpeg"));
     await assertFails(upload("thabo", "photos/thabo/profile.jpg", new Uint8Array(TWO_MB), "image/jpeg"));
+  });
+
+  it("refuses any upload from a demo account, even an image into its own folder", async () => {
+    await assertFails(upload("demo-thabo", "photos/demo-thabo/profile.jpg", JPEG, "image/jpeg", { demo: true }));
+    await assertSucceeds(upload("thabo", "photos/thabo/profile.jpg", JPEG, "image/jpeg", { demo: false }));
   });
 
   it("refuses signed-out uploads and anything outside the photos folders", async () => {

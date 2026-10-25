@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { decideWork } from "@/domain/allowedWork";
 import { checkTerms, decideReview, decideWithdraw, newTryout, postedStatus, postingProblem, type TryoutRecord } from "@/domain/tryoutDecisions";
 import { TRYOUT_STATUSES } from "@/domain/tryout";
+import { real } from "./support/profileFakes";
 import { NOW, owner, shop, terms, WELCOME } from "./support/tryoutFakes";
 
 describe("postingProblem", () => {
@@ -56,18 +57,23 @@ describe("newTryout", () => {
   const decided = { window: { start: new Date("2026-10-27T07:00:00Z"), end: new Date("2026-10-27T13:00:00Z") }, payCents: 18138 };
 
   it("trims the title and tasks and drops blank tasks", () => {
-    const record = newTryout("lerato", shop, terms({ title: "  Shop helper ", tasks: [" Pack shelves ", "   "] }), decided, "published", "stock_and_packing");
+    const record = newTryout(real("lerato"), shop, terms({ title: "  Shop helper ", tasks: [" Pack shelves ", "   "] }), decided, "published", "stock_and_packing");
     expect(record).toMatchObject({ title: "Shop helper", tasks: ["Pack shelves"] });
   });
 
+  it("marks a demo account's tryout demo, and a real one real", () => {
+    expect(newTryout({ uid: "lerato", demo: true }, shop, terms(), decided, "published", null)?.demo).toBe(true);
+    expect(newTryout(real("lerato"), shop, terms(), decided, "published", null)?.demo).toBe(false);
+  });
+
   it("refuses to build a tryout from an incomplete business", () => {
-    expect(newTryout("lerato", { ...shop, shopfrontPhoto: undefined }, terms(), decided, "published", null)).toBeNull();
+    expect(newTryout(real("lerato"), { ...shop, shopfrontPhoto: undefined }, terms(), decided, "published", null)).toBeNull();
   });
 });
 
 describe("decideWithdraw", () => {
   const record = (status: TryoutRecord["status"]): TryoutRecord => {
-    const built = newTryout("lerato", shop, terms(), { window: { start: new Date(), end: new Date() }, payCents: 1 }, "published", null);
+    const built = newTryout(real("lerato"), shop, terms(), { window: { start: new Date(), end: new Date() }, payCents: 1 }, "published", null);
     if (!built) throw new Error("fixture");
     return { ...built, status };
   };
@@ -85,7 +91,7 @@ describe("decideWithdraw", () => {
 
 describe("decideReview", () => {
   const inReview = (): TryoutRecord => {
-    const built = newTryout("lerato", shop, terms(), { window: { start: new Date(), end: new Date() }, payCents: 1 }, "review", null);
+    const built = newTryout(real("lerato"), shop, terms(), { window: { start: new Date(), end: new Date() }, payCents: 1 }, "review", null);
     if (!built) throw new Error("fixture");
     return built;
   };

@@ -12,9 +12,9 @@ import { parseBody } from "@/server/validate";
  */
 export async function POST(request: Request) {
   try {
-    const { uid } = await requireUser(request);
+    const viewer = await requireUser(request);
     const { kind } = await parseBody(request, PhotoSchema);
-    return NextResponse.json(await liveProfileService().savePhoto(uid, kind));
+    return NextResponse.json(await liveProfileService().savePhoto(viewer, kind));
   } catch (error) {
     return toErrorResponse(error, "POST /api/profile/photo");
   }

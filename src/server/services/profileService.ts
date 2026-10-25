@@ -2,7 +2,8 @@ import "server-only";
 import { decideWelcomeGrant, type CreditEntry } from "@/domain/credits";
 import { ID_PROBLEM_MESSAGES, profileProblemMessage } from "@/domain/messages";
 import { isProfileComplete, newAccount, photoPath, profileView, type BusinessRecord, type PhotoKind, type ProfileView, type UserRecord } from "@/domain/profile";
-import { decideBusinessSave, decidePhotoSave, decideWorkerSave, type ProfileProblem } from "@/domain/profileDecisions";
+import type { Viewer } from "@/domain/demo";
+import { decideBusinessSave, decidePhotoSave, decideWorkerSave, profileEditProblem, type ProfileProblem } from "@/domain/profileDecisions";
 import { decideRole, type Role } from "@/domain/roles";
 import { checkSaId } from "@/domain/saId";
 import type { BusinessProfileInput, SaveResult, YoungPersonProfileInput } from "@/schemas/profile";
@@ -28,6 +29,7 @@ const HTTP_STATUS: Record<ProfileProblem["code"], number> = {
   photo_wrong_type: 422,
   photo_too_big: 422,
   pin_imprecise: 422,
+  demo_locked: 403,
 };
 
 /** Nothing to write: the request matches what is stored, so there's no audit entry either. */
@@ -44,6 +46,13 @@ function refuse(problem: ProfileProblem): never {
   throw new AppError(HTTP_STATUS[problem.code], problem.code, profileProblemMessage(problem));
 }
 
+/** Every profile write starts here: a demo account's profile is never changed from the app. */
+function editableBy(viewer: Viewer): string {
+  const problem = profileEditProblem(viewer);
+  if (problem) refuse(problem);
+  return viewer.uid;
+}
+
 /**
  * Coordinates profile writes. It holds no rules of its own: every decision
  * comes from src/domain, and every write happens inside one repository
@@ -51,7 +60,8 @@ function refuse(problem: ProfileProblem): never {
  */
 export function createProfileService({ repo, photos, hashId, now }: ProfileServiceDeps) {
   return {
-    async setRole(uid: string, role: Role): Promise<SaveResult> {
+    async setRole(viewer: Viewer, role: Role): Promise<SaveResult> {
+      const uid = editableBy(viewer);
       return repo.transact<SaveResult>(uid, null, (state) => {
         const decision = decideRole(state.user?.role ?? null, role);
         if (decision.kind === "refuse") refuse({ code: "role_locked", current: decision.current });
@@ -61,7 +71,8 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
       });
     },
 
-    async saveWorker(uid: string, input: YoungPersonProfileInput): Promise<SaveResult> {
+    async saveWorker(viewer: Viewer, input: YoungPersonProfileInput): Promise<SaveResult> {
+      const uid = editableBy(viewer);
       const { idNumber, ...details } = input;
       const check = checkSaId(idNumber, now());
       if (!check.ok) throw new AppError(422, check.error, ID_PROBLEM_MESSAGES[check.error]);
@@ -81,7 +92,8 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
       });
     },
 
-    async saveBusiness(uid: string, input: BusinessProfileInput): Promise<SaveResult> {
+    async saveBusiness(viewer: Viewer, input: BusinessProfileInput): Promise<SaveResult> {
+      const uid = editableBy(viewer);
       return repo.transact<SaveResult>(uid, null, (state) => {
         const decision = decideBusinessSave(state.user, state.business, input);
         if (decision.kind === "refuse") refuse(decision.problem);
@@ -98,7 +110,8 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
       return repo.transact<ProfileView>(uid, null, (state) => ({ write: null, result: profileView(state.user, state.business, state.credits) }));
     },
 
-    async savePhoto(uid: string, kind: PhotoKind): Promise<SaveResult> {
+    async savePhoto(viewer: Viewer, kind: PhotoKind): Promise<SaveResult> {
+      const uid = editableBy(viewer);
       // The path is built here from the signed-in uid; a path from the browser is never accepted.
       const path = photoPath(uid, kind);
       const meta = await photos.metadata(path);

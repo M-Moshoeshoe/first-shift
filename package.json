@@ -23,10 +23,12 @@
     "e2e:profile": "tsx scripts/e2e/profile.ts",
     "e2e:photo": "tsx scripts/e2e/photo.ts",
     "e2e:browser": "tsx scripts/e2e/browser.ts",
+    "e2e:demo": "tsx scripts/e2e/demo.ts",
     "eval:ai": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/evalAi.ts",
     "credits:backfill": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/backfillCredits.ts",
     "review:tryout": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/reviewTryout.ts",
-    "demo:accounts": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/createDemoAccounts.ts"
+    "demo:accounts": "tsx --conditions=react-server --env-file-if-exists=.env.local --env-file-if-exists=.env.demo.local scripts/createDemoAccounts.ts",
+    "demo:reset": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/resetDemo.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",

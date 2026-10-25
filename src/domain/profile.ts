@@ -54,6 +54,8 @@ export interface BusinessDetails {
 export interface UserRecord extends Partial<Counters>, Partial<WorkerDetails> {
   role: Role;
   status: AccountStatus;
+  /** One of the demo accounts: everything it creates is marked demo too (domain/demo.ts). */
+  demo?: boolean;
   idLastFour?: string;
   residency?: Residency;
   profilePhoto?: StoredPhoto;
@@ -63,6 +65,7 @@ export interface UserRecord extends Partial<Counters>, Partial<WorkerDetails> {
 export interface BusinessRecord extends Counters, Partial<Omit<BusinessDetails, "location">> {
   ownerId: string;
   status: AccountStatus;
+  demo?: boolean;
   location?: Location;
   shopfrontPhoto?: StoredPhoto;
 }
@@ -70,9 +73,10 @@ export interface BusinessRecord extends Counters, Partial<Omit<BusinessDetails, 
 const ZERO_COUNTERS: Counters = { completed: 0, onTime: 0, lateCancellations: 0, noShows: 0 };
 
 /** The records a new role creates. Counters live on whichever side is rated: the young person or the business. */
-export function newAccount(uid: string, role: Role): { user: UserRecord; business: BusinessRecord | null } {
-  if (role === "young_person") return { user: { role, status: "active", ...ZERO_COUNTERS }, business: null };
-  return { user: { role, status: "active" }, business: { ownerId: uid, status: "active", ...ZERO_COUNTERS } };
+export function newAccount(uid: string, role: Role, demo = false): { user: UserRecord; business: BusinessRecord | null } {
+  const mark = demo ? { demo: true } : {};
+  if (role === "young_person") return { user: { role, status: "active", ...mark, ...ZERO_COUNTERS }, business: null };
+  return { user: { role, status: "active", ...mark }, business: { ownerId: uid, status: "active", ...mark, ...ZERO_COUNTERS } };
 }
 
 export function photoPath(uid: string, kind: PhotoKind): string {

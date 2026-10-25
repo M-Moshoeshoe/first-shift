@@ -8,9 +8,9 @@ import { parseBody } from "@/server/validate";
 /** Saves a business's details. The premises pin is optional here; the profile isn't complete without it. */
 export async function POST(request: Request) {
   try {
-    const { uid } = await requireUser(request);
+    const viewer = await requireUser(request);
     const input = await parseBody(request, BusinessProfileSchema);
-    return NextResponse.json(await liveProfileService().saveBusiness(uid, input));
+    return NextResponse.json(await liveProfileService().saveBusiness(viewer, input));
   } catch (error) {
     return toErrorResponse(error, "POST /api/profile/business");
   }

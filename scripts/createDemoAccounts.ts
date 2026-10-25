@@ -1,57 +1,105 @@
 import { randomBytes } from "node:crypto";
-import { adminAuth } from "../src/server/firebaseAdmin";
-import { announceTarget } from "./adminTarget";
+import { FieldValue } from "firebase-admin/firestore";
+import { DEMO_ROLES, type DemoRole } from "../src/config/demo";
+import { isDemoEmail } from "../src/domain/demo";
+import { hashDemoPassword } from "../src/server/demoPassword";
+import { adminAuth, adminDb } from "../src/server/firebaseAdmin";
+import { demoClaims } from "../src/server/services/liveDemoSignInService";
+import { announceTarget, flag } from "./adminTarget";
 
 /**
- * Creates the two demo accounts judges and testers sign in with: a business
- * and a young person, marked with the demo claim the server checks
- * (domain/signIn.ts). Their passwords are generated here and printed once, to
- * this terminal only; they're never written to a file or committed. Running it
- * again leaves existing accounts alone; --reset gives one a new password.
- * Their profiles and demo data come with demo mode.
+ * Sets up the two demo accounts judges and testers sign in with: a business
+ * and a young person, with the email and password you choose. They come from
+ * flags, or from .env.demo.local (ignored by Git, never read by Next.js):
  *
- *   npm run demo:accounts                  creates any that don't exist
- *   npm run demo:accounts -- --reset business   new password for the business account
+ *   DEMO_BUSINESS_EMAIL=...        DEMO_BUSINESS_PASSWORD=...
+ *   DEMO_YOUNG_PERSON_EMAIL=...    DEMO_YOUNG_PERSON_PASSWORD=...
+ *
+ *   npm run demo:accounts
+ *   npm run demo:accounts -- --business-email x --business-password y --young-person-email x --young-person-password y
+ *
+ * The passwords are public (they're in the slides), so they never go in the
+ * repo and they aren't what protects anyone: demo isolation is. The server
+ * checks them against a salted hash in demoAccounts (server-only) and signs
+ * the judge in with its own token; Firebase's password sign-in is switched off
+ * and refused (domain/signIn.ts). Running it again with the same values
+ * changes nothing a judge would notice. Then run npm run demo:reset.
  */
-const ACCOUNTS = [
-  // Plus-addresses of the support inbox: real, so a password reset reaches the team, and plainly demo.
-  { key: "business", email: "firstshift.support+demo-business@gmail.com", displayName: "Demo business" },
-  { key: "young_person", email: "firstshift.support+demo-young-person@gmail.com", displayName: "Demo young person" },
-] as const;
+const ENV_PREFIX: Record<DemoRole, string> = { business: "DEMO_BUSINESS", young_person: "DEMO_YOUNG_PERSON" };
+const FLAG_PREFIX: Record<DemoRole, string> = { business: "business", young_person: "young-person" };
+const DISPLAY_NAME: Record<DemoRole, string> = { business: "Demo business", young_person: "Demo young person" };
 
-const resetIndex = process.argv.indexOf("--reset");
-const reset = resetIndex >= 0 ? process.argv[resetIndex + 1] : undefined;
-if (reset && !ACCOUNTS.some((account) => account.key === reset)) {
-  console.error(`--reset takes one of: ${ACCOUNTS.map((account) => account.key).join(", ")}`);
-  process.exit(1);
+const args = process.argv.slice(2);
+
+function credentials(role: DemoRole): { email: string; password: string } {
+  const email = (flag(args, `${FLAG_PREFIX[role]}-email`) ?? process.env[`${ENV_PREFIX[role]}_EMAIL`] ?? "").trim().toLowerCase();
+  const password = flag(args, `${FLAG_PREFIX[role]}-password`) ?? process.env[`${ENV_PREFIX[role]}_PASSWORD`] ?? "";
+  if (!isDemoEmail(email)) throw new Error(`${role}: the email must end in @firstshift.demo (set --${FLAG_PREFIX[role]}-email or ${ENV_PREFIX[role]}_EMAIL in .env.demo.local).`);
+  if (password.length < 8) throw new Error(`${role}: the password must be at least 8 characters (--${FLAG_PREFIX[role]}-password or ${ENV_PREFIX[role]}_PASSWORD).`);
+  return { email, password };
 }
 
-/** 24 random characters from a 64-character set: about 144 bits, far past guessing. */
-const newPassword = (): string => randomBytes(18).toString("base64url");
+/** The account this role already has: the one on record, or one made before demoAccounts existed (found by its claim). */
+async function existingUid(role: DemoRole, email: string): Promise<string | null> {
+  const recorded = await adminDb().collection("demoAccounts").doc(role).get();
+  if (recorded.exists) return String(recorded.get("uid"));
+  let pageToken: string | undefined;
+  do {
+    const page = await adminAuth().listUsers(1000, pageToken);
+    const found = page.users.find((user) => user.customClaims?.demoRole === role || user.email === email);
+    if (found) return found.uid;
+    pageToken = page.pageToken;
+  } while (pageToken);
+  return null;
+}
+
+/**
+ * Firebase's own settings: no email and password sign-in, no sign-up and no
+ * deleting an account from the browser, for anyone. Every account signs in
+ * with Google or, for the demo accounts, through our server. Live project only.
+ */
+async function lockDownProject(project: string): Promise<void> {
+  const credential = adminAuth().app.options.credential;
+  if (!credential) throw new Error("No Admin credential to change the project's sign-in settings with.");
+  const { access_token: token } = await credential.getAccessToken();
+  const mask = ["signIn.email.enabled", "client.permissions.disabledUserSignup", "client.permissions.disabledUserDeletion"].join(",");
+  const response = await fetch(`https://identitytoolkit.googleapis.com/admin/v2/projects/${project}/config?updateMask=${mask}`, {
+    method: "PATCH",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ signIn: { email: { enabled: false } }, client: { permissions: { disabledUserSignup: true, disabledUserDeletion: true } } }),
+  });
+  if (!response.ok) {
+    throw new Error(`Couldn't change the sign-in settings (${response.status}). In the Firebase console, Authentication: switch Email/Password off under Sign-in method, and untick Enable create and Enable deletion under Settings, User actions.`);
+  }
+  console.log("Project: Email/Password sign-in off, sign-up off, deleting from the browser off.");
+}
 
 async function main(): Promise<void> {
-  announceTarget();
+  const project = announceTarget();
   const auth = adminAuth();
-  const printed: { account: string; email: string; password: string }[] = [];
-  for (const account of ACCOUNTS) {
-    const existing = await auth.getUserByEmail(account.email).catch((error: { code?: string }) => {
-      if (error.code === "auth/user-not-found") return null;
-      throw error;
-    });
-    if (existing && reset !== account.key) {
-      console.log(`${account.key}: already exists (${account.email}), left as it is. Use --reset ${account.key} for a new password.`);
-      continue;
-    }
-    const password = newPassword();
-    const user = existing
-      ? await auth.updateUser(existing.uid, { password })
-      : await auth.createUser({ email: account.email, emailVerified: true, password, displayName: account.displayName });
-    await auth.setCustomUserClaims(user.uid, { demo: true, demoRole: account.key });
-    printed.push({ account: account.key, email: account.email, password });
+  for (const role of DEMO_ROLES) {
+    const { email, password } = credentials(role);
+    const uid = await existingUid(role, email);
+    // A random Firebase password nobody knows: the public one is checked by our server, never by Firebase.
+    const account = { email, emailVerified: true, password: randomBytes(24).toString("base64url"), displayName: DISPLAY_NAME[role], disabled: false };
+    // An account deleted since it was recorded comes back under the same uid, so its demo data still fits.
+    const user = uid
+      ? await auth.updateUser(uid, account).catch((error: { code?: string }) => {
+          if (error.code === "auth/user-not-found") return auth.createUser({ uid, ...account });
+          throw error;
+        })
+      : await auth.createUser(account);
+    await auth.setCustomUserClaims(user.uid, demoClaims({ role }));
+    const at = FieldValue.serverTimestamp();
+    const batch = adminDb().batch();
+    batch.set(adminDb().collection("demoAccounts").doc(role), { uid: user.uid, email, role, ...hashDemoPassword(password), updatedAt: at });
+    batch.create(adminDb().collection("auditLog").doc(), { uid: user.uid, action: "demo_account_set", at });
+    await batch.commit();
+    console.log(`${role}: ${uid ? "updated" : "created"} ${email} (uid ${user.uid})`);
   }
-  if (printed.length === 0) return;
-  console.log("\nDemo accounts. These passwords are shown once and stored nowhere: copy them into your password manager now.\n");
-  console.table(printed);
+  if (process.env.FIREBASE_AUTH_EMULATOR_HOST) console.log("Emulators: the project's sign-in settings are left as they are.");
+  else await lockDownProject(project);
+  console.log("\nDone. Now run npm run demo:reset to give both accounts their demo data.");
 }
 
 main().then(

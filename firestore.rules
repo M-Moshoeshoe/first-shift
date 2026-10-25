@@ -29,9 +29,10 @@ service cloud.firestore {
       allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
     }
 
-    // Published tryouts hold no exact address; that is revealed only after booking.
+    // Only the owner reads a tryout directly, for the live dashboard. Young people get published
+    // tryouts from the server (GET /api/tryouts/nearby), which keeps demo and real apart.
     match /tryouts/{tryoutId} {
-      allow read: if signedIn() && (resource.data.status == "published" || resource.data.ownerId == request.auth.uid);
+      allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
     }
 
     match /applications/{applicationId} {

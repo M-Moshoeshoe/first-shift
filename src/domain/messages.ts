@@ -50,6 +50,8 @@ export const PROFILE_MESSAGES = {
   pinImprecise: `Your location isn't precise enough yet. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
   // Approved in step 3; moved here when the Sign out button became shared.
   signOutFailed: `We couldn't sign you out. Check your connection, then tap ${BUTTON_LABELS.signOut} again.`,
+  // Demo isolation, for review.
+  demoLocked: `This is a demo account, so its profile is set up for you and can't be changed. To make your own, tap ${BUTTON_LABELS.signOut} and ${BUTTON_LABELS.continueWithGoogle}.`,
 } as const;
 
 /** Step 6, for review: why a premises pin couldn't be taken, and what to do. */
@@ -94,6 +96,8 @@ export function profileProblemMessage(problem: ProfileProblem): string {
       return PROFILE_MESSAGES.photoTooBig;
     case "pin_imprecise":
       return PROFILE_MESSAGES.pinImprecise;
+    case "demo_locked":
+      return PROFILE_MESSAGES.demoLocked;
   }
 }
 
@@ -131,15 +135,19 @@ export function signInErrorMessage(code: string): string {
   return SIGN_IN_MESSAGES[code] ?? `Google sign-in didn't finish. Tap ${BUTTON_LABELS.continueWithGoogle} to try again.`;
 }
 
+/** The demo sign-in's own refusal, from the server (server/services/demoSignInService.ts). */
+export const DEMO_MESSAGES = {
+  wrongCredentials: "That email and password don't match a demo account. Check them, then try again.",
+} as const;
+
 const DEMO_SIGN_IN_MESSAGES: Record<string, string> = {
-  "auth/invalid-credential": "That email and password don't match a demo account. Check them, then try again.",
-  "auth/invalid-email": "That doesn't look like an email address. Check it, then try again.",
+  "auth/invalid-custom-token": `The demo sign-in didn't finish. Tap ${BUTTON_LABELS.signInToDemo} to try again.`,
   "auth/user-disabled": "That demo account is switched off. Ask the First Shift team for a working one.",
   "auth/too-many-requests": "There have been too many sign-in attempts from this phone. Wait a few minutes, then try again.",
   "auth/network-request-failed": `We couldn't reach First Shift. Check your connection, then tap ${BUTTON_LABELS.signInToDemo} again.`,
 };
 
-/** The same for the demo accounts' email and password sign-in. */
+/** The same for the last step of a demo sign-in, when the browser signs in with the server's token. */
 export function demoSignInErrorMessage(code: string): string {
   return DEMO_SIGN_IN_MESSAGES[code] ?? `The demo sign-in didn't finish. Tap ${BUTTON_LABELS.signInToDemo} to try again.`;
 }

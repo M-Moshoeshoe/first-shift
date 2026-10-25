@@ -94,6 +94,16 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 | Sending the same role, or the same ID with the same details, again is fine and changes nothing | A double tap or a retry on weak signal never fails or duplicates anything |
 | A wrong ID number is corrected only through support | The person is told to contact us; corrections go through the review list in Phase 7 |
 
+## Demo accounts
+
+| Rule | Why |
+| --- | --- |
+| Two demo accounts, a business and a young person, with public passwords | Judges walk the loop without a Google account |
+| Everything a demo account creates is marked demo; demo accounts see only demo records, real people only real ones (`demo.ts`) | The password is public, so separation, not secrecy, keeps real people safe |
+| A demo profile can't be changed from the app | Nobody can put their own name, photo or ID number on a shared account |
+| A demo account signs in only through our server | Changing its Firebase password or email from the browser gains nothing |
+| `npm run demo:reset` restores the demo world | A clean start before every judging session |
+
 ## Location
 
 A tryout shows where it is as a cell about 1 km across (a 6-character geohash) and the cell's centre, never the business's exact pin. The pin stays on the business record (`geo.ts`).

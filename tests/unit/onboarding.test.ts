@@ -4,7 +4,7 @@ import { displayPhone, newAccount, profileView, type UserRecord } from "@/domain
 import { fieldErrors, firstInvalid } from "@/lib/forms";
 import { PHOTO_MAX_EDGE_PX, fitWithin } from "@/lib/photos";
 import { ProfileViewSchema, WorkerDetailsSchema } from "@/schemas/profile";
-import { createFakeStore, fakeService, workerInput } from "./support/profileFakes";
+import { createFakeStore, fakeService, real, workerInput } from "./support/profileFakes";
 
 describe("photo resizing", () => {
   it("fits a 4000 x 3000 phone photo inside 1024 px, keeping its shape", () => {
@@ -45,8 +45,8 @@ describe("the person's own profile view", () => {
     const store = createFakeStore();
     const service = fakeService(store);
     expect(await service.getProfile("nobody")).toMatchObject({ role: null, destination: "/onboarding/role" });
-    await service.setRole("thabo", "young_person");
-    await service.saveWorker("thabo", workerInput());
+    await service.setRole(real("thabo"), "young_person");
+    await service.saveWorker(real("thabo"), workerInput());
     const before = store.snapshot();
     expect(await service.getProfile("thabo")).toMatchObject({ role: "young_person", complete: false, destination: "/onboarding/work", worker: { idLastFour: "0087", hasPhoto: false } });
     expect(store.snapshot()).toBe(before);

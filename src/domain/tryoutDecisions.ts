@@ -1,5 +1,6 @@
 import { decideWork, type BlockedCategory, type WorkCategory, type WorkDecision } from "./allowedWork";
 import { canPost, type CreditEntry } from "./credits";
+import type { Viewer } from "./demo";
 import { coarseLocation, type CoarseLocation } from "./geo";
 import type { Cents } from "./money";
 import { agreedPayCents } from "./pay";
@@ -41,6 +42,8 @@ export interface TryoutRecord {
   rateCentsPerHour: Cents;
   payCents: Cents;
   status: TryoutStatus;
+  /** Posted by a demo account: seen only by demo accounts (demo.ts). */
+  demo: boolean;
 }
 
 export type PostingProblem = "not_business" | "profile_incomplete" | "account_paused" | "no_credits";
@@ -80,11 +83,11 @@ export function postedStatus(work: WorkDecision): Result<{ status: "published" |
   return ok(work.decision === "allowed" ? { status: "published", category: work.category } : { status: "review", category: null });
 }
 
-/** The record to store. The business must be complete (postingProblem), so its pin and photo exist. */
-export function newTryout(ownerId: string, business: BusinessRecord, terms: TryoutTerms, decided: { window: TryoutWindow; payCents: Cents }, status: "published" | "review", category: WorkCategory | null): TryoutRecord | null {
+/** The record to store, marked demo when a demo account posts it. The business must be complete (postingProblem), so its pin and photo exist. */
+export function newTryout(owner: Viewer, business: BusinessRecord, terms: TryoutTerms, decided: { window: TryoutWindow; payCents: Cents }, status: "published" | "review", category: WorkCategory | null): TryoutRecord | null {
   if (!business.name || !business.area || !business.location || !business.shopfrontPhoto) return null;
   return {
-    ownerId,
+    ownerId: owner.uid,
     businessName: business.name,
     area: business.area,
     shopfrontPhoto: business.shopfrontPhoto.path,
@@ -98,6 +101,7 @@ export function newTryout(ownerId: string, business: BusinessRecord, terms: Tryo
     rateCentsPerHour: terms.rateCentsPerHour,
     payCents: decided.payCents,
     status,
+    demo: owner.demo,
   };
 }
 

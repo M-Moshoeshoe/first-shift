@@ -10,7 +10,9 @@ service firebase.storage {
 
     match /photos/{uid}/{fileName} {
       allow read: if request.auth != null;
+      // Demo accounts have public passwords, so nobody may put a photo of themselves on one.
       allow write: if request.auth != null
+        && request.auth.token.get("demo", false) != true
         && request.auth.uid == uid
         && request.resource.size < 2 * 1024 * 1024
         && request.resource.contentType.matches('image/(jpeg|png|webp)');
