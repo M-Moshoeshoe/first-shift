@@ -9,5 +9,6 @@ export default defineConfig({
       "server-only": fileURLToPath(new URL("./node_modules/server-only/empty.js", import.meta.url)),
     },
   },
-  test: { environment: "node", include: ["tests/unit/**/*.test.ts"] },
+  // hermeticEnv clears real settings first, so tests behave the same on a laptop and in Netlify's build.
+  test: { environment: "node", include: ["tests/unit/**/*.test.ts"], setupFiles: ["tests/unit/support/hermeticEnv.ts"] },
 });

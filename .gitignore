@@ -13,6 +13,8 @@ firestore-debug.log
 storage-debug.log
 ui-debug.log
 .firebase/
+# Netlify CLI working files (netlify build, netlify link).
+.netlify/
 *.keystore
 *.jks
 # Claude Code's local settings, including approved commands. Never committed.

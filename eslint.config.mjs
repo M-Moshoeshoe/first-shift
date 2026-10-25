@@ -8,7 +8,7 @@ const noScripts = { group: ["**/scripts/*", "**/scripts/**"], message: "App code
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([".next/**", "out/**", "build/**", "coverage/**", "next-env.d.ts"]),
+  globalIgnores([".next/**", ".netlify/**", "out/**", "build/**", "coverage/**", "next-env.d.ts"]),
   {
     rules: {
       // No God files: split anything that grows past this.
