@@ -113,12 +113,12 @@ A business pays for tryouts with prepaid credits (`credits.ts`), so nobody has t
 | Rule | Value |
 | --- | --- |
 | Free credits | 3, granted once when the business profile is first complete |
-| Price | One credit, R25, per completed tryout |
-| Posting | Needs at least one available credit. Drafting is refused too, so no AI work is wasted |
+| Price | R25 a credit |
+| The rule | A credit is used whenever the young person is owed money, and returned when nothing is owed (`settlement.ts`; every case in `docs/MONEY.md`) |
+| Posting | Allowed while any credit is available. Drafting is refused without one, so no AI work is wasted |
+| Booking | Needs an available credit, and holds it (wired in with booking) |
 | Available | Granted, minus used, minus held |
-| Hold | One credit is held when someone is booked (wired in with booking) |
-| Use | The held credit is used when the tryout is completed (wired in with completion) |
-| Release | The held credit comes back if the booking is cancelled (wired in with cancellations) |
-| Top-ups | Not open yet. A business that needs more contacts support |
+| Expiry | Credits never expire |
+| Top-ups | Not open yet. A business that needs more contacts support. Unused paid credits will be refundable on request, less the gateway fee |
 
 The ledger is append-only: entries are only ever added, by the server, in the same transaction as the event that causes them, each with an audit entry.
