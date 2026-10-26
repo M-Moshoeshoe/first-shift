@@ -76,7 +76,7 @@ The demo accounts' passwords are public, so what keeps real people safe is that 
 - We don't run face matching, which POPIA treats as biometric special personal information.
 - **Privacy notice, Terms, Safety and fair play, Contact** are public plain pages (`/privacy`, `/terms`, `/safety`, `/contact`), linked from every public page's footer. Signing in says "By continuing, you agree to the Terms and the Privacy notice", and the agreement is recorded at sign-in, once per version (`termsAcceptances/{uid}` with the version and time, server-only, audit-logged; `src/config/terms.ts`). If it can't be recorded, sign-in stops with a message: fail closed.
 - Photos are visible only to signed-in users of the app; IDs and phone numbers are never shown to businesses before booking.
-- Deleting an account and its record isn't built into the app yet. Until it is, anyone can ask for deletion by emailing firstshift.support@gmail.com (`src/config/contact.ts`), and we complete it within 30 days. A "Delete my account" button is in `docs/PHASES.md` only if time allows.
+- Deleting an account and its record isn't built into the app yet. Until it is, anyone can ask for deletion by emailing mokhachane.moshoeshoe@gmail.com (`src/config/contact.ts`), and we complete it within 30 days. A "Delete my account" button is in `docs/PHASES.md` only if time allows.
 
 ## Accepted risks
 
