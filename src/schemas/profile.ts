@@ -104,6 +104,7 @@ export const ProfileViewSchema = z.object({
       idLastFour: z.optional(z.string()),
       hasPhoto: z.boolean(),
       hasSurname: z.boolean(),
+      tryoutsDone: z.number(),
     }),
   ),
   business: z.nullable(

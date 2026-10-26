@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { SummaryBand } from "@/components/SummaryBand";
 import { buttonClass } from "@/components/ui/Button";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { FEED_COPY } from "@/domain/findingMessages";
 import { greetingFor } from "@/domain/greeting";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
+import { useNearbyTryouts } from "@/lib/useNearbyTryouts";
 import { NearbyList } from "./NearbyList";
 import { TryoutExplainer } from "./TryoutExplainer";
 
@@ -14,6 +16,8 @@ import { TryoutExplainer } from "./TryoutExplainer";
 export function WorkHome() {
   const { worker } = useGatedProfile();
   const heading = useHeadingFocus(true);
+  const feed = useNearbyTryouts();
+  const near = feed.data?.status === "ok" ? feed.data.items.length : null;
   return (
     <>
       <PageTitle headingRef={heading} title={worker?.firstName ? `${greetingFor(new Date())}, ${worker.firstName}` : FEED_COPY.title} />
@@ -28,12 +32,22 @@ export function WorkHome() {
           </Link>
         </section>
       ) : null}
+      {/* Real counts only: the feed just loaded and the record's own counter. */}
+      {worker && near !== null ? (
+        <SummaryBand
+          label="Your week"
+          figures={[
+            { label: "Tryouts near you", value: near },
+            { label: "Tryouts done", value: worker.tryoutsDone },
+          ]}
+        />
+      ) : null}
       <TryoutExplainer />
       <section aria-labelledby="feed-heading" className="flex flex-col gap-4">
         <h2 id="feed-heading" className="text-xl">
           {worker?.area ? FEED_COPY.near(worker.area) : FEED_COPY.title}
         </h2>
-        <NearbyList />
+        <NearbyList feed={feed} />
       </section>
     </>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { SummaryBand } from "@/components/SummaryBand";
 import { buttonClass } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
@@ -9,6 +11,7 @@ import { PAUSE_COPY } from "@/domain/tryoutMessages";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
+import { useOwnTryouts } from "@/lib/useOwnTryouts";
 import { CreditsPanel } from "./CreditsPanel";
 import { TryoutList } from "./TryoutList";
 
@@ -17,14 +20,27 @@ export function BusinessHome() {
   const { business } = useGatedProfile();
   const { user } = useAuth();
   const heading = useHeadingFocus(true);
+  const [attempt, setAttempt] = useState(0);
+  const list = useOwnTryouts(user?.uid ?? null, attempt);
+  const live = list.status === "ready" ? list.tryouts.filter((tryout) => tryout.status === "published") : [];
   return (
     <>
       <PageTitle
         headingRef={heading}
         title={business?.name ? `${greetingFor(new Date())}, ${business.name}` : undefined}
-        intro={business ? creditsLine(business.credits.available, business.credits.onlyFree) : undefined}
+        intro={business && business.credits.available === 0 ? creditsLine(0, false) : undefined}
       />
-      {business ? <CreditsPanel available={business.credits.available} onlyFree={business.credits.onlyFree} /> : null}
+      {/* Real counts only: the live list of their tryouts and their credit ledger. */}
+      {business && list.status === "ready" ? (
+        <SummaryBand
+          label="Your business today"
+          figures={[
+            { label: "Live tryouts", value: live.length },
+            { label: "Applicants waiting", value: live.reduce((sum, tryout) => sum + tryout.applicants, 0) },
+            { label: business.credits.onlyFree ? "Free tryouts left" : "Credits ready", value: business.credits.available },
+          ]}
+        />
+      ) : null}
       {business?.pause ? (
         // Why it's paused and what lifts it; posting waits until then (docs/RULES.md, Strikes, pauses and limits).
         <section aria-labelledby="paused" className="flex flex-col gap-3 border border-stop p-4">
@@ -58,8 +74,9 @@ export function BusinessHome() {
         <h2 id="your-tryouts" className="text-xl font-bold">
           Your tryouts
         </h2>
-        {user ? <TryoutList uid={user.uid} /> : null}
+        <TryoutList list={list} onRetry={() => setAttempt((count) => count + 1)} />
       </section>
+      {business ? <CreditsPanel /> : null}
     </>
   );
 }

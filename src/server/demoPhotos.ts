@@ -17,6 +17,8 @@ const INK: Rgb = [0x0f, 0x2d, 0x24];
 const MIST: Rgb = [0xef, 0xf5, 0xf1];
 const PAPER: Rgb = [0xff, 0xff, 0xff];
 const EDGE: Rgb = [0x5f, 0x7a, 0x6d];
+/** A face can be drawn in any of these, so a list of demo applicants is told apart at a glance. All from the theme. */
+const FACE_TONES: readonly Rgb[] = [EDGE, [0x0a, 0x6b, 0x47], INK, [0x43, 0x58, 0x4f]];
 
 const SHAPES: Record<PhotoKind, { background: Rgb; rects: readonly Rect[] }> = {
   // A head and shoulders, square-edged like everything else in the product.
@@ -34,9 +36,11 @@ function chunk(type: string, data: Buffer): Buffer {
   return Buffer.concat([length, body, check]);
 }
 
-/** A SIZE by SIZE RGB PNG of the shape for this kind of photo. */
-export function placeholderPng(kind: PhotoKind): Buffer {
-  const { background, rects } = SHAPES[kind];
+/** A SIZE by SIZE RGB PNG of the shape for this kind of photo; tone picks a face's colour from FACE_TONES. */
+export function placeholderPng(kind: PhotoKind, tone = 0): Buffer {
+  const { background, rects: shapes } = SHAPES[kind];
+  const face = FACE_TONES[tone % FACE_TONES.length] ?? EDGE;
+  const rects = kind === "profile" ? shapes.map(([x, y, width, height]): Rect => [x, y, width, height, face]) : shapes;
   // Later shapes sit on top of earlier ones.
   const topFirst = [...rects].reverse();
   const rows: Buffer[] = [];
@@ -57,13 +61,13 @@ export function placeholderPng(kind: PhotoKind): Buffer {
 }
 
 /** Puts a placeholder at each demo photo path that has no file yet, so every demo face and shopfront shows. */
-export async function ensureDemoPhotos(photos: readonly { uid: string; kind: PhotoKind }[]): Promise<void> {
+export async function ensureDemoPhotos(photos: readonly { uid: string; kind: PhotoKind; tone?: number }[]): Promise<void> {
   const bucket = adminBucket();
   await Promise.all(
-    photos.map(async ({ uid, kind }) => {
+    photos.map(async ({ uid, kind, tone }) => {
       const file = bucket.file(photoPath(uid, kind));
       const [exists] = await file.exists();
-      if (!exists) await file.save(placeholderPng(kind), { contentType: "image/png", resumable: false });
+      if (!exists) await file.save(placeholderPng(kind, tone), { contentType: "image/png", resumable: false });
     }),
   );
 }

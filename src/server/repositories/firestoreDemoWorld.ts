@@ -2,8 +2,9 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { FieldValue, type DocumentReference, type Query } from "firebase-admin/firestore";
 import { z } from "zod";
-import { DEMO_ROLES } from "@/config/demo";
+import { DEMO_EXAMPLE_APPLICANTS, DEMO_ROLES } from "@/config/demo";
 import { DEMO_EXTRA_OWNERS, demoApplication, demoState } from "@/data/demo";
+import { exampleApplications } from "@/data/demoApplicants";
 import { applicationId } from "@/domain/applications";
 import { statusExpiresAt } from "@/domain/bookings";
 import { adminBucket, adminDb } from "../firebaseAdmin";
@@ -117,10 +118,11 @@ export async function resetDemoWorld(now: Date, referenceText: string | null = n
   const [firstId] = ids;
   const [first] = state.tryouts;
   if (firstId && first) {
-    const application = demoApplication(firstId, first, uids.youngPerson);
+    // Thabo's application, and the six example applicants beside it (data/demoApplicants.ts).
+    const applications = [demoApplication(firstId, first, uids.youngPerson), ...exampleApplications(firstId, first)];
     await db.runTransaction(async (tx) => {
-      tx.set(db.collection("applications").doc(applicationId(firstId, uids.youngPerson)), { ...application, updatedAt: at });
-      tx.update(db.collection("tryouts").doc(firstId), { applicants: 1 });
+      for (const application of applications) tx.set(db.collection("applications").doc(applicationId(firstId, application.workerId)), { ...application, updatedAt: at });
+      tx.update(db.collection("tryouts").doc(firstId), { applicants: applications.length });
       tx.create(db.collection("auditLog").doc(), { uid: uids.youngPerson, action: "application_made", target: applicationId(firstId, uids.youngPerson), at });
     });
   }
@@ -128,6 +130,7 @@ export async function resetDemoWorld(now: Date, referenceText: string | null = n
   await ensureDemoPhotos([
     { uid: uids.youngPerson, kind: "profile" },
     { uid: uids.business, kind: "profile" },
+    ...DEMO_EXAMPLE_APPLICANTS.map((uid, index) => ({ uid, kind: "profile" as const, tone: index + 1 })),
     ...[uids.business, ...DEMO_EXTRA_OWNERS].map((uid) => ({ uid, kind: "shopfront" as const })),
   ]);
   return { removed, tryouts: state.tryouts.length, history: state.history.length };

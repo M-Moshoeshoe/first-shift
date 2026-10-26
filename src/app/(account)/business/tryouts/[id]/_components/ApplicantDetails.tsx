@@ -1,34 +1,42 @@
 import { PersonPhoto } from "@/components/PersonPhoto";
-import { Button } from "@/components/ui/Button";
 import { OWNER_COPY } from "@/domain/bookingMessages";
 import { FEED_COPY } from "@/domain/findingMessages";
 import type { ApplicantResponse } from "@/schemas/booking";
 
-interface ApplicantCardProps {
-  applicant: ApplicantResponse;
-  /** Whether an offer can be made now: no offer waiting, nobody booked, booking still open. */
-  canOffer: boolean;
-  busy: boolean;
-  onOffer: () => void;
-}
-
-/** One applicant: who they are, what they can do, how far they travel, their record, their note, and the one action. */
-export function ApplicantCard({ applicant, canOffer, busy, onOffer }: ApplicantCardProps) {
-  const where = [applicant.area, applicant.distance].filter(Boolean).join(", ");
+/**
+ * Everything the owner decides on, inside the applicant's sheet: their face,
+ * intro, where they travel from and the fare, their record, what they can do,
+ * the show-up insight with its reasons, and their note. Their name is the
+ * sheet's heading.
+ */
+export function ApplicantDetails({ applicant }: { applicant: ApplicantResponse }) {
   return (
-    <article className="flex flex-col gap-4 border border-line p-4">
+    <div className="flex flex-col gap-4">
       <div className="flex gap-4">
         <PersonPhoto subject={applicant.workerId} kind="profile" alt={applicant.firstName} />
         <div className="flex flex-col gap-1">
-          <h3 className="text-xl font-bold">{applicant.firstName}</h3>
           {applicant.intro ? <p className="text-base">{applicant.intro}</p> : null}
-          <p className="text-sm text-muted">{where}</p>
+          <p className="text-sm text-muted">{[applicant.area, applicant.distance].filter(Boolean).join(", ")}</p>
           <p className="text-sm text-muted tabular-nums">{applicant.returnFareCents === null ? FEED_COPY.fareUnknown : OWNER_COPY.returnFare(applicant.returnFareCents)}</p>
           <p className="text-sm text-muted tabular-nums">
             {OWNER_COPY.completed(applicant.completedTryouts)}. {OWNER_COPY.references(applicant.approvedReferences)}.
           </p>
         </div>
       </div>
+      {/* The insight: a score from their own record with every reason shown (domain/showUp.ts). Rules, not AI, so no AI mark. */}
+      <section aria-labelledby="show-up-heading" className="flex flex-col gap-2 bg-mist p-4">
+        <h3 id="show-up-heading" className="flex items-baseline justify-between gap-3 text-base font-bold">
+          {OWNER_COPY.showUpTitle}
+          <span className="text-xl tabular-nums">{OWNER_COPY.showUpScore(applicant.showUp.score)}</span>
+        </h3>
+        <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
+          {applicant.showUp.reasons.map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+        <p className="text-micro text-muted">{OWNER_COPY.showUpReasons}</p>
+        {applicant.firstTimerPlace ? <p className="text-sm">{OWNER_COPY.firstTimer}</p> : null}
+      </section>
       {applicant.skills.length > 0 || applicant.languages.length > 0 ? (
         <div className="flex flex-col gap-1 text-sm">
           {applicant.canDoThisWork ? <p className="font-semibold">{OWNER_COPY.canDo}</p> : null}
@@ -48,26 +56,12 @@ export function ApplicantCard({ applicant, canOffer, busy, onOffer }: ApplicantC
           </dl>
         </div>
       ) : null}
-      <div className="flex flex-col gap-1">
-        <p className="font-semibold tabular-nums">{OWNER_COPY.showUp(applicant.showUp.score)}</p>
-        <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
-          {applicant.showUp.reasons.map((reason) => (
-            <li key={reason}>{reason}</li>
-          ))}
-        </ul>
-        {applicant.firstTimerPlace ? <p className="text-sm">{OWNER_COPY.firstTimer}</p> : null}
-      </div>
       {applicant.note ? (
         <div className="flex flex-col gap-1">
           <p className="text-sm font-semibold">{OWNER_COPY.note}</p>
           <p className="text-base">{applicant.note}</p>
         </div>
       ) : null}
-      {canOffer ? (
-        <Button variant="secondary" busy={busy} busyLabel="Offering" onClick={onOffer}>
-          {OWNER_COPY.offer(applicant.firstName)}
-        </Button>
-      ) : null}
-    </article>
+    </div>
   );
 }

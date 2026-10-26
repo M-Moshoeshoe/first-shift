@@ -16,3 +16,11 @@ export type DemoRole = (typeof DEMO_ROLES)[number];
  * uids are 28 characters.
  */
 export const DEMO_EXAMPLE_OWNERS = ["demo-lerato", "demo-ayanda"] as const;
+
+/**
+ * Made-up young people who have applied to Sipho's first tryout, so the owner's
+ * list shows what a full one looks like. No account behind them: nobody could
+ * ever accept an offer, so offering to them is refused (offers.ts). Never real
+ * uids, for the same reason as above.
+ */
+export const DEMO_EXAMPLE_APPLICANTS = ["demo-applicant-1", "demo-applicant-2", "demo-applicant-3", "demo-applicant-4", "demo-applicant-5", "demo-applicant-6"] as const;

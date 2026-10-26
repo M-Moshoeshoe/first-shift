@@ -66,9 +66,9 @@ Folders and files:
 - Motion is limited to the eight listed in `docs/DESIGN.md`. Scroll reveals and load animations are banned on app screens; content in tools appears instantly.
 - Refactor only when it improves structure, never at the cost of behaviour.
 
-## React Aria: one use only
+## React Aria: the owner's two sheets only
 
-- React Aria Components is used for exactly one thing: the withdraw confirmation on `/business` (its Modal and Dialog), styled as a bottom sheet that uses our sheet-enter and sheet-exit motions through its entering and exiting states.
+- React Aria Components is used for exactly two things, both bottom sheets on the owner's screens built from its Modal and Dialog: the withdraw confirmation on `/business`, and an applicant's details and offer on `/business/tryouts/[id]` (added in UI round 2 at the owner's request). Both use our sheet-enter and sheet-exit motions through its entering and exiting states, and both load in idle time after the page has drawn. The Help sheet on app screens is a native `<dialog>`, not React Aria.
 - Import per component (`react-aria-components/Modal`), never from the package root. Pin the version under the dependency rules above.
 - Style it only with our tokens through its data attributes (`[data-entering]`, `[data-exiting]`, `[data-pressed]`, `[data-focus-visible]`). No default React Aria styles, and no motion outside `docs/DESIGN.md`.
 - Measure the JavaScript it adds and keep `/business` within its budget.

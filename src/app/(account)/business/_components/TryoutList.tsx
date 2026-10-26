@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { ShiftSlip } from "@/components/ShiftSlip";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
+import { formatRand } from "@/domain/money";
 import { sastSlot } from "@/domain/time";
-import { useOwnTryouts } from "@/lib/useOwnTryouts";
+import type { OwnTryouts } from "@/lib/useOwnTryouts";
 import { canWithdraw, orderTryouts, statusLine } from "./ownTryouts";
 
 // React Aria (about 20 KB) loads after the dashboard has drawn, in idle time, so it never delays the
@@ -21,11 +21,9 @@ const WithdrawSheet = lazy(() => loadSheet().then((module) => ({ default: module
  * appears without a reload. Only tryouts that arrive after the list first
  * loads use item-enter; the first list appears at once.
  */
-export function TryoutList({ uid }: { uid: string }) {
-  const [attempt, setAttempt] = useState(0);
+export function TryoutList({ list, onRetry }: { list: OwnTryouts; onRetry: () => void }) {
   const [withdrawing, setWithdrawing] = useState<string | null>(null);
   const [sheetReady, setSheetReady] = useState(false);
-  const list = useOwnTryouts(uid, attempt);
 
   useEffect(() => {
     const preload = () => void loadSheet().then(() => setSheetReady(true));
@@ -51,7 +49,7 @@ export function TryoutList({ uid }: { uid: string }) {
     return (
       <div className="flex flex-col gap-3">
         <FormError message={`Your tryouts did not load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`} />
-        <Button variant="secondary" onClick={() => setAttempt((count) => count + 1)}>
+        <Button variant="secondary" onClick={onRetry}>
           {BUTTON_LABELS.tryAgain}
         </Button>
       </div>
@@ -69,30 +67,31 @@ export function TryoutList({ uid }: { uid: string }) {
 
   return (
     <>
-      <ul className="flex flex-col gap-4">
+      <ul className="flex flex-col gap-2">
         {orderTryouts(list.tryouts).map((tryout) => {
           const { day, hours } = sastSlot(tryout.startAt, tryout.endAt);
           return (
             <li key={tryout.id} className={list.fresh.has(tryout.id) ? "animate-item-enter" : undefined}>
-              <ShiftSlip
-                day={day}
-                hours={hours}
-                business={tryout.title}
-                area={tryout.area}
-                payCents={tryout.payCents}
-                footer={
-                  <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-4">
-                    <Link href={`/business/tryouts/${tryout.id}`} aria-label={`${statusLine(tryout)}: open ${tryout.title} on ${day}`} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4 tabular-nums">
-                      {statusLine(tryout)}
-                    </Link>
-                    {canWithdraw(tryout.status) ? (
-                      <Button variant="quiet" aria-label={`Withdraw ${tryout.title} on ${day}`} onClick={() => setWithdrawing(tryout.id)}>
-                        Withdraw
-                      </Button>
-                    ) : null}
-                  </div>
-                }
-              />
+              {/* A compact row: what and when, the pay, a status chip, and Withdraw while nobody is booked. */}
+              <div className="flex flex-col gap-1 border border-line bg-paper p-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <Link href={`/business/tryouts/${tryout.id}`} className="inline-flex min-h-11 items-center text-base font-semibold">
+                    <span className="link">{tryout.title}</span>
+                  </Link>
+                  <span className="text-xl font-bold tabular-nums">{formatRand(tryout.payCents)}</span>
+                </div>
+                <p className="text-sm text-muted">
+                  {day}, {hours}, {tryout.area}
+                </p>
+                <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-4">
+                  <span className={`border px-1.5 py-0.5 text-micro font-semibold tabular-nums ${tryout.status === "published" ? "border-ink" : "border-line text-muted"}`}>{statusLine(tryout)}</span>
+                  {canWithdraw(tryout.status) ? (
+                    <Button variant="quiet" aria-label={`Withdraw ${tryout.title} on ${day}`} onClick={() => setWithdrawing(tryout.id)}>
+                      Withdraw
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
             </li>
           );
         })}

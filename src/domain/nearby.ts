@@ -47,6 +47,8 @@ export interface FeedItem {
   returnFareCents: number | null;
   /** "about 4 km" from the young person's area; null when we don't know where their area is. */
   distance: string | null;
+  /** The same distance in whole km, for sorting by Nearest; null when we don't know. */
+  km: number | null;
   injuryCover: string;
   /** The business's reputation for paying: "Paid on time: N of N", or "New on First Shift". */
   payRecord: string;
@@ -54,6 +56,7 @@ export interface FeedItem {
 
 export function feedItem(listing: Listing, from: { area: string; centre: Point | null }): FeedItem {
   const { tryout } = listing;
+  const km = from.centre ? distanceKm(from.centre, tryout.location) : null;
   return {
     id: listing.id,
     title: tryout.title,
@@ -65,7 +68,8 @@ export function feedItem(listing: Listing, from: { area: string; centre: Point |
     rateCentsPerHour: tryout.rateCentsPerHour,
     payCents: tryout.payCents,
     returnFareCents: returnFare(from.area, tryout.area)?.returnCents ?? null,
-    distance: from.centre ? aboutHowFar(distanceKm(from.centre, tryout.location)) : null,
+    distance: km === null ? null : aboutHowFar(km),
+    km: km === null ? null : Math.round(km),
     injuryCover: injuryCoverLine(listing.business.coida),
     // The demo's businesses with no account behind them show what they are, not a pay record.
     payRecord: isExampleOwner(tryout.ownerId) ? FEED_COPY.example : payRecordLine(listing.business),

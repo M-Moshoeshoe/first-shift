@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, MouseEvent } from "react";
 export type ButtonVariant = "primary" | "secondary" | "stop" | "quiet";
 
 // Press feedback is the first of the allowed motions (docs/DESIGN.md). v4 sizes: primary 48, secondary 44 (Buttons and links).
-const base = "inline-flex items-center justify-center gap-2 font-semibold transition-transform duration-(--dur-fast) ease-out active:scale-97 disabled:cursor-not-allowed";
+const base = "inline-flex items-center justify-center gap-2 font-semibold transition-transform duration-(--dur-fast) ease-out active:scale-97 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 
 const variants: Record<ButtonVariant, string> = {
   // The only place primary green is applied (docs/DESIGN.md).

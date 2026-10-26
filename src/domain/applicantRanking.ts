@@ -1,5 +1,6 @@
 import type { ApplicationRecord } from "./applications";
 import { areaCentre } from "./areas";
+import { isExampleApplicant } from "./demo";
 import { returnFare } from "./fares";
 import { aboutHowFar, distanceKm } from "./nearby";
 import type { UserRecord } from "./profile";
@@ -42,6 +43,8 @@ export interface ApplicantView {
   /** Holds the shortlist place kept for someone with no record yet (ranking.ts). */
   firstTimerPlace: boolean;
   shortlisted: boolean;
+  /** One of the demo's made-up applicants: shown, never offered (src/config/demo.ts). */
+  example: boolean;
 }
 
 /**
@@ -85,6 +88,7 @@ export function rankApplicants(tryout: TryoutRecord, inputs: readonly ApplicantI
       showUp: item.showUp,
       firstTimerPlace: entry.firstTimerPlace,
       shortlisted,
+      example: isExampleApplicant(application.workerId),
     };
     return [view];
   });

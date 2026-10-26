@@ -11,6 +11,8 @@ import { Toaster } from "./Toaster";
 
 // Demo accounts only, so real people never download it.
 const DemoBar = lazy(() => import("./DemoBar").then((module) => ({ default: module.DemoBar })));
+// App screens only, after the screen has drawn: sign-in never downloads it.
+const HelpButton = lazy(() => import("./HelpButton").then((module) => ({ default: module.HelpButton })));
 
 interface AppShellProps {
   /** The role's destinations; shown once there are enough of them to be worth a bar (src/config/nav.ts). */
@@ -46,6 +48,11 @@ export function AppShell({ nav = [], bare = false, children }: AppShellProps) {
         </main>
       )}
       {items.length > 0 ? <AppNav items={items} badge={badge} /> : null}
+      {bare ? null : (
+        <Suspense fallback={null}>
+          <HelpButton aboveNav={items.length > 0} />
+        </Suspense>
+      )}
       <Toaster />
     </div>
   );

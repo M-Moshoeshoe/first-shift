@@ -196,6 +196,8 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
           idLastFour: user.idLastFour,
           hasPhoto: Boolean(user.profilePhoto),
           hasSurname: Boolean(user.legalSurname),
+          // Only the count of tryouts done, for the dashboard's summary; it is on their record page too. No other counter.
+          tryoutsDone: user.completed ?? 0,
         }
       : null;
   const balance = creditBalance(credits);

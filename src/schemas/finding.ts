@@ -18,6 +18,7 @@ export const FeedItemSchema = z.object({
   payCents: z.number(),
   returnFareCents: z.nullable(z.number()),
   distance: z.nullable(z.string()),
+  km: z.nullable(z.number()),
   injuryCover: z.string(),
   payRecord: z.string(),
 });

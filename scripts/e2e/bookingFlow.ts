@@ -67,13 +67,17 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
   await rec.check(page, "dashboard, new applicant badge");
   await page.goto(`${BASE}/business/tryouts/${tryoutId}`);
   await page.getByRole("heading", { name: "Who applied" }).waitFor();
-  // The shortlist shows what Thabo said he can do (stock and packing, this tryout's kind of work) and his languages, never his surname.
-  await page.getByText("Says they can do this kind of work", { exact: true }).waitFor();
+  // The ranked row shows up to two of what Thabo said he can do; never his surname.
   await page.getByText("Serving customers, Stock and packing").waitFor();
-  await page.getByText("English, isiZulu").waitFor();
   if ((await page.getByText("Mokoena").count()) > 0) rec.failures.push(`${rec.width} px: the owner can see the young person's surname`);
   await rec.check(page, "owner's tryout, applicants ranked");
-  await page.getByRole("button", { name: "Offer the tryout to Thabo" }).click();
+  // The row opens his details in a sheet: this tryout's kind of work, his languages, and the offer.
+  await page.getByRole("button", { name: /Thabo/ }).click();
+  const sheet = page.getByRole("dialog");
+  await sheet.getByText("Says they can do this kind of work", { exact: true }).waitFor();
+  await sheet.getByText("English, isiZulu").waitFor();
+  await rec.check(page, "owner's tryout, applicant sheet");
+  await sheet.getByRole("button", { name: "Offer the tryout to Thabo" }).click();
   await page.getByText("Offered to Thabo.").waitFor();
   await rec.check(page, "owner's tryout, offer waiting");
 

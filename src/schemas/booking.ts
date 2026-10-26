@@ -27,6 +27,7 @@ const ApplicantSchema = z.object({
   showUp: z.object({ score: z.number(), band: z.enum(["high", "medium", "low", "new"]), reasons: z.array(z.string()) }),
   firstTimerPlace: z.boolean(),
   shortlisted: z.boolean(),
+  example: z.boolean(),
 });
 export type ApplicantResponse = z.infer<typeof ApplicantSchema>;
 

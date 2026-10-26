@@ -7,6 +7,7 @@ import { checkTerms, newTryout, type TryoutRecord, type TryoutTerms } from "@/do
 import { DEMO_EXAMPLE_OWNERS } from "@/config/demo";
 import { RULES } from "@/config/rules";
 import { addDays, sastDateKey } from "@/domain/time";
+import { exampleApplicantUsers } from "./demoApplicants";
 import { pastLedger, pastTryouts, type PastTryout } from "./demoHistory";
 
 /**
@@ -92,7 +93,7 @@ export function demoApplication(tryoutId: string, tryout: TryoutRecord, youngPer
   return { tryoutId, workerId: youngPersonUid, ownerId: tryout.ownerId, note: "I live in Ivory Park and can be there by 8:30.", status: "applied", demo: true, startAt: tryout.startAt, endAt: tryout.endAt, seenByOwner: false };
 }
 
-/** The whole demo world as of now: two complete profiles, three businesses and four live tryouts in the next three days. */
+/** The whole demo world as of now: two complete profiles, six example applicants, three businesses and four live tryouts in the next three days. */
 /** referenceText: the seeded reference written by the live model at reset, or null for the labelled example (demoHistory.ts). */
 export function demoState(uids: DemoUids, now: Date, referenceText: string | null = null): DemoState {
   const [lerato, ayanda] = DEMO_EXTRA_OWNERS;
@@ -137,6 +138,7 @@ export function demoState(uids: DemoUids, now: Date, referenceText: string | nul
     users: {
       [uids.business]: { ...newAccount(uids.business, "business", true).user, legalName: "Sipho Dlamini", idLastFour: "0000", residency: "citizen", profilePhoto: photo(uids.business, "profile") },
       [uids.youngPerson]: thabo,
+      ...exampleApplicantUsers(),
     },
     businesses,
     ledger: [{ kind: "grant", amount: RULES.freeCredits, reason: "welcome" }, ...pastLedger(history), { kind: "grant", amount: DEMO_EXTRA_CREDITS, reason: "granted" }],

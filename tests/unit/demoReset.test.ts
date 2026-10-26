@@ -43,6 +43,11 @@ describe("Reset the demo", () => {
 });
 
 describe("the demo's placeholder photos", () => {
+  it("draw faces in different theme tones, so example applicants are told apart", () => {
+    expect(placeholderPng("profile", 1).equals(placeholderPng("profile", 0))).toBe(false);
+    expect(placeholderPng("profile", 4).equals(placeholderPng("profile", 0))).toBe(true);
+  });
+
   it.each(["profile", "shopfront"] as const)("are real 240 by 240 PNG images: %s", (kind) => {
     const png = placeholderPng(kind);
     expect([...png.subarray(0, 8)]).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);

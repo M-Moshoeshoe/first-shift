@@ -1,7 +1,7 @@
 import { RULES } from "@/config/rules";
 import { bookingOpen, type ApplicationRecord } from "./applications";
 import { decideHold, type CreditEntry } from "./credits";
-import type { Viewer } from "./demo";
+import { isExampleApplicant, type Viewer } from "./demo";
 import { crossesRegularEmploymentLine, type WorkedSlot } from "./regularEmployment";
 import type { TryoutWindow } from "./schedule";
 import { addMinutes } from "./time";
@@ -20,7 +20,7 @@ export function openOffer(tryout: TryoutRecord, now: Date): { workerId: string; 
   return tryout.offer && bookingOpen(tryout, now) ? tryout.offer : null;
 }
 
-export type OfferProblem = "not_found" | "not_open" | "offer_pending" | "not_applicant";
+export type OfferProblem = "not_found" | "not_open" | "offer_pending" | "not_applicant" | "example_applicant";
 
 /** The owner makes an offer: their own published tryout, open for booking, no offer waiting, to someone who has applied. */
 export function decideOffer(owner: Viewer, tryout: TryoutRecord | null, application: ApplicationRecord | null, now: Date): { kind: "offer" } | { kind: "unchanged" } | { kind: "refuse"; problem: OfferProblem } {
@@ -30,6 +30,8 @@ export function decideOffer(owner: Viewer, tryout: TryoutRecord | null, applicat
   if (pending && application && pending.workerId === application.workerId) return { kind: "unchanged" };
   if (pending) return { kind: "refuse", problem: "offer_pending" };
   if (!application || application.status !== "applied") return { kind: "refuse", problem: "not_applicant" };
+  // A made-up demo applicant has no account to answer with.
+  if (isExampleApplicant(application.workerId)) return { kind: "refuse", problem: "example_applicant" };
   return { kind: "offer" };
 }
 

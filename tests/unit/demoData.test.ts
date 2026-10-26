@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { DEMO_EXTRA_OWNERS, demoState } from "@/data/demo";
+import { DEMO_EXTRA_OWNERS, demoApplication, demoState } from "@/data/demo";
+import { exampleApplications } from "@/data/demoApplicants";
+import { rankApplicants } from "@/domain/applicantRanking";
+import { isExampleApplicant } from "@/domain/demo";
+import { decideOffer } from "@/domain/offers";
 import { canPost, creditBalance, freeLeft } from "@/domain/credits";
 import { hireOfferDue } from "@/domain/hire";
 import { crossesRegularEmploymentLine } from "@/domain/regularEmployment";
@@ -88,6 +92,32 @@ describe("the demo world npm run demo:reset restores", () => {
     expect(written?.example).toBeUndefined();
     const fallback = demoState(uids, now, null).history.find((past) => past.reference)?.reference;
     expect(fallback).toMatchObject({ status: "approved", example: true });
+  });
+
+  it("has six example applicants beside Thabo: complete, demo, labelled, never offerable, and Thabo still bookable", () => {
+    const now = fromSast(2026, 10, 26, 10, 0);
+    const state = demoState(uids, now);
+    const [first] = state.tryouts;
+    if (!first) throw new Error("the demo always has a first tryout");
+    const examples = exampleApplications("t1", first);
+    expect(examples).toHaveLength(6);
+    for (const application of examples) {
+      expect(isExampleApplicant(application.workerId)).toBe(true);
+      expect(application.demo).toBe(true);
+      const user = state.users[application.workerId];
+      expect(user?.demo).toBe(true);
+      expect(isProfileComplete(user ?? null, null)).toBe(true);
+      expect(decideOffer({ uid: uids.business, demo: true }, first, application, now)).toEqual({ kind: "refuse", problem: "example_applicant" });
+    }
+    const thabosApplication = demoApplication("t1", first, uids.youngPerson);
+    expect(decideOffer({ uid: uids.business, demo: true }, first, thabosApplication, now)).toEqual({ kind: "offer" });
+
+    const ranked = rankApplicants(first, [thabosApplication, ...examples].map((application) => ({ application, worker: state.users[application.workerId] ?? { role: "young_person", status: "active" }, approvedReferences: 0 })));
+    expect(ranked).toHaveLength(7);
+    expect(ranked.filter((applicant) => applicant.example)).toHaveLength(6);
+    expect(ranked.find((applicant) => applicant.workerId === uids.youngPerson)?.example).toBe(false);
+    // Different histories, so the scores spread out.
+    expect(new Set(ranked.map((applicant) => applicant.showUp.score)).size).toBeGreaterThan(3);
   });
 });
 

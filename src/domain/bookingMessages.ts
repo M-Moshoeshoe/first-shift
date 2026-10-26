@@ -14,6 +14,7 @@ export const OFFER_PROBLEM_MESSAGES: Record<OfferProblem, string> = {
   not_open: `Offers close ${RULES.bookingCutoffMinutes / 60} hour before the start, so nobody is booked who cannot get there. This tryout cannot be offered any more.`,
   offer_pending: "You've already offered this tryout to someone. Wait for their answer: if they decline, you can offer it to someone else.",
   not_applicant: "That person is not waiting on this tryout any more. Choose someone else from the list.",
+  example_applicant: "This is an example applicant, made up to show a full list. Offer the tryout to Thabo to try booking.",
 };
 
 export const ANSWER_PROBLEM_MESSAGES: Record<AcceptProblem | "not_found", string> = {
@@ -62,8 +63,17 @@ export const OWNER_COPY = {
   completed: (count: number) => `Tryouts done: ${count}`,
   references: (count: number) => `References: ${count}`,
   showUp: (score: number) => `Likely to show up: ${score} out of 100`,
+  showUpTitle: "Likely to show up",
+  showUpShort: "show-up",
+  showUpScore: (score: number) => `${score} out of 100`,
   note: "Their note",
   returnFare: (cents: number) => `Return taxi ${formatRand(cents)}`,
+  example: "Example applicant",
+  exampleNote: "Made up to show a full list, so it cannot be offered. Offer the tryout to Thabo to try booking.",
+  open: (name: string) => `See ${name}'s details`,
+  details: "Their details",
+  showUpReasons: "Worked out from their record on First Shift",
+  close: "Close",
 };
 
 export const OFFER_COPY = {

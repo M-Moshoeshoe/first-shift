@@ -32,11 +32,13 @@ const TryoutDocSchema = z.object({ title: z.string(), area: z.string(), startAt:
  * loaded only now, after the page has drawn, so it never delays the first
  * screen. A document that doesn't match is left out, never trusted.
  */
-export function useOwnTryouts(uid: string, attempt: number): OwnTryouts {
+/** uid is null until sign-in has resolved; the list stays loading until then. */
+export function useOwnTryouts(uid: string | null, attempt: number): OwnTryouts {
   const [state, setState] = useState<OwnTryouts>({ status: "loading" });
   const known = useRef<Set<string> | null>(null);
 
   useEffect(() => {
+    if (!uid) return undefined;
     let unsubscribe: (() => void) | undefined;
     let current = true;
     known.current = null;
