@@ -12,9 +12,10 @@ import { sastDateKey } from "@/domain/time";
 import { firstInvalid, shakeAndFocus } from "@/lib/forms";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import type { PostTryoutInput } from "@/schemas/tryout";
-import { CHECK_FIELDS, checkForm, dayPay, type CheckDraft, type CheckErrors, type CheckField } from "./checkForm";
+import { CHECK_FIELDS, checkForm, dayPay, MAX_TASKS, type CheckDraft, type CheckErrors, type CheckField } from "./checkForm";
 import { HoursField } from "./HoursField";
 import { TaskListField } from "./TaskListField";
+import { DraftOptions, type DraftOption } from "./DraftOptions";
 
 const fieldId = (field: CheckField) => `post-${field}`;
 const FORM_ERROR_ID = "post-check-error";
@@ -22,6 +23,8 @@ const minimumRate = formatRand(RULES.minimumWageCentsPerHour);
 
 interface CheckStepProps {
   initial: CheckDraft;
+  /** The AI's versions; more than one shows them as choices above the fields. */
+  options: readonly DraftOption[];
   description: string;
   busy: boolean;
   /** A refusal from the server, shown under the button. */
@@ -35,8 +38,9 @@ interface CheckStepProps {
  * the server give instant feedback next to each field, and the day's pay
  * updates as the rate or hours change. The server checks it all again.
  */
-export function CheckStep({ initial, description, busy, formError, onPost, onBack }: CheckStepProps) {
+export function CheckStep({ initial, options, description, busy, formError, onPost, onBack }: CheckStepProps) {
   const [form, setForm] = useState(initial);
+  const [chosen, setChosen] = useState(0);
   const [errors, setErrors] = useState<CheckErrors>({});
   const heading = useHeadingFocus(true);
   const pay = dayPay(form);
@@ -61,6 +65,19 @@ export function CheckStep({ initial, description, busy, formError, onPost, onBac
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         Check your tryout
       </h2>
+      {options.length > 1 ? (
+        <DraftOptions
+          options={options}
+          chosen={chosen}
+          onChoose={(index) => {
+            const option = options[index];
+            if (!option) return;
+            setChosen(index);
+            setForm((current) => ({ ...current, title: option.title, tasks: [...option.tasks].slice(0, MAX_TASKS) }));
+            setErrors({});
+          }}
+        />
+      ) : null}
       <TextField id={fieldId("title")} label="Title" maxLength={60} value={form.title} error={errors.title} onChange={(event) => update("title", event.target.value)} />
       <TaskListField id={fieldId("tasks")} tasks={form.tasks} error={errors.tasks} onChange={(tasks) => update("tasks", tasks)} />
       <TextField id={fieldId("date")} label="Date" type="date" min={sastDateKey(new Date())} value={form.date} error={errors.date} onChange={(event) => update("date", event.target.value)} />

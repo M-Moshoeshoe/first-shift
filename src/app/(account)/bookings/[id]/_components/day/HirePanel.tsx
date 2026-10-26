@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, buttonClass } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
+import { Stamp } from "@/components/ui/Stamp";
 import { HIRE_COPY } from "@/domain/recordCopy";
 import type { HireOutcome } from "@/domain/hire";
 import { ApiError, apiPost } from "@/lib/api";
@@ -60,7 +61,14 @@ export function HirePanel({ bookingId, name }: { bookingId: string; name: string
           <p className="text-base font-semibold">{answerLine(hire.offer, name)}</p>
           <h3 className="text-base font-bold">{HIRE_COPY.outcomeTitle}</h3>
           {hire.offer.outcome ? (
-            <p className="text-base">{hire.offer.outcome === "hired" ? HIRE_COPY.markedHired(name) : HIRE_COPY.markedNotWorkedOut}</p>
+            <>
+              {hire.offer.outcome === "hired" ? (
+                <span className="self-start">
+                  <Stamp label="Hired" />
+                </span>
+              ) : null}
+              <p className="text-base">{hire.offer.outcome === "hired" ? HIRE_COPY.markedHired(name) : HIRE_COPY.markedNotWorkedOut}</p>
+            </>
           ) : (
             <>
               <Button variant="secondary" busy={busy === "hired"} busyLabel="Saving" onClick={() => void mark("hired")}>

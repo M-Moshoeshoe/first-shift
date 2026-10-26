@@ -53,7 +53,7 @@ export const fakeCheckWork = vi.fn(async (text: string) => {
   return decideWork("stock_and_packing", 0.9);
 });
 
-export const fakeDraft = vi.fn(async () => ({ title: "Shop helper", tasks: ["Pack bread onto the front shelves"], hours: 10 }));
+export const fakeDraft = vi.fn(async () => ({ options: [{ title: "Shop helper", tasks: ["Pack bread onto the front shelves"] }, { title: "Shelf and till helper", tasks: ["Serve customers at the counter"] }], hours: 10 }));
 
 export function createTryoutFakes() {
   const store = createFakeStore();

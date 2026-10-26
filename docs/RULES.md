@@ -220,7 +220,7 @@ A tryout shows where it is as a cell about 1 km across (a 6-character geohash) a
 
 ## Work that can't be posted
 
-The AI sorts every request into a category; `allowedWork.ts` decides. Blocked categories are refused with a safer option, whatever the AI's confidence. Unclear requests (confidence below 0.7) wait for human review. Electrical installation is blocked because the Electrical Installation Regulations, 2009 require it to be done under the control of a registered person.
+The AI sorts every request into a category; `allowedWork.ts` decides. Blocked categories are refused with a safer option, whatever the AI's confidence. The refusal is a screen of its own ("This cannot be posted"): the reason, the request's own words that show the work (quoted by the model for display only, and shown only if they really are in the request, `quotedPhrase`), and a safer request to start again from with "Use this instead" (`SAFER_REQUEST`), which is checked like any other. A draft comes as 2 or 3 versions to choose from; the owner chooses one, edits it, and what they post is checked again. Unclear requests (confidence below 0.7) wait for human review. Electrical installation is blocked because the Electrical Installation Regulations, 2009 require it to be done under the control of a registered person.
 
 ## References and the work record
 

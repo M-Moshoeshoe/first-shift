@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
-import { CREDITS_COPY } from "@/domain/creditsCopy";
+import { CREDIT_PACKS, CREDITS_COPY } from "@/domain/creditsCopy";
 import { sastDay } from "@/domain/time";
 import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
@@ -17,7 +17,7 @@ function Figure({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex flex-col gap-1">
       <dt className="text-sm text-muted">{label}</dt>
-      <dd className="text-2xl font-bold tabular-nums">{value}</dd>
+      <dd className="order-first text-xl font-semibold tabular-nums">{value}</dd>
     </div>
   );
 }
@@ -50,12 +50,32 @@ export function CreditsScreen() {
   return (
     <>
       <PageTitle headingRef={heading} title={CREDITS_COPY.title} intro={CREDITS_COPY.intro} />
-      <dl className="grid grid-cols-3 gap-4 border border-line p-4">
-        <Figure label={CREDITS_COPY.available} value={credits.available} />
-        <Figure label={CREDITS_COPY.held} value={credits.held} />
-        <Figure label={CREDITS_COPY.free} value={credits.freeLeft} />
-      </dl>
-      <p className="text-sm text-muted">{CREDITS_COPY.howItWorks}</p>
+      {/* The balance first and largest, the rest small beside it. */}
+      <section aria-label="Your balance" className="flex flex-col gap-3 border-b border-line pb-6">
+        <p className="flex items-baseline gap-2">
+          <span className="text-hero font-semibold tabular-nums">{credits.available}</span>
+          <span className="text-base">{CREDITS_COPY.available.toLowerCase()}</span>
+        </p>
+        <dl className="flex gap-6">
+          <Figure label={CREDITS_COPY.held} value={credits.held} />
+          <Figure label={CREDITS_COPY.free} value={credits.freeLeft} />
+        </dl>
+        <p className="text-sm text-muted">{CREDITS_COPY.howItWorks}</p>
+      </section>
+      <section aria-labelledby="credit-packs" className="flex flex-col gap-3">
+        <h2 id="credit-packs" className="text-xl">
+          {CREDITS_COPY.packsTitle}
+        </h2>
+        <ul className="grid grid-cols-2 gap-3">
+          {CREDIT_PACKS.map((pack) => (
+            <li key={pack.credits} className="flex flex-col gap-1 border border-line p-4">
+              <span className="text-xl font-semibold tabular-nums">{pack.price}</span>
+              <span className="text-sm text-muted">{pack.credits} credits</span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-sm text-muted">{CREDITS_COPY.packsNote}</p>
+      </section>
       <RequestCredits requestedAt={credits.request?.requestedAt ?? null} onRequested={(requestedAt) => set({ ...credits, request: { requestedAt } })} />
       <section aria-labelledby="credit-history" className="flex flex-col gap-2">
         <h2 id="credit-history" className="text-xl font-bold">

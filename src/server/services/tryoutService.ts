@@ -64,14 +64,14 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
       const work = checked.value;
       if (work.decision === "blocked") {
         log("warn", "tryout_draft_blocked", { uid, category: work.category });
-        return { outcome: "blocked", saferOption: work.saferOption };
+        return { outcome: "blocked", saferOption: work.saferOption, saferRequest: work.saferRequest, phrase: work.phrase };
       }
       if (drafted.status === "rejected") throw inContext(drafted.reason, TRYOUT_MESSAGES.aiDraftUnavailable);
       const draft = drafted.value;
       // Code decides the date: the day the owner named, or none for them to choose (draftDate.ts).
       const date = namedDate(description, now());
       if (draft.date && draft.date !== date) log("info", "tryout_draft_date_overruled", { named: date !== null });
-      return { outcome: work.decision, draft: { title: draft.title, tasks: draft.tasks, hours: suggestHours(draft.hours), date } };
+      return { outcome: work.decision, draft: { options: draft.options.slice(0, 3), hours: suggestHours(draft.hours), date } };
     },
 
     /**
@@ -94,7 +94,7 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
       const posted = postedStatus(work);
       if (!posted.ok) {
         log("warn", "tryout_post_blocked", { uid, category: posted.error.category });
-        return { outcome: "blocked", saferOption: posted.error.saferOption };
+        return { outcome: "blocked", saferOption: posted.error.saferOption, saferRequest: posted.error.saferRequest, phrase: posted.error.phrase };
       }
 
       const record = business ? newTryout(viewer, business, terms, decided.value, posted.value.status, posted.value.category) : null;

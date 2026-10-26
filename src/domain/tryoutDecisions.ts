@@ -84,8 +84,8 @@ export function checkTerms(now: Date, terms: Pick<TryoutTerms, "date" | "startTi
 }
 
 /** How the work check decides what happens to a post: live, waiting for review, or refused. */
-export function postedStatus(work: WorkDecision): Result<{ status: "published" | "review"; category: WorkCategory | null }, { category: BlockedCategory; saferOption: string }> {
-  if (work.decision === "blocked") return fail({ category: work.category, saferOption: work.saferOption });
+export function postedStatus(work: WorkDecision): Result<{ status: "published" | "review"; category: WorkCategory | null }, { category: BlockedCategory; saferOption: string; saferRequest: string; phrase: string | null }> {
+  if (work.decision === "blocked") return fail({ category: work.category, saferOption: work.saferOption, saferRequest: work.saferRequest, phrase: work.phrase });
   return ok(work.decision === "allowed" ? { status: "published", category: work.category } : { status: "review", category: null });
 }
 

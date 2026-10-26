@@ -59,7 +59,7 @@ New measured ratios may be added here. Existing ones change only with a reason.
 
 Never put text on `line`. Never put white text on `gold`, and never put `ink` text on `primary`.
 
-Gold is used for exactly two things: the stub of a shift slip and the Stamp. Not for highlights, badges, borders, links, icons or backgrounds. In code it is applied only by `ShiftSlip` and `Stamp`. Primary green fills only the one primary action per screenful, and is applied only by the primary button style.
+Gold is used for exactly three things: the stub of a shift slip, the Stamp, and (v4) the small clipboard mark beside the AI guide while a tryout is drafted (`AiGuide`). Not for highlights, badges, borders, links, icons or backgrounds. In code it is applied only by `ShiftSlip` and `Stamp`. Primary green fills only the one primary action per screenful, and is applied only by the primary button style.
 
 ## Type (v4, 26 October 2026)
 
@@ -163,7 +163,7 @@ These are the only motion allowed: the eight below, and the v4 additions after t
 Responses to what the person did, or to new data. App screens never use scroll reveals or load animations: content in a tool appears instantly.
 
 1. **Press feedback.** Every `Button`, and every link styled with `buttonClass()`, scales to 0.97 while pressed, over `--dur-fast`.
-2. **The Stamp**, the signature moment. Gold fill, `ink` text, 2 px `ink` border, square, rotated -8 degrees. It lands from scale 1.4 and opacity 0 to scale 1 and opacity 1 over `--dur-slow` with `--ease-spring` (`animate-stamp`). Its label is one of "Paid", "Received", "Booked", "Profile done" or "Posted" (a tryout that went live), and nothing else. When it lands, the phone gives one 15 ms vibration if it supports it, the person has tapped the page, and reduced motion is off.
+2. **The Stamp**, the signature moment. Gold fill, `ink` text, 2 px `ink` border, square, rotated -8 degrees. It lands from scale 1.4 and opacity 0 to scale 1 and opacity 1 over `--dur-slow` with `--ease-spring` (`animate-stamp`). Its label is one of "Paid" (on the owner's booking, once the young person confirms Received), "Received", "Booked" (also the moment an offer is accepted), "Profile done", "Posted" (a tryout that went live) or "Hired" (a job offer marked hired), and nothing else. When it lands, the phone gives one 15 ms vibration if it supports it, the person has tapped the page, and reduced motion is off.
 3. **Sheet enter, sheet exit and item enter.** A sheet slides up from 24 px below over `--dur-slow` with `--ease-out` (`animate-sheet-enter`). Closing, it does the reverse: it slides 24 px down and fades out over `--dur-base` with `--ease-out` (`animate-sheet-exit`), so it never vanishes in a frame, which reads as broken. The scrim behind it (`ink` at 40%) fades in and out with it (`animate-scrim-in`, `animate-scrim-out`). A new item in a live feed fades in from 8 px above over `--dur-base` with `--ease-out` (`animate-item-enter`).
 4. **Field error.** When a submit fails validation, the first invalid field shakes once, 3 px left and right twice, 200 ms in all (`animate-field-shake`), and focus moves to it. Its error text fades in over `--dur-base` (`animate-error-in`, built into `FormError`).
 5. **Step progress.** Onboarding shows a thin bar that fills with `transform: scaleX()` over `--dur-slow` with `--ease-out` as each step completes.

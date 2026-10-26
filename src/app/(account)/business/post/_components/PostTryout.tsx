@@ -9,10 +9,14 @@ import { DraftResultSchema, PostResultSchema, type PostTryoutInput } from "@/sch
 import { CheckStep } from "./CheckStep";
 import { initialCheck, type CheckDraft } from "./checkForm";
 import { DescribeStep } from "./DescribeStep";
+import type { DraftOption } from "./DraftOptions";
 import { PostOutcome, type Outcome } from "./PostOutcome";
 
 type Step = "describe" | "check" | "outcome";
 const STEP_NUMBER: Record<Step, number> = { describe: 1, check: 2, outcome: 3 };
+
+/** A refusal's screen: why, a safer request, and the words that showed the work. */
+const blockedFrom = (result: { saferOption: string; saferRequest: string; phrase: string | null }): Outcome => ({ kind: "blocked", saferOption: result.saferOption, saferRequest: result.saferRequest, phrase: result.phrase });
 
 const messageOf = (caught: unknown) => (caught instanceof ApiError ? caught.message : PROFILE_MESSAGES.fallback);
 
@@ -29,14 +33,12 @@ export function PostTryout() {
   const [outcome, setOutcome] = useState<Outcome>({ kind: "no_credits" });
   const [description, setDescription] = useState("");
   const [check, setCheck] = useState<CheckDraft | null>(null);
+  const [options, setOptions] = useState<readonly DraftOption[]>([]);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [returned, setReturned] = useState(false);
 
-  const finish = (next: Outcome) => {
-    setOutcome(next);
-    setStep("outcome");
-  };
+  const finish = (next: Outcome) => (setOutcome(next), setStep("outcome"));
 
   /** A refusal that has its own screen (no credit left), or a message under the button. */
   const refuse = (caught: unknown) => {
@@ -50,8 +52,9 @@ export function PostTryout() {
     setDescription(text);
     try {
       const result = await apiPost("/api/tryouts/draft", { description: text }, DraftResultSchema);
-      if (result.outcome === "blocked") finish({ kind: "blocked", saferOption: result.saferOption });
+      if (result.outcome === "blocked") finish(blockedFrom(result));
       else {
+        setOptions(result.draft.options);
         setCheck(initialCheck(result.draft));
         setStep("check");
       }
@@ -67,7 +70,7 @@ export function PostTryout() {
     setCheck(form);
     try {
       const result = await apiPost("/api/tryouts", input, PostResultSchema);
-      finish(result.outcome === "blocked" ? { kind: "blocked", saferOption: result.saferOption } : { kind: result.outcome });
+      finish(result.outcome === "blocked" ? blockedFrom(result) : { kind: result.outcome });
     } catch (caught) {
       refuse(caught);
     }
@@ -79,6 +82,7 @@ export function PostTryout() {
     setReturned(true);
     setStep("describe");
   };
+  const useInstead = (safer: string) => (setDescription(safer), backToDescribe());
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,6 +94,7 @@ export function PostTryout() {
       {step === "check" && check ? (
         <CheckStep
           initial={check}
+          options={options}
           description={description}
           busy={busy}
           formError={formError}
@@ -100,7 +105,7 @@ export function PostTryout() {
           }}
         />
       ) : null}
-      {step === "outcome" ? <PostOutcome outcome={outcome} onChangeRequest={backToDescribe} /> : null}
+      {step === "outcome" ? <PostOutcome outcome={outcome} request={description} onChangeRequest={backToDescribe} onUseInstead={useInstead} /> : null}
     </div>
   );
 }

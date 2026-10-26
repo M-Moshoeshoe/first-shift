@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { lazy, Suspense } from "react";
 import { ShiftSlip } from "@/components/ShiftSlip";
@@ -60,7 +62,12 @@ export function BookingDetail() {
   const { day, hours } = sastSlot(new Date(booking.startAt), new Date(booking.endAt));
   return (
     <>
-      <PageTitle headingRef={heading} title={booking.title} intro={STATUS_LABELS[booking.status]} />
+      <Link href={booking.party === "business" ? "/business" : "/work/applications"} className="inline-flex min-h-11 items-center gap-1 self-start text-sm font-semibold">
+        <ArrowLeft aria-hidden="true" size={16} strokeWidth={1.75} />
+        <span className="link">{booking.party === "business" ? "Back to your tryouts" : "Back to your applications"}</span>
+      </Link>
+      {/* One "Booked": the Stamp on the slip says it, so the subtitle names any other status. */}
+      <PageTitle headingRef={heading} title={booking.title} intro={booking.status === "booked" ? undefined : STATUS_LABELS[booking.status]} />
       <ShiftSlip day={day} hours={hours} business={booking.businessName} area={booking.businessArea} payCents={booking.payCents} stamp={booking.status === "booked" ? "Booked" : undefined} />
       <BookingPeople booking={booking} />
       <section aria-labelledby="where-heading" className="flex flex-col gap-2">

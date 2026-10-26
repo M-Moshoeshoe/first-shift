@@ -4,6 +4,7 @@ import Link from "next/link";
 import { buttonClass } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
+import { creditsLine, greetingFor } from "@/domain/greeting";
 import { PAUSE_COPY } from "@/domain/tryoutMessages";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
@@ -18,7 +19,11 @@ export function BusinessHome() {
   const heading = useHeadingFocus(true);
   return (
     <>
-      <PageTitle headingRef={heading} title={business?.name} intro={business?.area} />
+      <PageTitle
+        headingRef={heading}
+        title={business?.name ? `${greetingFor(new Date())}, ${business.name}` : undefined}
+        intro={business ? creditsLine(business.credits.available, business.credits.onlyFree) : undefined}
+      />
       {business ? <CreditsPanel available={business.credits.available} onlyFree={business.credits.onlyFree} /> : null}
       {business?.pause ? (
         // Why it's paused and what lifts it; posting waits until then (docs/RULES.md, Strikes, pauses and limits).

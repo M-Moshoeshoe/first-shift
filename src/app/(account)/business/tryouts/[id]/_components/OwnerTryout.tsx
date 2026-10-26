@@ -12,6 +12,7 @@ import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { OWNER_COPY } from "@/domain/bookingMessages";
 import { sastSlot, sastWhen } from "@/domain/time";
 import { ApiError, apiPost } from "@/lib/api";
+import { toast } from "@/lib/toast";
 import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import { OfferResultSchema, OwnerTryoutSchema, SeenResultSchema, type ApplicantResponse } from "@/schemas/booking";
@@ -60,6 +61,7 @@ export function OwnerTryout() {
     setError(null);
     try {
       await apiPost(`/api/tryouts/${encodeURIComponent(id)}/offer`, { workerId }, OfferResultSchema);
+      toast("Offer sent");
       reload();
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : FALLBACK);

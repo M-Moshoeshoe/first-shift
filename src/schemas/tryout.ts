@@ -27,13 +27,16 @@ export type PostTryoutInput = z.infer<typeof PostTryoutSchema>;
 /** A tryout id in a route's address. */
 export const TryoutIdSchema = z.string().check(z.minLength(1), z.maxLength(128), z.regex(/^[A-Za-z0-9_-]+$/));
 
-const DraftSchema = z.object({ title: z.string(), tasks: z.array(z.string()), hours: z.number(), date: z.nullable(z.string()) });
+/** 2 or 3 versions to choose from (title and tasks), the suggested hours, and the date the owner named, if any. */
+const DraftSchema = z.object({ options: z.array(z.object({ title: z.string(), tasks: z.array(z.string()) })), hours: z.number(), date: z.nullable(z.string()) });
+/** Refused: why, a safer request to start again from, and the request's own words that show the work (display only). */
+const BlockedSchema = z.object({ outcome: z.literal("blocked"), saferOption: z.string(), saferRequest: z.string(), phrase: z.nullable(z.string()) });
 
 /** POST /api/tryouts/draft: the draft to review, or the safer option when the work can't be posted. Nothing is written. */
 export const DraftResultSchema = z.discriminatedUnion("outcome", [
   z.object({ outcome: z.literal("allowed"), draft: DraftSchema }),
   z.object({ outcome: z.literal("review"), draft: DraftSchema }),
-  z.object({ outcome: z.literal("blocked"), saferOption: z.string() }),
+  BlockedSchema,
 ]);
 export type DraftResult = z.infer<typeof DraftResultSchema>;
 
@@ -41,7 +44,7 @@ export type DraftResult = z.infer<typeof DraftResultSchema>;
 export const PostResultSchema = z.discriminatedUnion("outcome", [
   z.object({ outcome: z.literal("published"), id: z.string() }),
   z.object({ outcome: z.literal("review"), id: z.string() }),
-  z.object({ outcome: z.literal("blocked"), saferOption: z.string() }),
+  BlockedSchema,
 ]);
 export type PostResult = z.infer<typeof PostResultSchema>;
 

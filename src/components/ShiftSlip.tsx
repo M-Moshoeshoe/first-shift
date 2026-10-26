@@ -33,26 +33,29 @@ export function ShiftSlip({ day, hours, business, area, payCents, returnFareCent
           <p className="text-sm font-semibold">{day}</p>
           <p className="text-sm">{hours}</p>
         </div>
-        <div className="flex-1 px-4 py-4">
+        <div className="flex flex-1 flex-col gap-1 px-4 py-3">
           <p className="text-2xl font-bold tabular-nums">{formatRand(payCents)}</p>
-          <p className="mt-1">{business}</p>
+          <p className="text-base font-semibold">{business}</p>
+          {/* One stat line: where, how far, and the fare, which wraps as one piece so the amount never loses its label. */}
           <p className="text-sm text-muted tabular-nums">
             {area}
             {distance ? `, ${distance}` : null}
-            {/* The fare wraps as one piece, so the amount never sits on a line without its label. */}
             {typeof returnFareCents === "number" ? (
               <>
                 , <span className="whitespace-nowrap">return taxi {formatRand(returnFareCents)}</span>
               </>
             ) : null}
+            {returnFareCents === null ? `, ${FARE_UNKNOWN.toLowerCase()}` : null}
           </p>
-          {returnFareCents === null ? <p className="text-sm text-muted">{FARE_UNKNOWN}</p> : null}
-          {notes.map((note) => (
-            <p key={note} className="text-sm text-muted">
-              {note}
-            </p>
-          ))}
-          {record ? <p className="text-sm font-semibold">{record}</p> : null}
+          {notes.length > 0 || record ? (
+            <ul aria-label="About this business" className="flex flex-wrap gap-1.5 pt-1">
+              {[...notes, ...(record ? [record] : [])].map((chip) => (
+                <li key={chip} className="border border-line px-1.5 py-0.5 text-micro">
+                  {chip}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </div>
       {footer ? <div className="border-t-2 border-ink px-4 py-2">{footer}</div> : null}

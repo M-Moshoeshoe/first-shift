@@ -5,12 +5,12 @@ import { TERMS_MESSAGES, TRYOUT_FIELD_MESSAGES } from "@/domain/tryoutMessages";
 // Monday 26 October 2026, 08:00 in Johannesburg.
 const NOW = new Date("2026-10-26T06:00:00Z");
 const description = "Help sorting stock and serving customers on Saturday";
-const draft = { title: "Shop helper", tasks: ["Pack bread onto the shelves"], hours: 8, date: "2026-10-27" };
+const draft = { options: [{ title: "Shop helper", tasks: ["Pack bread onto the shelves"] }, { title: "Till helper", tasks: ["Serve customers"] }], hours: 8, date: "2026-10-27" };
 const form = (overrides: Partial<CheckDraft> = {}): CheckDraft => ({ ...initialCheck(draft), supervision: true, ...overrides });
 
 describe("initialCheck", () => {
-  it("starts on the day the owner named, at 09:00, at the suggested hours and the minimum wage, unconfirmed", () => {
-    expect(initialCheck(draft)).toEqual({ ...draft, date: "2026-10-27", startTime: "09:00", rate: "30.23", supervision: false });
+  it("starts from the first version, on the day the owner named, at 09:00, at the suggested hours and the minimum wage, unconfirmed", () => {
+    expect(initialCheck(draft)).toEqual({ title: "Shop helper", tasks: ["Pack bread onto the shelves"], hours: 8, date: "2026-10-27", startTime: "09:00", rate: "30.23", supervision: false });
   });
 
   it("leaves the date empty for the owner to choose when they named no day", () => {

@@ -18,7 +18,7 @@ describe("draft", () => {
     const { service, tryouts, audit } = createTryoutFakes();
     const result = await service.draft("lerato", "Help sorting stock and serving customers on Saturday");
     // "on Saturday": the date is the coming Saturday, decided in code (draftDate.ts).
-    expect(result).toEqual({ outcome: "allowed", draft: { title: "Shop helper", tasks: ["Pack bread onto the front shelves"], hours: RULES.maxTryoutHours, date: "2026-10-31" } });
+    expect(result).toEqual({ outcome: "allowed", draft: { options: [{ title: "Shop helper", tasks: ["Pack bread onto the front shelves"] }, { title: "Shelf and till helper", tasks: ["Serve customers at the counter"] }], hours: RULES.maxTryoutHours, date: "2026-10-31" } });
     expect(fakeCheckWork).toHaveBeenCalledWith("Request: Help sorting stock and serving customers on Saturday");
     expect(tryouts.size + audit.length).toBe(0);
   });
@@ -26,7 +26,7 @@ describe("draft", () => {
   it("answers a blocked request with the safer option and writes nothing", async () => {
     const { service, tryouts, audit } = createTryoutFakes();
     const result = await service.draft("lerato", "Fix the wiring in my shop");
-    expect(result).toMatchObject({ outcome: "blocked", saferOption: expect.stringContaining("registered electrician") });
+    expect(result).toMatchObject({ outcome: "blocked", saferOption: expect.stringContaining("registered electrician"), saferRequest: expect.stringContaining("registered electrician does the electrical work") });
     expect(tryouts.size + audit.length).toBe(0);
   });
 

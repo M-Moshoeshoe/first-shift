@@ -25,6 +25,8 @@ export const CREDITS_COPY = {
   requesting: "Sending your request",
   requested: (day: string) => `Requested on ${day}. We'll add them and let you know.`,
   launch: `At launch: 5 tryouts for ${rand(5 * RULES.creditPriceCents)} or 10 for ${rand(10 * RULES.creditPriceCents)}, by card or Instant EFT.`,
+  packsTitle: "Credit packs",
+  packsNote: "At launch, by card or Instant EFT. Paying online is not open yet: tap Request more credits and we'll add them.",
   unavailable: "Your credits did not load. Check your connection, then tap Try again.",
   seeCredits: "See your credits",
 } as const;
@@ -52,3 +54,6 @@ export const GRANT_PROBLEMS: Record<GrantProblem, string> = {
   reason: "Give a reason with --reason, at least 3 characters: it goes in the audit log.",
   not_business: "That uid is not a business.",
 };
+
+/** The packs on the Credits screen, as information only until top-ups open (docs/MONEY.md). */
+export const CREDIT_PACKS = [5, 10].map((credits) => ({ credits, price: rand(credits * RULES.creditPriceCents) }));

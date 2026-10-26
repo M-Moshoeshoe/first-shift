@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { FEED_COPY, FINDING_MESSAGES } from "@/domain/findingMessages";
+import { feedCountLine } from "@/domain/greeting";
 import { useNearbyTryouts } from "@/lib/useNearbyTryouts";
 import { FeedSlip } from "./FeedSlip";
 
@@ -48,15 +49,20 @@ export function NearbyList() {
           <p className="text-base">{FEED_COPY.empty(data.area)}</p>
         </div>
       ) : (
+        <>
+        <p role="status" className="text-sm font-semibold">
+          {feedCountLine(data.items.length)}
+        </p>
         <ul className="flex flex-col gap-4">
           {data.items.map((item) => (
             <li key={item.id} className={fresh.has(item.id) ? "animate-item-enter" : undefined}>
-              <Link href={`/work/tryouts/${item.id}`} className="block focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink">
-                <FeedSlip item={item} footer={<p className="flex min-h-11 items-center font-semibold underline underline-offset-4">{item.title}</p>} />
+              <Link href={`/work/tryouts/${item.id}`} className="lift block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
+                <FeedSlip item={item} footer={<p className="flex min-h-11 items-center text-sm font-semibold"><span className="link">{item.title}</span></p>} />
               </Link>
             </li>
           ))}
         </ul>
+        </>
       )}
       {actions}
     </div>

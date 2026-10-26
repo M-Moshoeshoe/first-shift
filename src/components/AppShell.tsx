@@ -7,6 +7,7 @@ import { useBadge } from "@/lib/useBadge";
 import { NAV_MIN_ITEMS, type NavItem } from "@/config/nav";
 import { AppHeader } from "./AppHeader";
 import { AppNav } from "./AppNav";
+import { Toaster } from "./Toaster";
 
 // Demo accounts only, so real people never download it.
 const DemoBar = lazy(() => import("./DemoBar").then((module) => ({ default: module.DemoBar })));
@@ -45,6 +46,7 @@ export function AppShell({ nav = [], bare = false, children }: AppShellProps) {
         </main>
       )}
       {items.length > 0 ? <AppNav items={items} badge={badge} /> : null}
+      <Toaster />
     </div>
   );
 }

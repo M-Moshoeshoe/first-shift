@@ -41,12 +41,13 @@ const PROBLEM_FIELD: Record<TermsProblem, CheckField> = {
 };
 
 /**
- * The draft as a form: the day the owner named, or no date for them to choose
+ * The draft as a form, from its first version: the day the owner named, or no date for them to choose
  * (domain/draftDate.ts), 09:00, the suggested hours and the minimum wage. The
  * owner changes any of it.
  */
-export function initialCheck(draft: { title: string; tasks: readonly string[]; hours: number; date: string | null }): CheckDraft {
-  return { title: draft.title, tasks: [...draft.tasks].slice(0, MAX_TASKS), date: draft.date ?? "", startTime: "09:00", hours: draft.hours, rate: MINIMUM_RATE_TEXT, supervision: false };
+export function initialCheck(draft: { options: readonly { title: string; tasks: readonly string[] }[]; hours: number; date: string | null }): CheckDraft {
+  const [first] = draft.options;
+  return { title: first?.title ?? "", tasks: [...(first?.tasks ?? [])].slice(0, MAX_TASKS), date: draft.date ?? "", startTime: "09:00", hours: draft.hours, rate: MINIMUM_RATE_TEXT, supervision: false };
 }
 
 /** The day's pay at the typed rate, for the live line; null while the rate isn't a number yet. */

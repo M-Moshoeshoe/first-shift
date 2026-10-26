@@ -42,11 +42,14 @@ async function runCase(aiCase: AiCase): Promise<Row> {
   const work = decision.value;
   const got = work.decision === "review" ? "review" : `${work.decision} (${work.category})`;
 
-  const draftText = draft.status === "fulfilled" ? [draft.value.title, ...draft.value.tasks].join(" ") : null;
-  const draftNote = draftText === null ? "error" : MONEY.test(draftText) ? "mentions money" : `${draft.status === "fulfilled" ? draft.value.tasks.length : 0} tasks`;
+  const options = draft.status === "fulfilled" ? draft.value.options : [];
+  const draftText = draft.status === "fulfilled" ? options.flatMap((option) => [option.title, ...option.tasks]).join(" ") : null;
+  const draftNote = draftText === null ? "error" : MONEY.test(draftText) ? "mentions money" : `${options.length} options`;
 
   // An allowed request's own draft must pass the check again at publish, as the owner would post it unedited.
-  const published = aiCase.expect.outcome === "allowed" && draft.status === "fulfilled" ? await checkWork(checkText(draft.value.title, draft.value.tasks, aiCase.text)) : null;
+  // Every option the owner could choose must pass, so the first one that doesn't is the one reported.
+  const checks = aiCase.expect.outcome === "allowed" ? await Promise.all(options.map((option) => checkWork(checkText(option.title, option.tasks, aiCase.text)))) : [];
+  const published = checks.find((check) => check.decision !== "allowed") ?? checks[0] ?? null;
   const publishNote = published && published.decision !== "allowed" ? `, at publish: ${published.decision === "blocked" ? `blocked (${published.category})` : "review"}` : "";
 
   const outcomeOk =

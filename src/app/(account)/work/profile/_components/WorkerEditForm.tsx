@@ -13,6 +13,7 @@ import { ABOUT_COPY } from "@/domain/profileCopy";
 import { ApiError, apiPost } from "@/lib/api";
 import { shakeAndFocus } from "@/lib/forms";
 import { SaveResultSchema } from "@/schemas/profile";
+import { toast } from "@/lib/toast";
 
 const PAY_ID = "profile-payMethods";
 const SURNAME_ID = "profile-legalSurname";
@@ -68,6 +69,7 @@ export function WorkerEditForm({ initial, askSurname }: WorkerEditFormProps) {
     try {
       await apiPost("/api/profile/worker/edit", { payMethods: methods, ...about, ...(askSurname ? { legalSurname: surname.trim() } : {}) }, SaveResultSchema);
       setSaved(true);
+      toast("Saved");
     } catch (caught) {
       setFormError(caught instanceof ApiError ? caught.message : PROFILE_MESSAGES.fallback);
     }

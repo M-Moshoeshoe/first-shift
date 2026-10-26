@@ -1,6 +1,6 @@
 import "server-only";
 import { AI_LIMITS } from "@/config/ai";
-import { decideWork, type WorkDecision } from "@/domain/allowedWork";
+import { decideWork, quotedPhrase, type WorkDecision } from "@/domain/allowedWork";
 import { ReferenceTextSchema, TryoutDraftSchema, WorkClassificationSchema, type TryoutDraft } from "@/schemas/ai";
 import type { OwnerAnswers } from "@/schemas/tryout";
 import { todayForPrompt } from "@/domain/draftDate";
@@ -19,7 +19,7 @@ export async function checkWork(description: string): Promise<WorkDecision> {
     maxTokens: AI_LIMITS.classifyMaxTokens,
     schema: WorkClassificationSchema,
   });
-  return decideWork(classification.category, classification.confidence);
+  return decideWork(classification.category, classification.confidence, quotedPhrase(description, classification.phrase));
 }
 
 export async function writeReference(answers: OwnerAnswers, tasks: string[]): Promise<string> {

@@ -6,6 +6,7 @@ import { FormError } from "@/components/ui/FormError";
 import { TextAreaField } from "@/components/ui/TextAreaField";
 import { shakeAndFocus } from "@/lib/forms";
 import { DraftRequestSchema } from "@/schemas/tryout";
+import { AiGuide } from "./AiGuide";
 
 const FIELD_ID = "post-description";
 const FORM_ERROR_ID = "post-describe-error";
@@ -61,6 +62,7 @@ export function DescribeStep({ initial, focusField, busy, formError, onDraft }: 
           Draft my tryout
         </Button>
         <FormError id={FORM_ERROR_ID} message={formError} />
+        {busy ? <AiGuide /> : null}
       </div>
     </form>
   );

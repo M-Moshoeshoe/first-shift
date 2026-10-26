@@ -44,7 +44,6 @@ export function RequestCredits({ requestedAt, onRequested }: { requestedAt: stri
           <FormError id={ERROR_ID} message={error} />
         </>
       )}
-      <p className="text-sm text-muted">{CREDITS_COPY.launch}</p>
     </section>
   );
 }

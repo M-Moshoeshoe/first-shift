@@ -93,9 +93,12 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
         ) : null}
         {payment && payment.state !== "awaiting_payment" ? (
           <div className="flex flex-col gap-3">
-            <span className="self-start">
-              <Stamp label={payment.state === "received" ? "Received" : "Paid"} />
-            </span>
+            {/* "Paid" lands only once the young person confirms it: never on a payment that is waiting or disputed. */}
+            {payment.state === "received" ? (
+              <span className="self-start">
+                <Stamp label="Paid" />
+              </span>
+            ) : null}
             {payment.state === "awaiting_confirmation" ? <p className="text-base">{DAY_COPY.waitingAnswer(booking.workerFirstName)}</p> : null}
             {payment.state === "awaiting_confirmation" && payment.method === "cash" ? <p className="text-base">{DAY_COPY.cashHandover(booking.workerFirstName)}</p> : null}
             {payment.state === "not_received" ? <p className="text-base">{DAY_COPY.notReceivedDone}</p> : null}

@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Button, buttonClass } from "@/components/ui/Button";
+import { buttonClass } from "@/components/ui/Button";
 import { Stamp } from "@/components/ui/Stamp";
 import { POSTING_PROBLEM_MESSAGES } from "@/domain/tryoutMessages";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
+import { BlockedResult } from "./BlockedResult";
 
-export type Outcome = { kind: "published" } | { kind: "review" } | { kind: "blocked"; saferOption: string } | { kind: "no_credits" };
+export type Outcome = { kind: "published" } | { kind: "review" } | { kind: "blocked"; saferOption: string; saferRequest: string; phrase: string | null } | { kind: "no_credits" };
 
 const backToTryouts = (
   <Link href="/business" className={buttonClass("primary")}>
@@ -15,7 +16,7 @@ const backToTryouts = (
 );
 
 /** Step 3: what happened to the tryout, and one clear next step. Never a dead end. */
-export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; onChangeRequest: () => void }) {
+export function PostOutcome({ outcome, request, onChangeRequest, onUseInstead }: { outcome: Outcome; request: string; onChangeRequest: () => void; onUseInstead: (request: string) => void }) {
   // Focus lands on the first thing that says what happened: a heading, or the sentence when there isn't one.
   const heading = useHeadingFocus<HTMLHeadingElement & HTMLParagraphElement>(true);
 
@@ -44,15 +45,7 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
   }
 
   if (outcome.kind === "blocked") {
-    return (
-      <div className="flex flex-col gap-4">
-        <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
-          This work cannot be a tryout
-        </h2>
-        <p className="border border-stop p-4 text-base">{outcome.saferOption}</p>
-        <Button onClick={onChangeRequest}>Change my request</Button>
-      </div>
-    );
+    return <BlockedResult request={request} reason={outcome.saferOption} saferRequest={outcome.saferRequest} phrase={outcome.phrase} onUseInstead={() => onUseInstead(outcome.saferRequest)} onEdit={onChangeRequest} />;
   }
 
   return (
