@@ -56,6 +56,8 @@ const BookingSchema = z.object({
   owedMinimumCents: z.number().int().nullable().optional(),
   // Bookings made before the door check carried it: none on the live site yet, so required.
   workerIdLastFour: z.string(),
+  // Demo only (day.ts, demoDayOpen). Parsed like the rest, or a read would drop it.
+  dayOpenedAt: instant.nullable().optional(),
   checkedInAt: instant.nullable().optional(),
   ended: z
     .object({ at: instant, reason: z.enum(CHECKOUT_REASONS), minutesWorked: z.number(), answers: z.object({ onTime: z.boolean(), didTheWork: z.boolean(), wouldHireAgain: z.boolean() }).optional() })

@@ -70,7 +70,7 @@ Consequences:
 
 | Step | Rule | Code |
 | --- | --- | --- |
-| Check-in | The owner confirms the door check (the face matches the photo; the ID card's name and last four digits match) and types the 6-digit code the young person shows. From an hour before the start until the end | `day.ts`, `decideCheckIn` |
+| Check-in | The owner confirms the door check (the face matches the photo; the ID card's name and last four digits match) and types the 6-digit code the young person shows. From an hour before the start until the end; on a demo booking opened with "Skip to the day", at any hour (Demo accounts, below) | `day.ts`, `decideCheckIn` |
 | Wrong codes | Counted on the booking; after 5 the booking locks and goes to support, so a code can't be guessed without the young person there | `RULES.checkInCodeAttempts` |
 | On time | Checked in by 10 minutes after the start | `wasOnTime` |
 | No-show | The owner can record one from 30 minutes after the start if nobody checked in: nothing owed, the credit comes back, a strike for the young person, and a review | `decideNoShow`, `settle()` |
@@ -176,7 +176,7 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 | `npm run demo:reset` restores the demo world, and so does "Reset the demo" in the app, from a demo account only, at most once a minute for everyone | A clean start before every judging session, and for each judge |
 | One tap to sign in: "Try as Thabo, looking for work" or "Try as Sipho, a business" (`POST /api/demo/try`); the email and password still work | Judges get in without typing anything; the passwords are public anyway |
 | The demo world starts with two finished, paid, Received tryouts between Sipho and Thabo this month, one with an approved reference (`src/data/demoHistory.ts`) | The work record and its share link have something on them, and the next tryout they finish together brings up the job offer |
-| "Skip to the day" on a demo booking, before the door opens, moves its start to 5 minutes ago, keeping its hours (`decideSkipToDay`). Never on a real booking | A judge can try check-in, pay, Received and the reference at any hour |
+| "Skip to the day" on a demo booking, before the door opens, opens the door now and keeps the tryout's date and times (`decideSkipToDay`, `demoDayOpen`). The owner can then check in and out at any hour. Checked in before the start counts as on time; hours worked never count past the agreed hours; payment is still due by 23:59 on the tryout's own day; a no-show still waits until 30 minutes after the real start. Never on a real booking: the rule needs the booking's own demo mark too | A judge can try check-in, pay, Received and the reference at any hour, and every screen still shows a daytime tryout |
 | The two businesses with no account behind them show "Example, for viewing only" and take no applications (`isExampleOwner`) | Nobody could ever answer an application to them |
 | Placeholder photos for the demo faces and shopfronts, plain shapes drawn by the server | The door check and the shortlist have a photo to show |
 

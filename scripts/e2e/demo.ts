@@ -14,6 +14,7 @@ import { DraftResultSchema, HireAnswerResultSchema, HireViewSchema, RecordViewSc
 import { SharedRecordSchema } from "../../src/schemas/sharedRecord";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { doorOpen, skipToDay } from "./demoClock";
 import { adminApp, clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser } from "./session";
 
 /**
@@ -69,15 +70,6 @@ async function feedIsolation(steps: Record<string, unknown>): Promise<void> {
 const ANSWERS = { onTime: true, didTheWork: true, wouldHireAgain: true };
 const AnswerSchema = z.object({ status: z.string(), state: z.object({ kind: z.string(), bookingId: z.optional(z.string()) }) });
 const step = (path: string, body: unknown = {}) => apiPost(path, body, StepResultSchema);
-const SkipSchema = z.object({ status: z.string() });
-
-/** As a judge would: "Skip to the day" on the young person's booking, then the code their booking page shows. */
-async function skipToDay(bookingId: string): Promise<string> {
-  const skipped = await apiPost(`/api/bookings/${bookingId}/skip-to-day`, {}, SkipSchema);
-  const view = await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema);
-  if (skipped.status !== "skipped" || view.day.canSkipToDay || !view.checkInCode) throw new Error(`Skip to the day should move the day and leave the code to show: ${JSON.stringify({ skipped, canSkip: view.day.canSkipToDay })}`);
-  return view.checkInCode;
-}
 
 /** A whole demo tryout, as a judge would walk it: Sipho offers it to Thabo, Thabo accepts, the day runs, Sipho pays, Thabo confirms. */
 async function demoDay(steps: Record<string, unknown>): Promise<string> {
@@ -95,10 +87,11 @@ async function demoDay(steps: Record<string, unknown>): Promise<string> {
   await demoSignIn(THABO.email, THABO.password);
   const answered = await apiPost(`/api/applications/${seeded.tryoutId}/answer`, { answer: "accept" }, AnswerSchema);
   const bookingId = answered.state.bookingId ?? "";
-  const code = await skipToDay(bookingId);
+  const { code, times } = await skipToDay(bookingId);
 
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
+  await doorOpen(bookingId, times);
   await step(`/api/bookings/${bookingId}/check-in`, { code, faceMatches: true, nameMatches: true, lastFourMatches: true });
   await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed", answers: ANSWERS });
   const owed = (await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema)).day.owedCents;
@@ -165,10 +158,11 @@ async function demoDispute(steps: Record<string, unknown>, firstTryoutId: string
   await signOut(clientAuth());
   await demoSignIn(THABO.email, THABO.password);
   const bookingId = (await apiPost(`/api/applications/${second.id}/answer`, { answer: "accept" }, AnswerSchema)).state.bookingId ?? "";
-  const code = await skipToDay(bookingId);
+  const { code, times } = await skipToDay(bookingId);
 
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
+  await doorOpen(bookingId, times);
   await step(`/api/bookings/${bookingId}/check-in`, { code, faceMatches: true, nameMatches: true, lastFourMatches: true });
   await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed", answers: ANSWERS });
   const owed = (await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema)).day.owedCents;

@@ -9,7 +9,7 @@ import { SkipResultSchema } from "@/schemas/booking";
 
 const ERROR_ID = "skip-error";
 
-/** Demo bookings only, before the door opens: moves the day to now, so a judge can try check-in, pay and the reference at any hour. */
+/** Demo bookings only, before the door opens: opens it now and keeps the tryout's times, so a judge can try check-in, pay and the reference at any hour. */
 export function SkipToDay({ bookingId, onSkipped }: { bookingId: string; onSkipped: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

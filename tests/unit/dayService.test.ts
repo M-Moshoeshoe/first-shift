@@ -123,6 +123,71 @@ describe("a full tryout, from the door to Received", () => {
   });
 });
 
+describe("Skip to the day, through the services", () => {
+  const demoSipho = { uid: "sipho", demo: true };
+  const demoThabo = { uid: "thabo", demo: true };
+  const START = fromSast(2026, 10, 27, 9, 0);
+  const END = fromSast(2026, 10, 27, 15, 0);
+
+  /** The same booking as a demo one, the evening before, as a judge would find it. */
+  async function demoBooked() {
+    const fakes = await booked();
+    const record = fakes.bookings.get("booking-1");
+    if (record) fakes.bookings.set("booking-1", { ...record, demo: true });
+    clock = fromSast(2026, 10, 26, 21, 30);
+    return fakes;
+  }
+
+  it("opens the door the night before and keeps the daytime times, then walks the day to Received", async () => {
+    const { bookingService, dayService, bookings, store, door, audit } = await demoBooked();
+    expect(await bookingService.skipToDay(demoThabo, "booking-1")).toEqual({ status: "skipped" });
+    expect(bookings.get("booking-1")).toMatchObject({ startAt: START, endAt: END, dayOpenedAt: clock, status: "booked" });
+    expect(audit.at(-1)).toBe("demo_skipped_to_day");
+    const view = await bookingService.view(demoSipho, "booking-1");
+    expect(view).toMatchObject({ startAt: START.toISOString(), endAt: END.toISOString(), day: { canCheckIn: true, canSkipToDay: false } });
+    // Once open, a second tap changes nothing.
+    expect(await bookingService.skipToDay(demoSipho, "booking-1")).toEqual({ status: "unchanged" });
+
+    expect(await dayService.checkIn(demoSipho, "booking-1", door)).toEqual({ status: "done" });
+    clock = fromSast(2026, 10, 26, 21, 45);
+    expect(await dayService.checkOut(demoSipho, "booking-1", "completed", ANSWERS)).toEqual({ status: "done" });
+    expect(bookings.get("booking-1")).toMatchObject({ status: "ended", owedCents: 21000, startAt: START, endAt: END });
+    // Checked in before the start: on time.
+    expect(store.users.get("thabo")).toMatchObject({ completed: 1, onTime: 1 });
+    // Due by 23:59 on the tryout's own day, not the evening it was opened.
+    clock = fromSast(2026, 10, 27, 0, 1);
+    await dayService.sweepDeadlines(demoThabo);
+    expect(store.businesses.get("sipho")?.status).toBe("active");
+    expect(await dayService.markPaid(demoSipho, "booking-1", { method: "ewallet", amountCents: 21000 })).toEqual({ status: "done" });
+    expect(await dayService.confirm(demoThabo, "booking-1", true)).toEqual({ status: "done" });
+    expect(store.businesses.get("sipho")).toMatchObject({ payments: 1, paidOnTime: 1 });
+  });
+
+  it("refuses a real booking at the same hour exactly as before, and never opens it", async () => {
+    const { bookingService, dayService, bookings, door } = await booked();
+    clock = fromSast(2026, 10, 26, 21, 30);
+    expect(await refusal(dayService.checkIn(sipho, "booking-1", door))).toMatchObject({ publicMessage: CHECK_IN_MESSAGES.too_early });
+    expect(await refusal(bookingService.skipToDay(sipho, "booking-1"))).toMatchObject({ status: 403, code: "not_demo" });
+    expect(await refusal(bookingService.skipToDay(demoSipho, "booking-1"))).toMatchObject({ status: 403, code: "not_demo" });
+    expect(bookings.get("booking-1")).toMatchObject({ startAt: START, endAt: END });
+    expect(bookings.get("booking-1")?.dayOpenedAt).toBeUndefined();
+  });
+
+  it("refuses a demo booking to a viewer who is not demo", async () => {
+    const { bookingService, bookings } = await demoBooked();
+    expect(await refusal(bookingService.skipToDay(thaboViewer, "booking-1"))).toMatchObject({ status: 403, code: "not_demo" });
+    expect(bookings.get("booking-1")?.dayOpenedAt).toBeUndefined();
+  });
+
+  it("keeps the door shut on a booking with the field set but no demo mark", async () => {
+    const { dayService, bookings, door } = await booked();
+    const record = bookings.get("booking-1");
+    if (record) bookings.set("booking-1", { ...record, dayOpenedAt: fromSast(2026, 10, 26, 21, 0) });
+    clock = fromSast(2026, 10, 26, 21, 30);
+    expect(await refusal(dayService.checkIn(sipho, "booking-1", door))).toMatchObject({ publicMessage: CHECK_IN_MESSAGES.too_early });
+  });
+});
+
 // A real PNG's first bytes, then padding: what the server reads to tell what a file is.
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, ...new Array(64).fill(0)]);
 

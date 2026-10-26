@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { BookingRecord } from "@/domain/bookings";
-import { dayOptions, deadlineActions, decideBusinessNotOpen, decideSkipToDay, decideCheckIn, decideCheckOut, decideConfirm, decideMarkPaid, decideNoShow, methodsFor, payRecordCounters, unpaidPause, wasOnTime } from "@/domain/day";
+import { statusView, type BookingRecord } from "@/domain/bookings";
+import { dayOptions, deadlineActions, decideBusinessNotOpen, decideSkipToDay, decideCheckIn, decideCheckOut, decideConfirm, decideMarkPaid, decideNoShow, demoDayOpen, methodsFor, payRecordCounters, unpaidPause, wasOnTime } from "@/domain/day";
 import { fromSast } from "@/domain/time";
 
 const owner = { uid: "sipho", demo: false };
@@ -183,14 +183,17 @@ describe("Skip to the day, demo only", () => {
   const demoBooking = booking({ demo: true });
   const evening = fromSast(2026, 10, 26, 21, 17);
 
-  it("moves a demo booking to have started 5 minutes ago, on the minute, keeping its hours, for either party", () => {
+  it("opens a demo booking's door now, for either party, and never touches its times", () => {
     for (const viewer of [demoOwner, demoWorker]) {
-      expect(decideSkipToDay(viewer, demoBooking, evening)).toEqual({ kind: "skip", startAt: fromSast(2026, 10, 26, 21, 12), endAt: fromSast(2026, 10, 27, 3, 12) });
+      const decision = decideSkipToDay(viewer, demoBooking, evening);
+      expect(decision).toEqual({ kind: "skip", dayOpenedAt: evening });
+      expect(decision).not.toHaveProperty("startAt");
+      expect(decision).not.toHaveProperty("endAt");
     }
     expect(dayOptions("business", demoBooking, evening).canSkipToDay).toBe(true);
   });
 
-  it("never moves a real booking, or anyone else's", () => {
+  it("never opens a real booking, or anyone else's", () => {
     expect(decideSkipToDay(owner, booking(), evening)).toEqual({ kind: "refuse", problem: "not_demo" });
     expect(decideSkipToDay(demoOwner, booking(), evening)).toEqual({ kind: "refuse", problem: "not_demo" });
     expect(decideSkipToDay(owner, demoBooking, evening)).toEqual({ kind: "refuse", problem: "not_demo" });
@@ -199,9 +202,72 @@ describe("Skip to the day, demo only", () => {
     expect(dayOptions("business", booking(), evening).canSkipToDay).toBe(false);
   });
 
-  it("only while booked, and changes nothing once the door is open", () => {
+  it("only while booked, and changes nothing once the door is open, by the clock or by an earlier skip", () => {
     expect(decideSkipToDay(demoOwner, booking({ demo: true, status: "checked_in" }), evening)).toEqual({ kind: "refuse", problem: "not_booked" });
     expect(decideSkipToDay(demoOwner, demoBooking, fromSast(2026, 10, 27, 8, 0))).toEqual({ kind: "unchanged" });
     expect(dayOptions("young_person", demoBooking, fromSast(2026, 10, 27, 8, 0)).canSkipToDay).toBe(false);
+    const opened = booking({ demo: true, dayOpenedAt: evening });
+    expect(decideSkipToDay(demoWorker, opened, fromSast(2026, 10, 26, 21, 30))).toEqual({ kind: "unchanged" });
+    expect(dayOptions("young_person", opened, fromSast(2026, 10, 26, 21, 30)).canSkipToDay).toBe(false);
+  });
+});
+
+describe("a demo day opened early", () => {
+  const demoOwner = { ...owner, demo: true };
+  const opened = booking({ demo: true, dayOpenedAt: fromSast(2026, 10, 26, 21, 17) });
+  const nightBefore = fromSast(2026, 10, 26, 21, 30);
+
+  it("lets the owner check in at any hour, so the day's panels show", () => {
+    expect(demoDayOpen(opened)).toBe(true);
+    expect(decideCheckIn(demoOwner, opened, secrets, door, nightBefore)).toEqual({ kind: "check_in" });
+    expect(decideCheckIn(demoOwner, opened, secrets, door, fromSast(2026, 10, 27, 16, 0))).toEqual({ kind: "check_in" });
+    expect(dayOptions("business", opened, nightBefore)).toMatchObject({ canCheckIn: true, canNoShow: false, canReportNotOpen: false, canSkipToDay: false });
+    // The door check and the code still apply.
+    expect(decideCheckIn(demoOwner, opened, secrets, { ...door, code: "000000" }, nightBefore)).toEqual({ kind: "refuse", problem: "wrong_code" });
+  });
+
+  it("refuses a real booking at the same hour exactly as before", () => {
+    expect(decideCheckIn(owner, booking(), secrets, door, nightBefore)).toEqual({ kind: "refuse", problem: "too_early" });
+    expect(dayOptions("business", booking(), nightBefore).canCheckIn).toBe(false);
+  });
+
+  it("never applies to a booking without the demo mark, even with the field set", () => {
+    const unmarked = booking({ dayOpenedAt: fromSast(2026, 10, 26, 21, 17) });
+    expect(demoDayOpen(unmarked)).toBe(false);
+    expect(decideCheckIn(owner, unmarked, secrets, door, nightBefore)).toEqual({ kind: "refuse", problem: "too_early" });
+    expect(decideCheckIn(owner, unmarked, secrets, door, fromSast(2026, 10, 27, 15, 0))).toEqual({ kind: "refuse", problem: "over" });
+    expect(dayOptions("business", unmarked, nightBefore).canCheckIn).toBe(false);
+    const inDay = { ...unmarked, status: "checked_in" as const, checkedInAt: nightBefore };
+    expect(decideCheckOut(owner, "b1", inDay, "worker_left_early", ANSWERS, fromSast(2026, 10, 27, 16, 0))).toMatchObject({ minutesWorked: 1110 });
+  });
+
+  it("counts a check-in the night before as on time, and leaves the no-show at 30 minutes after the real start", () => {
+    expect(wasOnTime({ startAt: START, checkedInAt: nightBefore })).toBe(true);
+    expect(decideNoShow(demoOwner, "b1", opened, nightBefore)).toEqual({ kind: "refuse", problem: "not_now" });
+    expect(dayOptions("business", opened, fromSast(2026, 10, 27, 9, 30)).canNoShow).toBe(true);
+  });
+
+  it("checks out with sensible hours: never below 0, never above the agreed 6, pay never below 4 hours", () => {
+    const inDay = { ...opened, status: "checked_in" as const, checkedInAt: nightBefore };
+    expect(decideCheckOut(demoOwner, "b1", inDay, "completed", ANSWERS, fromSast(2026, 10, 26, 21, 45))).toMatchObject({ settlement: { wage: { amountCents: 21000, minimumCents: 21000 } } });
+    expect(decideCheckOut(demoOwner, "b1", inDay, "worker_left_early", ANSWERS, fromSast(2026, 10, 26, 21, 45))).toMatchObject({ settlement: { wage: { amountCents: 21000, minimumCents: 14000 } }, minutesWorked: 15 });
+    expect(decideCheckOut(demoOwner, "b1", inDay, "safety", ANSWERS, fromSast(2026, 10, 27, 16, 0))).toMatchObject({ settlement: { wage: { amountCents: 21000 } }, minutesWorked: 360 });
+    expect(decideCheckOut(demoOwner, "b1", inDay, "worker_left_early", ANSWERS, fromSast(2026, 10, 26, 21, 0))).toMatchObject({ settlement: { wage: { minimumCents: 14000 } }, minutesWorked: 0 });
+  });
+
+  it("is due by 23:59 on the tryout's own day, even when checked out the night before", () => {
+    const ended = { ...opened, status: "ended" as const, checkedInAt: nightBefore, owedCents: 21000, owedMinimumCents: 21000, ended: { at: fromSast(2026, 10, 26, 21, 45), reason: "completed" as const, minutesWorked: 15 }, payment: { state: "awaiting_payment" as const } };
+    expect(deadlineActions("b1", ended, null, fromSast(2026, 10, 27, 0, 0)).pauseBusiness).toBe(false);
+    expect(deadlineActions("b1", ended, null, fromSast(2026, 10, 27, 23, 59)).pauseBusiness).toBe(false);
+    expect(deadlineActions("b1", ended, null, fromSast(2026, 10, 28, 0, 0)).pauseBusiness).toBe(true);
+    const paidAt = (markedPaidAt: Date) => ({ ...ended, payment: { state: "awaiting_confirmation" as const, method: "ewallet" as const, amountCents: 21000, markedPaidAt } });
+    expect(payRecordCounters(paidAt(fromSast(2026, 10, 27, 12, 0)), "received")).toEqual(["payments", "paidOnTime"]);
+    // Without the demo mark, the day it was checked out still counts, as before.
+    expect(deadlineActions("b1", { ...ended, demo: false }, null, fromSast(2026, 10, 27, 0, 0)).pauseBusiness).toBe(true);
+  });
+
+  it("keeps the status page to the tryout's own day", () => {
+    expect(statusView(opened, nightBefore)).toMatchObject({ startAt: START.toISOString() });
+    expect(statusView(opened, fromSast(2026, 10, 28, 0, 0))).toBeNull();
   });
 });

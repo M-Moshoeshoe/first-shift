@@ -127,7 +127,7 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
       });
     },
 
-    /** Demo only: moves a demo booking's day to now, so a judge can try the door at any hour (day.ts, decideSkipToDay). */
+    /** Demo only: opens a demo booking's door now, keeping its times, so a judge can try the door at any hour (day.ts, decideSkipToDay). */
     async skipToDay(viewer: Viewer, bookingId: string): Promise<{ status: "skipped" | "unchanged" }> {
       return bookings.transactBooking<{ status: "skipped" | "unchanged" }>(bookingId, viewer.uid, ({ booking }) => {
         const decision = decideSkipToDay(viewer, booking, now());
@@ -136,7 +136,7 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
           throw decision.problem === "not_demo" ? new AppError(403, "not_demo", DEMO_COPY.notDemo) : new AppError(409, "not_booked", DEMO_COPY.skipNotBooked);
         }
         if (decision.kind === "unchanged") return { write: null, result: { status: "unchanged" } };
-        return { write: { booking: { startAt: decision.startAt, endAt: decision.endAt }, audit: "demo_skipped_to_day" }, result: { status: "skipped" } };
+        return { write: { booking: { dayOpenedAt: decision.dayOpenedAt }, audit: "demo_skipped_to_day" }, result: { status: "skipped" } };
       });
     },
 
