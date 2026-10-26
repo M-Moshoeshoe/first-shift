@@ -10,6 +10,7 @@ import { GatedProfileContext } from "@/lib/auth/gatedProfile";
 import { useOwnProfile } from "@/lib/auth/useOwnProfile";
 import { setSignedInHint } from "@/lib/signedInHint";
 import { AppShell } from "./AppShell";
+import { NavProgress } from "./NavProgress";
 import { ProfileErrorState } from "./ProfileErrorState";
 import { ScreenSkeleton } from "./ScreenSkeleton";
 
@@ -51,6 +52,7 @@ export function ProfileGate({ children }: { children: ReactNode }) {
     const nav = profile.view.complete && profile.view.role ? NAV[profile.view.role] : [];
     return (
       <GatedProfileContext.Provider value={profile.view}>
+        <NavProgress />
         <AppShell nav={nav}>{children}</AppShell>
       </GatedProfileContext.Provider>
     );

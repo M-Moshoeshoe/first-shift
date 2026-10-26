@@ -21,6 +21,16 @@ const SPECS: Record<string, Spec> = {
   "/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 0, desktop: 0 }, body: "feed", nav: true },
   "/business": { title: { phone: 2, desktop: 2 }, intro: { phone: 0, desktop: 0 }, body: "dashboard", nav: true },
   "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 3, desktop: 3 }, body: "form", nav: true },
+  // Shown by each segment's loading.tsx during a navigation, before the screen's own loading state takes over.
+  "/work/applications": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "feed", nav: true },
+  "/work/record": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "feed", nav: true },
+  "/work/profile": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "form", nav: true },
+  "/work/tryouts": { title: { phone: 1, desktop: 1 }, intro: { phone: 0, desktop: 0 }, body: "feed", nav: true },
+  "/business/credits": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "dashboard", nav: true },
+  "/business/profile": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "form", nav: true },
+  "/business/owner": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "form", nav: true },
+  "/business/tryouts": { title: { phone: 1, desktop: 1 }, intro: { phone: 0, desktop: 0 }, body: "feed", nav: true },
+  "/bookings": { title: { phone: 1, desktop: 1 }, intro: { phone: 0, desktop: 0 }, body: "feed", nav: true },
 };
 
 const block = "skeleton";

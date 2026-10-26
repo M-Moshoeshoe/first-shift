@@ -184,6 +184,7 @@ Responses to what the person did, or to new data. App screens never use scroll r
 13. **Skeleton shimmer**: a light band crossing the placeholder, by `transform`, replacing the opacity pulse.
 14. **Toast**: enters from 8 px below and fades in; leaves by fading out.
 15. **The AI guide's ticks**: each step's tick lands (scale 0.6 to 1 and fade) when that step really completes. Never on a timer.
+16. **Navigation progress** (final round): a 2 px `primary` bar at the top of app screens while a tapped link is still loading. It appears only after 150 ms, by a CSS transition delay (no timer), and grows by `scaleX` to 80% over 2 s with `--ease-out`; the new screen removes it at once. Hidden entirely with reduced motion, where the screen's skeleton shows the wait.
 
 No smooth-scroll library.
 
