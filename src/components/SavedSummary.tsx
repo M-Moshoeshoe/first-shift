@@ -1,16 +1,21 @@
+import type { ReactNode } from "react";
+
 interface SavedSummaryProps {
   id: string;
   title?: string;
   rows: readonly { term: string; value: string }[];
+  /** A saved photo, shown above the details (PersonPhoto). */
+  photo?: ReactNode;
 }
 
 /** What's already saved, so a person who comes back sees it and only what's left to do. Used by both onboarding forms. */
-export function SavedSummary({ id, title = "Your details are saved", rows }: SavedSummaryProps) {
+export function SavedSummary({ id, title = "Your details are saved", rows, photo }: SavedSummaryProps) {
   return (
     <section aria-labelledby={id} className="flex flex-col gap-2 border border-line p-4">
       <h3 id={id} className="font-bold">
         {title}
       </h3>
+      {photo}
       <dl className="flex flex-col gap-1 text-sm">
         {rows.map((row) => (
           <div key={row.term} className="flex flex-wrap gap-x-2">

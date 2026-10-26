@@ -175,6 +175,23 @@ describe("the booking", () => {
     expect(await refusal(bookingService.report(lerato, "booking-1", "other", ""))).toMatchObject({ status: 404 });
   });
 
+  it("shows a shopfront beside an open tryout in the viewer's world, and a face only to someone linked", async () => {
+    const { bookingService, tryouts } = setUp();
+    const png = { contentType: "image/png" };
+    // Sipho's t1 is published and open: Thabo's feed can show the shopfront, never Sipho's face before booking.
+    expect(await bookingService.photo(thaboViewer, "sipho", "shopfront")).toMatchObject(png);
+    expect(await bookingService.photo(thaboViewer, "sipho", "profile")).toBeNull();
+    // A demo account never sees a real shopfront.
+    expect(await bookingService.photo({ uid: "demo-thabo", demo: true }, "sipho", "shopfront")).toBeNull();
+    // Faces as before: your own, and an applicant's for the owner they applied to.
+    expect(await bookingService.photo(sipho, "sipho", "profile")).toMatchObject(png);
+    expect(await bookingService.photo(sipho, "thabo", "profile")).toMatchObject(png);
+    // Once the tryout is withdrawn, nothing of Sipho's is open to Thabo.
+    const t1 = tryouts.get("t1");
+    if (t1) tryouts.set("t1", { ...t1, status: "withdrawn" });
+    expect(await bookingService.photo(thaboViewer, "sipho", "shopfront")).toBeNull();
+  });
+
   it("serves the status page by token, until it expires, and nothing for a wrong token", async () => {
     const { bookingService, secrets } = await booked();
     const token = secrets.get("booking-1")?.shareToken ?? "";

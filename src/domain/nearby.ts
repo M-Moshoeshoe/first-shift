@@ -52,6 +52,8 @@ export interface FeedItem {
   injuryCover: string;
   /** The business's reputation for paying: "Paid on time: N of N", or "New on First Shift". */
   payRecord: string;
+  /** The business owner's uid, for their shopfront photo through GET /api/photos (mayViewPhoto). Never their pin. */
+  photoSubject: string;
 }
 
 export function feedItem(listing: Listing, from: { area: string; centre: Point | null }): FeedItem {
@@ -73,6 +75,7 @@ export function feedItem(listing: Listing, from: { area: string; centre: Point |
     injuryCover: injuryCoverLine(listing.business.coida),
     // The demo's businesses with no account behind them show what they are, not a pay record.
     payRecord: isExampleOwner(tryout.ownerId) ? FEED_COPY.example : payRecordLine(listing.business),
+    photoSubject: tryout.ownerId,
   };
 }
 
@@ -86,6 +89,13 @@ export const withinReach = (from: { area: string; centre: Point }, tryout: Pick<
   distanceKm(from.centre, tryout.location) <= RULES.nearbyRadiusKm || returnFare(from.area, tryout.area) !== null;
 
 /**
+ * A tryout listed for this viewer: published, still open for booking, and in
+ * their world (demo or real). The feed shows the ones within reach; while a
+ * business has one, its shopfront may be shown (bookings.ts, mayViewPhoto).
+ */
+export const listedFor = (viewer: Pick<Viewer, "demo">, tryout: Pick<TryoutRecord, "status" | "startAt" | "demo">, now: Date): boolean => sameWorld(viewer, tryout) && bookingOpen(tryout, now);
+
+/**
  * The feed: published tryouts still open for booking, within reach, in
  * the viewer's world only (demo or real), soonest first. Listings come from
  * the geohash range queries and the route areas, which may overlap and
@@ -94,7 +104,7 @@ export const withinReach = (from: { area: string; centre: Point }, tryout: Pick<
 export function nearbyFeed(viewer: Viewer, from: { area: string; centre: Point }, listings: readonly Listing[], now: Date): FeedItem[] {
   const unique = [...new Map(listings.map((listing) => [listing.id, listing])).values()];
   return unique
-    .filter(({ tryout }) => sameWorld(viewer, tryout) && bookingOpen(tryout, now) && withinReach(from, tryout))
+    .filter(({ tryout }) => listedFor(viewer, tryout, now) && withinReach(from, tryout))
     .sort((a, b) => a.tryout.startAt.getTime() - b.tryout.startAt.getTime())
     .map((listing) => feedItem(listing, from));
 }

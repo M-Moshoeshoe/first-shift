@@ -21,6 +21,8 @@ export const FeedItemSchema = z.object({
   km: z.nullable(z.number()),
   injuryCover: z.string(),
   payRecord: z.string(),
+  // Optional, so a page from a new deploy still reads a reply from the previous one for the minute both are live.
+  photoSubject: z.optional(z.string()),
 });
 export type FeedItemResponse = z.infer<typeof FeedItemSchema>;
 

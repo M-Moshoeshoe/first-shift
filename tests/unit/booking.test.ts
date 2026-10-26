@@ -4,8 +4,10 @@ import type { ApplicationRecord } from "@/domain/applications";
 import { cancelOutcome, decideCancel, decideReport, mayViewPhoto, newBooking, showsCheckInCode, statusExpiresAt, statusView, type BookingRecord } from "@/domain/bookings";
 import { BOOKING_MESSAGES } from "@/domain/tryoutMessages";
 import { ANSWER_PROBLEM_MESSAGES } from "@/domain/bookingMessages";
+import { listedFor } from "@/domain/nearby";
 import { decideAnswer, decideOffer, offerLapsesAt, openOffer, overlappingApplications, type AcceptInputs } from "@/domain/offers";
 import { fromSast } from "@/domain/time";
+import type { TryoutRecord } from "@/domain/tryoutDecisions";
 import { thabo, tryoutAt } from "./support/findingFakes";
 
 // Monday 26 October 2026, 08:00 SAST; the tryout is Tuesday 09:00 to 15:00.
@@ -140,13 +142,31 @@ describe("the status page", () => {
 });
 
 describe("photos", () => {
+  const none = { appliedToViewer: false, bookedTogether: false, openTryout: false };
+
   it("are seen by their owner, an applicant's by the owner they applied to, and each other's once booked", () => {
-    const none = { appliedToViewer: false, bookedTogether: false };
     expect(mayViewPhoto("thabo", "thabo", "profile", none)).toBe(true);
     expect(mayViewPhoto("sipho", "thabo", "profile", { ...none, appliedToViewer: true })).toBe(true);
     expect(mayViewPhoto("thabo", "sipho", "shopfront", { ...none, appliedToViewer: true })).toBe(false);
     expect(mayViewPhoto("thabo", "sipho", "shopfront", { ...none, bookedTogether: true })).toBe(true);
     expect(mayViewPhoto("lerato", "thabo", "profile", none)).toBe(false);
+  });
+
+  it("show a business's shopfront while it has a tryout listed for the viewer, and never its face on that ground", () => {
+    const open = tryout();
+    const listed = (viewer: { demo: boolean }, tryouts: readonly TryoutRecord[], now = NOW) => ({ ...none, openTryout: tryouts.some((t) => listedFor(viewer, t, now)) });
+    // Same world, published and open for booking: the feed can show the shopfront.
+    expect(mayViewPhoto("thabo", "sipho", "shopfront", listed(worker, [open]))).toBe(true);
+    // The other world: a demo account never sees a real shopfront, nor a real person a demo one.
+    expect(mayViewPhoto("thabo", "sipho", "shopfront", listed({ demo: true }, [open]))).toBe(false);
+    expect(mayViewPhoto("thabo", "sipho", "shopfront", listed(worker, [{ ...open, demo: true }]))).toBe(false);
+    // No open tryout: none at all, one withdrawn, one booked, or one past its booking cut-off.
+    expect(mayViewPhoto("thabo", "sipho", "shopfront", listed(worker, []))).toBe(false);
+    expect(mayViewPhoto("thabo", "sipho", "shopfront", listed(worker, [{ ...open, status: "withdrawn" }, { ...open, status: "booked" }]))).toBe(false);
+    expect(mayViewPhoto("thabo", "sipho", "shopfront", listed(worker, [open], fromSast(2026, 10, 27, 8, 1)))).toBe(false);
+    // Faces are unchanged: an open tryout never shows the owner's face.
+    expect(mayViewPhoto("thabo", "sipho", "profile", listed(worker, [open]))).toBe(false);
+    expect(mayViewPhoto("thabo", "sipho", "profile", { ...listed(worker, [open]), bookedTogether: true })).toBe(true);
   });
 });
 
@@ -195,8 +215,8 @@ describe("who the young person meets", () => {
   });
 
   it("shows the owner's face to the young person only once booked, never while applying", () => {
-    expect(mayViewPhoto("thabo", "sipho", "profile", { appliedToViewer: false, bookedTogether: false })).toBe(false);
-    expect(mayViewPhoto("thabo", "sipho", "profile", { appliedToViewer: false, bookedTogether: true })).toBe(true);
+    expect(mayViewPhoto("thabo", "sipho", "profile", { appliedToViewer: false, bookedTogether: false, openTryout: true })).toBe(false);
+    expect(mayViewPhoto("thabo", "sipho", "profile", { appliedToViewer: false, bookedTogether: true, openTryout: false })).toBe(true);
   });
 });
 

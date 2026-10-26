@@ -38,7 +38,14 @@ const EntrySchema = z.object({
 export const RecordViewSchema = z.object({
   firstName: z.string(),
   shareToken: z.string(),
-  entries: z.array(z.extend(EntrySchema, { bookingId: z.string(), reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema, example: z.optional(z.boolean()), status: z.enum(REFERENCE_STATUSES) })) })),
+  entries: z.array(
+    z.extend(EntrySchema, {
+      bookingId: z.string(),
+      // The owner's uid, for the shopfront. Optional, so a page from a new deploy still reads a reply from the previous one for the minute both are live.
+      photoSubject: z.optional(z.string()),
+      reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema, example: z.optional(z.boolean()), status: z.enum(REFERENCE_STATUSES) })),
+    }),
+  ),
   jobs: z.array(z.object({ businessName: z.string(), hired: z.boolean() })),
 });
 export type RecordViewResponse = z.infer<typeof RecordViewSchema>;

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>Lerato's Spaza, an illustration</title>
+  <rect width="384" height="384" fill="#EFF5F1"/>
+  <!-- The yard -->
+  <rect y="332" width="384" height="52" fill="#CADBD1"/>
+  <!-- A small white-painted room with a green band, under a corrugated iron roof -->
+  <rect x="36" y="114" width="312" height="218" fill="#FFFFFF" stroke="#0F2D24" stroke-width="4"/>
+  <rect x="38" y="292" width="308" height="38" fill="#0A6B47"/>
+  <path d="M18 122 L366 94 L366 112 L18 140 Z" fill="#5F7A6D"/>
+  <g stroke="#43584F" stroke-width="3">
+    <path d="M34 121 L34 139 M54 119 L54 137 M74 118 L74 136 M94 116 L94 134 M114 115 L114 133 M134 113 L134 131 M154 111 L154 129 M174 110 L174 128 M194 108 L194 126 M214 107 L214 125 M234 105 L234 123 M254 103 L254 121 M274 102 L274 120 M294 100 L294 118 M314 99 L314 117 M334 97 L334 115 M354 95 L354 113"/>
+  </g>
+  <!-- The painted sign -->
+  <text x="192" y="174" text-anchor="middle" font-family="'Arial Black', 'Segoe UI', Arial, sans-serif" font-weight="900" font-size="32" fill="#0F2D24" textLength="270" lengthAdjust="spacingAndGlyphs">Lerato's Spaza</text>
+  <rect x="62" y="182" width="260" height="5" fill="#0A6B47"/>
+  <text x="192" y="204" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="13" fill="#43584F">Bread, airtime, cool drinks</text>
+  <!-- The serving hatch: shelves of bread and cool drinks behind burglar bars -->
+  <rect x="58" y="214" width="168" height="74" fill="#0F2D24"/>
+  <g fill="#CADBD1">
+    <path d="M66 236 Q66 226 76 226 L96 226 Q106 226 106 236 Z"/>
+    <path d="M110 236 Q110 226 120 226 L140 226 Q150 226 150 236 Z"/>
+    <path d="M154 236 Q154 226 164 226 L184 226 Q194 226 194 236 Z"/>
+  </g>
+  <rect x="60" y="236" width="164" height="4" fill="#43584F"/>
+  <g fill="#0A6B47">
+    <rect x="68" y="256" width="10" height="24"/>
+    <rect x="104" y="256" width="10" height="24"/>
+    <rect x="140" y="256" width="10" height="24"/>
+    <rect x="176" y="256" width="10" height="24"/>
+  </g>
+  <g fill="#FFFFFF">
+    <rect x="86" y="260" width="10" height="20"/>
+    <rect x="122" y="260" width="10" height="20"/>
+    <rect x="158" y="260" width="10" height="20"/>
+    <rect x="194" y="260" width="10" height="20"/>
+  </g>
+  <g stroke="#5F7A6D" stroke-width="4">
+    <path d="M78 214 L78 288 M100 214 L100 288 M122 214 L122 288 M144 214 L144 288 M166 214 L166 288 M188 214 L188 288 M210 214 L210 288"/>
+    <path d="M58 250 L226 250"/>
+  </g>
+  <rect x="58" y="214" width="168" height="74" fill="none" stroke="#0F2D24" stroke-width="5"/>
+  <rect x="50" y="286" width="184" height="10" fill="#43584F"/>
+  <!-- The door -->
+  <rect x="254" y="212" width="72" height="120" fill="#0A6B47" stroke="#0F2D24" stroke-width="4"/>
+  <rect x="264" y="224" width="52" height="40" fill="#CADBD1" stroke="#0F2D24" stroke-width="3"/>
+  <rect x="308" y="276" width="8" height="16" fill="#FFFFFF"/>
+</svg>

@@ -77,10 +77,12 @@ describe("nearbyFeed", () => {
     expect(unknownFare).toMatchObject({ returnFareCents: null, injuryCover: "Injury cover: not confirmed", payRecord: "New on First Shift" });
   });
 
-  it("never sends the business's pin, only the cell", () => {
-    const json = JSON.stringify(nearbyFeed(real, from, [listing("t1")], NOW));
+  it("never sends the business's pin, only the cell, and names the owner only for their shopfront photo", () => {
+    const items = nearbyFeed(real, from, [listing("t1")], NOW);
+    const json = JSON.stringify(items);
     expect(json).not.toContain("28.1263");
     expect(json).not.toContain("geohash");
+    expect(items[0]?.photoSubject).toBe("sipho");
   });
 });
 

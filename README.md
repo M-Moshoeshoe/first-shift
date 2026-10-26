@@ -187,6 +187,7 @@ The switch works only on `localhost` or `127.0.0.1`, and `/api/health` shows `"e
 | `npm run eval:ai` | The 20-sentence AI evaluation against the real API (costs money; never in CI) |
 | `npm run demo:accounts` | Sets up the two demo accounts from `.env.demo.local` and switches off Firebase's own password sign-in |
 | `npm run demo:reset` | Puts the demo world back to its known state, with its illustrated faces and shopfronts; touches only demo records |
+| `npm run demo:art` | Draws each demo illustration (`scripts/demoArt/*.svg`) as a 384 by 384 PNG with Edge, for `demo:reset` to upload |
 | `npm run e2e:demo` | Attacks a demo account in the emulators the way anyone with its password could, and checks the demo world |
 | `npm run e2e:browser` | The whole walk in Microsoft Edge at 360 and 1280 px, axe-core on every screen, plus Slow 4G timings |
 | `npm run e2e:profile`, `e2e:photo` | Profiles and photo uploads against the emulators |
