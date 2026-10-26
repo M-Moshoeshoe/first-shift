@@ -3,6 +3,8 @@ import { OnView } from "@/components/OnView";
 import { ShiftSlip } from "@/components/ShiftSlip";
 import { buttonClass } from "@/components/ui/Button";
 import { HERO } from "./homeContent";
+import { ScenePhoto } from "./ScenePhoto";
+import { SCENES } from "./scenes";
 
 const HERO_SLIP = { day: "Saturday", hours: "9:00 to 15:00", business: "Sipho's Phone Repairs", area: "Randburg", distance: "from Ivory Park", payCents: 21000, returnFareCents: 5600 } as const;
 
@@ -35,12 +37,14 @@ export function HomeHero() {
             <span className="link">{HERO.demo}</span>
           </Link>
         </div>
-        <figure className="flex flex-col gap-2 pt-6">
-          <div className="load-sequence">
+        {/* From 1024 px the slip sits over a photo of real street trade; on a phone the photo is left out, so the first screen is text and the slip. */}
+        <figure className="flex flex-col gap-2 pt-6 lg:relative lg:pt-0 lg:pb-32">
+          <ScenePhoto scene={SCENES.stalls} sizes="(min-width: 1024px) 36rem, 1px" className="hidden aspect-3/2 lg:block" />
+          <div className="load-sequence lg:absolute lg:bottom-8 lg:-left-8 lg:w-96">
             {/* On a phone the slip sits below the fold, so its Booked Stamp waits until it is seen. */}
             <OnView before={<ShiftSlip {...HERO_SLIP} />} later={<ShiftSlip {...HERO_SLIP} stamp="Booked" />} />
           </div>
-          <figcaption className="text-sm text-muted">Example tryout</figcaption>
+          <figcaption className="text-sm text-muted lg:absolute lg:bottom-0 lg:-left-8">Example tryout</figcaption>
         </figure>
       </div>
     </section>

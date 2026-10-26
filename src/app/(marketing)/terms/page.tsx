@@ -4,6 +4,7 @@ import { SUPPORT_EMAIL } from "@/config/contact";
 import { RULES } from "@/config/rules";
 import { TERMS_VERSION } from "@/config/terms";
 import { formatRand } from "@/domain/money";
+import { SCENES } from "../_components/scenes";
 import { PlainPage, type PlainSection } from "../_components/PlainPage";
 
 export const metadata: Metadata = { title: "Terms of use for First Shift", description: "What First Shift is and is not, what it costs, how everyone is expected to behave, and when an account is paused." };
@@ -79,5 +80,5 @@ const SECTIONS: readonly PlainSection[] = [
 
 /** The terms of use: plain text, public, agreed to at sign-in. */
 export default function TermsPage() {
-  return <PlainPage title="Terms of use" intro="What First Shift is and is not, what it costs, and what everyone agrees to." sections={SECTIONS} />;
+  return <PlainPage photo={SCENES.stalls} title="Terms of use" intro="What First Shift is and is not, what it costs, and what everyone agrees to." sections={SECTIONS} />;
 }

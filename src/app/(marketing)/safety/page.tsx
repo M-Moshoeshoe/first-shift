@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Banknote, CalendarX, ClipboardCheck, Clock, Flag, HeartPulse, IdCard, MapPin, Phone, Scale, ShieldAlert, Siren, X } from "lucide-react";
 import { RULES } from "@/config/rules";
 import { formatRand } from "@/domain/money";
+import { SCENES } from "../_components/scenes";
 import { PlainPage, type PlainSection } from "../_components/PlainPage";
 
 export const metadata: Metadata = { title: "Safety and fair play on First Shift", description: "How First Shift keeps young people and businesses safe, and what happens when something goes wrong." };
@@ -114,5 +115,5 @@ const SECTIONS: readonly PlainSection[] = [
 
 /** Safety and fair play: plain text, public, linked from every public page's footer. */
 export default function SafetyPage() {
-  return <PlainPage title="Safety and fair play" intro="How First Shift keeps tryouts safe and fair for both sides, and what happens when something goes wrong." sections={SECTIONS} />;
+  return <PlainPage photo={SCENES.corner} title="Safety and fair play" intro="How First Shift keeps tryouts safe and fair for both sides, and what happens when something goes wrong." sections={SECTIONS} />;
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Flag, Mail, ShieldCheck, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { SUPPORT_EMAIL } from "@/config/contact";
+import { SCENES } from "../_components/scenes";
 import { PlainPage } from "../_components/PlainPage";
 
 export const metadata: Metadata = { title: "Contact First Shift", description: "How to reach the First Shift team." };
@@ -30,7 +31,7 @@ const CARDS: readonly { icon: LucideIcon; heading: string; body: string; action?
 /** Contact: three cards, the support email, where a report about a tryout belongs, and what to do in an emergency. */
 export default function ContactPage() {
   return (
-    <PlainPage title="Contact us" intro="Email the First Shift team, or report a problem on the booking it is about." sections={[]}>
+    <PlainPage photo={SCENES.stalls} title="Contact us" intro="Email the First Shift team, or report a problem on the booking it is about." sections={[]}>
       <ul className="flex flex-col gap-4">
         {CARDS.map(({ icon: Icon, heading, body, action }) => (
           <li key={heading} className="flex flex-col gap-3 border border-line p-4">

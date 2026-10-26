@@ -87,7 +87,8 @@ Keep lines under 70 characters. Left-align everything. `text-wrap: balance` on t
 ## Shape
 
 - Sharp edges everywhere: border radius 0. The radius tokens are removed in `globals.css`; never use any `rounded-*` class.
-- Photos are square. No circles anywhere.
+- Photos of people and shopfronts are square. No circles anywhere.
+- Scene photos (home page and public page bands only, docs/CREDITS.md) keep their landscape crop, with sharp edges and a 1 px `line` border. Never on app screens, never presented as a First Shift user.
 - **Borders are 1 px.** Cards and dividers use `line`; inputs and secondary buttons use `edge` or `ink` (control edges need 3:1). **2 px `ink` only for the shift slip and focus rings.** No shadows.
 
 ## Spacing

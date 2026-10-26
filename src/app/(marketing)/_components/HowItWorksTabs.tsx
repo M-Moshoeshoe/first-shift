@@ -4,6 +4,8 @@ import { useState, type KeyboardEvent } from "react";
 import { OnView } from "@/components/OnView";
 import { ShiftSlip } from "@/components/ShiftSlip";
 import { HOW } from "./homeContent";
+import { ScenePhoto } from "./ScenePhoto";
+import { SCENES } from "./scenes";
 
 const SIDES = [HOW.young, HOW.business] as const;
 const PAID_SLIP = { day: "Saturday", hours: "9:00 to 15:00", business: "Sipho's Phone Repairs", area: "Randburg", payCents: 21000 } as const;
@@ -43,6 +45,7 @@ export function HowItWorksTabs() {
         {SIDES.map((side, index) => (
           <section key={side.id} id={side.id} role="tabpanel" aria-labelledby={`tab-${side.id}`} className={`flex scroll-mt-20 flex-col gap-4 ${selected === index ? "" : "hidden lg:flex"}`}>
             <h3 className="hidden text-xl lg:block">{side.title}</h3>
+            {side.id === HOW.business.id ? <ScenePhoto scene={SCENES.tailor} sizes="(min-width: 1024px) 34rem, 100vw" className="aspect-3/2" /> : null}
             <ol className="flex flex-col gap-3">
               {side.steps.map((step, number) => (
                 <li key={step} className="flex gap-4 border border-line p-4">

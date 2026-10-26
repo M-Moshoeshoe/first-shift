@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { PageShell } from "@/components/ui/PageShell";
-import { PlainHeader, type BandPhoto } from "./PlainHeader";
+import { PlainHeader } from "./PlainHeader";
+import type { Scene } from "./ScenePhoto";
 import { PlainSectionCard } from "./PlainSectionCard";
 
 /** A list of key facts with its own icon, such as X for what we do not do yet. A plain list gets ticks. */
@@ -31,7 +32,7 @@ const anchor = (heading: string): string =>
  * line, then each section as a card. From 1024 px a contents list sticks
  * beside the cards. Server-rendered, so the page adds no JavaScript.
  */
-export function PlainPage({ title, intro, photo, sections, children }: { title: string; intro: string; photo?: BandPhoto; sections: readonly PlainSection[]; children?: ReactNode }) {
+export function PlainPage({ title, intro, photo, sections, children }: { title: string; intro: string; photo?: Scene; sections: readonly PlainSection[]; children?: ReactNode }) {
   const contents = sections.length > 2;
   return (
     <PageShell>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Ban, Cpu, Database, Eye, Lock, ShieldCheck, Users, X } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/config/contact";
+import { SCENES } from "../_components/scenes";
 import { PlainPage, type PlainSection } from "../_components/PlainPage";
 
 export const metadata: Metadata = { title: "Privacy notice for First Shift", description: "What First Shift collects, why, who sees it, how long we keep it, and how to ask us to delete it." };
@@ -73,5 +74,5 @@ const SECTIONS: readonly PlainSection[] = [
 
 /** The privacy notice (POPIA): plain text, public, linked from every public page's footer and from sign-in. */
 export default function PrivacyPage() {
-  return <PlainPage title="Privacy notice" intro="What we collect, why, who sees it, and how to ask us to change or delete it." sections={SECTIONS} />;
+  return <PlainPage photo={SCENES.stalls} title="Privacy notice" intro="What we collect, why, who sees it, and how to ask us to change or delete it." sections={SECTIONS} />;
 }

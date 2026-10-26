@@ -2,6 +2,8 @@ import { Flag, IdCard, Share2, Sun, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { Band } from "@/components/ui/Band";
 import { SAFETY } from "./homeContent";
+import { ScenePhoto } from "./ScenePhoto";
+import { SCENES } from "./scenes";
 import { SectionHeading } from "./SectionHeading";
 
 // Server-rendered icons: plain SVG in the HTML, no JavaScript (docs/DESIGN.md, Icons).
@@ -13,6 +15,7 @@ export function SafetySection() {
     <Band tone="mist" wide>
       <section aria-labelledby="safety" className="reveal flex flex-col gap-8">
         <SectionHeading id="safety" number="04" title={SAFETY.title} />
+        <ScenePhoto scene={SCENES.corner} crop="band" sizes="(min-width: 1024px) 72rem, 100vw" className="aspect-8/3" />
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SAFETY.cards.map((card) => {
             const Icon = SAFETY_ICONS[card.icon];
