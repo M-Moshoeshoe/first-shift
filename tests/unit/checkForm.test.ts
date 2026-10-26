@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkForm, dayPay, HOUR_CHOICES, initialCheck, MINIMUM_RATE_TEXT, type CheckDraft } from "@/app/(account)/business/post/_components/checkForm";
+import { checkForm, dayPay, HOUR_CHOICES, initialCheck, MINIMUM_RATE_TEXT, suggestedOptions, type CheckDraft } from "@/app/(account)/business/post/_components/checkForm";
 import { TERMS_MESSAGES, TRYOUT_FIELD_MESSAGES } from "@/domain/tryoutMessages";
 
 // Monday 26 October 2026, 08:00 in Johannesburg.
@@ -7,6 +7,15 @@ const NOW = new Date("2026-10-26T06:00:00Z");
 const description = "Help sorting stock and serving customers on Saturday";
 const draft = { options: [{ title: "Shop helper", tasks: ["Pack bread onto the shelves"] }, { title: "Till helper", tasks: ["Serve customers"] }], hours: 8, date: "2026-10-27" };
 const form = (overrides: Partial<CheckDraft> = {}): CheckDraft => ({ ...initialCheck(draft), supervision: true, ...overrides });
+
+describe("the drafts the owner sees", () => {
+  it("keeps the recommended version and one alternative, each with at most four tasks", () => {
+    const tasks = ["a", "b", "c", "d", "e", "f"];
+    const options = [{ title: "One", tasks }, { title: "Two", tasks }, { title: "Three", tasks }];
+    expect(suggestedOptions(options)).toEqual([{ title: "One", tasks: ["a", "b", "c", "d"] }, { title: "Two", tasks: ["a", "b", "c", "d"] }]);
+    expect(initialCheck({ ...draft, options }).tasks).toEqual(["a", "b", "c", "d"]);
+  });
+});
 
 describe("initialCheck", () => {
   it("starts from the first version, on the day the owner named, at 09:00, at the suggested hours and the minimum wage, unconfirmed", () => {

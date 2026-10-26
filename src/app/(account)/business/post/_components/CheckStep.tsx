@@ -12,11 +12,12 @@ import { sastDateKey } from "@/domain/time";
 import { firstInvalid, shakeAndFocus } from "@/lib/forms";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import type { PostTryoutInput } from "@/schemas/tryout";
-import { CHECK_FIELDS, checkForm, dayPay, MAX_TASKS, type CheckDraft, type CheckErrors, type CheckField } from "./checkForm";
+import { CHECK_FIELDS, checkForm, dayPay, SUGGESTED_TASKS, type CheckDraft, type CheckErrors, type CheckField } from "./checkForm";
 import { HoursField } from "./HoursField";
 import { TaskListField } from "./TaskListField";
 import { DraftOptions, type DraftOption } from "./DraftOptions";
 import { AiMark } from "@/components/AiMark";
+import { Collapsible } from "@/components/ui/Collapsible";
 import { AI_COPY } from "@/domain/tryoutMessages";
 
 const fieldId = (field: CheckField) => `post-${field}`;
@@ -59,7 +60,11 @@ export function CheckStep({ initial, options, description, busy, formError, onPo
     if (checked.input) return onPost(checked.input, form);
     setErrors(checked.errors);
     const first = firstInvalid(checked.errors, CHECK_FIELDS);
-    if (first) requestAnimationFrame(() => shakeAndFocus(fieldId(first)));
+    if (!first) return;
+    // A folded section can't show its field: open it first.
+    const details = document.getElementById(fieldId(first))?.closest("details");
+    if (details) details.open = true;
+    requestAnimationFrame(() => shakeAndFocus(fieldId(first)));
   };
 
   return (
@@ -68,10 +73,10 @@ export function CheckStep({ initial, options, description, busy, formError, onPo
         Check your tryout
       </h2>
       {/* What the AI did and what our rules decided, so nobody mistakes the draft for the decision. */}
-      <section aria-label={AI_COPY.assist} className="flex flex-col gap-2 border border-line bg-mist p-4">
+      <section aria-label={AI_COPY.assist} className="flex flex-col gap-1 border border-line bg-mist p-3">
         <AiMark>{AI_COPY.checked}</AiMark>
         <p className="text-sm">{AI_COPY.did}</p>
-        <p className="text-sm">{AI_COPY.enforced}</p>
+        <p className="text-sm text-muted">{AI_COPY.enforced}</p>
       </section>
       {options.length > 1 ? (
         <DraftOptions
@@ -81,29 +86,35 @@ export function CheckStep({ initial, options, description, busy, formError, onPo
             const option = options[index];
             if (!option) return;
             setChosen(index);
-            setForm((current) => ({ ...current, title: option.title, tasks: [...option.tasks].slice(0, MAX_TASKS) }));
+            setForm((current) => ({ ...current, title: option.title, tasks: [...option.tasks].slice(0, SUGGESTED_TASKS) }));
             setErrors({});
           }}
         />
       ) : null}
-      <TextField id={fieldId("title")} label="Title" maxLength={60} value={form.title} error={errors.title} onChange={(event) => update("title", event.target.value)} />
-      <TaskListField id={fieldId("tasks")} tasks={form.tasks} error={errors.tasks} onChange={(tasks) => update("tasks", tasks)} />
-      <TextField id={fieldId("date")} label="Date" type="date" min={sastDateKey(new Date())} value={form.date} error={errors.date} onChange={(event) => update("date", event.target.value)} />
-      <TextField id={fieldId("startTime")} label="Start time" type="time" value={form.startTime} error={errors.startTime} onChange={(event) => update("startTime", event.target.value)} />
-      <HoursField id={fieldId("hours")} value={form.hours} error={errors.hours} onChange={(hours) => update("hours", hours)} />
-      <TextField
-        id={fieldId("rate")}
-        label="Pay per hour"
-        hint={`At least ${minimumRate}, the national minimum wage. You can pay more.`}
-        inputMode="decimal"
-        value={form.rate}
-        error={errors.rate}
-        onChange={(event) => update("rate", event.target.value)}
-      />
-      <p role="status" className="text-base font-semibold tabular-nums">
-        {pay === null ? "" : `Pay for the day: ${formatRand(pay)}`}
-      </p>
-      <CheckboxField id={fieldId("supervision")} label="I'll be on site to supervise." checked={form.supervision} error={errors.supervision} onChange={(checked) => update("supervision", checked)} />
+      <Collapsible title="Tasks" count={form.tasks.length} boxed>
+        <TextField id={fieldId("title")} label="Title" maxLength={60} value={form.title} error={errors.title} onChange={(event) => update("title", event.target.value)} />
+        <TaskListField id={fieldId("tasks")} tasks={form.tasks} error={errors.tasks} onChange={(tasks) => update("tasks", tasks)} />
+      </Collapsible>
+      <Collapsible title="Time and pay" boxed>
+        <TextField id={fieldId("date")} label="Date" type="date" min={sastDateKey(new Date())} value={form.date} error={errors.date} onChange={(event) => update("date", event.target.value)} />
+        <TextField id={fieldId("startTime")} label="Start time" type="time" value={form.startTime} error={errors.startTime} onChange={(event) => update("startTime", event.target.value)} />
+        <HoursField id={fieldId("hours")} value={form.hours} error={errors.hours} onChange={(hours) => update("hours", hours)} />
+        <TextField
+          id={fieldId("rate")}
+          label="Pay per hour"
+          hint={`At least ${minimumRate}, the national minimum wage. You can pay more.`}
+          inputMode="decimal"
+          value={form.rate}
+          error={errors.rate}
+          onChange={(event) => update("rate", event.target.value)}
+        />
+        <p role="status" className="text-base font-semibold tabular-nums">
+          {pay === null ? "" : `Pay for the day: ${formatRand(pay)}`}
+        </p>
+      </Collapsible>
+      <Collapsible title="Supervision" boxed>
+        <CheckboxField id={fieldId("supervision")} label="I'll be on site to supervise." checked={form.supervision} error={errors.supervision} onChange={(checked) => update("supervision", checked)} />
+      </Collapsible>
       <div className="flex flex-col gap-3">
         <Button type="submit" busy={busy} busyLabel="Checking and posting" aria-describedby={FORM_ERROR_ID}>
           Post tryout

@@ -22,6 +22,15 @@ export type CheckErrors = Partial<Record<CheckField, string>>;
 /** The hours a tryout can be, as chips: 4, 5, 6, 7, 8. */
 export const HOUR_CHOICES = Array.from({ length: RULES.maxTryoutHours - RULES.minPaidHours + 1 }, (_, index) => RULES.minPaidHours + index);
 export const MAX_TASKS = 6;
+/** Tasks a draft suggests: the owner adds more with Add a task, up to MAX_TASKS. */
+export const SUGGESTED_TASKS = 4;
+/** The recommended draft and at most one alternative, behind See another version. */
+export const SHOWN_OPTIONS = 2;
+
+/** The drafts as the owner sees them: the first (recommended) and one alternative at most, each with at most four tasks. */
+export function suggestedOptions<T extends { title: string; tasks: readonly string[] }>(options: readonly T[]): T[] {
+  return options.slice(0, SHOWN_OPTIONS).map((option) => ({ ...option, tasks: option.tasks.slice(0, SUGGESTED_TASKS) }));
+}
 
 /** The minimum wage as the rate field starts: "30.23". */
 export const MINIMUM_RATE_TEXT = (RULES.minimumWageCentsPerHour / 100).toFixed(2);
@@ -47,7 +56,7 @@ const PROBLEM_FIELD: Record<TermsProblem, CheckField> = {
  */
 export function initialCheck(draft: { options: readonly { title: string; tasks: readonly string[] }[]; hours: number; date: string | null }): CheckDraft {
   const [first] = draft.options;
-  return { title: first?.title ?? "", tasks: [...(first?.tasks ?? [])].slice(0, MAX_TASKS), date: draft.date ?? "", startTime: "09:00", hours: draft.hours, rate: MINIMUM_RATE_TEXT, supervision: false };
+  return { title: first?.title ?? "", tasks: [...(first?.tasks ?? [])].slice(0, SUGGESTED_TASKS), date: draft.date ?? "", startTime: "09:00", hours: draft.hours, rate: MINIMUM_RATE_TEXT, supervision: false };
 }
 
 /** The day's pay at the typed rate, for the live line; null while the rate isn't a number yet. */

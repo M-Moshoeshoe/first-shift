@@ -7,7 +7,7 @@ import { ApiError, apiPost } from "@/lib/api";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { DraftResultSchema, PostResultSchema, type PostTryoutInput } from "@/schemas/tryout";
 import { CheckStep } from "./CheckStep";
-import { initialCheck, type CheckDraft } from "./checkForm";
+import { initialCheck, suggestedOptions, type CheckDraft } from "./checkForm";
 import { DescribeStep } from "./DescribeStep";
 import type { DraftOption } from "./DraftOptions";
 import { PostOutcome, type Outcome } from "./PostOutcome";
@@ -54,7 +54,7 @@ export function PostTryout() {
       const result = await apiPost("/api/tryouts/draft", { description: text }, DraftResultSchema);
       if (result.outcome === "blocked") finish(blockedFrom(result));
       else {
-        setOptions(result.draft.options);
+        setOptions(suggestedOptions(result.draft.options));
         setCheck(initialCheck(result.draft));
         setStep("check");
       }
