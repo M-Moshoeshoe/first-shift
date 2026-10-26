@@ -192,9 +192,10 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | `npm run rules` | Security rules tests in the emulators |
 | `npm run emulators` | Firebase emulators (pinned `firebase-tools`) with the UI at http://localhost:4000 |
 | `npm run demo:accounts` | Sets up the two demo accounts for judges from `.env.demo.local` or flags, and switches off Firebase's own password sign-in (`docs/DEPLOY.md`, 5b) |
-| `npm run demo:reset` | Puts the demo accounts' data back to a known state; touches only demo records |
+| `npm run demo:reset` | Puts the demo accounts' data back to a known state; touches only demo records. Uploads the illustrated demo faces and shopfronts from `scripts/demoArt/png` |
+| `npm run demo:art` | Draws each demo illustration (`scripts/demoArt/*.svg`) as a 384 by 384 PNG with Edge; `-- thabo` draws only the ones named. Commit the PNGs |
 | `npx firebase deploy --only firestore:indexes` | Deploys the Firestore indexes in `firestore.indexes.json` (the nearby feed needs one) |
-| `npm run e2e:demo` | Attacks a demo account in the emulators the way anyone with its password could, and checks each attack is refused |
+| `npm run e2e:demo` | Attacks a demo account in the emulators the way anyone with its password could, and checks each attack is refused; checks every demo face and shopfront is served as its illustration where each screen shows it |
 | `npm run credits:backfill` | Shows which complete businesses lack their free credits; `-- --apply` grants them (says first whether it targets the emulators or the live project) |
 | `npm run credits:grant` | Lists businesses waiting for credits; `-- <businessUid> <amount> --reason "<why>" --admin <name>` adds them (1 to 50), audit-logged, and closes the request |
 | `npm run review:case` | Lists open review cases by priority; `-- <caseId>` shows the full context; `-- <caseId> resolve --outcome "..." --reason "..." --admin <name>` with any of `--pause`, `--unpause`, `--strike`, `--overturn`, `--reference`, `--grant` resolves it, audit-logged. Both sides see the outcome on the booking, so write it for them; the reason stays with the team |

@@ -42,7 +42,8 @@ describe("the work record", () => {
     const unpaid = booking({ payment: { state: "awaiting_confirmation" } });
     const entries = recordEntries([{ id: "b1", booking: booking() }, { id: "b2", booking: later }, { id: "b3", booking: unpaid }], new Map([["b1", reference({ status: "approved" })]]));
     expect(entries.map((entry) => entry.bookingId)).toEqual(["b2", "b1"]);
-    expect(entries[1]).toMatchObject({ businessName: "Sipho's Phone Repairs", day: "Tue 27 Oct", hours: 6, reference: { status: "approved" } });
+    // The owner's uid, for the shopfront in the young person's own view.
+    expect(entries[1]).toMatchObject({ photoSubject: "sipho", businessName: "Sipho's Phone Repairs", day: "Tue 27 Oct", hours: 6, reference: { status: "approved" } });
     expect(entries[0]?.reference).toBeNull();
   });
 
@@ -51,14 +52,14 @@ describe("the work record", () => {
     expect(recordHours(booking({ ended: { at: START, reason: "finished_early", minutesWorked: 140 } }))).toBe(6);
   });
 
-  it("shares approved references only, and never an id, a surname or a number", () => {
+  it("shares approved references only, and never an id, a uid, a surname or a number", () => {
     const entries = recordEntries(
       [{ id: "b1", booking: booking() }, { id: "b2", booking: booking({ title: "Stock count helper" }) }],
       new Map([["b1", reference({ status: "approved" })], ["b2", reference({ status: "challenged" })]]),
     );
     const shared = sharedRecord("Thabo", entries);
     expect(shared.entries.map((entry) => entry.reference?.text ?? null)).toEqual(["They arrived on time and greeted customers.", null]);
-    expect(JSON.stringify(shared)).not.toMatch(/b1|thabo"|27821234567|0087|Mokoena/);
+    expect(JSON.stringify(shared)).not.toMatch(/b1|thabo"|sipho"|photoSubject|27821234567|0087|Mokoena/);
   });
 
   it("takes only 24-character share tokens", () => {

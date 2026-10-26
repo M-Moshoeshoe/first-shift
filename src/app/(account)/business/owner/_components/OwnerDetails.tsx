@@ -4,18 +4,22 @@ import Link from "next/link";
 import { useState } from "react";
 import { OwnerDetailsForm, type OwnerDraft } from "@/components/OwnerDetailsForm";
 import { OwnerPhotoStep } from "@/components/OwnerPhotoStep";
+import { PersonPhoto } from "@/components/PersonPhoto";
 import { buttonClass } from "@/components/ui/Button";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { OWNER_FORM_COPY } from "@/domain/profileCopy";
+import { useAuth } from "@/lib/auth/useAuth";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 
 /**
  * The owner's details, for a business that signed up before they were asked
  * (or to change them): full name, ID, cellphone and CIPC number, then a
- * photo of their face. Posting opens again once both are saved.
+ * photo of their face. Posting opens again once both are saved, and the
+ * saved face is shown.
  */
 export function OwnerDetails() {
   const owner = useGatedProfile().business?.owner;
+  const uid = useAuth().user?.uid;
   const [draft, setDraft] = useState<OwnerDraft>({ legalName: owner?.legalName ?? "", phone: owner?.phone ?? "", cipc: owner?.cipc ?? "" });
   const [step, setStep] = useState<"details" | "photo" | "done">("details");
   return (
@@ -36,6 +40,7 @@ export function OwnerDetails() {
           <p role="status" className="text-base font-semibold text-go">
             {OWNER_FORM_COPY.saved}
           </p>
+          {uid ? <PersonPhoto subject={uid} kind="profile" alt="Your face photo" fresh /> : null}
           <Link href="/business" className={buttonClass("primary")}>
             Back to your tryouts
           </Link>

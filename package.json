@@ -31,7 +31,8 @@
     "review:case": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/reviewCase.ts",
     "pilot:metrics": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/pilotMetrics.ts",
     "demo:accounts": "tsx --conditions=react-server --env-file-if-exists=.env.local --env-file-if-exists=.env.demo.local scripts/createDemoAccounts.ts",
-    "demo:reset": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/resetDemo.ts"
+    "demo:reset": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/resetDemo.ts",
+    "demo:art": "tsx scripts/demoArt/render.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",

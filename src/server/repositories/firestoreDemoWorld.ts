@@ -2,13 +2,14 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { FieldValue, type DocumentReference, type Query } from "firebase-admin/firestore";
 import { z } from "zod";
-import { DEMO_EXAMPLE_APPLICANTS, DEMO_ROLES } from "@/config/demo";
+import { DEMO_ROLES } from "@/config/demo";
 import { DEMO_EXTRA_OWNERS, demoApplication, demoState } from "@/data/demo";
+import { demoPhotos } from "@/data/demoArt";
 import { exampleApplications } from "@/data/demoApplicants";
 import { applicationId } from "@/domain/applications";
 import { statusExpiresAt } from "@/domain/bookings";
 import { adminBucket, adminDb } from "../firebaseAdmin";
-import { ensureDemoPhotos } from "../demoPhotos";
+import { saveDemoPhotos, type DemoArtSource } from "../demoPhotos";
 import { defined } from "./firestoreRecords";
 import { appendLedger } from "./firestoreLedger";
 import { firestoreTryoutRepository } from "./firestoreTryoutRepository";
@@ -31,6 +32,8 @@ export interface DemoResetSummary {
   removed: number;
   tryouts: number;
   history: number;
+  /** Faces and shopfronts written from their illustrations: all of them from npm run demo:reset, none from the app. */
+  illustrations: number;
 }
 
 async function demoUids(): Promise<{ business: string; youngPerson: string }> {
@@ -90,8 +93,11 @@ async function clearDemo(uids: { business: string; youngPerson: string }): Promi
   return removed;
 }
 
-/** referenceText: the seeded reference from the live model, or null for the labelled example (server/demoReference.ts). */
-export async function resetDemoWorld(now: Date, referenceText: string | null = null): Promise<DemoResetSummary> {
+/**
+ * referenceText: the seeded reference from the live model, or null for the labelled example (server/demoReference.ts).
+ * art: the illustrations' PNGs, which npm run demo:reset reads from scripts/demoArt; the app has none (server/demoPhotos.ts).
+ */
+export async function resetDemoWorld(now: Date, referenceText: string | null = null, art?: DemoArtSource): Promise<DemoResetSummary> {
   const db = adminDb();
   const uids = await demoUids();
   const removed = await clearDemo(uids);
@@ -126,12 +132,7 @@ export async function resetDemoWorld(now: Date, referenceText: string | null = n
       tx.create(db.collection("auditLog").doc(), { uid: uids.youngPerson, action: "application_made", target: applicationId(firstId, uids.youngPerson), at });
     });
   }
-  // Every demo face and shopfront has a placeholder, so the door check has a photo to look at.
-  await ensureDemoPhotos([
-    { uid: uids.youngPerson, kind: "profile" },
-    { uid: uids.business, kind: "profile" },
-    ...DEMO_EXAMPLE_APPLICANTS.map((uid, index) => ({ uid, kind: "profile" as const, tone: index + 1 })),
-    ...[uids.business, ...DEMO_EXTRA_OWNERS].map((uid) => ({ uid, kind: "shopfront" as const })),
-  ]);
-  return { removed, tryouts: state.tryouts.length, history: state.history.length };
+  // Every demo face and shopfront has a picture, so the door check, the shortlist and the feed have one to show.
+  const { illustrations } = await saveDemoPhotos(demoPhotos(uids), art);
+  return { removed, tryouts: state.tryouts.length, history: state.history.length, illustrations };
 }

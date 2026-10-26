@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>Sipho's Phone Repairs, an illustration</title>
+  <rect width="384" height="384" fill="#EFF5F1"/>
+  <!-- Pavement and road -->
+  <rect y="330" width="384" height="40" fill="#CADBD1"/>
+  <rect y="370" width="384" height="14" fill="#43584F"/>
+  <!-- A green-painted shop in a row, with its coping -->
+  <rect x="20" y="64" width="344" height="266" fill="#0A6B47"/>
+  <rect x="12" y="52" width="360" height="16" fill="#0F2D24"/>
+  <!-- The painted sign -->
+  <rect x="40" y="82" width="304" height="72" fill="#FFFFFF" stroke="#0F2D24" stroke-width="4"/>
+  <text x="192" y="111" text-anchor="middle" font-family="'Arial Black', 'Segoe UI', Arial, sans-serif" font-weight="900" font-size="22" fill="#0A6B47">Sipho's</text>
+  <text x="192" y="142" text-anchor="middle" font-family="'Arial Black', 'Segoe UI', Arial, sans-serif" font-weight="900" font-size="26" fill="#0F2D24" textLength="262" lengthAdjust="spacingAndGlyphs">Phone Repairs</text>
+  <!-- A striped awning over the window -->
+  <path d="M36 170 L222 170 L230 190 L28 190 Z" fill="#0F2D24"/>
+  <g fill="#FFFFFF">
+    <path d="M58 170 L80 170 L82 190 L56 190 Z"/>
+    <path d="M102 170 L124 170 L125 190 L101 190 Z"/>
+    <path d="M146 170 L168 170 L168 190 L146 190 Z"/>
+    <path d="M190 170 L212 170 L214 190 L190 190 Z"/>
+  </g>
+  <!-- The window: phones on a shelf, a reflection on the glass -->
+  <rect x="40" y="194" width="172" height="108" fill="#CADBD1" stroke="#0F2D24" stroke-width="6"/>
+  <g fill="#0F2D24">
+    <rect x="58" y="226" width="20" height="36"/>
+    <rect x="90" y="222" width="22" height="40"/>
+    <rect x="124" y="228" width="18" height="34"/>
+    <rect x="154" y="222" width="22" height="40"/>
+    <rect x="186" y="228" width="16" height="34"/>
+  </g>
+  <g fill="#5F7A6D">
+    <rect x="61" y="230" width="14" height="26"/>
+    <rect x="93" y="226" width="16" height="30"/>
+    <rect x="127" y="232" width="12" height="24"/>
+    <rect x="157" y="226" width="16" height="30"/>
+    <rect x="189" y="232" width="10" height="24"/>
+  </g>
+  <rect x="46" y="262" width="160" height="7" fill="#0F2D24"/>
+  <path d="M64 200 L86 200 L54 296 L46 296 L46 254 Z" fill="#FFFFFF" fill-opacity="0.45"/>
+  <rect x="40" y="308" width="172" height="16" fill="#FFFFFF"/>
+  <text x="126" y="320" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="11" fill="#0F2D24">Screens, batteries, chargers</text>
+  <!-- The door, its trellis security gate folded back for the day -->
+  <rect x="238" y="178" width="100" height="152" fill="#0F2D24"/>
+  <rect x="248" y="190" width="68" height="104" fill="#CADBD1"/>
+  <rect x="254" y="206" width="56" height="24" fill="#FFFFFF" stroke="#0F2D24" stroke-width="2"/>
+  <text x="282" y="223" text-anchor="middle" font-family="'Segoe UI', Arial, sans-serif" font-weight="700" font-size="14" fill="#0A6B47">Open</text>
+  <rect x="252" y="252" width="6" height="18" fill="#0F2D24"/>
+  <rect x="322" y="178" width="16" height="152" fill="#5F7A6D"/>
+  <path d="M326 178 L326 330 M330 178 L330 330 M334 178 L334 330" stroke="#0F2D24" stroke-width="1.5"/>
+  <rect x="238" y="178" width="100" height="152" fill="none" stroke="#0F2D24" stroke-width="5"/>
+</svg>

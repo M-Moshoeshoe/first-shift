@@ -11,6 +11,8 @@ import { sastDay } from "./time";
 
 export interface RecordEntry {
   bookingId: string;
+  /** The business owner's uid, for their shopfront in the young person's own view (they were booked together: mayViewPhoto). Never on the shared record. */
+  photoSubject: string;
   businessName: string;
   businessArea: string;
   title: string;
@@ -38,6 +40,7 @@ export function recordEntries(bookings: readonly { id: string; booking: BookingR
       const reference = references.get(id);
       return {
         bookingId: id,
+        photoSubject: booking.ownerId,
         businessName: booking.businessName,
         businessArea: booking.businessArea,
         title: booking.title,
@@ -52,7 +55,7 @@ export interface SharedRecord {
   firstName: string;
   /** "Offered a job by", and "Hired by" once marked (hire.ts, recordJobs). */
   jobs: { businessName: string; hired: boolean }[];
-  entries: (Omit<RecordEntry, "bookingId" | "reference"> & { reference: { text: string; answers: OwnerAnswers; example?: boolean } | null })[];
+  entries: (Omit<RecordEntry, "bookingId" | "photoSubject" | "reference"> & { reference: { text: string; answers: OwnerAnswers; example?: boolean } | null })[];
 }
 
 /** What the share link shows: the first name and the verified entries, with approved references only. */

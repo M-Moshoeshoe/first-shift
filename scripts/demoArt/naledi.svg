@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>Naledi, an illustration</title>
+  <rect width="384" height="384" fill="#EFF5F1"/>
+  <g transform="translate(192 330) scale(1.15) translate(-192 -330)">
+    <!-- Neck, then a grey-green scoop-neck top -->
+    <path d="M166 230 L166 292 Q192 308 218 292 L218 230 Z" fill="#74472B"/>
+    <path d="M28 384 C32 320 88 288 150 282 Q192 330 234 282 C296 288 352 320 356 384 Z" fill="#5F7A6D"/>
+    <path d="M150 282 Q192 330 234 282" fill="none" stroke="#43584F" stroke-width="6"/>
+    <!-- Long box braids over the shoulders -->
+    <g fill="none" stroke="#1E1512" stroke-width="14" stroke-linecap="round">
+      <path d="M128 168 C112 216 106 270 108 332"/>
+      <path d="M138 150 C122 200 118 262 122 344"/>
+      <path d="M150 140 C134 196 134 262 140 350"/>
+      <path d="M256 168 C272 216 278 270 276 332"/>
+      <path d="M246 150 C262 200 266 262 262 344"/>
+      <path d="M234 140 C250 196 250 262 244 350"/>
+    </g>
+    <g fill="none" stroke="#3D2C22" stroke-width="3" stroke-dasharray="7 9">
+      <path d="M128 168 C112 216 106 270 108 332"/>
+      <path d="M138 150 C122 200 118 262 122 344"/>
+      <path d="M150 140 C134 196 134 262 140 350"/>
+      <path d="M256 168 C272 216 278 270 276 332"/>
+      <path d="M246 150 C262 200 266 262 262 344"/>
+      <path d="M234 140 C250 196 250 262 244 350"/>
+    </g>
+    <!-- Head -->
+    <path d="M132 170 C132 118 160 96 192 96 C224 96 252 118 252 170 C252 222 226 256 192 256 C158 256 132 222 132 170 Z" fill="#8C5A3A"/>
+    <!-- Braids pulled back from the hairline -->
+    <path d="M126 178 C120 108 156 82 192 82 C228 82 264 108 258 178 C252 150 246 132 236 124 C212 112 172 112 148 124 C138 132 132 150 126 178 Z" fill="#1E1512"/>
+    <g fill="none" stroke="#3D2C22" stroke-width="3" stroke-linecap="round">
+      <path d="M160 120 C156 106 162 94 172 88"/>
+      <path d="M192 114 L192 86"/>
+      <path d="M224 120 C228 106 222 94 212 88"/>
+      <path d="M140 136 C134 120 138 104 148 96"/>
+      <path d="M244 136 C250 120 246 104 236 96"/>
+    </g>
+    <!-- Face -->
+    <path d="M154 160 Q167 152 180 156" fill="none" stroke="#1E1512" stroke-width="5" stroke-linecap="round"/>
+    <path d="M204 156 Q217 152 230 160" fill="none" stroke="#1E1512" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="168" cy="179" rx="6" ry="7.5" fill="#1E1512"/>
+    <ellipse cx="216" cy="179" rx="6" ry="7.5" fill="#1E1512"/>
+    <path d="M160 174 L155 170 M224 174 L229 170" stroke="#1E1512" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="170" cy="176" r="2" fill="#FFFFFF"/>
+    <circle cx="218" cy="176" r="2" fill="#FFFFFF"/>
+    <path d="M184 199 C184 209 200 209 200 199" fill="none" stroke="#74472B" stroke-width="5" stroke-linecap="round"/>
+    <path d="M172 221 Q192 244 212 221 Z" fill="#5A241B"/>
+    <path d="M175 222 Q192 230 209 222 Z" fill="#FFFFFF"/>
+  </g>
+</svg>
