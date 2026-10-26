@@ -42,7 +42,7 @@ export async function dayWalk(rec: Recorder, page: Page, bookingPath: string): P
   await page.locator('label[for="pay-method-ewallet"]').click();
   await page.getByLabel("Payment reference").fill("FS THABO 27");
   await rec.check(page, "checked out, pay by eWallet with a reference");
-  await page.getByRole("button", { name: "Paid", exact: true }).click();
+  await page.getByRole("button", { name: "Mark as paid", exact: true }).click();
   await page.getByText("Waiting for Thabo to confirm", { exact: false }).waitFor();
   await rec.check(page, "paid, waiting for Thabo");
 
@@ -82,6 +82,6 @@ async function referenceAndRecord(rec: Recorder, page: Page): Promise<void> {
   if ((await page.getByText(/Mokoena|082 123 4567|27821234567|0087/).count()) > 0) rec.failures.push(`${rec.width} px: the shared record shows private details`);
   await rec.check(page, "shared work record, no sign-in");
   await page.goto(`${BASE}/record/not-a-real-token-at-all`);
-  await page.getByText("This link isn't working.", { exact: false }).waitFor();
+  await page.getByText("This link is not working.", { exact: false }).waitFor();
   await page.goto(`${BASE}/work`);
 }

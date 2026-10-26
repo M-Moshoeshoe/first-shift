@@ -58,11 +58,11 @@ async function profileError(rec: Recorder, page: Page, path: string): Promise<vo
       : route.continue();
   await page.route("**/api/profile", fail);
   await page.goto(`${BASE}${path}`);
-  await page.getByRole("heading", { name: "We couldn't load your profile" }).waitFor();
+  await page.getByRole("heading", { name: "We could not load your profile" }).waitFor();
   await rec.check(page, `profile error on ${path}`);
   await page.unroute("**/api/profile", fail);
   await page.getByRole("button", { name: "Try again" }).click();
-  await page.getByRole("heading", { name: "We couldn't load your profile" }).waitFor({ state: "detached" });
+  await page.getByRole("heading", { name: "We could not load your profile" }).waitFor({ state: "detached" });
   await page.locator("main h1").first().waitFor();
   if (new URL(page.url()).pathname !== path) rec.failures.push(`${rec.width} px: Try again on ${path} ended on ${page.url()}`);
 }
@@ -207,12 +207,12 @@ export async function business(rec: Recorder, page: Page): Promise<void> {
   await page.getByRole("heading", { name: "Your photo" }).waitFor();
   await takeFace(rec, page, "business step 3, the owner's face");
   await page.getByRole("button", { name: "Next" }).click();
-  await page.getByRole("heading", { name: "Your premises pin" }).waitFor();
+  await page.getByRole("heading", { name: "Your shop's location" }).waitFor();
   await page.getByRole("button", { name: "Use my location" }).click();
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("heading", { name: "Your shopfront" }).waitFor();
   await page.getByRole("button", { name: "Back" }).click();
-  await page.getByRole("heading", { name: "Your premises pin" }).waitFor();
+  await page.getByRole("heading", { name: "Your shop's location" }).waitFor();
   await rec.check(page, "business step 2, after Back");
   await page.getByRole("button", { name: "Next" }).click();
   await choosePhoto(page, "shopfront.png");

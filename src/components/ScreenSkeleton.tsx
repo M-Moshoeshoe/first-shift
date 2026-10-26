@@ -16,7 +16,7 @@ const SPECS: Record<string, Spec> = {
   "/onboarding/role": { title: { phone: 2, desktop: 2 }, intro: { phone: 2, desktop: 2 }, body: "role" },
   "/onboarding/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 2 }, body: "form" },
   "/onboarding/business": { title: { phone: 2, desktop: 1 }, intro: { phone: 3, desktop: 2 }, body: "form" },
-  "/work": { title: { phone: 2, desktop: 1 }, intro: { phone: 1, desktop: 1 }, body: "feed" },
+  "/work": { title: { phone: 2, desktop: 1 }, intro: { phone: 2, desktop: 2 }, body: "feed" },
   "/business": { title: { phone: 1, desktop: 1 }, intro: { phone: 1, desktop: 1 }, body: "dashboard" },
   "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 4, desktop: 3 }, body: "form" },
 };

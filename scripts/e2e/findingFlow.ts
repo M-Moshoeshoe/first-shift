@@ -99,7 +99,7 @@ async function forcedStates(rec: Recorder, page: Page, detailPath: string): Prom
 
   for (const [name, status, body, text] of [
     ["empty", 200, { status: "ok", area: "Ivory Park", items: [] }, "No tryouts near you right now"],
-    ["unknown area", 200, { status: "unknown_area", area: "Soshanguve" }, "We don't know where Soshanguve is yet"],
+    ["unknown area", 200, { status: "unknown_area", area: "Soshanguve" }, "We do not know where Soshanguve is yet"],
     ["failed", 500, { error: "server_error", message: "Something went wrong on our side. Try again in a minute." }, "Something went wrong on our side"],
   ] as const) {
     const restore = await answerGet(page, "**/api/tryouts/nearby", status, body);

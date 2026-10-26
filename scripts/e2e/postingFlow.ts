@@ -2,6 +2,7 @@ import type { Page, Route } from "playwright-core";
 import { findingAndApplying } from "./findingFlow";
 import { skeleton } from "./flows";
 import { BASE, pathIs, signIn, throttle, type Recorder } from "./kit";
+import { addDays, sastDateKey } from "../../src/domain/time";
 
 type Timing = { timing: string; seconds: string };
 
@@ -85,7 +86,7 @@ async function postingStates(rec: Recorder, page: Page): Promise<Timing[]> {
   await page.unroute("**/api/tryouts/draft");
 
   await describe(page, "Fix the wiring in my shop and the plugs at the back");
-  await page.getByRole("heading", { name: "This work can't be a tryout" }).waitFor({ timeout: 90_000 });
+  await page.getByRole("heading", { name: "This work cannot be a tryout" }).waitFor({ timeout: 90_000 });
   await rec.check(page, "post, blocked");
   await page.getByRole("button", { name: "Change my request" }).click();
 
@@ -129,7 +130,7 @@ async function dashboardStates(rec: Recorder, page: Page): Promise<void> {
   await page.getByRole("heading", { name: "Withdraw this tryout?" }).waitFor({ state: "detached" });
   await rec.check(page, "dashboard, tryout withdrawn");
 
-  await answer(page, "/api/tryouts/draft", 200, { outcome: "allowed", draft: { title: "Shop helper", tasks: ["Pack shelves"], hours: 5 } });
+  await answer(page, "/api/tryouts/draft", 200, { outcome: "allowed", draft: { title: "Shop helper", tasks: ["Pack shelves"], hours: 5, date: sastDateKey(addDays(new Date(), 1)) } });
   await answer(page, "/api/tryouts", 200, { outcome: "review", id: "forced-review" });
   await page.goto(`${BASE}/business/post`);
   await describe(page, "Help with something at the shop");
@@ -142,7 +143,7 @@ async function dashboardStates(rec: Recorder, page: Page): Promise<void> {
 
   const restore = await withoutCredits(page);
   await page.goto(`${BASE}/business/post`);
-  await page.getByText("You've used your free tryouts").waitFor();
+  await page.getByText("You've used your credits").waitFor();
   await rec.check(page, "post, no credits left");
   await page.goto(`${BASE}/business`);
   await page.getByText("Free tryouts left: 0").waitFor();

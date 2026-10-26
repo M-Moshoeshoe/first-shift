@@ -116,7 +116,7 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
     await rec.check(page, "status page for a trusted contact");
   }
   await page.goto(`${BASE}/status/not-a-real-token-at-all`);
-  await page.getByText("This link isn't working.", { exact: false }).waitFor();
+  await page.getByText("This link is not working.", { exact: false }).waitFor();
 
   await page.goto(`${BASE}/work`);
   await switchTo(page, "e2e-lerato", "/business");
