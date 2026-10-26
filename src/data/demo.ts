@@ -4,8 +4,10 @@ import type { CreditEntry } from "@/domain/credits";
 import type { CoidaAnswer } from "@/domain/injuryCover";
 import { newAccount, photoPath, type BusinessRecord, type UserRecord } from "@/domain/profile";
 import { checkTerms, newTryout, type TryoutRecord, type TryoutTerms } from "@/domain/tryoutDecisions";
+import { DEMO_EXAMPLE_OWNERS } from "@/config/demo";
 import { RULES } from "@/config/rules";
 import { addDays, sastDateKey } from "@/domain/time";
+import { pastLedger, pastTryouts, type PastTryout } from "./demoHistory";
 
 /**
  * The known state npm run demo:reset puts the demo world back to. Every
@@ -24,10 +26,18 @@ export interface DemoState {
   /** The demo business account's credit ledger. */
   ledger: CreditEntry[];
   tryouts: TryoutRecord[];
+  /** Sipho and Thabo's two finished tryouts this month (demoHistory.ts). */
+  history: PastTryout[];
 }
 
-/** The demo businesses with no account behind them. Never real uids: Firebase uids are 28 characters. */
-export const DEMO_EXTRA_OWNERS = ["demo-lerato", "demo-ayanda"] as const;
+/** The past tryouts' documents: fixed ids, so every reset puts the same ones back. */
+export const DEMO_HISTORY_IDS = ["demo-past-tryout-1", "demo-past-booking-1", "demo-past-tryout-2", "demo-past-booking-2"] as const;
+
+/** Added on top of the free credits, so judges can post and book without running out. */
+const DEMO_EXTRA_CREDITS = 5;
+
+/** The demo businesses with no account behind them (src/config/demo.ts). */
+export const DEMO_EXTRA_OWNERS = DEMO_EXAMPLE_OWNERS;
 
 const photo = (uid: string, kind: "profile" | "shopfront") => ({ path: photoPath(uid, kind), version: "demo" });
 
@@ -88,7 +98,7 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
   const businesses: Record<string, BusinessRecord> = {
     // Randburg: about 21 km from Thabo in Ivory Park, on a direct taxi route (R28 each way).
     // Sipho's own details as the owner: a number nobody can be reached on, like Thabo's.
-    [uids.business]: { ...business(uids.business, { name: "Sipho's Phone Repairs", area: "Randburg", latitude: -26.0939, longitude: 28.0071, completed: 0, paidOnTime: 0, coida: "registered" }), ownerFirstName: "Sipho", ownerPhone: "27000000001" },
+    [uids.business]: { ...business(uids.business, { name: "Sipho's Phone Repairs", area: "Randburg", latitude: -26.0939, longitude: 28.0071, completed: 2, paidOnTime: 2, coida: "registered" }), ownerFirstName: "Sipho", ownerPhone: "27000000001" },
     [lerato]: business(lerato, { name: "Lerato's Spaza", area: "Tembisa", latitude: -25.9964, longitude: 28.2268, completed: 6, paidOnTime: 6, coida: "registered" }),
     [ayanda]: business(ayanda, { name: "Ayanda's Car Wash", area: "Ivory Park", latitude: -25.9861, longitude: 28.1958, completed: 2, paidOnTime: 1, coida: "not_sure" }),
   };
@@ -107,6 +117,9 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
     idLastFour: "0000",
     residency: "citizen",
     profilePhoto: photo(uids.youngPerson, "profile"),
+    // The two finished tryouts with Sipho, both on time (demoHistory.ts).
+    completed: 2,
+    onTime: 2,
   };
   const slots: Slot[] = [
     { owner: uids.business, daysAhead: 1, startTime: "09:00", hours: 6, rateCentsPerHour: 3500, title: "Phone shop helper", tasks: ["Greet customers and write repairs in the book", "Clean and pack phone cases on the shelves"], category: "customer_service" },
@@ -114,13 +127,19 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
     { owner: ayanda, daysAhead: 2, startTime: "09:00", hours: 6, rateCentsPerHour: 3100, title: "Car wash helper", tasks: ["Wash and dry cars by hand", "Vacuum seats and mats"], category: "car_washing" },
     { owner: uids.business, daysAhead: 3, startTime: "10:00", hours: RULES.minPaidHours, rateCentsPerHour: RULES.minimumWageCentsPerHour, title: "Stock count helper", tasks: ["Count phone accessories and write down the totals", "Pack stock into labelled boxes"], category: "stock_and_packing" },
   ];
+  const tryouts = slots.map((slot) => tryout(slot, businesses, now));
+  const sipho = businesses[uids.business];
+  const [phoneShop] = tryouts;
+  if (!sipho || !phoneShop) throw new Error("the demo always has Sipho's business and a phone shop tryout");
+  const history = pastTryouts([phoneShop, phoneShop], DEMO_HISTORY_IDS, sipho, uids.youngPerson, thabo);
   return {
     users: {
       [uids.business]: { ...newAccount(uids.business, "business", true).user, legalName: "Sipho Dlamini", idLastFour: "0000", residency: "citizen", profilePhoto: photo(uids.business, "profile") },
       [uids.youngPerson]: thabo,
     },
     businesses,
-    ledger: [{ kind: "grant", amount: RULES.freeCredits, reason: "welcome" }],
-    tryouts: slots.map((slot) => tryout(slot, businesses, now)),
+    ledger: [{ kind: "grant", amount: RULES.freeCredits, reason: "welcome" }, ...pastLedger(history), { kind: "grant", amount: DEMO_EXTRA_CREDITS, reason: "granted" }],
+    tryouts,
+    history,
   };
 }

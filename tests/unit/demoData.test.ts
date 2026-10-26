@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_EXTRA_OWNERS, demoState } from "@/data/demo";
-import { canPost } from "@/domain/credits";
+import { canPost, creditBalance, freeLeft } from "@/domain/credits";
+import { hireOfferDue } from "@/domain/hire";
+import { crossesRegularEmploymentLine } from "@/domain/regularEmployment";
+import { recordEntries } from "@/domain/workRecord";
 import { isProfileComplete, needsWorkerUpdate, ownerReady } from "@/domain/profile";
 import { fromSast, sastSlot } from "@/domain/time";
 
@@ -41,5 +44,40 @@ describe("the demo world npm run demo:reset restores", () => {
     expect(state.users[uids.youngPerson]?.idLastFour).toBe("0000");
     expect(state.businesses[uids.business]?.ownerPhone).toBe("27000000001");
     expect(state.users[uids.business]?.idLastFour).toBe("0000");
+  });
+
+  it("gives Sipho and Thabo two finished, paid, Received tryouts, one with an approved reference, so the record has entries", () => {
+    const now = fromSast(2026, 10, 26, 10, 0);
+    const state = demoState(uids, now);
+    expect(state.history).toHaveLength(2);
+    for (const past of state.history) {
+      expect(past.tryout.status).toBe("completed");
+      expect(past.booking).toMatchObject({ status: "ended", demo: true, ownerId: uids.business, workerId: uids.youngPerson, payment: { state: "received" } });
+      expect(past.booking.endAt.getTime()).toBeLessThan(now.getTime());
+    }
+    const references = new Map(state.history.flatMap((past) => (past.reference ? [[past.bookingId, past.reference] as const] : [])));
+    expect([...references.values()].map((reference) => reference.status)).toEqual(["approved"]);
+    const entries = recordEntries(state.history.map((past) => ({ id: past.bookingId, booking: past.booking })), references);
+    expect(entries).toHaveLength(2);
+    expect(entries.filter((entry) => entry.reference)).toHaveLength(1);
+  });
+
+  it("keeps the credits and counters in step with that history, with credits to spare for judges", () => {
+    const state = demoState(uids, fromSast(2026, 10, 26, 10, 0));
+    expect(creditBalance(state.ledger)).toMatchObject({ used: 2, held: 0, available: 6 });
+    expect(freeLeft(state.ledger)).toBe(1);
+    expect(state.businesses[uids.business]).toMatchObject({ completed: 2, payments: 2, paidOnTime: 2 });
+    expect(state.users[uids.youngPerson]).toMatchObject({ completed: 2, onTime: 2 });
+  });
+
+  it("brings up the job offer on the next tryout they finish together, and that tryout stays under the 24-hour line", () => {
+    const now = fromSast(2026, 10, 26, 10, 0);
+    const state = demoState(uids, now);
+    const slots = state.history.map((past) => ({ startAt: past.booking.startAt, hours: past.booking.hours }));
+    const [next] = state.tryouts;
+    if (!next) throw new Error("no live tryout");
+    expect(crossesRegularEmploymentLine(slots, { startAt: next.startAt, hours: next.hours })).toBe(false);
+    expect(hireOfferDue(2, slots, now, false)).toBe(false);
+    expect(hireOfferDue(3, [...slots, { startAt: next.startAt, hours: next.hours }], now, false)).toBe(true);
   });
 });

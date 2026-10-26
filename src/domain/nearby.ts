@@ -1,7 +1,7 @@
 import { distanceBetween, geohashQueryBounds } from "geofire-common";
 import { RULES } from "@/config/rules";
 import { bookingOpen } from "./applications";
-import { sameWorld, type Viewer } from "./demo";
+import { isExampleOwner, sameWorld, type Viewer } from "./demo";
 import { returnFare } from "./fares";
 import { FEED_COPY } from "./findingMessages";
 import { injuryCoverLine, type CoidaAnswer } from "./injuryCover";
@@ -67,7 +67,8 @@ export function feedItem(listing: Listing, from: { area: string; centre: Point |
     returnFareCents: returnFare(from.area, tryout.area)?.returnCents ?? null,
     distance: from.centre ? aboutHowFar(distanceKm(from.centre, tryout.location)) : null,
     injuryCover: injuryCoverLine(listing.business.coida),
-    payRecord: payRecordLine(listing.business),
+    // The demo's businesses with no account behind them show what they are, not a pay record.
+    payRecord: isExampleOwner(tryout.ownerId) ? FEED_COPY.example : payRecordLine(listing.business),
   };
 }
 

@@ -1,3 +1,4 @@
+import { DEMO_EXAMPLE_OWNERS } from "@/config/demo";
 import { describe, expect, it } from "vitest";
 import { AREAS } from "@/config/areas";
 import { RULES } from "@/config/rules";
@@ -121,6 +122,12 @@ describe("applying", () => {
     expect(applyState({ ...inputs, bookings: [overlapping] })).toEqual({ kind: "not_eligible", reason: "overlaps_booking" });
     const touching = { start: tryout.endAt, end: new Date("2026-10-27T15:00:00Z") };
     expect(applyState({ ...inputs, bookings: [touching] })).toEqual({ kind: "can_apply" });
+  });
+
+  it("shows the demo's businesses with no account behind them as examples, never open to applications", () => {
+    for (const ownerId of DEMO_EXAMPLE_OWNERS) {
+      expect(applyState({ ...inputs, tryout: { ...tryout, ownerId, demo: true } })).toEqual({ kind: "closed", reason: "example_only" });
+    }
   });
 
   it("shows an application already made, even after booking closes", () => {

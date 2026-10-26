@@ -1,10 +1,15 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
+import { isDemoEmail } from "@/domain/demo";
+import { useAuth } from "@/lib/auth/useAuth";
 import { useBadge } from "@/lib/useBadge";
 import { NAV_MIN_ITEMS, type NavItem } from "@/config/nav";
 import { AppHeader } from "./AppHeader";
 import { AppNav } from "./AppNav";
+
+// Demo accounts only, so real people never download it.
+const DemoBar = lazy(() => import("./DemoBar").then((module) => ({ default: module.DemoBar })));
 
 interface AppShellProps {
   /** The role's destinations; shown once there are enough of them to be worth a bar (src/config/nav.ts). */
@@ -21,9 +26,15 @@ interface AppShellProps {
 export function AppShell({ nav = [], children }: AppShellProps) {
   const items = nav.length >= NAV_MIN_ITEMS ? nav : [];
   const badge = useBadge(items.length > 0);
+  const { user } = useAuth();
   return (
     <div className="flex min-h-dvh flex-col">
       <AppHeader nav={items} badge={badge} />
+      {isDemoEmail(user?.email ?? undefined) ? (
+        <Suspense fallback={null}>
+          <DemoBar />
+        </Suspense>
+      ) : null}
       <main className={`flex-1 lg:bg-mist lg:px-5 lg:py-12 ${items.length > 0 ? "pb-16 lg:pb-12" : ""}`}>
         <div className="lg:mx-auto lg:max-w-md lg:border-2 lg:border-ink lg:bg-paper">{children}</div>
       </main>

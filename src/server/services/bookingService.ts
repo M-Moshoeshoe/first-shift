@@ -1,10 +1,11 @@
 import "server-only";
 import { RULES } from "@/config/rules";
 import { BOOKING_COPY, REPORT_COPY } from "@/domain/bookingMessages";
+import { DEMO_COPY } from "@/domain/demoCopy";
 import { cancelOutcome, decideCancel, type CancelOutcome, decideReport, mapsUrl, mayViewPhoto, partyOf, statusView, whatsAppUrl, type BookingRecord } from "@/domain/bookings";
 import type { Party } from "@/domain/cancellation";
 import type { ReportCategory } from "@/domain/cases";
-import { dayOptions, methodsFor } from "@/domain/day";
+import { dayOptions, decideSkipToDay, methodsFor } from "@/domain/day";
 import { canAddEvidence } from "@/domain/evidence";
 import type { Viewer } from "@/domain/demo";
 import { displayPhone, photoPath, type PhotoKind } from "@/domain/profile";
@@ -120,6 +121,19 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
           },
           result: { status: "cancelled" },
         };
+      });
+    },
+
+    /** Demo only: moves a demo booking's day to now, so a judge can try the door at any hour (day.ts, decideSkipToDay). */
+    async skipToDay(viewer: Viewer, bookingId: string): Promise<{ status: "skipped" | "unchanged" }> {
+      return bookings.transactBooking<{ status: "skipped" | "unchanged" }>(bookingId, viewer.uid, ({ booking }) => {
+        const decision = decideSkipToDay(viewer, booking, now());
+        if (decision.kind === "refuse") {
+          if (decision.problem === "not_found") throw notFound();
+          throw decision.problem === "not_demo" ? new AppError(403, "not_demo", DEMO_COPY.notDemo) : new AppError(409, "not_booked", DEMO_COPY.skipNotBooked);
+        }
+        if (decision.kind === "unchanged") return { write: null, result: { status: "unchanged" } };
+        return { write: { booking: { startAt: decision.startAt, endAt: decision.endAt }, audit: "demo_skipped_to_day" }, result: { status: "skipped" } };
       });
     },
 

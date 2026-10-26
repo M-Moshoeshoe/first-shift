@@ -105,6 +105,7 @@ export const BookingViewSchema = z.object({
     canReportNotOpen: z.boolean(),
     canCheckOut: z.boolean(),
     payable: z.boolean(),
+    canSkipToDay: z.boolean(),
     checkedInAt: z.nullable(z.string()),
     endReason: z.nullable(z.enum(CHECKOUT_REASONS)),
     owedCents: z.number(),
@@ -141,4 +142,7 @@ export const StepResultSchema = z.object({ status: z.enum(["done", "unchanged"])
 export type BookingViewResponse = z.infer<typeof BookingViewSchema>;
 
 export const CancelResultSchema = z.object({ status: z.enum(["cancelled", "unchanged"]) });
+
+/** POST /api/bookings/[id]/skip-to-day, demo only. */
+export const SkipResultSchema = z.object({ status: z.enum(["skipped", "unchanged"]) });
 export const ReportResultSchema = z.object({ paused: z.boolean() });

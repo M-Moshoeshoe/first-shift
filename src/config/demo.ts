@@ -8,3 +8,11 @@ export const DEMO_EMAIL_DOMAIN = "firstshift.demo";
 
 export const DEMO_ROLES = ["business", "young_person"] as const;
 export type DemoRole = (typeof DEMO_ROLES)[number];
+
+/**
+ * The demo businesses with no account behind them, there so the demo feed
+ * isn't one business long. Their tryouts are examples, for viewing only:
+ * nobody could ever answer an application to them. Never real uids: Firebase
+ * uids are 28 characters.
+ */
+export const DEMO_EXAMPLE_OWNERS = ["demo-lerato", "demo-ayanda"] as const;

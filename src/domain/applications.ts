@@ -1,5 +1,5 @@
 import { RULES } from "@/config/rules";
-import { sameWorld, type Viewer } from "./demo";
+import { isExampleOwner, sameWorld, type Viewer } from "./demo";
 import { isProfileComplete, needsWorkerUpdate, type UserRecord } from "./profile";
 import { canTakePart } from "./strikes";
 import type { TryoutWindow } from "./schedule";
@@ -36,7 +36,7 @@ export const bookingOpen = (tryout: Pick<TryoutRecord, "status" | "startAt">, no
 const overlaps = (a: TryoutWindow, b: TryoutWindow): boolean => a.start < b.end && b.start < a.end;
 
 export type NotEligibleReason = "not_young_person" | "profile_incomplete" | "profile_update" | "account_paused" | "overlaps_booking";
-export type ClosedReason = "booking_closed" | "not_open";
+export type ClosedReason = "booking_closed" | "not_open" | "example_only";
 
 /** What the detail page offers this young person for this tryout. */
 export type ApplyState =
@@ -68,6 +68,7 @@ export function applyState({ worker, tryout, application, bookings, now }: Apply
   if (!isProfileComplete(worker, null)) return { kind: "not_eligible", reason: "profile_incomplete" };
   // Profiles from before these were asked: how to be paid, what they can do, languages and surname, on Profile.
   if (needsWorkerUpdate(worker)) return { kind: "not_eligible", reason: "profile_update" };
+  if (isExampleOwner(tryout.ownerId)) return { kind: "closed", reason: "example_only" };
   const settled = applicationState(application, tryout, now);
   if (settled) return settled;
   if (!bookingOpen(tryout, now)) return { kind: "closed", reason: tryout.status === "published" ? "booking_closed" : "not_open" };

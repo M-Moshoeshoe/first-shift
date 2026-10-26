@@ -17,6 +17,7 @@ export const FEED_COPY = {
   explainerTitle: "What's a tryout?",
   explainer: `One paid day at a business near you. You're paid the same day, at least ${formatRand(RULES.minimumWageCentsPerHour)} an hour, and the business writes you a reference.`,
   explainerDismiss: "Got it",
+  example: "Example, for viewing only",
   emptyTitle: "No tryouts near you right now",
   empty: (area: string) => `Nothing within ${RULES.nearbyRadiusKm} km of ${area} is open for applications. Tap ${BUTTON_LABELS.refresh} to check again later.`,
   fareUnknown: "Fare not known",
@@ -62,6 +63,7 @@ export const NOT_ELIGIBLE_MESSAGES: Record<NotEligibleReason, string> = {
 export const CLOSED_MESSAGES: Record<ClosedReason, string> = {
   booking_closed: `Applications for this tryout have closed. They close ${RULES.bookingCutoffMinutes / 60} hour before the start, so whoever is booked can get there.`,
   not_open: "This tryout isn't taking applications any more. Go back and pick another one.",
+  example_only: "Example, for viewing only. To try a whole tryout, apply to one from Sipho's Phone Repairs.",
 };
 
 export const FINDING_MESSAGES = {

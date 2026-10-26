@@ -28,3 +28,19 @@ export async function consumeDailyQuota(uid: string, bucket: string, limit: numb
   });
   if (!allowed) throw new AppError(429, "daily_limit", message);
 }
+
+/**
+ * At most once in this many seconds, for everyone: claimed in a transaction,
+ * so two quick taps can't both pass. For actions that affect a shared world,
+ * such as resetting the demo. Kept apart from the per-user daily counts.
+ */
+export async function claimCooldown(key: string, seconds: number, message: string, now: Date = new Date()): Promise<void> {
+  const ref = adminDb().collection("cooldowns").doc(key);
+  const allowed = await adminDb().runTransaction(async (transaction) => {
+    const last = (await transaction.get(ref)).get("at") as { toDate(): Date } | undefined;
+    if (last && now.getTime() - last.toDate().getTime() < seconds * 1000) return false;
+    transaction.set(ref, { at: now });
+    return true;
+  });
+  if (!allowed) throw new AppError(429, "too_soon", message);
+}

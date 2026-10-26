@@ -25,7 +25,7 @@ const notFound = () => new AppError(404, "not_found", FINDING_MESSAGES.notFound)
 /** How each refusal is reported over HTTP. The decision itself comes from src/domain (applications.ts). */
 function refusal(problem: Extract<ApplyState, { reason: unknown }>["reason"] | "not_found"): AppError {
   if (problem === "not_found") return notFound();
-  if (problem === "booking_closed" || problem === "not_open") return new AppError(409, problem, CLOSED_MESSAGES[problem]);
+  if (problem === "booking_closed" || problem === "not_open" || problem === "example_only") return new AppError(409, problem, CLOSED_MESSAGES[problem]);
   return new AppError(problem === "not_young_person" ? 403 : 409, problem, NOT_ELIGIBLE_MESSAGES[problem]);
 }
 

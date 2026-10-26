@@ -10,7 +10,7 @@ const paidBy = (method: "ewallet" | "payshap" | "cash_send" | "cash", amountCent
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=-26.0939,28.0071", pinAccuracyMetres: 15, photo: { subject: "sipho", kind: "shopfront" },
   payoutPhone: null, owner: { firstName: "Sipho", subject: "sipho" }, whatsappUrl: null, checkInCode: "482913", shareToken: "share-token-00000001", cancel: null,
   day: {
-    canCheckIn: false, canNoShow: false, canReportNotOpen: false, canCheckOut: false, payable: true, checkedInAt: "2026-10-27T06:55:00.000Z", endReason: "completed",
+    canCheckIn: false, canNoShow: false, canReportNotOpen: false, canCheckOut: false, payable: true, canSkipToDay: false, checkedInAt: "2026-10-27T06:55:00.000Z", endReason: "completed",
     owedCents: 21000, owedMinimumCents: 21000, payment: { state: "awaiting_confirmation", method, amountCents, reference: method === "cash" ? null : "FS 27 OCT" },
     payMethods: ["ewallet", "payshap", "cash_send", "cash"], door: null, remind: false, evidence: { canAdd: false, sent: false },
   },

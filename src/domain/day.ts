@@ -183,7 +183,30 @@ export function dayOptions(party: "business" | "young_person", booking: BookingR
     canReportNotOpen: !isOwner && booked && now >= booking.startAt,
     canCheckOut: isOwner && booking.status === "checked_in",
     payable: isPayable(booking),
+    canSkipToDay: canSkipToDay(booking, now),
   };
+}
+
+/** Before the door opens on a demo booking: "Skip to the day" is offered to both parties (decideSkipToDay). */
+const canSkipToDay = (booking: BookingRecord, now: Date): boolean =>
+  booking.demo && booking.status === "booked" && now < addMinutes(booking.startAt, -RULES.checkInOpensMinutesBefore);
+
+export type SkipToDayDecision = { kind: "skip"; startAt: Date; endAt: Date } | { kind: "unchanged" } | { kind: "refuse"; problem: "not_found" | "not_demo" | "not_booked" };
+
+/**
+ * "Skip to the day", for the demo only: a judge can't wait until tomorrow's
+ * start to try the door, so a demo booking's day moves to start a few minutes
+ * ago, keeping its hours. Real bookings never move: their times are locked
+ * once booked (docs/RULES.md). Either party may skip; once the door is open
+ * it changes nothing.
+ */
+export function decideSkipToDay(viewer: Viewer, booking: BookingRecord | null, now: Date): SkipToDayDecision {
+  if (!booking || !partyOf(viewer, booking)) return { kind: "refuse", problem: "not_found" };
+  if (!viewer.demo || !booking.demo) return { kind: "refuse", problem: "not_demo" };
+  if (booking.status !== "booked") return { kind: "refuse", problem: "not_booked" };
+  if (!canSkipToDay(booking, now)) return { kind: "unchanged" };
+  const startAt = addMinutes(new Date(Math.floor(now.getTime() / 60_000) * 60_000), -RULES.demoSkipStartsMinutesAgo);
+  return { kind: "skip", startAt, endAt: addMinutes(startAt, booking.hours * 60) };
 }
 
 /** What a business paused for an unpaid tryout is paused for; paying that tryout lifts it. */

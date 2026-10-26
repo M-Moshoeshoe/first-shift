@@ -1,4 +1,4 @@
-import { DEMO_EMAIL_DOMAIN } from "@/config/demo";
+import { DEMO_EMAIL_DOMAIN, DEMO_EXAMPLE_OWNERS } from "@/config/demo";
 
 /**
  * Who is asking: the signed-in uid, and whether it's one of the demo accounts
@@ -16,6 +16,9 @@ export interface Viewer {
  * existed has no flag and counts as real.
  */
 export const sameWorld = (viewer: Pick<Viewer, "demo">, record: { demo?: boolean }): boolean => viewer.demo === (record.demo === true);
+
+/** A tryout from a demo business with no account behind it: shown as an example, never open to applications. */
+export const isExampleOwner = (ownerId: string): boolean => DEMO_EXAMPLE_OWNERS.some((owner) => owner === ownerId);
 
 /** A demo account's email must stay on the demo domain; one moved anywhere else is refused (signIn.ts). */
 export const isDemoEmail = (email: string | undefined): boolean => typeof email === "string" && email.toLowerCase().endsWith(`@${DEMO_EMAIL_DOMAIN}`);

@@ -6,14 +6,15 @@ import { clientAuth } from "../../src/lib/firebaseClient";
 import { ApplicationResultSchema, NearbySchema, TryoutDetailSchema } from "../../src/schemas/finding";
 import { ProfileViewSchema } from "../../src/schemas/profile";
 import { DemoTokenSchema } from "../../src/schemas/demo";
+import { DemoResetSchema } from "../../src/schemas/demoReset";
 import * as z from "zod/mini";
 import { ApplicationsSchema, BookingViewSchema, StepResultSchema } from "../../src/schemas/booking";
 import { CreditRequestResultSchema, CreditsViewSchema } from "../../src/schemas/credits";
-import { DraftResultSchema, RecordViewSchema } from "../../src/schemas/record";
+import { DraftResultSchema, HireViewSchema, RecordViewSchema } from "../../src/schemas/record";
 import { SharedRecordSchema } from "../../src/schemas/sharedRecord";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
-import { adminApp, clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser, startNow } from "./session";
+import { adminApp, clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser } from "./session";
 
 /**
  * The demo accounts, attacked the way anyone holding their public password
@@ -45,10 +46,14 @@ const nearby = () => apiGet("/api/tryouts/nearby", NearbySchema);
 async function feedIsolation(steps: Record<string, unknown>): Promise<void> {
   const demoFeed = await nearby();
   if (demoFeed.status !== "ok" || demoFeed.items.length !== 4) throw new Error(`The demo feed should hold the 4 demo tryouts: ${JSON.stringify(demoFeed)}`);
-  const [first] = demoFeed.items;
-  if (!first) throw new Error("no demo tryout");
+  const first = demoFeed.items.find((item) => item.businessName === "Sipho's Phone Repairs");
+  const example = demoFeed.items.find((item) => item.businessName !== "Sipho's Phone Repairs");
+  if (!first || !example) throw new Error("no demo tryout");
   steps["8. demo feed"] = demoFeed.items.map((item) => `${item.businessName}, ${item.distance}, ${item.injuryCover}, ${item.payRecord}`);
   steps["9. demo applies to a demo tryout"] = (await apiPost("/api/applications", { tryoutId: first.id, note: "Demo note" }, ApplicationResultSchema)).status;
+  // The businesses with no account behind them are examples: shown as such, and closed to applications.
+  steps["9b. example business"] = { payRecord: example.payRecord, apply: await refusal(() => apiPost("/api/applications", { tryoutId: example.id }, ApplicationResultSchema)) };
+  if (example.payRecord !== "Example, for viewing only" || (steps["9b. example business"] as { apply: { status: number } }).apply.status !== 409) throw new Error(`An example business should be marked and closed: ${JSON.stringify(steps["9b. example business"])}`);
 
   await signOut(clientAuth());
   await signInAs("e2e-real-ayanda");
@@ -64,6 +69,15 @@ async function feedIsolation(steps: Record<string, unknown>): Promise<void> {
 const ANSWERS = { onTime: true, didTheWork: true, wouldHireAgain: true };
 const AnswerSchema = z.object({ status: z.string(), state: z.object({ kind: z.string(), bookingId: z.optional(z.string()) }) });
 const step = (path: string, body: unknown = {}) => apiPost(path, body, StepResultSchema);
+const SkipSchema = z.object({ status: z.string() });
+
+/** As a judge would: "Skip to the day" on the young person's booking, then the code their booking page shows. */
+async function skipToDay(bookingId: string): Promise<string> {
+  const skipped = await apiPost(`/api/bookings/${bookingId}/skip-to-day`, {}, SkipSchema);
+  const view = await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema);
+  if (skipped.status !== "skipped" || view.day.canSkipToDay || !view.checkInCode) throw new Error(`Skip to the day should move the day and leave the code to show: ${JSON.stringify({ skipped, canSkip: view.day.canSkipToDay })}`);
+  return view.checkInCode;
+}
 
 /** A whole demo tryout, as a judge would walk it: Sipho offers it to Thabo, Thabo accepts, the day runs, Sipho pays, Thabo confirms. */
 async function demoDay(steps: Record<string, unknown>): Promise<string> {
@@ -81,7 +95,7 @@ async function demoDay(steps: Record<string, unknown>): Promise<string> {
   await demoSignIn(THABO.email, THABO.password);
   const answered = await apiPost(`/api/applications/${seeded.tryoutId}/answer`, { answer: "accept" }, AnswerSchema);
   const bookingId = answered.state.bookingId ?? "";
-  const code = await startNow(bookingId);
+  const code = await skipToDay(bookingId);
 
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
@@ -99,8 +113,18 @@ async function demoDay(steps: Record<string, unknown>): Promise<string> {
   const record = await apiGet("/api/record", RecordViewSchema);
   // Signed out, as anyone with the link: a plain request, no token.
   const shared = SharedRecordSchema.parse(await (await fetch(`/api/record/${record.shareToken}`)).json());
-  steps["13b. reference and record"] = { entries: record.entries.length, reference: shared.entries[0]?.reference?.text };
-  if (!shared.entries[0]?.reference || JSON.stringify(shared).match(/0000|27000000000|Mokoena/)) throw new Error(`The shared record should show the approved reference and nothing private: ${JSON.stringify(shared)}`);
+  steps["13b. reference and record"] = { entries: record.entries.length, shared: shared.entries.length, references: shared.entries.filter((entry) => entry.reference).length, reference: shared.entries[0]?.reference?.text };
+  // The seeded two, with one approved reference, and this one.
+  if (record.entries.length !== 3 || shared.entries.filter((entry) => entry.reference).length !== 2 || !shared.entries[0]?.reference || JSON.stringify(shared).match(/0000|27000000000|Mokoena/)) {
+    throw new Error(`The shared record should show three tryouts, two approved references and nothing private: ${JSON.stringify(shared)}`);
+  }
+  // Their third tryout together: the owner is asked to offer a job.
+  await signOut(clientAuth());
+  await demoSignIn(SIPHO.email, SIPHO.password);
+  steps["13c. job offer due"] = await apiGet(`/api/bookings/${bookingId}/hire`, HireViewSchema);
+  if (!(steps["13c. job offer due"] as { due: boolean }).due) throw new Error("A third finished tryout together should bring up the job offer.");
+  await signOut(clientAuth());
+  await demoSignIn(THABO.email, THABO.password);
   const final = await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema);
   steps["13. demo tryout, offer to Received"] = { booked: answered.status, status: final.status, owed: final.day.owedCents, payment: final.day.payment?.state };
   if (final.day.payment?.state !== "received") throw new Error("The demo tryout should end at Received.");
@@ -126,7 +150,7 @@ async function demoDispute(steps: Record<string, unknown>, firstTryoutId: string
   await signOut(clientAuth());
   await demoSignIn(THABO.email, THABO.password);
   const bookingId = (await apiPost(`/api/applications/${second.id}/answer`, { answer: "accept" }, AnswerSchema)).state.bookingId ?? "";
-  const code = await startNow(bookingId);
+  const code = await skipToDay(bookingId);
 
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
@@ -183,6 +207,25 @@ async function demoCredits(steps: Record<string, unknown>): Promise<void> {
   if (again.status !== "unchanged" || after.available !== before.available + 5 || after.request !== null || after.history[0]?.text !== "5 credits added by First Shift") throw new Error(`Credits should be requested once and granted: ${JSON.stringify(steps["15. credits: request, then an admin grant"])}`);
 }
 
+/** "Reset the demo" from the app: demo accounts only, once a minute, and the world is back with its photos. */
+async function demoResetRoute(steps: Record<string, unknown>): Promise<void> {
+  await signOut(clientAuth());
+  await demoSignIn(THABO.email, THABO.password);
+  const thaboUid = clientAuth().currentUser?.uid ?? "";
+  const reset = await apiPost("/api/demo/reset", {}, DemoResetSchema);
+  const tooSoon = await refusal(() => apiPost("/api/demo/reset", {}, DemoResetSchema));
+  const feed = await nearby();
+  const record = await apiGet("/api/record", RecordViewSchema);
+  const [photo] = await getStorage(adminApp()).bucket().file(`photos/${thaboUid}/profile.jpg`).exists();
+  await signOut(clientAuth());
+  await signInAs("e2e-real-ayanda");
+  const real = await refusal(() => apiPost("/api/demo/reset", {}, DemoResetSchema));
+  steps["17. reset the demo from the app"] = { reset: reset.status, tooSoon: tooSoon.status, feed: feed.status === "ok" ? feed.items.length : feed, record: record.entries.length, photo, real: real.status };
+  if (tooSoon.status !== 429 || real.status !== 403 || feed.status !== "ok" || feed.items.length !== 4 || record.entries.length !== 2 || !photo) {
+    throw new Error(`Reset the demo should put the world back once a minute, for demo accounts only: ${JSON.stringify(steps["17. reset the demo from the app"])}`);
+  }
+}
+
 run(async () => {
   await clearEmulators();
   script("demo:accounts", ["--business-email", SIPHO.email, "--business-password", SIPHO.password, "--young-person-email", THABO.email, "--young-person-password", THABO.password]);
@@ -234,6 +277,7 @@ run(async () => {
   await demoDispute(steps, first);
   await demoCredits(steps);
   await demoReview(steps);
+  await demoResetRoute(steps);
 
   console.log(JSON.stringify(steps, null, 2));
   const refused = ["1. wrong password", "7c. one tap, made-up role", "3. edit the demo profile", "3b. change the demo's pay methods", "4. Firebase password changed, then used", "6. email moved off the demo domain", "11. real opens a demo tryout", "12. real applies to a demo tryout"].map((key) => (steps[key] as { status: number }).status);

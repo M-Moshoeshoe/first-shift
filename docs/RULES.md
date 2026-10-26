@@ -173,7 +173,12 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 | Everything a demo account creates is marked demo; demo accounts see only demo records, real people only real ones (`demo.ts`) | The password is public, so separation, not secrecy, keeps real people safe |
 | A demo profile can't be changed from the app | Nobody can put their own name, photo or ID number on a shared account |
 | A demo account signs in only through our server | Changing its Firebase password or email from the browser gains nothing |
-| `npm run demo:reset` restores the demo world | A clean start before every judging session |
+| `npm run demo:reset` restores the demo world, and so does "Reset the demo" in the app, from a demo account only, at most once a minute for everyone | A clean start before every judging session, and for each judge |
+| One tap to sign in: "Try as Thabo, looking for work" or "Try as Sipho, a business" (`POST /api/demo/try`); the email and password still work | Judges get in without typing anything; the passwords are public anyway |
+| The demo world starts with two finished, paid, Received tryouts between Sipho and Thabo this month, one with an approved reference (`src/data/demoHistory.ts`) | The work record and its share link have something on them, and the next tryout they finish together brings up the job offer |
+| "Skip to the day" on a demo booking, before the door opens, moves its start to 5 minutes ago, keeping its hours (`decideSkipToDay`). Never on a real booking | A judge can try check-in, pay, Received and the reference at any hour |
+| The two businesses with no account behind them show "Example, for viewing only" and take no applications (`isExampleOwner`) | Nobody could ever answer an application to them |
+| Placeholder photos for the demo faces and shopfronts, plain shapes drawn by the server | The door check and the shortlist have a photo to show |
 
 ## Accountability and profiles
 

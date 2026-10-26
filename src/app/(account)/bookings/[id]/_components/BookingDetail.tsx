@@ -2,7 +2,6 @@
 
 import { useParams } from "next/navigation";
 import { lazy, Suspense } from "react";
-import { PersonPhoto } from "@/components/PersonPhoto";
 import { ShiftSlip } from "@/components/ShiftSlip";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
 import { Button } from "@/components/ui/Button";
@@ -16,11 +15,14 @@ import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import { BookingViewSchema, type BookingViewResponse } from "@/schemas/booking";
 import { BookingActions } from "./BookingActions";
+import { BookingPeople } from "./BookingPeople";
 import { CancelPanel } from "./CancelPanel";
 import { ReportForm } from "./ReportForm";
 
 // The day's tools load only once the day has begun (or money is owed), so the booking page stays inside its budget.
 const DayPanel = lazy(() => import("./day/DayPanel").then((module) => ({ default: module.DayPanel })));
+// Demo bookings only, before the door opens.
+const SkipToDay = lazy(() => import("./SkipToDay").then((module) => ({ default: module.SkipToDay })));
 
 const FALLBACK = `This booking didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
 
@@ -57,37 +59,11 @@ export function BookingDetail() {
 
   const booking = resource.data;
   const { day, hours } = sastSlot(new Date(booking.startAt), new Date(booking.endAt));
-  const isOwner = booking.party === "business";
-  const other = isOwner ? booking.workerFirstName : booking.businessName;
   return (
     <>
       <PageTitle headingRef={heading} title={booking.title} intro={STATUS_LABELS[booking.status]} />
       <ShiftSlip day={day} hours={hours} business={booking.businessName} area={booking.businessArea} payCents={booking.payCents} stamp={booking.status === "booked" ? "Booked" : undefined} />
-      <section aria-labelledby="who-heading" className="flex gap-4">
-        <PersonPhoto subject={booking.photo.subject} kind={booking.photo.kind} alt={other} />
-        <div className="flex flex-col gap-1">
-          <h2 id="who-heading" className="text-xl font-bold">
-            {other}
-          </h2>
-          {isOwner && booking.payoutPhone ? (
-            <p className="text-lg tabular-nums">
-              {BOOKING_COPY.payoutPhone}: {booking.payoutPhone}
-            </p>
-          ) : null}
-        </div>
-      </section>
-      {booking.owner ? (
-        // The young person's view: who they'll meet, so they know who to ask for at the door.
-        <section aria-labelledby="owner-heading" className="flex gap-4">
-          <PersonPhoto subject={booking.owner.subject} kind="profile" alt={booking.owner.firstName} />
-          <div className="flex flex-col gap-1">
-            <h2 id="owner-heading" className="text-xl font-bold">
-              {BOOKING_COPY.ownerTitle(booking.owner.firstName)}
-            </h2>
-            <p className="text-sm text-muted">{BOOKING_COPY.ownerHint}</p>
-          </div>
-        </section>
-      ) : null}
+      <BookingPeople booking={booking} />
       <section aria-labelledby="where-heading" className="flex flex-col gap-2">
         <h2 id="where-heading" className="text-xl font-bold">
           {BOOKING_COPY.where}
@@ -99,6 +75,11 @@ export function BookingDetail() {
           {BOOKING_COPY.openMaps}
         </a>
       </section>
+      {booking.day.canSkipToDay ? (
+        <Suspense fallback={null}>
+          <SkipToDay bookingId={booking.id} onSkipped={reload} />
+        </Suspense>
+      ) : null}
       {hasDay(booking) ? (
         <Suspense fallback={<div role="status" aria-label="Loading the day" className="h-44 animate-skeleton bg-mist" />}>
           <DayPanel booking={booking} reload={reload} />

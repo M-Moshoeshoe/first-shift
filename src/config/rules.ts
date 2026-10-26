@@ -34,6 +34,10 @@ export const RULES = {
   onTimeGraceMinutes: 10,
   /** Wrong check-in codes allowed on one booking before it locks, so a code can't be guessed. */
   checkInCodeAttempts: 5,
+  /** Demo only: "Skip to the day" moves a demo booking to start this long ago, so the young person is on time. */
+  demoSkipStartsMinutesAgo: 5,
+  /** Demo only: the whole demo world can be reset from the app at most once in this many seconds, by anyone. */
+  demoResetCooldownSeconds: 60,
 
   strikeWindowDays: 90,
   strikesToSuspend: 3,
