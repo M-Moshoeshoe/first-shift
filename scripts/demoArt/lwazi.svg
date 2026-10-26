@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>Lwazi, an illustration</title>
+  <rect width="384" height="384" fill="#EFF5F1"/>
+  <g transform="translate(192 330) scale(1.15) translate(-192 -330)">
+    <!-- Locs hanging behind, to the jaw -->
+    <g fill="none" stroke="#2A1C15" stroke-width="15" stroke-linecap="round">
+      <path d="M138 118 C118 160 112 220 116 268"/>
+      <path d="M152 108 C132 158 128 222 132 276"/>
+      <path d="M128 140 C108 180 102 228 104 258"/>
+      <path d="M246 118 C266 160 272 220 268 268"/>
+      <path d="M232 108 C252 158 256 222 252 276"/>
+      <path d="M256 140 C276 180 282 228 280 258"/>
+    </g>
+    <!-- Neck, then a grey-green crew-neck T-shirt -->
+    <path d="M164 230 L164 292 Q192 308 220 292 L220 230 Z" fill="#7A4C2E"/>
+    <path d="M28 384 C32 320 88 288 158 282 Q192 314 226 282 C296 288 352 320 356 384 Z" fill="#5F7A6D"/>
+    <path d="M158 282 Q192 314 226 282" fill="none" stroke="#0F2D24" stroke-width="8" stroke-linejoin="round"/>
+    <!-- Head -->
+    <path d="M130 170 C130 116 158 94 192 94 C226 94 254 116 254 170 C254 224 228 258 192 258 C156 258 130 224 130 170 Z" fill="#94603D"/>
+    <!-- Locs on top, parted to the sides -->
+    <path d="M126 172 C120 106 156 80 192 80 C228 80 264 106 258 172 C248 142 236 126 214 118 C200 114 184 114 170 118 C148 126 136 142 126 172 Z" fill="#2A1C15"/>
+    <g fill="none" stroke="#4A3324" stroke-width="4" stroke-linecap="round">
+      <path d="M184 86 C166 92 148 108 138 138"/>
+      <path d="M186 98 C170 104 156 114 148 128"/>
+      <path d="M200 86 C218 92 236 108 246 138"/>
+      <path d="M198 98 C214 104 228 114 236 128"/>
+    </g>
+    <!-- Face -->
+    <path d="M152 160 Q166 153 180 157" fill="none" stroke="#2A1C15" stroke-width="6" stroke-linecap="round"/>
+    <path d="M204 157 Q218 153 232 160" fill="none" stroke="#2A1C15" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="167" cy="179" rx="6" ry="7.5" fill="#1A120E"/>
+    <ellipse cx="217" cy="179" rx="6" ry="7.5" fill="#1A120E"/>
+    <circle cx="169" cy="176" r="2" fill="#FFFFFF"/>
+    <circle cx="219" cy="176" r="2" fill="#FFFFFF"/>
+    <path d="M183 200 C183 211 201 211 201 200" fill="none" stroke="#7A4C2E" stroke-width="5" stroke-linecap="round"/>
+    <path d="M172 224 Q192 242 212 224 Z" fill="#3A1C14"/>
+    <path d="M175 225 Q192 232 209 225 Z" fill="#FFFFFF"/>
+  </g>
+</svg>

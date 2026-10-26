@@ -76,8 +76,14 @@ async function referenceAndRecord(rec: Recorder, page: Page): Promise<void> {
   await rec.check(page, "work record");
   const link = (await page.locator("p.break-all").innerText()).trim();
   if (!/\/record\/[A-Za-z0-9_-]{24}$/.test(link)) rec.failures.push(`${rec.width} px: the share link looks wrong: ${link}`);
+  // Copy for my CV: the toast, and the text on the clipboard with the tryout, the reference's first sentence and the link.
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"], { origin: BASE });
+  await page.getByRole("button", { name: "Copy for my CV" }).click();
+  await page.getByText("Copied. Paste it into your CV or job application.").waitFor();
+  const cv = await page.evaluate(() => navigator.clipboard.readText());
+  if (!cv.startsWith("Work experience (verified on First Shift)") || !cv.includes("Paid tryout, Lerato's Spaza") || !cv.endsWith(`Check these at: ${link}`)) rec.failures.push(`${rec.width} px: Copy for my CV copied: ${cv}`);
   await page.goto(link.replace(/^https?:\/\/[^/]+/, BASE));
-  await page.getByRole("heading", { name: "Thabo's work record" }).waitFor();
+  await page.getByRole("heading", { name: "Thabo's verified work record" }).waitFor();
   await page.getByText("Written with AI from the business's answers").waitFor();
   if ((await page.getByText(/Mokoena|082 123 4567|27821234567|0087/).count()) > 0) rec.failures.push(`${rec.width} px: the shared record shows private details`);
   await rec.check(page, "shared work record, no sign-in");

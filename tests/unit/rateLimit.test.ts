@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { sastDateKey } from "@/domain/time";
-import { consumeDailyQuota } from "@/server/rateLimit";
+import { clientAddress, consumeDailyQuota, consumeWindowQuota } from "@/server/rateLimit";
 
 // An in-memory stand-in for Firestore: one map of counters, transactions run straight through.
 const store = vi.hoisted(() => new Map<string, Record<string, unknown>>());
@@ -40,5 +40,32 @@ describe("consumeDailyQuota", () => {
     store.clear();
     await consumeDailyQuota("lerato", "posts", 1, { now: sast("2026-10-26T00:30:00") });
     await expect(consumeDailyQuota("lerato", "posts", 1, { now: sast("2026-10-26T23:30:00"), message: "Post this one tomorrow." })).rejects.toMatchObject({ status: 429, code: "daily_limit", publicMessage: "Post this one tomorrow." });
+  });
+});
+
+describe("consumeWindowQuota (the demo sign-in limit)", () => {
+  const at = (iso: string) => new Date(iso);
+
+  it("allows the limit in a window, refuses the next one, and starts again in the next window", async () => {
+    store.clear();
+    for (let i = 0; i < 3; i += 1) await consumeWindowQuota("demo_sign_in:203.0.113.7", 3, 10, "Wait.", at("2026-10-26T10:01:00Z"));
+    await expect(consumeWindowQuota("demo_sign_in:203.0.113.7", 3, 10, "Wait.", at("2026-10-26T10:09:00Z"))).rejects.toMatchObject({ status: 429, code: "too_many_requests", publicMessage: "Wait." });
+    await expect(consumeWindowQuota("demo_sign_in:203.0.113.7", 3, 10, "Wait.", at("2026-10-26T10:10:00Z"))).resolves.toBeUndefined();
+  });
+
+  it("counts each address apart, and never stores the address itself", async () => {
+    store.clear();
+    await consumeWindowQuota("demo_sign_in:203.0.113.7", 1, 10, "Wait.", at("2026-10-26T10:01:00Z"));
+    await expect(consumeWindowQuota("demo_sign_in:198.51.100.2", 1, 10, "Wait.", at("2026-10-26T10:01:00Z"))).resolves.toBeUndefined();
+    expect(JSON.stringify([...store.entries()])).not.toContain("203.0.113.7");
+  });
+});
+
+describe("clientAddress", () => {
+  it("prefers the address Netlify's edge sets, then the first forwarded one", () => {
+    const request = (headers: Record<string, string>) => new Request("https://example.test", { headers });
+    expect(clientAddress(request({ "x-nf-client-connection-ip": "203.0.113.7", "x-forwarded-for": "198.51.100.2" }))).toBe("203.0.113.7");
+    expect(clientAddress(request({ "x-forwarded-for": "198.51.100.2, 10.0.0.1" }))).toBe("198.51.100.2");
+    expect(clientAddress(request({}))).toBe("unknown");
   });
 });

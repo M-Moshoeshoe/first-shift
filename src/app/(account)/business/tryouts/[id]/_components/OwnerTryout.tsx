@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ShiftSlip } from "@/components/ShiftSlip";
+import { SheetLoading } from "@/components/SheetLoading";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -141,7 +142,7 @@ export function OwnerTryout() {
       )}
       {/* Kept mounted once loaded, so closing plays sheet-exit instead of vanishing. */}
       {sheetReady || open ? (
-        <Suspense fallback={null}>
+        <Suspense fallback={open ? <SheetLoading /> : null}>
           <ApplicantSheet isOpen={open !== null} applicant={opened} canOffer={canOffer} busy={offering !== null} error={open ? error : null} onOffer={(workerId) => void makeOffer(workerId)} onClose={closeSheet} />
         </Suspense>
       ) : null}

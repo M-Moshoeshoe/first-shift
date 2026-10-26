@@ -82,7 +82,6 @@ export type BadgesResponse = z.infer<typeof BadgesSchema>;
 
 export const OfferResultSchema = z.object({ status: z.enum(["offered", "unchanged"]) });
 export const SeenResultSchema = z.object({ status: z.literal("seen") });
-export const AnswerResultSchema = z.object({ status: z.enum(["booked", "declined", "unchanged"]) });
 export const OfferSchema = z.object({ workerId: z.string().check(z.minLength(1), z.maxLength(128), z.regex(/^[A-Za-z0-9_-]+$/)) });
 export const AnswerSchema = z.object({ answer: z.enum(["accept", "decline"]) });
 export const ReportSchema = z.object({

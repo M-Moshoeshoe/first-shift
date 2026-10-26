@@ -28,7 +28,7 @@ export const REFERENCE_COPY = {
   writtenWithAi: "Written with AI from the business's answers",
   example: "Example reference for the demo.",
   add: "Add to my record",
-  added: "Added to your record.",
+  added: "Added to your record. You can now put it on your CV.",
   challenge: "Challenge it",
   challengeReason: "What's wrong with it?",
   challengeHint: "A person at First Shift reads this and contacts you. Until then the reference stays off your record.",
@@ -50,7 +50,7 @@ export const REFERENCE_COPY = {
 
 export const RECORD_COPY = {
   title: "Your work record",
-  intro: "Every tryout you were paid for, confirmed by you and the business.",
+  intro: "Every tryout you were paid for, confirmed by you and the business. Add it to your CV.",
   empty: "Your first paid tryout will show here once you tap Received.",
   verified: "Paid, confirmed by both",
   hours: (hours: number) => `${hours} ${hours === 1 ? "hour" : "hours"}`,
@@ -60,12 +60,24 @@ export const RECORD_COPY = {
   challengeOpen: "We're looking into your challenge. The reference stays off your record until it's sorted out.",
   shareHint: "Anyone with this link sees your first name, your tryouts and the references you added. Never your ID or number.",
   shareText: (link: string) => `My work record on First Shift, with references from the businesses I worked for: ${link}`,
-  publicTitle: (name: string) => `${name}'s work record`,
-  publicIntro: "Paid tryouts on First Shift, each confirmed by the business and the young person. References show only once the young person approved them.",
+  publicTitle: (name: string) => `${name}'s verified work record`,
+  publicIntro: (name: string) => `Each tryout here was paid for and confirmed by the business and by ${name}.`,
   publicMissing: "This link is not working. Ask the person who sent it for a new one.",
   unavailable: "Your record did not load. Check your connection, then tap Try again.",
   metaTitle: "A work record on First Shift",
   metaDescription: "Paid tryouts, each confirmed by the business and the young person, with references they approved.",
+} as const;
+
+/** "Copy for my CV" on the work record, and the text it copies (cvText.ts). */
+export const CV_COPY = {
+  copy: "Copy for my CV",
+  copying: "Copying",
+  copied: "Copied. Paste it into your CV or job application.",
+  copyFailed: "Copying did not work on this phone. Press and hold the text below, then copy it.",
+  heading: "Work experience (verified on First Shift)",
+  line: (business: string, area: string, date: string, hours: string) => `Paid tryout, ${business}, ${area}, ${date} (${hours})`,
+  hiredBy: (business: string) => `Hired by ${business}`,
+  checkAt: (link: string) => `Check these at: ${link}`,
 } as const;
 
 export const HIRE_COPY = {

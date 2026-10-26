@@ -9,7 +9,7 @@ import { OFFER_COPY } from "@/domain/bookingMessages";
 import { FINDING_MESSAGES } from "@/domain/findingMessages";
 import { sastWhen } from "@/domain/time";
 import { ApiError, apiPost } from "@/lib/api";
-import { AnswerResultSchema } from "@/schemas/booking";
+import { AnswerResultSchema } from "@/schemas/offerAnswer";
 import type { ApplyStateResponse } from "@/schemas/finding";
 
 const ERROR_ID = "offer-error";

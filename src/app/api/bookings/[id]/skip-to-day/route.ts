@@ -5,7 +5,7 @@ import { toErrorResponse } from "@/server/errors";
 import { liveBookingService } from "@/server/services/liveBookingServices";
 import { parseId } from "@/server/validate";
 
-/** Demo only: "Skip to the day" moves a demo booking's start to now. Refused for any booking not marked demo. */
+/** Demo only: "Skip to the day" opens a demo booking's door now and keeps its times. Refused for any booking not marked demo. */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const viewer = await requireUser(request);

@@ -49,7 +49,9 @@ export function createBookingFakes(now: () => Date) {
     return { checkInCode: String(100000 + secretCount), shareToken: `share-token-${String(secretCount).padStart(8, "0")}` };
   };
   const offerService = createOfferService({ offers, profiles: store.repo, hires: { forWorker: async () => [] }, newSecrets, now });
-  const bookingService = createBookingService({ bookings: bookingRepo, photos: { metadata: async () => null, download: async () => null }, now });
+  // Every photo path holds a PNG, so a test of who may see a photo sees the permission alone.
+  const photos = { metadata: async () => null, download: async () => ({ bytes: new Uint8Array([0x89, 0x50, 0x4e, 0x47]), contentType: "image/png" }) };
+  const bookingService = createBookingService({ bookings: bookingRepo, photos, now });
   let ids = 0;
   const evidenceStore = { save: async (path: string, bytes: Uint8Array) => void files.set(path, bytes), remove: async (path: string) => void files.delete(path) };
   const dayService = createDayService({ bookings: bookingRepo, evidence: evidenceStore, newId: () => `id${(ids += 1)}`, now });
@@ -77,7 +79,7 @@ interface SharedState {
 }
 
 /** The booking repository over the same in-memory state. */
-function fakeBookingRepository({ store, applications, bookings, secrets, cases, strikes, audit, evidence, ledger, appendLedger, updateApp, updateTryout }: SharedState): BookingRepository {
+function fakeBookingRepository({ store, tryouts, applications, bookings, secrets, cases, strikes, audit, evidence, ledger, appendLedger, updateApp, updateTryout }: SharedState): BookingRepository {
   return {
     async get(id) {
       const booking = bookings.get(id);
@@ -139,6 +141,9 @@ function fakeBookingRepository({ store, applications, bookings, secrets, cases, 
         appliedToViewer: apps.some((app) => app.workerId === subject && app.ownerId === viewer),
         bookedTogether: all.some((b) => (b.ownerId === viewer && b.workerId === subject) || (b.ownerId === subject && b.workerId === viewer)),
       };
+    },
+    async publishedTryouts(owner) {
+      return [...tryouts.values()].filter((tryout) => tryout.ownerId === owner && tryout.status === "published").map((tryout) => structuredClone(tryout));
     },
   };
 }

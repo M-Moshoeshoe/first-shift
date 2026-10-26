@@ -2,6 +2,7 @@
   "name": "first-shift",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Paid one-day tryouts at local businesses, with references from the business that paid.",
   "engines": {
     "node": ">=24.12 <25"
@@ -31,7 +32,8 @@
     "review:case": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/reviewCase.ts",
     "pilot:metrics": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/pilotMetrics.ts",
     "demo:accounts": "tsx --conditions=react-server --env-file-if-exists=.env.local --env-file-if-exists=.env.demo.local scripts/createDemoAccounts.ts",
-    "demo:reset": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/resetDemo.ts"
+    "demo:reset": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/resetDemo.ts",
+    "demo:art": "tsx scripts/demoArt/render.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.132.1",

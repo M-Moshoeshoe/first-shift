@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>Thabo, an illustration</title>
+  <rect width="384" height="384" fill="#EFF5F1"/>
+  <g transform="translate(192 330) scale(1.15) translate(-192 -330)">
+    <!-- Neck, then a green crew-neck T-shirt -->
+    <path d="M164 230 L164 292 Q192 308 220 292 L220 230 Z" fill="#64391F"/>
+    <path d="M28 384 C32 320 88 288 158 282 Q192 314 226 282 C296 288 352 320 356 384 Z" fill="#0A6B47"/>
+    <path d="M158 282 Q192 314 226 282" fill="none" stroke="#0F2D24" stroke-width="8" stroke-linejoin="round"/>
+    <!-- Ears -->
+    <ellipse cx="129" cy="178" rx="13" ry="19" fill="#7A4A2E"/>
+    <ellipse cx="255" cy="178" rx="13" ry="19" fill="#7A4A2E"/>
+    <ellipse cx="129" cy="180" rx="6" ry="10" fill="#64391F"/>
+    <ellipse cx="255" cy="180" rx="6" ry="10" fill="#64391F"/>
+    <!-- Head -->
+    <path d="M130 170 C130 116 158 94 192 94 C226 94 254 116 254 170 C254 224 228 258 192 258 C156 258 130 224 130 170 Z" fill="#7A4A2E"/>
+    <!-- Short fade: close on the sides, fuller and squared on top -->
+    <path d="M130 172 C126 114 156 90 192 90 C228 90 258 114 254 172 L248 170 C246 150 242 138 234 130 C210 122 174 122 150 130 C142 138 138 150 136 170 Z" fill="#3A2619"/>
+    <path d="M137 134 C134 96 156 76 192 76 C228 76 250 96 247 134 C232 124 212 119 192 119 C172 119 152 124 137 134 Z" fill="#17110E"/>
+    <g fill="none" stroke="#33251C" stroke-width="3" stroke-linecap="round">
+      <path d="M158 102 q4 -5 8 0"/>
+      <path d="M180 92 q4 -5 8 0"/>
+      <path d="M204 94 q4 -5 8 0"/>
+      <path d="M222 104 q4 -5 8 0"/>
+      <path d="M192 106 q4 -5 8 0"/>
+    </g>
+    <!-- Face -->
+    <path d="M152 160 Q166 152 180 157" fill="none" stroke="#17110E" stroke-width="6" stroke-linecap="round"/>
+    <path d="M204 157 Q218 152 232 160" fill="none" stroke="#17110E" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="167" cy="179" rx="6" ry="7.5" fill="#17110E"/>
+    <ellipse cx="217" cy="179" rx="6" ry="7.5" fill="#17110E"/>
+    <circle cx="169" cy="176" r="2" fill="#FFFFFF"/>
+    <circle cx="219" cy="176" r="2" fill="#FFFFFF"/>
+    <path d="M183 200 C183 211 201 211 201 200" fill="none" stroke="#64391F" stroke-width="5" stroke-linecap="round"/>
+    <path d="M170 222 Q192 246 214 222 Z" fill="#3A1C14"/>
+    <path d="M173 223 Q192 232 211 223 Z" fill="#FFFFFF"/>
+  </g>
+</svg>

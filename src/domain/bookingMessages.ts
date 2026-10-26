@@ -91,8 +91,9 @@ export const BOOKING_NOT_FOUND = "We cannot find that booking. Go back and check
 export const BOOKING_COPY = {
   ownerNextTitle: "What happens next",
   reviewed: (day: string, outcome: string) => `Looked into on ${day}: ${outcome}`,
-  ownerNext: (name: string, opens: string) => [
-    `Check-in opens at ${opens}, an hour before the start.`,
+  /** opens is null once the door is open, including a demo day opened with Skip to the day. */
+  ownerNext: (name: string, opens: string | null) => [
+    opens ? `Check-in opens at ${opens}, an hour before the start.` : "Check-in is open now.",
     `When ${name} arrives, check their face against their photo, and the name and last four digits on their ID card.`,
     `Then type the 6-digit code ${name} shows you. At the end, check ${name} out and pay them.`,
   ],

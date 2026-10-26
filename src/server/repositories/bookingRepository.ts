@@ -1,11 +1,12 @@
 import type { ApplicationStatus } from "@/domain/applications";
-import type { BookingRecord } from "@/domain/bookings";
+import type { BookingRecord, PhotoRelation } from "@/domain/bookings";
 import type { Party } from "@/domain/cancellation";
 import type { ReviewCase } from "@/domain/cases";
 import type { CreditEntry } from "@/domain/credits";
 import type { EvidenceType } from "@/domain/evidence";
 import type { StrikeReason } from "@/domain/strikes";
 import type { TryoutStatus } from "@/domain/tryout";
+import type { TryoutRecord } from "@/domain/tryoutDecisions";
 import type { BookingSecrets, Planned } from "./offerRepository";
 
 export interface BookingState {
@@ -60,5 +61,7 @@ export interface BookingRepository {
   /** What the First Shift team decided on this booking's closed cases (a review, a report, a challenged reference), oldest first. */
   reviews(bookingId: string, tryoutId: string): Promise<{ closedAt: Date; outcome: string }[]>;
   /** How two people are linked, for photo permissions: an application from subject to viewer, or a booking between them. */
-  relation(viewerUid: string, subjectUid: string): Promise<{ appliedToViewer: boolean; bookedTogether: boolean }>;
+  relation(viewerUid: string, subjectUid: string): Promise<Omit<PhotoRelation, "openTryout">>;
+  /** This owner's published tryouts, for whether one is listed for the viewer, so the shopfront may show (nearby.ts, listedFor). */
+  publishedTryouts(ownerUid: string): Promise<TryoutRecord[]>;
 }

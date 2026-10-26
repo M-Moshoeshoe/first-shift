@@ -2,7 +2,7 @@ import "server-only";
 import type { DemoRole } from "@/config/demo";
 import { isDemoEmail } from "@/domain/demo";
 import { DEMO_MESSAGES } from "@/domain/messages";
-import { demoPasswordMatches, type DemoPasswordHash } from "../demoPassword";
+import { demoPasswordMatches, hashDemoPassword, type DemoPasswordHash } from "../demoPassword";
 import { AppError } from "../errors";
 import { log } from "../log";
 
@@ -21,6 +21,9 @@ export interface DemoSignInDeps {
   /** A custom token for the account, minted with the server's own credentials. */
   mintToken: (uid: string) => Promise<string>;
 }
+
+/** Checked against when no account matches, so an unknown email takes as long to refuse as a wrong password. */
+const NO_ACCOUNT: DemoPasswordHash = hashDemoPassword("no demo account has this password");
 
 /**
  * Judges sign in to the demo accounts through here, never with Firebase's own
@@ -51,7 +54,9 @@ export function createDemoSignInService({ findByEmail, findByRole, restore, mint
     async signIn(email: string, password: string): Promise<{ token: string }> {
       const normalised = email.trim().toLowerCase();
       const account = isDemoEmail(normalised) ? await findByEmail(normalised) : null;
-      if (!account || !demoPasswordMatches(password, account)) {
+      // Always one hash check, and one message for every refusal, so nothing says whether an account exists.
+      const matches = demoPasswordMatches(password, account ?? NO_ACCOUNT);
+      if (!account || !matches) {
         log("warn", "demo_sign_in_refused", { found: account !== null });
         throw new AppError(401, "demo_credentials", DEMO_MESSAGES.wrongCredentials);
       }

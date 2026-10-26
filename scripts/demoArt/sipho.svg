@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>Sipho, an illustration</title>
+  <rect width="384" height="384" fill="#EFF5F1"/>
+  <g transform="translate(192 330) scale(1.15) translate(-192 -330)">
+    <!-- Neck, then a dark work shirt with a collar, buttons and a screwdriver in the pocket -->
+    <path d="M164 230 L164 312 Q192 330 220 312 L220 230 Z" fill="#472A19"/>
+    <path d="M28 384 C32 320 88 288 158 282 L192 318 L226 282 C296 288 352 320 356 384 Z" fill="#0F2D24"/>
+    <path d="M192 318 L192 384" stroke="#43584F" stroke-width="4"/>
+    <circle cx="200" cy="336" r="3" fill="#5F7A6D"/>
+    <circle cx="200" cy="364" r="3" fill="#5F7A6D"/>
+    <path d="M156 280 L192 318 L170 326 L150 290 Z" fill="#43584F"/>
+    <path d="M228 280 L192 318 L214 326 L234 290 Z" fill="#43584F"/>
+    <rect x="246" y="314" width="9" height="26" fill="#0A6B47"/>
+    <rect x="249" y="306" width="3" height="10" fill="#CADBD1"/>
+    <rect x="232" y="334" width="40" height="34" fill="none" stroke="#43584F" stroke-width="4"/>
+    <!-- Ears -->
+    <ellipse cx="129" cy="178" rx="13" ry="19" fill="#5B3824"/>
+    <ellipse cx="255" cy="178" rx="13" ry="19" fill="#5B3824"/>
+    <ellipse cx="129" cy="180" rx="6" ry="10" fill="#472A19"/>
+    <ellipse cx="255" cy="180" rx="6" ry="10" fill="#472A19"/>
+    <!-- Head -->
+    <path d="M130 170 C130 116 158 94 192 94 C226 94 254 116 254 170 C254 224 228 258 192 258 C156 258 130 224 130 170 Z" fill="#5B3824"/>
+    <!-- Short grey hair with a high hairline -->
+    <path d="M130 176 C126 112 156 88 192 88 C228 88 258 112 254 176 L247 172 C246 150 240 132 232 120 C220 107 206 104 192 104 C178 104 164 107 152 120 C144 132 138 150 137 172 Z" fill="#A8A39A"/>
+    <path d="M170 136 Q192 130 214 136" fill="none" stroke="#472A19" stroke-width="3" stroke-linecap="round"/>
+    <!-- A short grey beard and moustache -->
+    <path d="M134 186 C134 236 160 266 192 266 C224 266 250 236 250 186 C246 206 238 214 228 216 C214 208 170 208 156 216 C146 214 138 206 134 186 Z" fill="#A8A39A"/>
+    <path d="M172 232 Q192 244 212 232" fill="none" stroke="#2A1710" stroke-width="5" stroke-linecap="round"/>
+    <!-- Face, with square reading glasses -->
+    <path d="M150 158 Q166 151 182 156" fill="none" stroke="#7E7A73" stroke-width="6" stroke-linecap="round"/>
+    <path d="M202 156 Q218 151 234 158" fill="none" stroke="#7E7A73" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="167" cy="180" rx="5.5" ry="6.5" fill="#17110E"/>
+    <ellipse cx="217" cy="180" rx="5.5" ry="6.5" fill="#17110E"/>
+    <circle cx="169" cy="177" r="1.8" fill="#FFFFFF"/>
+    <circle cx="219" cy="177" r="1.8" fill="#FFFFFF"/>
+    <rect x="147" y="166" width="38" height="28" fill="#FFFFFF" fill-opacity="0.12" stroke="#0F2D24" stroke-width="4.5"/>
+    <rect x="199" y="166" width="38" height="28" fill="#FFFFFF" fill-opacity="0.12" stroke="#0F2D24" stroke-width="4.5"/>
+    <path d="M185 174 L199 174 M147 172 L132 168 M237 172 L252 168" stroke="#0F2D24" stroke-width="4.5"/>
+    <path d="M183 202 C183 213 201 213 201 202" fill="none" stroke="#472A19" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

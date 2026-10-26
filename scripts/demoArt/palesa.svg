@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" width="384" height="384">
+  <title>Palesa, an illustration</title>
+  <rect width="384" height="384" fill="#EFF5F1"/>
+  <!-- A touch smaller than the others, so the puff fits the square -->
+  <g transform="translate(192 340) scale(1.08) translate(-192 -340)">
+    <!-- A puff on top: one big round of hair with a soft edge -->
+    <g fill="#1F1511">
+      <circle cx="192" cy="84" r="44"/>
+      <circle cx="152.5" cy="69.6" r="11"/>
+      <circle cx="162.3" cy="54.3" r="11"/>
+      <circle cx="177.6" cy="44.5" r="11"/>
+      <circle cx="192" cy="42" r="11"/>
+      <circle cx="206.4" cy="44.5" r="11"/>
+      <circle cx="221.7" cy="54.3" r="11"/>
+      <circle cx="231.5" cy="69.6" r="11"/>
+    </g>
+    <!-- Neck, then a green V-neck top -->
+    <path d="M166 230 L166 314 Q192 334 218 314 L218 230 Z" fill="#85553A"/>
+    <path d="M28 384 C32 320 88 288 152 282 L192 324 L232 282 C296 288 352 320 356 384 Z" fill="#0A6B47"/>
+    <path d="M152 282 L192 324 L232 282" fill="none" stroke="#0F2D24" stroke-width="5" stroke-linejoin="round"/>
+    <!-- Ears with small studs -->
+    <ellipse cx="131" cy="180" rx="12" ry="18" fill="#A06A44"/>
+    <ellipse cx="253" cy="180" rx="12" ry="18" fill="#A06A44"/>
+    <ellipse cx="131" cy="182" rx="5.5" ry="9" fill="#85553A"/>
+    <ellipse cx="253" cy="182" rx="5.5" ry="9" fill="#85553A"/>
+    <rect x="127" y="196" width="7" height="7" fill="#FFFFFF"/>
+    <rect x="250" y="196" width="7" height="7" fill="#FFFFFF"/>
+    <!-- Head -->
+    <path d="M132 172 C132 120 160 98 192 98 C224 98 252 120 252 172 C252 222 226 256 192 256 C158 256 132 222 132 172 Z" fill="#A06A44"/>
+    <!-- Hair brushed back to the puff, under a light band -->
+    <path d="M130 172 C124 112 156 88 192 88 C228 88 260 112 254 172 C248 144 240 128 226 120 C206 110 178 110 158 120 C144 128 136 144 130 172 Z" fill="#1F1511"/>
+    <g fill="none" stroke="#3B2A20" stroke-width="3" stroke-linecap="round">
+      <path d="M146 140 C150 118 164 104 178 98"/>
+      <path d="M238 140 C234 118 220 104 206 98"/>
+    </g>
+    <path d="M150 104 C170 90 214 90 234 104 L230 116 C212 104 172 104 154 116 Z" fill="#CADBD1"/>
+    <!-- Face -->
+    <path d="M154 159 Q167 151 180 155" fill="none" stroke="#1F1511" stroke-width="5" stroke-linecap="round"/>
+    <path d="M204 155 Q217 151 230 159" fill="none" stroke="#1F1511" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="168" cy="178" rx="6" ry="7.5" fill="#1F1511"/>
+    <ellipse cx="216" cy="178" rx="6" ry="7.5" fill="#1F1511"/>
+    <path d="M160 173 L155 169 M224 173 L229 169" stroke="#1F1511" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="170" cy="175" r="2" fill="#FFFFFF"/>
+    <circle cx="218" cy="175" r="2" fill="#FFFFFF"/>
+    <path d="M184 198 C184 208 200 208 200 198" fill="none" stroke="#85553A" stroke-width="5" stroke-linecap="round"/>
+    <path d="M170 220 Q192 246 214 220 Z" fill="#5A241B"/>
+    <path d="M173 221 Q192 230 211 221 Z" fill="#FFFFFF"/>
+  </g>
+</svg>

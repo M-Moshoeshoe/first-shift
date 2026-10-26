@@ -1,13 +1,18 @@
 import "server-only";
 import { crc32, deflateSync } from "node:zlib";
+import { RULES } from "@/config/rules";
+import type { DemoArt, DemoPhoto } from "@/data/demoArt";
+import { sniffImage } from "@/domain/evidence";
 import { photoPath, type PhotoKind } from "@/domain/profile";
 import { adminBucket } from "./firebaseAdmin";
 
 /*
- * Placeholder photos for the demo accounts and businesses, drawn here as
- * small square PNGs in the theme's colours, so no image file has to ship with
- * the server. Plain shapes only: a head and shoulders, or a shopfront. No
- * real face, and nothing for anyone to mistake for a real person.
+ * The demo faces and shopfronts. npm run demo:reset uploads the illustrations
+ * drawn for them (data/demoArt.ts, scripts/demoArt). "Reset the demo" in the
+ * app runs on the server, which has no access to scripts/, so it draws a
+ * placeholder here instead, only where no photo is stored yet: small square
+ * PNGs in the theme's colours, plain shapes only, a head and shoulders or a
+ * shopfront. Never a real face, and nothing to mistake for a real person.
  */
 type Rgb = readonly [number, number, number];
 type Rect = readonly [x: number, y: number, width: number, height: number, colour: Rgb];
@@ -60,14 +65,31 @@ export function placeholderPng(kind: PhotoKind, tone = 0): Buffer {
   return Buffer.concat([signature, chunk("IHDR", header), chunk("IDAT", deflateSync(Buffer.concat(rows))), chunk("IEND", Buffer.alloc(0))]);
 }
 
-/** Puts a placeholder at each demo photo path that has no file yet, so every demo face and shopfront shows. */
-export async function ensureDemoPhotos(photos: readonly { uid: string; kind: PhotoKind; tone?: number }[]): Promise<void> {
+/** An illustration's PNG bytes, from whoever can read them (npm run demo:reset), or null. */
+export type DemoArtSource = (name: DemoArt) => Uint8Array | null;
+
+/**
+ * Puts every demo face and shopfront in place. An illustration is always
+ * written, so the latest art replaces whatever was there; it must be a PNG
+ * under the photo size limit, or the reset stops. Without one, a placeholder
+ * goes only where no photo is stored, so uploaded illustrations stay. Each
+ * placeholder face takes the next tone, so a list of them is told apart.
+ */
+export async function saveDemoPhotos(photos: readonly DemoPhoto[], art: DemoArtSource = () => null): Promise<{ illustrations: number }> {
   const bucket = adminBucket();
-  await Promise.all(
-    photos.map(async ({ uid, kind, tone }) => {
+  const drawn = await Promise.all(
+    photos.map(async ({ uid, kind, art: name }, index) => {
       const file = bucket.file(photoPath(uid, kind));
+      const bytes = art(name);
+      if (bytes) {
+        if (sniffImage(bytes) !== "image/png" || bytes.length > RULES.photoMaxBytes) throw new Error(`The demo illustration ${name} is not a PNG under 2 MB. Run npm run demo:art again.`);
+        await file.save(Buffer.from(bytes), { contentType: "image/png", resumable: false });
+        return true;
+      }
       const [exists] = await file.exists();
-      if (!exists) await file.save(placeholderPng(kind, tone), { contentType: "image/png", resumable: false });
+      if (!exists) await file.save(placeholderPng(kind, index), { contentType: "image/png", resumable: false });
+      return false;
     }),
   );
+  return { illustrations: drawn.filter(Boolean).length };
 }

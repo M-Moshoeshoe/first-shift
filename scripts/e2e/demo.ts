@@ -1,5 +1,4 @@
 import { execSync } from "node:child_process";
-import { randomBytes } from "node:crypto";
 import { signInWithCustomToken, signInWithEmailAndPassword, signOut, updateEmail, updatePassword } from "firebase/auth";
 import { apiGet, apiPost, apiPostSignedOut } from "../../src/lib/api";
 import { clientAuth } from "../../src/lib/firebaseClient";
@@ -14,6 +13,9 @@ import { DraftResultSchema, HireAnswerResultSchema, HireViewSchema, RecordViewSc
 import { SharedRecordSchema } from "../../src/schemas/sharedRecord";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { doorOpen, skipToDay } from "./demoClock";
+import { SIPHO, THABO, demoSignIn } from "./demoAccounts";
+import { demoPhotoChecks, showsArt } from "./demoPhotos";
 import { adminApp, clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser } from "./session";
 
 /**
@@ -27,17 +29,9 @@ import { adminApp, clearEmulators, post, refusal, requireEmulators, run, signInA
 requireEmulators(["FIRESTORE_EMULATOR_HOST", "FIREBASE_AUTH_EMULATOR_HOST", "FIREBASE_STORAGE_EMULATOR_HOST"]);
 standInForBrowser();
 
-// Throwaway accounts for this check: the real demo passwords never appear in the repo.
-const THABO = { email: "e2e-thabo@firstshift.demo", password: randomBytes(12).toString("base64url") };
-const SIPHO = { email: "e2e-sipho@firstshift.demo", password: randomBytes(12).toString("base64url") };
 // Fixed arguments only, never input: one command line works on Windows and elsewhere.
 const script = (name: string, args: string[] = []) => execSync(["npm run --silent", name, "--", ...args].join(" "), { stdio: "inherit" });
 const scriptOutput = (name: string, args: string[] = []) => execSync(["npm run --silent", name, "--", ...args].join(" "), { encoding: "utf8" });
-
-async function demoSignIn(email: string, password: string): Promise<void> {
-  const { token } = await apiPostSignedOut("/api/demo/sign-in", { email, password }, DemoTokenSchema);
-  await signInWithCustomToken(clientAuth(), token);
-}
 
 const profile = () => apiGet("/api/profile", ProfileViewSchema);
 const nearby = () => apiGet("/api/tryouts/nearby", NearbySchema);
@@ -69,15 +63,6 @@ async function feedIsolation(steps: Record<string, unknown>): Promise<void> {
 const ANSWERS = { onTime: true, didTheWork: true, wouldHireAgain: true };
 const AnswerSchema = z.object({ status: z.string(), state: z.object({ kind: z.string(), bookingId: z.optional(z.string()) }) });
 const step = (path: string, body: unknown = {}) => apiPost(path, body, StepResultSchema);
-const SkipSchema = z.object({ status: z.string() });
-
-/** As a judge would: "Skip to the day" on the young person's booking, then the code their booking page shows. */
-async function skipToDay(bookingId: string): Promise<string> {
-  const skipped = await apiPost(`/api/bookings/${bookingId}/skip-to-day`, {}, SkipSchema);
-  const view = await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema);
-  if (skipped.status !== "skipped" || view.day.canSkipToDay || !view.checkInCode) throw new Error(`Skip to the day should move the day and leave the code to show: ${JSON.stringify({ skipped, canSkip: view.day.canSkipToDay })}`);
-  return view.checkInCode;
-}
 
 /** A whole demo tryout, as a judge would walk it: Sipho offers it to Thabo, Thabo accepts, the day runs, Sipho pays, Thabo confirms. */
 async function demoDay(steps: Record<string, unknown>): Promise<string> {
@@ -95,10 +80,11 @@ async function demoDay(steps: Record<string, unknown>): Promise<string> {
   await demoSignIn(THABO.email, THABO.password);
   const answered = await apiPost(`/api/applications/${seeded.tryoutId}/answer`, { answer: "accept" }, AnswerSchema);
   const bookingId = answered.state.bookingId ?? "";
-  const code = await skipToDay(bookingId);
+  const { code, times } = await skipToDay(bookingId);
 
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
+  await doorOpen(bookingId, times);
   await step(`/api/bookings/${bookingId}/check-in`, { code, faceMatches: true, nameMatches: true, lastFourMatches: true });
   await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed", answers: ANSWERS });
   const owed = (await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema)).day.owedCents;
@@ -165,10 +151,11 @@ async function demoDispute(steps: Record<string, unknown>, firstTryoutId: string
   await signOut(clientAuth());
   await demoSignIn(THABO.email, THABO.password);
   const bookingId = (await apiPost(`/api/applications/${second.id}/answer`, { answer: "accept" }, AnswerSchema)).state.bookingId ?? "";
-  const code = await skipToDay(bookingId);
+  const { code, times } = await skipToDay(bookingId);
 
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
+  await doorOpen(bookingId, times);
   await step(`/api/bookings/${bookingId}/check-in`, { code, faceMatches: true, nameMatches: true, lastFourMatches: true });
   await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed", answers: ANSWERS });
   const owed = (await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema)).day.owedCents;
@@ -227,7 +214,7 @@ async function demoCredits(steps: Record<string, unknown>): Promise<void> {
   if (again.status !== "unchanged" || after.available !== before.available + 5 || after.request !== null || after.history[0]?.text !== "5 credits added by First Shift") throw new Error(`Credits should be requested once and granted: ${JSON.stringify(steps["15. credits: request, then an admin grant"])}`);
 }
 
-/** "Reset the demo" from the app: demo accounts only, once a minute, and the world is back with its photos. */
+/** "Reset the demo" from the app: demo accounts only, once a minute, and the world is back with its photos, the illustrations left as they were. */
 async function demoResetRoute(steps: Record<string, unknown>): Promise<void> {
   await signOut(clientAuth());
   await demoSignIn(THABO.email, THABO.password);
@@ -237,11 +224,12 @@ async function demoResetRoute(steps: Record<string, unknown>): Promise<void> {
   const feed = await nearby();
   const record = await apiGet("/api/record", RecordViewSchema);
   const [photo] = await getStorage(adminApp()).bucket().file(`photos/${thaboUid}/profile.jpg`).exists();
+  const illustrated = (await showsArt(thaboUid, "profile", "thabo")).ok;
   await signOut(clientAuth());
   await signInAs("e2e-real-ayanda");
   const real = await refusal(() => apiPost("/api/demo/reset", {}, DemoResetSchema));
-  steps["17. reset the demo from the app"] = { reset: reset.status, tooSoon: tooSoon.status, feed: feed.status === "ok" ? feed.items.length : feed, record: record.entries.length, photo, real: real.status };
-  if (tooSoon.status !== 429 || real.status !== 403 || feed.status !== "ok" || feed.items.length !== 4 || record.entries.length !== 2 || !photo) {
+  steps["17. reset the demo from the app"] = { reset: reset.status, tooSoon: tooSoon.status, feed: feed.status === "ok" ? feed.items.length : feed, record: record.entries.length, photo, illustrated, real: real.status };
+  if (tooSoon.status !== 429 || real.status !== 403 || feed.status !== "ok" || feed.items.length !== 4 || record.entries.length !== 2 || !photo || !illustrated) {
     throw new Error(`Reset the demo should put the world back once a minute, for demo accounts only: ${JSON.stringify(steps["17. reset the demo from the app"])}`);
   }
 }
@@ -292,6 +280,8 @@ run(async () => {
   }
   steps["7c. one tap, made-up role"] = await refusal(() => apiPostSignedOut("/api/demo/try", { role: "admin" }, DemoTokenSchema));
 
+  // The illustrations demo:reset uploaded, wherever a face or shopfront shows.
+  await demoPhotoChecks(steps);
   await feedIsolation(steps);
   const first = await demoDay(steps);
   await demoDispute(steps, first);

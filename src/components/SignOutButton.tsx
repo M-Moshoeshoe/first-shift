@@ -7,13 +7,14 @@ import { FormError } from "@/components/ui/FormError";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { PROFILE_MESSAGES } from "@/domain/messages";
 import { useAuth } from "@/lib/auth/useAuth";
+import { hideSessionCover, showSessionCover } from "@/lib/sessionCover";
 
 interface SignOutButtonProps {
   /** "header": a quiet text action in the app header; "block": a full-width secondary button. */
   variant?: "header" | "block";
 }
 
-/** Signs out and goes to /sign-in. A failure says so; it never looks like it worked. */
+/** Signs out and goes to /sign-in, behind the "Signing you out" cover. A failure says so; it never looks like it worked. */
 export function SignOutButton({ variant = "block" }: SignOutButtonProps) {
   const { signOut } = useAuth();
   const router = useRouter();
@@ -25,10 +26,13 @@ export function SignOutButton({ variant = "block" }: SignOutButtonProps) {
     if (busy) return;
     setBusy(true);
     setError(null);
+    // Covered from the tap until the sign-in screen has drawn (SignInPanel clears it), so no screen flashes on the way.
+    showSessionCover("out");
     try {
       await signOut();
       router.replace("/sign-in");
     } catch {
+      hideSessionCover("out");
       setError(PROFILE_MESSAGES.signOutFailed);
       setBusy(false);
     }

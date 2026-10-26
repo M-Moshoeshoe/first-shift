@@ -41,6 +41,7 @@ export function DemoSignIn() {
       <h2 id="demo-email-heading" className="text-xl font-bold">
         Sign in with a demo email
       </h2>
+      <p className="text-sm text-muted">Email sign-in is only for the demo accounts. Everyone else continues with Google.</p>
       <TextField id="demo-email" label="Email" type="email" inputMode="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} />
       <TextField id="demo-password" label="Password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
       <div className="flex flex-col gap-3">

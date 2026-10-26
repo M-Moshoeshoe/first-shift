@@ -8,8 +8,9 @@ import type { Language, Skill } from "@/domain/workerProfile";
  * Six made-up applicants on Sipho's first tryout, beside Thabo, so a judge
  * signed in as Sipho sees a full ranked list. Each is marked demo: true and
  * labelled "Example applicant"; offering to them is refused (offers.ts), so
- * Thabo stays the one to book. Their photos are drawn placeholders, never a
- * real face (server/demoPhotos.ts). Histories differ, so their show-up scores do.
+ * Thabo stays the one to book. Their faces are illustrations drawn for First
+ * Shift, never a photo of a real person (data/demoArt.ts, scripts/demoArt).
+ * Histories differ, so their show-up scores do.
  */
 
 interface Example {

@@ -38,7 +38,7 @@ export function DemoChoice({ children }: { children?: ReactNode }) {
   return (
     <section id="demo" aria-labelledby="demo-heading" className="flex flex-col gap-3 bg-mist p-4">
       <h2 id="demo-heading" className="text-xl">
-        Explore with a demo account
+        Explore with a demo account: tap Thabo or Sipho.
       </h2>
       {ROLES.map(({ role, label, line }) => (
         <button

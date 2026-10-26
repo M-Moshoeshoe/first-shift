@@ -8,6 +8,7 @@ import type { ReportCategory } from "@/domain/cases";
 import { dayOptions, decideSkipToDay, methodsFor } from "@/domain/day";
 import { canAddEvidence } from "@/domain/evidence";
 import type { Viewer } from "@/domain/demo";
+import { listedFor } from "@/domain/nearby";
 import { displayPhone, photoPath, type PhotoKind } from "@/domain/profile";
 import { settlementCredit } from "@/domain/settlement";
 import { addDays } from "@/domain/time";
@@ -73,8 +74,9 @@ function bookingView(bookingId: string, booking: BookingRecord, secrets: Booking
 
 /**
  * The booking page for both parties, cancelling through settle(), reports,
- * the public status page and photos between people who are linked. Every
- * decision comes from src/domain (bookings.ts, settlement.ts).
+ * the public status page, and photos between people who are linked or of a
+ * business with a tryout open to the viewer. Every decision comes from
+ * src/domain (bookings.ts, settlement.ts, nearby.ts).
  */
 export function createBookingService({ bookings, photos, now }: BookingServiceDeps) {
   const graceCancels = (uid: string) => bookings.graceCancelsSince(uid, addDays(now(), -GRACE_WINDOW_DAYS));
@@ -127,7 +129,7 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
       });
     },
 
-    /** Demo only: moves a demo booking's day to now, so a judge can try the door at any hour (day.ts, decideSkipToDay). */
+    /** Demo only: opens a demo booking's door now, keeping its times, so a judge can try the door at any hour (day.ts, decideSkipToDay). */
     async skipToDay(viewer: Viewer, bookingId: string): Promise<{ status: "skipped" | "unchanged" }> {
       return bookings.transactBooking<{ status: "skipped" | "unchanged" }>(bookingId, viewer.uid, ({ booking }) => {
         const decision = decideSkipToDay(viewer, booking, now());
@@ -136,7 +138,7 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
           throw decision.problem === "not_demo" ? new AppError(403, "not_demo", DEMO_COPY.notDemo) : new AppError(409, "not_booked", DEMO_COPY.skipNotBooked);
         }
         if (decision.kind === "unchanged") return { write: null, result: { status: "unchanged" } };
-        return { write: { booking: { startAt: decision.startAt, endAt: decision.endAt }, audit: "demo_skipped_to_day" }, result: { status: "skipped" } };
+        return { write: { booking: { dayOpenedAt: decision.dayOpenedAt }, audit: "demo_skipped_to_day" }, result: { status: "skipped" } };
       });
     },
 
@@ -156,7 +158,13 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
     },
 
     async photo(viewer: Viewer, subjectUid: string, kind: PhotoKind) {
-      const relation = viewer.uid === subjectUid ? { appliedToViewer: false, bookedTogether: false } : await bookings.relation(viewer.uid, subjectUid);
+      const own = viewer.uid === subjectUid;
+      // An open tryout counts for a shopfront only (mayViewPhoto), so a face never waits on that read.
+      const [linked, tryouts] = await Promise.all([
+        own ? { appliedToViewer: false, bookedTogether: false } : bookings.relation(viewer.uid, subjectUid),
+        own || kind !== "shopfront" ? [] : bookings.publishedTryouts(subjectUid),
+      ]);
+      const relation = { ...linked, openTryout: tryouts.some((tryout) => listedFor(viewer, tryout, now())) };
       if (!mayViewPhoto(viewer.uid, subjectUid, kind, relation)) return null;
       const file = await photos.download(photoPath(subjectUid, kind));
       return file && RULES.photoContentTypes.some((type) => type === file.contentType) ? file : null;

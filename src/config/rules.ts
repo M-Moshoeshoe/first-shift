@@ -34,8 +34,6 @@ export const RULES = {
   onTimeGraceMinutes: 10,
   /** Wrong check-in codes allowed on one booking before it locks, so a code can't be guessed. */
   checkInCodeAttempts: 5,
-  /** Demo only: "Skip to the day" moves a demo booking to start this long ago, so the young person is on time. */
-  demoSkipStartsMinutesAgo: 5,
   /** Demo only: the whole demo world can be reset from the app at most once in this many seconds, by anyone. */
   demoResetCooldownSeconds: 60,
 
@@ -54,6 +52,9 @@ export const RULES = {
 
   applicationsPerDay: 10,
   postsPerDay: 5,
+  /** Demo sign-ins (one tap or email) from one network address in each window, so nobody can flood the route. */
+  demoSignInsPerWindow: 30,
+  demoSignInWindowMinutes: 10,
 
   hirePromptAfterTryouts: 3,
   /** A job offer: the role in a few words, the days a week, and an optional personal message. */

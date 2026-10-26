@@ -1,5 +1,7 @@
 # Audit: the real state of First Shift
 
+> A dated snapshot: what was true at the commit named below. It is kept as a record and is not updated; the code and the other documents have moved on since.
+
 Read-only audit, Sunday 25 October 2026, 00:10 SAST, at commit `f95fd11` (tag `phase-1` is `905be2b`). Nothing in the code was changed. Evidence was gathered by reading every file in `src/`, running `npm run check`, `npm run rules`, the e2e scripts, knip, and 66 screenshots in Microsoft Edge.
 
 The short version: the foundations are strong (rules, security, tests, architecture), but the product a judge can use today is sign-in plus two onboarding forms that end on placeholder screens. Not one tryout can be posted, found, booked or paid yet. About 48 hours remain.

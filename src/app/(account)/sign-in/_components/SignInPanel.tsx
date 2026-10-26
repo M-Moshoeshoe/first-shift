@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ComponentType } from "react";
 import { ProfileErrorState } from "@/components/ProfileErrorState";
-import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { readIntent, withIntent } from "@/domain/intent";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
@@ -12,6 +11,7 @@ import { redirectFor } from "@/domain/profile";
 import { fail } from "@/domain/result";
 import { useAuth } from "@/lib/auth/useAuth";
 import { signInWithGoogle } from "@/lib/auth/signInWithGoogle";
+import { hideSessionCover, showSessionCover } from "@/lib/sessionCover";
 import { testSignInAllowed } from "@/lib/emulators";
 import { DemoChoice } from "./DemoChoice";
 import { GoogleButton } from "./GoogleButton";
@@ -45,6 +45,12 @@ export function SignInPanel() {
     void loadTestSignIn().then((module) => setTestSignIn(() => module.TestSignIn));
   }, []);
 
+  // Before paint: someone signed in is covered at once, so the form never flashes; once signed out, the form shows.
+  useLayoutEffect(() => {
+    if (user) showSessionCover("in");
+    else if (!loading) hideSessionCover("out");
+  }, [user, loading]);
+
   useEffect(() => {
     if (!user) return undefined;
     let current = true;
@@ -54,7 +60,10 @@ export function SignInPanel() {
       .catch(() => fail(PROFILE_MESSAGES.profileUnavailable)) // the code itself didn't download
       .then((result) => {
         if (!current) return;
-        if (!result.ok) return setProfileError({ uid: user.uid, message: result.error });
+        if (!result.ok) {
+          hideSessionCover();
+          return setProfileError({ uid: user.uid, message: result.error });
+        }
         const target = redirectFor("/sign-in", result.value);
         if (target) router.replace(withIntent(target, readIntent(window.location.search)));
       });
@@ -89,6 +98,7 @@ export function SignInPanel() {
         <GoogleButton busy={busy} onClick={() => void handleSignIn()} aria-describedby={ERROR_ID}>
           {busy ? "Opening Google" : BUTTON_LABELS.continueWithGoogle}
         </GoogleButton>
+        <p className="text-sm text-muted">New here or coming back, Continue with Google works for both.</p>
         <FormError id={ERROR_ID} message={message} />
         <TermsLine />
       </div>
@@ -101,7 +111,7 @@ export function SignInPanel() {
         ) : (
           // Most people use the role cards above, so the email form waits behind a small link.
           <button type="button" onClick={() => setShowDemo(true)} className="inline-flex min-h-11 items-center self-start text-left text-sm">
-            <span className="link">Have demo login details? Sign in with email.</span>
+            <span className="link">Have the demo login details? Sign in with email.</span>
           </button>
         )}
       </DemoChoice>

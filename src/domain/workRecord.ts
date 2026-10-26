@@ -1,6 +1,6 @@
 import type { BookingRecord } from "./bookings";
 import type { OwnerAnswers, ReferenceRecord, ReferenceStatus } from "./references";
-import { sastDay } from "./time";
+import { sastDay, sastParts } from "./time";
 
 /*
  * The work record: every tryout that ended with Received is a verified line,
@@ -11,10 +11,14 @@ import { sastDay } from "./time";
 
 export interface RecordEntry {
   bookingId: string;
+  /** The business owner's uid, for their shopfront in the young person's own view (they were booked together: mayViewPhoto). Never on the shared record. */
+  photoSubject: string;
   businessName: string;
   businessArea: string;
   title: string;
   day: string;
+  /** The tryout's year in South African time, for the CV text (cvText.ts); the screens show day only. */
+  year: number;
   hours: number;
   /** The young person's own view sees every status; the shared record only approved ones. */
   reference: { text: string; answers: OwnerAnswers; status: ReferenceStatus; example?: boolean } | null;
@@ -38,10 +42,12 @@ export function recordEntries(bookings: readonly { id: string; booking: BookingR
       const reference = references.get(id);
       return {
         bookingId: id,
+        photoSubject: booking.ownerId,
         businessName: booking.businessName,
         businessArea: booking.businessArea,
         title: booking.title,
         day: sastDay(booking.startAt),
+        year: sastParts(booking.startAt).year,
         hours: recordHours(booking),
         reference: reference && reference.status !== "withdrawn" ? { text: reference.text, answers: reference.answers, status: reference.status, ...(reference.example ? { example: true } : {}) } : null,
       };
@@ -52,7 +58,7 @@ export interface SharedRecord {
   firstName: string;
   /** "Offered a job by", and "Hired by" once marked (hire.ts, recordJobs). */
   jobs: { businessName: string; hired: boolean }[];
-  entries: (Omit<RecordEntry, "bookingId" | "reference"> & { reference: { text: string; answers: OwnerAnswers; example?: boolean } | null })[];
+  entries: (Omit<RecordEntry, "bookingId" | "photoSubject" | "year" | "reference"> & { reference: { text: string; answers: OwnerAnswers; example?: boolean } | null })[];
 }
 
 /** What the share link shows: the first name and the verified entries, with approved references only. */

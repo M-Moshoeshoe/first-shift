@@ -6,6 +6,7 @@ import type { BookingRecord } from "@/domain/bookings";
 import type { BookingRepository, BookingWrite, Counter } from "./bookingRepository";
 import { appendLedger, readLedger } from "./firestoreLedger";
 import { defined, parseBooking, parseSecrets } from "./firestoreRecords";
+import { parseTryout } from "./firestoreTryoutRepository";
 
 /** Applies one booking step's writes inside its transaction, each with the audit entry. */
 function applyBookingWrite(db: Firestore, tx: Transaction, bookingId: string, booking: BookingRecord, ledgerLength: number, actorUid: string, write: BookingWrite): void {
@@ -117,5 +118,11 @@ export const firestoreBookingRepository: BookingRepository = {
       db.collection("bookings").where("ownerId", "==", subjectUid).where("workerId", "==", viewerUid).limit(1).get(),
     ]);
     return { appliedToViewer: !applied.empty, bookedTogether: !asOwner.empty || !asWorker.empty };
+  },
+
+  async publishedTryouts(ownerUid) {
+    // Equality only: served by single-field indexes, no composite index needed.
+    const snapshot = await adminDb().collection("tryouts").where("ownerId", "==", ownerUid).where("status", "==", "published").get();
+    return snapshot.docs.map((doc) => parseTryout(doc.data()));
   },
 };

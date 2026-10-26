@@ -1,6 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useState } from "react";
+import { SheetLoading } from "@/components/SheetLoading";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
 import { Button } from "@/components/ui/Button";
 import { Collapsible } from "@/components/ui/Collapsible";
@@ -85,7 +86,7 @@ export function TryoutList({ list, onRetry }: { list: OwnTryouts; onRetry: () =>
       )}
       {/* Kept mounted once loaded, so closing plays sheet-exit instead of vanishing. */}
       {sheetReady || withdrawing ? (
-        <Suspense fallback={null}>
+        <Suspense fallback={withdrawing ? <SheetLoading /> : null}>
           <WithdrawSheet tryoutId={withdrawing} onClose={() => setWithdrawing(null)} />
         </Suspense>
       ) : null}

@@ -30,7 +30,7 @@ export const HOW = {
       "Find a paid tryout near you and apply in one tap.",
       "Get booked, and share your trip with someone you trust.",
       "Do the day. The owner checks you in at the door and pays you the same day.",
-      "Get a reference written from the business's answers, on a work record you can share.",
+      "Get a reference written from the business's answers, on a work record you can add to your CV.",
     ],
   },
   business: {

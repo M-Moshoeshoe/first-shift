@@ -48,6 +48,8 @@ export interface BookingRecord {
   owedMinimumCents?: number | null;
   /** For the door check: the last four digits on the young person's ID card. Shown to the owner only at check-in. */
   workerIdLastFour: string;
+  /** Demo only: when a judge tapped "Skip to the day", which opens the door at any hour and keeps the times (day.ts, demoDayOpen). Ignored on a real booking. */
+  dayOpenedAt?: Date | null;
   checkedInAt?: Date | null;
   /** answers: the owner's three, required at check-out; the reference is written from them only (references.ts). */
   ended?: { at: Date; reason: CheckoutReason; minutesWorked: number; answers?: OwnerAnswers } | null;
@@ -169,18 +171,30 @@ export function statusView(booking: BookingRecord, now: Date): { workerFirstName
 }
 
 /**
- * Who sees whose photo: your own; an applicant's face, by the owner they
- * applied to; and each other's, once booked together (the young person sees
- * the shopfront to find the door). Nobody else, so demo and real never meet.
- */
-/**
  * The check-in code is the young person's, to show at the door: never the
  * owner's, and gone once they are checked in or the booking has ended, so an
  * old code is never on screen to be copied.
  */
 export const showsCheckInCode = (party: Party, booking: Pick<BookingRecord, "status">): boolean => party === "young_person" && booking.status === "booked";
 
-export function mayViewPhoto(viewerUid: string, subjectUid: string, kind: "profile" | "shopfront", relation: { appliedToViewer: boolean; bookedTogether: boolean }): boolean {
+/** How the viewer and the person in a photo are linked, for mayViewPhoto. */
+export interface PhotoRelation {
+  /** The subject applied to one of the viewer's tryouts. */
+  appliedToViewer: boolean;
+  bookedTogether: boolean;
+  /** The subject has a tryout listed for the viewer: published, still open for booking, in the viewer's world (nearby.ts, listedFor). */
+  openTryout: boolean;
+}
+
+/**
+ * Who sees whose photo: your own; an applicant's face, by the owner they
+ * applied to; each other's, once booked together (the young person sees the
+ * shopfront to find the door); and a business's shopfront, by anyone signed
+ * in to the same world while it has a tryout open for booking, so the feed can
+ * show it. Never a face on that last ground, and nobody else, so demo and real
+ * never meet.
+ */
+export function mayViewPhoto(viewerUid: string, subjectUid: string, kind: "profile" | "shopfront", relation: PhotoRelation): boolean {
   if (viewerUid === subjectUid) return true;
-  return kind === "profile" ? relation.appliedToViewer || relation.bookedTogether : relation.bookedTogether;
+  return kind === "profile" ? relation.appliedToViewer || relation.bookedTogether : relation.bookedTogether || relation.openTryout;
 }

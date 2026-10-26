@@ -6,7 +6,7 @@ Young people on cheap Android phones, often outdoors in bright sun, and busy sma
 
 ## Version 4 (26 October 2026)
 
-A quieter, denser system after the audit (`docs/AUDIT-2.md`): Archivo type with a semi-condensed heading width, a smaller type scale, 1 px borders, smaller buttons, Lucide icons, and the owner's logo. The palette, the contrast ratios, the slip, the Stamp and the sharp edges are unchanged. References: our own builds (Citrus Aura, Dragon Pilates), Findra and PopArt Studio for density and ranked lists (home page sections carry no numbers since the final round); Nielsen's heuristics, NN/g's error-message guidelines and WCAG 2.2 AA as the bar.
+A quieter, denser system after the audit (`docs/audits/AUDIT-2.md`): Archivo type with a semi-condensed heading width, a smaller type scale, 1 px borders, smaller buttons, Lucide icons, and the owner's logo. The palette, the contrast ratios, the slip, the Stamp and the sharp edges are unchanged. References: our own builds (Citrus Aura, Dragon Pilates), Findra and PopArt Studio for density and ranked lists (home page sections carry no numbers since the final round); Nielsen's heuristics, NN/g's error-message guidelines and WCAG 2.2 AA as the bar.
 
 ## Logo
 
@@ -185,7 +185,12 @@ Responses to what the person did, or to new data. App screens never use scroll r
 13. **Skeleton shimmer**: a light band crossing the placeholder, by `transform`, replacing the opacity pulse.
 14. **Toast**: enters from 8 px below and fades in; leaves by fading out.
 15. **The AI guide's ticks**: each step's tick lands (scale 0.6 to 1 and fade) when that step really completes. Never on a timer.
-16. **Navigation progress** (final round): a 2 px `primary` bar at the top of app screens while a tapped link is still loading. It appears only after 150 ms, by a CSS transition delay (no timer), and grows by `scaleX` to 80% over 2 s with `--ease-out`; the new screen removes it at once. Hidden entirely with reduced motion, where the screen's skeleton shows the wait.
+16. **Navigation progress** (final round): a 2 px `primary` bar at the top of the screen while a tapped link is still loading, on every account screen (sign-in and onboarding included, from the account layout) and every marketing page (`PageShell`). It appears only after 150 ms, by a CSS transition delay (no timer), and grows by `scaleX` to 80% over 2 s with `--ease-out`; the new screen removes it at once. Hidden entirely with reduced motion, where the screen's skeleton shows the wait. The two trusted-contact pages (`/status`, `/record`) leave it out: they sit at their JavaScript budgets and have only the footer's links.
+17. **Session cover** (final round): once sign-in succeeds (Google, a demo card or the demo email), and from the tap on Sign out, a `paper` cover fills the screen with the mark, a 4 px bar and "Signing you in" or "Signing you out" (`SessionCover`). The bar grows by `scale` from 8% to 90% over 3 s with `--ease-out` and waits there. The cover stays until the next screen has drawn (`ProfileGate` removes it, or the sign-in screen after signing out), so the form never flashes in between. With reduced motion the bar is drawn at 90% and does not move.
+
+### Loading states (final round audit)
+
+Every navigation and every action that waits on the network shows something within 150 ms: the navigation bar (16), the screen's own skeleton (`loading.tsx` and `ScreenSkeleton`), or the button's busy label (`Button`'s `busyLabel`, which also ignores a second tap). The audit on 26 October 2026 found three gaps, now closed: no bar on marketing pages and the sign-in screen; the withdraw and applicant sheets showing nothing when tapped before their code had loaded (now `SheetLoading`, the scrim and a sheet-sized skeleton); and the sign-in form showing again between signing in and the next screen (now the session cover).
 
 No smooth-scroll library.
 
@@ -221,6 +226,8 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/status/[token]` | 200 KB (a marketing page) | 198.7 KB, 10 scripts: no sign-in code; the status words have their own module (`bookingStatus.ts`) so the page loads none of the booking rules |
 
 A new page's budget is its measured size plus 10%, never above 260 KB.
+
+Final round (26 October 2026, before the last deploy): every page within budget. The closest to the cap are `/bookings/[id]` (258.6 KB), `/business/tryouts/[id]` (258.3 KB), `/work/tryouts/[id]` (258.2 KB, after its offer answer schema moved to a module of its own, `schemas/offerAnswer.ts`, which saved 1.8 KB) and `/business/post` (259.0 KB). `/sign-in` is 228.6 KB of 232.
 
 Almost all of the home page's JavaScript is React and the Next.js runtime, so it has about 21 KB of room. Marketing pages never load auth or Firebase code (`AGENTS.md`), which is what keeps them inside it. Account pages load Firebase per service (`firebaseClient.ts` for Auth, `firebaseDb.ts`, `firebaseStorage.ts`), so a screen downloads only what it uses, and the photo code (Storage and resizing, about 10 KB) loads only when a photo step appears.
 

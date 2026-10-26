@@ -45,7 +45,7 @@ An owner can always pay more than the amount shown.
 | The booking page | Both parties: the exact pin with "Open in maps", names and photos. The owner sees the payout number and can message on WhatsApp; at payment, only the ways the young person chose. The young person sees a 6-digit check-in code and can share their trip | `bookings.ts` |
 | Share my trip | A WhatsApp message with a link to a public status page at an unguessable token: first names, the business, the times and the status only, until midnight at the end of the tryout's day | `statusView` |
 | Report a problem | On every booking, before, during and after the day, from either side, each with its own kinds: a young person can report harassment, unsafe work, being asked for money, not being paid, or something else; a business, harassment, unsafe work, paying too much, or something else. Harassment, unsafe work and being asked for money pause the business at once | `decideReport`, `reportCategoriesFor` |
-| Photos | Your own; an applicant's face for the owner they applied to; each other's once booked, the owner's face included. Through the server only | `mayViewPhoto` |
+| Photos | Your own; an applicant's face for the owner they applied to; each other's once booked, the owner's face included; and a business's shopfront, for anyone signed in to the same world (demo or real) while the business has a published tryout still open for booking, so the feed can show it. Never a face on that ground. Through the server only | `mayViewPhoto`, `listedFor` |
 | Who the young person meets | Once booked, the young person sees the owner's first name and photo, and can message them on WhatsApp at the owner's contact number. Not before | `newBooking`, `bookingView` |
 
 ## Cancellations
@@ -70,7 +70,7 @@ Consequences:
 
 | Step | Rule | Code |
 | --- | --- | --- |
-| Check-in | The owner confirms the door check (the face matches the photo; the ID card's name and last four digits match) and types the 6-digit code the young person shows. From an hour before the start until the end | `day.ts`, `decideCheckIn` |
+| Check-in | The owner confirms the door check (the face matches the photo; the ID card's name and last four digits match) and types the 6-digit code the young person shows. From an hour before the start until the end; on a demo booking opened with "Skip to the day", at any hour (Demo accounts, below) | `day.ts`, `decideCheckIn` |
 | Wrong codes | Counted on the booking; after 5 the booking locks and goes to support, so a code can't be guessed without the young person there | `RULES.checkInCodeAttempts` |
 | On time | Checked in by 10 minutes after the start | `wasOnTime` |
 | No-show | The owner can record one from 30 minutes after the start if nobody checked in: nothing owed, the credit comes back, a strike for the young person, and a review | `decideNoShow`, `settle()` |
@@ -176,9 +176,9 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 | `npm run demo:reset` restores the demo world, and so does "Reset the demo" in the app, from a demo account only, at most once a minute for everyone | A clean start before every judging session, and for each judge |
 | One tap to sign in: "Try as Thabo, looking for work" or "Try as Sipho, a business" (`POST /api/demo/try`); the email and password still work | Judges get in without typing anything; the passwords are public anyway |
 | The demo world starts with two finished, paid, Received tryouts between Sipho and Thabo this month, one with an approved reference (`src/data/demoHistory.ts`) | The work record and its share link have something on them, and the next tryout they finish together brings up the job offer |
-| "Skip to the day" on a demo booking, before the door opens, moves its start to 5 minutes ago, keeping its hours (`decideSkipToDay`). Never on a real booking | A judge can try check-in, pay, Received and the reference at any hour |
+| "Skip to the day" on a demo booking, before the door opens, opens the door now and keeps the tryout's date and times (`decideSkipToDay`, `demoDayOpen`). The owner can then check in and out at any hour. Checked in before the start counts as on time; hours worked never count past the agreed hours; payment is still due by 23:59 on the tryout's own day; a no-show still waits until 30 minutes after the real start. Never on a real booking: the rule needs the booking's own demo mark too | A judge can try check-in, pay, Received and the reference at any hour, and every screen still shows a daytime tryout |
 | The two businesses with no account behind them show "Example, for viewing only" and take no applications (`isExampleOwner`) | Nobody could ever answer an application to them |
-| Placeholder photos for the demo faces and shopfronts, plain shapes drawn by the server | The door check and the shortlist have a photo to show |
+| Illustrated demo faces and shopfronts: Thabo, Sipho, the six example applicants and the three demo businesses, drawn for First Shift and never photos of real people (`src/data/demoArt.ts`, `scripts/demoArt`). `npm run demo:reset` uploads them, replacing what was there. "Reset the demo" in the app cannot read them, so it draws a plain placeholder only where no photo is stored | The door check, the shortlist, the feed and the record have a picture to show, and nobody takes a demo person for a real one |
 
 ## Accountability and profiles
 
@@ -209,7 +209,7 @@ A tryout shows where it is as a cell about 1 km across (a 6-character geohash) a
 | Search point | The young person's area's approximate centre (`src/config/areas.ts`); an area we don't know gives no feed, and the screen says so | `areas.ts` |
 | Within reach | 10 km of the area's centre, measured to the tryout's cell centre and shown as "about 4 km"; or any area with a published direct taxi fare from the young person's area, however far, because people make that trip every day (Ivory Park to Randburg: about 21 km, R56 return) | `nearby.ts`, `withinReach` |
 | Taxi fares | Published one-way fares only, both directions, each with its source (`src/config/fares.ts`); a route we have no fare for shows "Fare not known" | `fares.ts` |
-| What the feed shows | Published tryouts still open for booking, soonest first, in the viewer's world only (demo or real) | `nearby.ts`, `demo.ts` |
+| What the feed shows | Published tryouts still open for booking, soonest first, in the viewer's world only (demo or real), each with its business's shopfront photo. The feed names the owner by uid for that photo, never by the pin | `nearby.ts`, `demo.ts` |
 | Who may apply | A young person with a complete, active profile, at least one way to be paid, what they can do, their languages and their surname | `applications.ts` |
 | When | While the tryout is published and booking is open (until 1 hour before the start) | `applications.ts` |
 | One each | One application per young person per tryout; applying again changes nothing | `applications.ts` |
@@ -230,7 +230,7 @@ The AI sorts every request into a category; `allowedWork.ts` decides. Blocked ca
 | When | Only after the young person taps Received, once per booking, as soon as they open it (or "Write my reference" if the AI didn't answer). Counts against the daily AI limit. A failure writes nothing | `referenceDraftProblem` |
 | The young person decides | They see the three answers as the criteria and the wording, then tap "Add to my record" or "Challenge it" with a reason, which opens a review case. Owners can't edit a reference once written; there is no route for it | `decideReference` |
 | On review | A challenge upheld takes the reference off for good; a challenge rejected gives it back to the young person to add or leave off, and it can't be challenged again | `review.ts`, `challengeRejected` |
-| The record | `/work/record`: every tryout paid and confirmed by both, as a verified entry (business, date, hours, "Paid, confirmed by both"), with its reference once approved. Hours are the agreed hours, or the hours worked when the young person left early or it ended for safety | `recordEntries`, `recordHours` |
+| The record | `/work/record`: every tryout paid and confirmed by both, as a verified entry (business, date, hours, "Paid, confirmed by both"), with the business's shopfront in the young person's own view (never on the shared link), and its reference once approved. Hours are the agreed hours, or the hours worked when the young person left early or it ended for safety | `recordEntries`, `recordHours` |
 | Sharing | A link at an unguessable 144-bit token (`/record/{token}`), made on the first visit to the record: the first name and the verified entries with approved references only. Never an ID, a surname or a phone number. No sign-in; not in search results; a plain Open Graph title and description | `sharedRecord`, `isRecordToken` |
 
 ## Hiring
