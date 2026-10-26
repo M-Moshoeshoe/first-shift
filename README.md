@@ -29,11 +29,11 @@ On the live site at 390 by 844 (2x), from the demo accounts.
 
 | Post | Find | Shortlist | Booking |
 | --- | --- | --- | --- |
-| <img src="docs/images/1-post.png" alt="Sipho checks the AI draft of his tryout" width="190"> | <img src="docs/images/2-find.png" alt="Thabo's feed with pay, taxi fare and distance" width="190"> | <img src="docs/images/3-shortlist.png" alt="Ranked applicants with show-up likelihood" width="190"> | <img src="docs/images/4-booking.png" alt="Thabo's booking with the check-in code" width="190"> |
+| <img src="docs/images/post.png" alt="Sipho checks the AI draft of his tryout" width="190"> | <img src="docs/images/find.png" alt="Thabo's feed with pay, taxi fare and distance" width="190"> | <img src="docs/images/shortlist.png" alt="Ranked applicants with show-up likelihood" width="190"> | <img src="docs/images/booking.png" alt="Thabo's booking with the check-in code" width="190"> |
 
 | Door | Paid | Reference | Record |
 | --- | --- | --- | --- |
-| <img src="docs/images/5-door.png" alt="Sipho's door check: face, ID and code" width="190"> | <img src="docs/images/6-paid.png" alt="Mark as paid with the method and a reference" width="190"> | <img src="docs/images/7-reference.png" alt="A reference written from the owner's three answers" width="190"> | <img src="docs/images/8-record.png" alt="Thabo's verified work record with Copy for my CV" width="190"> |
+| <img src="docs/images/door.png" alt="Sipho's door check: face, ID and code" width="190"> | <img src="docs/images/paid.png" alt="Mark as paid with the method and a reference" width="190"> | <img src="docs/images/reference.png" alt="A reference written from the owner's three answers" width="190"> | <img src="docs/images/record.png" alt="Thabo's verified work record with Copy for my CV" width="190"> |
 
 ## Features
 
@@ -113,11 +113,11 @@ Measured on 26 October 2026, before the final deploy:
 
 | Check | Result |
 | --- | --- |
-| Unit tests (`npm test`) | QUALITY_UNIT |
-| Security rules tests (`npm run rules`) | QUALITY_RULES |
-| Screens checked in the browser | QUALITY_SCREENS |
-| AI evaluation (`npm run eval:ai`, 20 owner sentences) | 20 of 20 passed: allowed 8 of 8, blocked refused 8 of 8, hostile resisted 4 of 4 |
-| Vulnerabilities (`npm audit`) | QUALITY_AUDIT |
+| Unit tests (`npm test`) | 744 passed, in 66 files |
+| Security rules tests (`npm run rules`) | 26 passed (Firestore 18, Storage 8) |
+| Screens checked in the browser | The whole loop on the live site at 390 by 844: 18 screens, both demo accounts, Microsoft Edge (`scripts/walkthrough.ts`) |
+| AI evaluation (`npm run eval:ai`, 20 owner sentences, rerun tonight) | 20 of 20 passed: allowed 8 of 8, blocked refused 8 of 8, hostile resisted 4 of 4 |
+| Vulnerabilities (`npm audit`) | 0, on a fresh clone with `npm ci` |
 | JavaScript budgets (`npm run budget`) | Every page within its budget, 260 KB gzipped at most |
 
 ## Project structure
