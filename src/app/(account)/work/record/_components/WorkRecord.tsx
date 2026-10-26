@@ -9,10 +9,12 @@ import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { whatsAppUrl } from "@/domain/bookings";
+import { cvText } from "@/domain/cvText";
 import { RECORD_COPY } from "@/domain/recordCopy";
 import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import { RecordViewSchema, type RecordViewResponse } from "@/schemas/record";
+import { CopyForCv } from "./CopyForCv";
 
 type Reference = RecordViewResponse["entries"][number]["reference"];
 
@@ -50,6 +52,7 @@ export function WorkRecord() {
   return (
     <>
       <PageTitle headingRef={heading} title={RECORD_COPY.title} intro={RECORD_COPY.intro} />
+      {record.entries.length > 0 ? <CopyForCv text={cvText(record.entries.map((entry) => ({ ...entry, reference: entry.reference?.status === "approved" ? entry.reference : null })), record.jobs, link)} /> : null}
       {record.entries.length === 0 ? (
         <p className="text-base">{RECORD_COPY.empty}</p>
       ) : (

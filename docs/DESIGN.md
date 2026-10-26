@@ -227,6 +227,8 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 
 A new page's budget is its measured size plus 10%, never above 260 KB.
 
+Final round (26 October 2026, before the last deploy): every page within budget. The closest to the cap are `/bookings/[id]` (258.6 KB), `/business/tryouts/[id]` (258.3 KB), `/work/tryouts/[id]` (258.2 KB, after its offer answer schema moved to a module of its own, `schemas/offerAnswer.ts`, which saved 1.8 KB) and `/business/post` (259.0 KB). `/sign-in` is 228.6 KB of 232.
+
 Almost all of the home page's JavaScript is React and the Next.js runtime, so it has about 21 KB of room. Marketing pages never load auth or Firebase code (`AGENTS.md`), which is what keeps them inside it. Account pages load Firebase per service (`firebaseClient.ts` for Auth, `firebaseDb.ts`, `firebaseStorage.ts`), so a screen downloads only what it uses, and the photo code (Storage and resizing, about 10 KB) loads only when a photo step appears.
 
 Every account page also carries the app shell (the header with Sign out, about 4 KB including Next's link code) and every page carries the branded error page (about 4.4 KB: as a root error boundary it loads everywhere, with its own copy of the link code).

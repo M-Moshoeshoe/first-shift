@@ -111,7 +111,8 @@ export function demoState(uids: DemoUids, now: Date, referenceText: string | nul
     availability: ["weekday_mornings", "saturdays"],
     // Not a number anyone can be reached on, so nothing ever messages a real person.
     payoutPhone: "27000000000",
-    payMethods: ["ewallet", "cash"],
+    // All four, so the owner sees every way to pay in the demo (docs/RULES.md, Paying).
+    payMethods: ["ewallet", "payshap", "cash_send", "cash"],
     skills: ["customer_service", "stock_and_packing"],
     languages: ["english", "isizulu", "sepedi"],
     intro: "I'm good with customers and I keep shelves neat.",

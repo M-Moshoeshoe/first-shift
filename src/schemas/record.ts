@@ -43,6 +43,8 @@ export const RecordViewSchema = z.object({
       bookingId: z.string(),
       // The owner's uid, for the shopfront. Optional, so a page from a new deploy still reads a reply from the previous one for the minute both are live.
       photoSubject: z.optional(z.string()),
+      // The year, for Copy for my CV; optional for the same reason.
+      year: z.optional(z.number()),
       reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema, example: z.optional(z.boolean()), status: z.enum(REFERENCE_STATUSES) })),
     }),
   ),

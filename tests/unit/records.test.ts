@@ -43,7 +43,7 @@ describe("the work record", () => {
     const entries = recordEntries([{ id: "b1", booking: booking() }, { id: "b2", booking: later }, { id: "b3", booking: unpaid }], new Map([["b1", reference({ status: "approved" })]]));
     expect(entries.map((entry) => entry.bookingId)).toEqual(["b2", "b1"]);
     // The owner's uid, for the shopfront in the young person's own view.
-    expect(entries[1]).toMatchObject({ photoSubject: "sipho", businessName: "Sipho's Phone Repairs", day: "Tue 27 Oct", hours: 6, reference: { status: "approved" } });
+    expect(entries[1]).toMatchObject({ photoSubject: "sipho", businessName: "Sipho's Phone Repairs", day: "Tue 27 Oct", year: 2026, hours: 6, reference: { status: "approved" } });
     expect(entries[0]?.reference).toBeNull();
   });
 

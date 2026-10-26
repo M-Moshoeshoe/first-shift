@@ -6,7 +6,8 @@ export interface CvEntry {
   businessArea: string;
   /** As the record shows it: "Saturday 24 October". */
   day: string;
-  year: number;
+  /** Optional only for a reply from the previous deploy; every new record carries it. */
+  year?: number;
   hours: number;
   /** The approved reference only; a draft or challenged one never reaches a CV. */
   reference: { text: string } | null;
@@ -30,7 +31,7 @@ export function cvText(entries: readonly CvEntry[], jobs: readonly { businessNam
   const hiredBy = new Set(jobs.filter((job) => job.hired).map((job) => job.businessName));
   const named = new Set<string>();
   const blocks = entries.map((entry) => {
-    const lines = [CV_COPY.line(entry.businessName, entry.businessArea, `${entry.day} ${entry.year}`, RECORD_COPY.hours(entry.hours))];
+    const lines = [CV_COPY.line(entry.businessName, entry.businessArea, entry.year ? `${entry.day} ${entry.year}` : entry.day, RECORD_COPY.hours(entry.hours))];
     if (entry.reference) lines.push(referenceSummary(entry.reference.text));
     if (hiredBy.has(entry.businessName) && !named.has(entry.businessName)) {
       lines.push(CV_COPY.hiredBy(entry.businessName));
