@@ -23,7 +23,8 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
   const sheet = useRef<HTMLDialogElement>(null);
   const isOwner = booking.party === "business";
   const other = isOwner ? booking.workerFirstName : booking.businessName;
-  const fact = isOwner ? (booking.payoutPhone ? `${BOOKING_COPY.payoutPhone}: ${booking.payoutPhone}` : null) : booking.owner ? BOOKING_COPY.meet(booking.owner.firstName) : booking.businessArea;
+  // The young person's one fact: who to ask for at the door, while there is a door to go to.
+  const fact = isOwner ? (booking.payoutPhone ? `${BOOKING_COPY.payoutPhone}: ${booking.payoutPhone}` : null) : booking.owner && booking.status === "booked" ? BOOKING_COPY.meet(booking.owner.firstName) : booking.businessArea;
   return (
     <>
       <section aria-label={other} className="flex items-center gap-3 border border-line p-3">

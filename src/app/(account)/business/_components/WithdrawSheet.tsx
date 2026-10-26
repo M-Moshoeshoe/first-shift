@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { PROFILE_MESSAGES } from "@/domain/messages";
 import { ApiError, apiPost } from "@/lib/api";
+import { toast } from "@/lib/toast";
 import { WithdrawResultSchema } from "@/schemas/tryout";
 
 const ERROR_ID = "withdraw-error";
@@ -40,6 +41,8 @@ export function WithdrawSheet({ tryoutId, onClose }: WithdrawSheetProps) {
     setError(null);
     try {
       await apiPost(`/api/tryouts/${encodeURIComponent(tryoutId)}/withdraw`, {}, WithdrawResultSchema);
+      // It moves to the folded Past group, so say it happened.
+      toast("Tryout withdrawn");
       setBusy(false);
       onClose();
     } catch (caught) {

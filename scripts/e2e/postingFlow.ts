@@ -126,6 +126,9 @@ async function dashboardStates(rec: Recorder, page: Page): Promise<void> {
   await page.waitForTimeout(400); // let sheet-enter finish, for the screenshot
   await rec.check(page, "dashboard, withdraw sheet");
   await page.getByRole("button", { name: "Withdraw tryout" }).click();
+  await page.getByText("Tryout withdrawn", { exact: true }).waitFor();
+  // A withdrawn tryout moves to the folded Past group.
+  await page.getByText(/^Past \(\d+\)$/).click();
   await page.getByText("Withdrawn", { exact: true }).waitFor();
   await page.getByRole("heading", { name: "Withdraw this tryout?" }).waitFor({ state: "detached" });
   await rec.check(page, "dashboard, tryout withdrawn");
@@ -159,7 +162,7 @@ async function businessTimings(page: Page): Promise<Timing[]> {
   for (const [path, ready] of [["/business", "Your tryouts"], ["/business/post", "What do you need help with?"]] as const) {
     const start = Date.now();
     await page.goto(`${BASE}${path}`, { waitUntil: "commit" });
-    await (path === "/business" ? page.getByText("Withdrawn", { exact: true }) : page.getByLabel(ready)).waitFor({ timeout: 120_000 });
+    await (path === "/business" ? page.getByText(/^Past \(\d+\)$/) : page.getByLabel(ready)).waitFor({ timeout: 120_000 });
     timings.push({ timing: `${path}: open to ready, Slow 4G (dev server)`, seconds: ((Date.now() - start) / 1000).toFixed(1) });
   }
   return timings;

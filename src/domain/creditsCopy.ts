@@ -14,7 +14,7 @@ const credits = (count: number) => `${count} ${count === 1 ? "credit" : "credits
 
 export const CREDITS_COPY = {
   title: "Credits",
-  intro: `Each completed tryout uses one credit. Your first ${RULES.freeCredits} are free.`,
+  intro: `One credit is used for each tryout a young person is paid for. Your first ${RULES.freeCredits} are free.`,
   available: "Available",
   held: "Set aside for booked tryouts",
   free: "Free credits left",
