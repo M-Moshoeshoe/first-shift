@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 import { ProfileErrorState } from "@/components/ProfileErrorState";
@@ -88,6 +89,17 @@ export function SignInPanel() {
           {BUTTON_LABELS.continueWithGoogle}
         </Button>
         <FormError id={ERROR_ID} message={message} />
+        <p className="text-sm text-muted">
+          By continuing, you agree to the{" "}
+          <Link href="/terms" className="underline">
+            Terms
+          </Link>{" "}
+          and the{" "}
+          <Link href="/privacy" className="underline">
+            Privacy notice
+          </Link>
+          .
+        </p>
       </div>
       <DemoChoice />
       {showDemo ? (

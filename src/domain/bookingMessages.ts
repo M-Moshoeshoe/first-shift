@@ -119,6 +119,7 @@ export const REPORT_COPY = {
   sent: "Thanks. Your report is with the First Shift team, and we'll contact you about it.",
   sentPaused: "Thanks. Your report is with the First Shift team. The business is paused until we've looked into it.",
   emergency: "If you're in danger now, call 10111 for the police, or 112 from a cellphone.",
+  safetyLink: "How safety and fair play work on First Shift",
 };
 
 export const REPORT_LABELS: Record<ReportCategory, string> = {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -53,6 +54,9 @@ export function ReportForm({ bookingId, party }: { bookingId: string; party: "bu
   return (
     <form noValidate onSubmit={(event) => void submit(event)} aria-label={BOOKING_COPY.report} className="flex flex-col gap-4 border-2 border-ink p-4">
       <p className="text-lg font-bold">{REPORT_COPY.emergency}</p>
+      <Link href="/safety" className="inline-flex min-h-11 items-center self-start underline underline-offset-4">
+        {REPORT_COPY.safetyLink}
+      </Link>
       <RadioGroup id="report-category" legend={REPORT_COPY.legend} options={options} value={category} onChange={setCategory} />
       <TextAreaField id="report-note" label={REPORT_COPY.note} hint={REPORT_COPY.noteHint} maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} />
       <div className="flex flex-col gap-3">

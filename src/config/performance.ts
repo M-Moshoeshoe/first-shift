@@ -39,6 +39,11 @@ export const JS_BUDGETS_KB = {
   // The work record (26 October 2026). + 10% is over the cap.
   "/work/record": 260,
   // The shared work record: a marketing page, no sign-in code. Measured 199.2 KB (26 October 2026); + 10% is 219.
+  // The plain public pages (26 October 2026): no JavaScript of their own, the marketing budget.
+  "/safety": 200,
+  "/privacy": 200,
+  "/terms": 200,
+  "/contact": 200,
   "/record/token": 219,
   // The trusted contact's status page: a marketing page, no sign-in code, so it keeps the home page's budget. Measured 198.7 KB.
   "/status/token": 200,
