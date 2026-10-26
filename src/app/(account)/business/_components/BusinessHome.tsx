@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { buttonClass } from "@/components/ui/Button";
+import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
+import { PAUSE_COPY } from "@/domain/tryoutMessages";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
@@ -18,7 +20,20 @@ export function BusinessHome() {
     <>
       <PageTitle headingRef={heading} title={business?.name} intro={business?.area} />
       {business ? <CreditsPanel available={business.credits.available} onlyFree={business.credits.onlyFree} /> : null}
-      {business && !business.owner.ready ? (
+      {business?.pause ? (
+        // Why it's paused and what lifts it; posting waits until then (docs/RULES.md, Strikes, pauses and limits).
+        <section aria-labelledby="paused" className="flex flex-col gap-3 border-2 border-stop p-4">
+          <h2 id="paused" className="text-xl font-bold">
+            {PAUSE_COPY.title}
+          </h2>
+          {business.pause.reason === "other" ? <FormError message={PAUSE_COPY.other} /> : <p className="text-lg">{PAUSE_COPY[business.pause.reason]}</p>}
+          {business.pause.bookingId ? (
+            <Link href={`/bookings/${business.pause.bookingId}`} className={buttonClass("primary")}>
+              {PAUSE_COPY.openBooking}
+            </Link>
+          ) : null}
+        </section>
+      ) : business && !business.owner.ready ? (
         // A business from before the owner was asked: posting waits for them (tryoutDecisions.ts, owner_missing).
         <section aria-labelledby="owner-missing" className="flex flex-col gap-3 border-2 border-ink p-4">
           <h2 id="owner-missing" className="text-xl font-bold">

@@ -68,7 +68,7 @@ describe("prompts", () => {
   });
 
   it("puts user text only in the user turn, never the system prompt", () => {
-    for (const prompt of [draftTryoutPrompt("SECRET-TEXT"), classifyWorkPrompt("SECRET-TEXT")]) {
+    for (const prompt of [draftTryoutPrompt("SECRET-TEXT", "Monday 26 October 2026 (2026-10-26)"), classifyWorkPrompt("SECRET-TEXT")]) {
       expect(prompt.system).not.toContain("SECRET-TEXT");
       expect(prompt.user).toContain("SECRET-TEXT");
     }

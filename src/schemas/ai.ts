@@ -6,6 +6,12 @@ export const TryoutDraftSchema = z.object({
   title: z.string().min(3).max(60),
   tasks: z.array(z.string().min(3).max(120)).min(1).max(6),
   hours: z.number().min(1).max(12),
+  /** The model's reading of a day named in the request; code decides the date (domain/draftDate.ts). */
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
 });
 export type TryoutDraft = z.infer<typeof TryoutDraftSchema>;
 

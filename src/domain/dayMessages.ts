@@ -63,7 +63,7 @@ export const DAY_COPY = {
   amountHint: (owed: number, minimum: number) =>
     minimum < owed ? `${formatRand(owed)} is owed for the full day. You can lower it to the hours worked, not below ${formatRand(minimum)}.` : `${formatRand(owed)} is owed. You can pay more.`,
   amountInvalid: "Enter the amount in rand, like 210 or 210.00.",
-  paid: "Paid",
+  paid: "Mark as paid",
   waitingAnswer: (name: string) => `Waiting for ${name} to confirm they received it.`,
   workerTitle: "Your pay",
   workerWaiting: (cents: number) => `You're owed ${formatRand(cents)}. The business pays you directly; you'll confirm here when it arrives.`,

@@ -53,13 +53,17 @@ export function createOfferService({ offers, profiles, hires, newSecrets, now }:
     async ownerTryout(viewer: Viewer, tryoutId: string): Promise<OwnerTryoutResponse> {
       const tryout = await offers.tryout(tryoutId);
       if (!tryout || tryout.ownerId !== viewer.uid) throw notFound();
-      const applicants = rankApplicants(tryout, await offers.applicants(tryoutId));
+      const applied = await offers.applicants(tryoutId);
+      const applicants = rankApplicants(tryout, applied);
+      // Once someone is booked, the page shows who, not an empty list of applicants.
+      const booked = applied.find(({ application }) => application.status === "booked")?.worker.firstName ?? null;
       const pending = openOffer(tryout, now());
       const offeredTo = pending ? (applicants.find((applicant) => applicant.workerId === pending.workerId)?.firstName ?? "") : null;
       return {
         tryout: { id: tryoutId, title: tryout.title, area: tryout.area, startAt: tryout.startAt.toISOString(), endAt: tryout.endAt.toISOString(), payCents: tryout.payCents, status: tryout.status },
         offer: pending && offeredTo !== null ? { workerId: pending.workerId, firstName: offeredTo, lapsesAt: offerLapsesAt(tryout).toISOString() } : null,
-        bookingId: tryout.status === "booked" ? (tryout.bookingId ?? null) : null,
+        bookingId: tryout.status === "booked" || tryout.status === "completed" ? (tryout.bookingId ?? null) : null,
+        booked,
         canOffer: bookingOpen(tryout, now()) && !pending,
         applicants,
       };

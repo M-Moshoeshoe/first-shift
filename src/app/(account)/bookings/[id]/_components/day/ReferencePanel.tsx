@@ -18,7 +18,7 @@ import { ReferenceReview } from "./ReferenceReview";
  */
 export function ReferencePanel({ bookingId }: { bookingId: string }) {
   const path = `/api/bookings/${encodeURIComponent(bookingId)}/reference`;
-  const { resource, reload } = useApi(path, ReferenceViewSchema, REFERENCE_COPY.notYet);
+  const { resource, reload } = useApi(path, ReferenceViewSchema, REFERENCE_COPY.loadFailed);
   const [writing, setWriting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const tried = useRef(false);
@@ -31,7 +31,7 @@ export function ReferencePanel({ bookingId }: { bookingId: string }) {
       await apiPost(path, {}, DraftResultSchema);
       reload();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : REFERENCE_COPY.notYet);
+      setError(caught instanceof ApiError ? caught.message : REFERENCE_COPY.writeFailed);
     }
     setWriting(false);
   };
@@ -65,7 +65,7 @@ export function ReferencePanel({ bookingId }: { bookingId: string }) {
       {view.reference ? <ReferenceReview bookingId={bookingId} reference={view.reference} done={reload} /> : null}
       {!view.reference && !view.withdrawn ? (
         <>
-          <p className="text-lg">{writing ? REFERENCE_COPY.writing : REFERENCE_COPY.notYet}</p>
+          <p className="text-lg">{writing ? REFERENCE_COPY.writing : view.canWrite ? REFERENCE_COPY.notYet : REFERENCE_COPY.notYetWaiting}</p>
           {view.canWrite && !writing ? (
             <Button variant="secondary" onClick={() => void write()}>
               {REFERENCE_COPY.write}

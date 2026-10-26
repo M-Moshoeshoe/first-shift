@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button, buttonClass } from "@/components/ui/Button";
 import { Stamp } from "@/components/ui/Stamp";
-import { SUPPORT_EMAIL } from "@/config/contact";
+import { POSTING_PROBLEM_MESSAGES } from "@/domain/tryoutMessages";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 
 export type Outcome = { kind: "published" } | { kind: "review" } | { kind: "blocked"; saferOption: string } | { kind: "no_credits" };
@@ -58,13 +58,11 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
   return (
     <div className="flex flex-col gap-4">
       <p ref={heading} tabIndex={-1} className="text-lg">
-        You&apos;ve used your free tryouts. Top-ups open soon. Contact us at{" "}
-        <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">
-          {SUPPORT_EMAIL}
-        </a>{" "}
-        if you need more now.
+        {POSTING_PROBLEM_MESSAGES.no_credits}
       </p>
-      {backToTryouts}
+      <Link href="/business/credits" className={buttonClass("primary")}>
+        Open Credits
+      </Link>
     </div>
   );
 }

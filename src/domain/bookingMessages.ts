@@ -3,7 +3,6 @@ import type { AcceptProblem, OfferProblem } from "./offers";
 import type { ApplicationStatus } from "./applications";
 import type { ReportCategory } from "./cases";
 import { formatRand } from "./money";
-import { BOOKING_MESSAGES } from "./tryoutMessages";
 
 /*
  * Every sentence about offers, bookings, cancelling and reporting. "Contact
@@ -21,9 +20,10 @@ export const ANSWER_PROBLEM_MESSAGES: Record<AcceptProblem | "not_found", string
   not_found: "We can't find that offer. Go back to Applications and check.",
   no_offer: "There's no offer waiting for you on this tryout. Check Applications.",
   lapsed: "This offer has ended: offers close an hour before the start. Look for another tryout.",
-  no_credits: "The business can't take a booking right now. We've told them; look for another tryout in the meantime.",
+  no_credits: "The business has no credit to book with right now, so this offer cannot go ahead. Look for another tryout in the meantime.",
   overlaps_booking: "You're already booked on a tryout at this time, so you can't accept this one.",
-  regular_employment: BOOKING_MESSAGES.regularEmployment,
+  // The young person's own words: the owner's version asks them to offer a job (tryoutMessages.ts, BOOKING_MESSAGES).
+  regular_employment: "You have worked close to 24 hours with this business this month. Another tryout would make it regular work, which needs a proper job. Ask the business about a job instead.",
 };
 
 export const APPLICATION_LABELS: Record<ApplicationStatus, string> = {
@@ -55,7 +55,9 @@ export const OWNER_COPY = {
   languages: "Languages",
   offer: (name: string) => `Offer the tryout to ${name}`,
   offered: (name: string, until: string) => `Offered to ${name}. They have until ${until} to answer.`,
-  booked: (name: string) => `Booked: ${name}.`,
+  booked: (name: string) => `Booked: ${name}`,
+  bookedNoName: "Booked",
+  bookedNext: "Open the booking to see when check-in opens, check them in at the door, and pay them at the end.",
   seeBooking: "See the booking",
   completed: (count: number) => `Tryouts done: ${count}`,
   references: (count: number) => `References: ${count}`,
@@ -75,6 +77,12 @@ export const OFFER_COPY = {
 };
 
 export const BOOKING_COPY = {
+  ownerNextTitle: "What happens next",
+  ownerNext: (name: string, opens: string) => [
+    `Check-in opens at ${opens}, an hour before the start.`,
+    `When ${name} arrives, check their face against their photo, and the name and last four digits on their ID card.`,
+    `Then type the 6-digit code ${name} shows you. At the end, check ${name} out and pay them.`,
+  ],
   where: "Where",
   pin: (metres: number) => `Pinned to within ${Math.max(1, Math.ceil(metres))} metres of the door.`,
   openMaps: "Open in maps",

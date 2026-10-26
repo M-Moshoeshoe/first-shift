@@ -37,6 +37,11 @@ export const REFERENCE_COPY = {
   write: "Write my reference",
   writing: "Writing your reference",
   notYet: "Your reference isn't written yet. Tap Write my reference.",
+  notYetWaiting: "Your reference is not written yet. It is written once you tap Received.",
+  aiFailed: "We could not write your reference just now. Wait a minute, then tap Write my reference.",
+  loadFailed: "Your reference did not load. Check your connection, then reload the page.",
+  writeFailed: "Your reference was not written. Check your connection, then tap Write my reference.",
+  decideFailed: "That did not go through. Check your connection, then tap the button again.",
   ownerNote: "The young person reviews the reference written from your answers. You can't change it once it's written.",
 } as const;
 

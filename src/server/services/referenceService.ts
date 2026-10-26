@@ -54,7 +54,11 @@ export function createReferenceService({ references, writeReference, consumeQuot
       await consumeQuota(viewer.uid, "ai", aiDailyLimit, { message: AI_LIMIT });
       const answers = booking.ended?.answers;
       if (!answers) throw new AppError(409, "no_answers", REFERENCE_COPY.notYet);
-      const record = newReference(booking, tasks, await writeReference(answers, tasks));
+      // The model's failure, in words about the reference, with the button that's on screen.
+      const text = await writeReference(answers, tasks).catch((error: unknown) => {
+        throw error instanceof AppError && error.code === "ai_unavailable" ? new AppError(502, "ai_unavailable", REFERENCE_COPY.aiFailed) : error;
+      });
+      const record = newReference(booking, tasks, text);
       if (!record) throw new AppError(409, "no_answers", REFERENCE_COPY.notYet);
       await references.create(bookingId, record, viewer.uid);
       return { status: "written" };

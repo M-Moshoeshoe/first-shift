@@ -17,7 +17,8 @@ describe("draft", () => {
   it("drafts and checks side by side, suggests hours within 4 to 8, and writes nothing", async () => {
     const { service, tryouts, audit } = createTryoutFakes();
     const result = await service.draft("lerato", "Help sorting stock and serving customers on Saturday");
-    expect(result).toEqual({ outcome: "allowed", draft: { title: "Shop helper", tasks: ["Pack bread onto the front shelves"], hours: RULES.maxTryoutHours } });
+    // "on Saturday": the date is the coming Saturday, decided in code (draftDate.ts).
+    expect(result).toEqual({ outcome: "allowed", draft: { title: "Shop helper", tasks: ["Pack bread onto the front shelves"], hours: RULES.maxTryoutHours, date: "2026-10-31" } });
     expect(fakeCheckWork).toHaveBeenCalledWith("Request: Help sorting stock and serving customers on Saturday");
     expect(tryouts.size + audit.length).toBe(0);
   });

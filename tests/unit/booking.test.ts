@@ -53,7 +53,9 @@ describe("accepting", () => {
     expect(decideAnswer(worker, accept({ pairSlots: [{ startAt: fromSast(2026, 10, 5, 9, 0), hours: 8 }, { startAt: fromSast(2026, 10, 12, 9, 0), hours: 8 }] }), "accept").kind).toBe("accept");
     const crossing = accept({ pairSlots: [{ startAt: fromSast(2026, 10, 5, 9, 0), hours: 8 }, { startAt: fromSast(2026, 10, 12, 9, 0), hours: 8 }, { startAt: fromSast(2026, 10, 19, 9, 0), hours: 4 }] });
     expect(decideAnswer(worker, crossing, "accept")).toEqual({ kind: "refuse", problem: "regular_employment" });
-    expect(ANSWER_PROBLEM_MESSAGES.regular_employment).toBe(BOOKING_MESSAGES.regularEmployment);
+    // The young person is told in their own words, never the owner's "Offer them a job instead?".
+    expect(ANSWER_PROBLEM_MESSAGES.regular_employment).not.toBe(BOOKING_MESSAGES.regularEmployment);
+    expect(ANSWER_PROBLEM_MESSAGES.regular_employment).toMatch(/Ask the business about a job/);
     // Last month's hours don't count.
     expect(decideAnswer(worker, accept({ pairSlots: [{ startAt: fromSast(2026, 9, 28, 9, 0), hours: 20 }] }), "accept").kind).toBe("accept");
   });

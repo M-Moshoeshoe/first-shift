@@ -86,6 +86,8 @@ describe("offer, then accept or decline", () => {
     expect(bookings.get("booking-1")).toMatchObject({ workerId: "thabo", ownerId: "sipho", workerPayoutPhone: "27821234567", status: "booked" });
     expect(secrets.get("booking-1")?.checkInCode).toMatch(/^\d{6}$/);
     expect(await offerService.answer(thaboViewer, "t1", "accept")).toMatchObject({ status: "unchanged" });
+    // The owner's page now shows who is booked, not an empty list of applicants.
+    expect(await offerService.ownerTryout(sipho, "t1")).toMatchObject({ bookingId: "booking-1", booked: "Thabo", applicants: [] });
   });
 
   it("refuses to accept without a credit to hold, and at the 24-hour line, writing nothing", async () => {

@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Paid one-day tryouts at businesses near you, with a reference from the business that paid.",
   applicationName: "First Shift",
   manifest: "/manifest.webmanifest",
+  // The tab and home-screen icons come from src/app/icon.png and apple-icon.png (the shift slip), never the host's.
+  appleWebApp: { capable: true, title: "First Shift", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

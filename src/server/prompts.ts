@@ -45,7 +45,7 @@ const CATEGORY_MEANINGS: Record<WorkCategory, string> = {
  * the draft isn't then turned away. Guidance only: the check still decides,
  * in code, on the final text (domain/allowedWork.ts).
  */
-export function draftTryoutPrompt(description: string): { system: string; user: string } {
+export function draftTryoutPrompt(description: string, today: string): { system: string; user: string } {
   return {
     system: [
       "You help owners of small South African businesses describe a one-day paid tryout for a young person who has never done this work before.",
@@ -55,6 +55,7 @@ export function draftTryoutPrompt(description: string): { system: string; user: 
       "Use plain English a 19-year-old would use. Describe only the kind of work the owner asked for. Never mention pay, rates or money.",
       `Never add a task that is any of this work, even if the request hints at it: ${BLOCKED_CATEGORIES.map((category) => CATEGORY_MEANINGS[category]).join("; ")}.`,
       "Suggest how many hours, from 4 to 8, the work needs.",
+      `Today is ${today} in South Africa. If the request names a day for the work, give its date as YYYY-MM-DD in "date"; otherwise give null.`,
     ].join(" "),
     user: wrap(description),
   };

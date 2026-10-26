@@ -52,7 +52,7 @@ export function PostTryout() {
       const result = await apiPost("/api/tryouts/draft", { description: text }, DraftResultSchema);
       if (result.outcome === "blocked") finish({ kind: "blocked", saferOption: result.saferOption });
       else {
-        setCheck(initialCheck(result.draft, new Date()));
+        setCheck(initialCheck(result.draft));
         setStep("check");
       }
     } catch (caught) {

@@ -31,7 +31,7 @@ export function ReferenceReview({ bookingId, reference, done }: { bookingId: str
       await apiPost(path, body, StepResultSchema);
       done();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : REFERENCE_COPY.notYet);
+      setError(caught instanceof ApiError ? caught.message : REFERENCE_COPY.decideFailed);
     }
     setBusy(false);
   };

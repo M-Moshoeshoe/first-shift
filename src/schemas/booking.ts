@@ -34,6 +34,8 @@ export const OwnerTryoutSchema = z.object({
   tryout: z.object({ id: z.string(), title: z.string(), area: z.string(), startAt: z.string(), endAt: z.string(), payCents: z.number(), status: z.enum(TRYOUT_STATUSES) }),
   offer: z.nullable(z.object({ workerId: z.string(), firstName: z.string(), lapsesAt: z.string() })),
   bookingId: z.nullable(z.string()),
+  /** The first name of the young person booked on it, once someone is. */
+  booked: z.nullable(z.string()),
   /** No offer waiting, nobody booked, and booking still open (offers.ts). */
   canOffer: z.boolean(),
   applicants: z.array(ApplicantSchema),

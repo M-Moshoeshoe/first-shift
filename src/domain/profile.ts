@@ -159,10 +159,26 @@ export interface ProfileView {
     | (Partial<BusinessDetails> & {
         hasPhoto: boolean;
         credits: { available: number; onlyFree: boolean };
+        pause: { reason: PauseReason; bookingId: string | null } | null;
         /** The owner's own details, to fill the form back in. Never anyone else's. */
         owner: { legalName?: string; idLastFour?: string; phone?: string; cipc?: string; hasPhoto: boolean; ready: boolean };
       })
     | null;
+}
+
+export type PauseReason = "unpaid" | "report" | "other";
+
+/**
+ * Why a business is paused, so it can be told and told what lifts it
+ * (docs/RULES.md: a paused user sees why and what resolves it). An unpaid
+ * tryout names its booking (day.ts, unpaidPause); a report's case id stays
+ * on the server.
+ */
+export function pauseNotice(business: Pick<BusinessRecord, "status" | "pausedFor">): { reason: PauseReason; bookingId: string | null } | null {
+  if (business.status === "active") return null;
+  const pausedFor = business.pausedFor ?? "";
+  if (pausedFor.startsWith("unpaid:")) return { reason: "unpaid", bookingId: pausedFor.slice("unpaid:".length) || null };
+  return { reason: pausedFor ? "report" : "other", bookingId: null };
 }
 
 export function profileView(user: UserRecord | null, business: BusinessRecord | null, credits: readonly CreditEntry[] = []): ProfileView {
@@ -193,6 +209,7 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
           coida: business.coida,
           hasPhoto: Boolean(business.shopfrontPhoto),
           credits: { available: balance.available, onlyFree: balance.onlyFree },
+          pause: pauseNotice(business),
           owner: {
             legalName: user.legalName,
             idLastFour: user.idLastFour,

@@ -45,6 +45,15 @@ export const TRYOUT_MESSAGES = {
   asksForMoney: "A tryout never costs the young person anything. Take out anything that asks them to pay, such as a fee, a deposit or their own uniform, then try again.",
 } as const;
 
+/** On the dashboard while a business is paused: why, and what lifts it (profile.ts, pauseNotice). */
+export const PAUSE_COPY = {
+  title: "Your account is paused",
+  unpaid: "A tryout is not paid and confirmed yet. Open the booking to pay, or to add proof if you already paid. The pause lifts once the payment is confirmed.",
+  report: "The First Shift team is looking into a report about one of your tryouts. We will contact you. Until then you cannot post or book, and your booked tryouts stay as they are.",
+  other: "Contact us to find out why and what to do next.",
+  openBooking: "Open the booking",
+} as const;
+
 /** Booking (Phase 4). Approved copy; a question, because the answer is the owner's choice. */
 export const BOOKING_MESSAGES = {
   regularEmployment: "Another tryout would make this regular employment, which brings UIF and leave rules. Offer them a job instead?",

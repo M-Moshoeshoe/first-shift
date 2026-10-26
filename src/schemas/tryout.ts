@@ -27,7 +27,7 @@ export type PostTryoutInput = z.infer<typeof PostTryoutSchema>;
 /** A tryout id in a route's address. */
 export const TryoutIdSchema = z.string().check(z.minLength(1), z.maxLength(128), z.regex(/^[A-Za-z0-9_-]+$/));
 
-const DraftSchema = z.object({ title: z.string(), tasks: z.array(z.string()), hours: z.number() });
+const DraftSchema = z.object({ title: z.string(), tasks: z.array(z.string()), hours: z.number(), date: z.nullable(z.string()) });
 
 /** POST /api/tryouts/draft: the draft to review, or the safer option when the work can't be posted. Nothing is written. */
 export const DraftResultSchema = z.discriminatedUnion("outcome", [

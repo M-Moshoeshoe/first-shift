@@ -115,6 +115,7 @@ export const ProfileViewSchema = z.object({
       coida: z.optional(z.enum(COIDA_ANSWERS)),
       hasPhoto: z.boolean(),
       credits: z.object({ available: z.number(), onlyFree: z.boolean() }),
+      pause: z.nullable(z.object({ reason: z.enum(["unpaid", "report", "other"]), bookingId: z.nullable(z.string()) })),
       owner: z.object({
         legalName: z.optional(z.string()),
         idLastFour: z.optional(z.string()),

@@ -137,14 +137,14 @@ Tryout cards and the tryout page show the business's record for paying: **Paid o
 
 | Rule | Value |
 | --- | --- |
-| A strike | A no-show, a late cancellation, a false payment claim shown in review, or an upheld safety report |
-| Suspension | 3 active strikes; the account is suspended until reviewed |
+| A strike | A no-show, a late cancellation, a false payment claim shown in review, or an upheld safety report. Recorded today, on the booking and in the review list (`npm run review:case`) |
+| Suspension | Roadmap: 3 active strikes will suspend the account until reviewed. The rule is in code with tests (`strikes.ts`, `accountStatus`) but not yet applied automatically; until then an admin pauses an account by hand from the review list |
 | Strike expiry | 90 days, so one bad week doesn't end anyone's chances |
 | Instant pause | An unpaid tryout or an open safety report pauses a business until resolved |
 | Daily limits | 10 applications for a young person, 5 tryouts posted for a business |
 | Appeals | Any strike can be overturned on review; overturned strikes stop counting |
 
-The same rules apply to both sides. A paused or suspended user sees why and what resolves it.
+The same rules apply to both sides. A paused business sees why on its dashboard and what lifts it (`pauseNotice`): an unpaid tryout, with a link to its booking, or a report the First Shift team is looking into.
 
 ## Eligibility and identity
 

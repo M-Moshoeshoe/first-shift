@@ -1,6 +1,5 @@
 import { RULES } from "@/config/rules";
 import { multiplyCents, parseRand, type Cents } from "@/domain/money";
-import { addDays, sastDateKey } from "@/domain/time";
 import { checkTerms, type TermsProblem } from "@/domain/tryoutDecisions";
 import { TERMS_MESSAGES, TRYOUT_FIELD_MESSAGES } from "@/domain/tryoutMessages";
 import { PostTryoutSchema, type PostTryoutInput } from "@/schemas/tryout";
@@ -41,9 +40,13 @@ const PROBLEM_FIELD: Record<TermsProblem, CheckField> = {
   below_minimum_wage: "rate",
 };
 
-/** The draft as a form: tomorrow, 09:00, the suggested hours and the minimum wage. The owner changes any of it. */
-export function initialCheck(draft: { title: string; tasks: readonly string[]; hours: number }, now: Date): CheckDraft {
-  return { title: draft.title, tasks: [...draft.tasks].slice(0, MAX_TASKS), date: sastDateKey(addDays(now, 1)), startTime: "09:00", hours: draft.hours, rate: MINIMUM_RATE_TEXT, supervision: false };
+/**
+ * The draft as a form: the day the owner named, or no date for them to choose
+ * (domain/draftDate.ts), 09:00, the suggested hours and the minimum wage. The
+ * owner changes any of it.
+ */
+export function initialCheck(draft: { title: string; tasks: readonly string[]; hours: number; date: string | null }): CheckDraft {
+  return { title: draft.title, tasks: [...draft.tasks].slice(0, MAX_TASKS), date: draft.date ?? "", startTime: "09:00", hours: draft.hours, rate: MINIMUM_RATE_TEXT, supervision: false };
 }
 
 /** The day's pay at the typed rate, for the live line; null while the rate isn't a number yet. */

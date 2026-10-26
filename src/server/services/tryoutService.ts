@@ -2,6 +2,7 @@ import "server-only";
 import { RULES } from "@/config/rules";
 import type { WorkDecision } from "@/domain/allowedWork";
 import type { Viewer } from "@/domain/demo";
+import { namedDate } from "@/domain/draftDate";
 import { asksForMoney } from "@/domain/scamRules";
 import { checkText, suggestHours } from "@/domain/tryout";
 import { checkTerms, decideWithdraw, newTryout, postedStatus, postingProblem, type TryoutTerms } from "@/domain/tryoutDecisions";
@@ -17,7 +18,7 @@ export interface TryoutServiceDeps {
   tryouts: TryoutRepository;
   /** Read only: the poster's own user and business records. */
   profiles: ProfileRepository;
-  draftTryout: (description: string) => Promise<TryoutDraft>;
+  draftTryout: (description: string, now: Date) => Promise<TryoutDraft>;
   checkWork: (text: string) => Promise<WorkDecision>;
   consumeQuota: (uid: string, bucket: string, limit: number, options: { message: string }) => Promise<void>;
   aiDailyLimit: number;
@@ -57,7 +58,7 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
       await poster(uid);
       refuseIfAsksForMoney(uid, description);
       await consumeQuota(uid, "ai", aiDailyLimit, { message: TRYOUT_MESSAGES.aiLimit });
-      const [checked, drafted] = await Promise.allSettled([checkWork(checkText("", [], description)), draftTryout(description)]);
+      const [checked, drafted] = await Promise.allSettled([checkWork(checkText("", [], description)), draftTryout(description, now())]);
       // Fail closed: no safety answer, no draft. A blocked answer stands whatever happened to the draft.
       if (checked.status === "rejected") throw inContext(checked.reason, TRYOUT_MESSAGES.aiDraftUnavailable);
       const work = checked.value;
@@ -67,7 +68,10 @@ export function createTryoutService({ tryouts, profiles, draftTryout, checkWork,
       }
       if (drafted.status === "rejected") throw inContext(drafted.reason, TRYOUT_MESSAGES.aiDraftUnavailable);
       const draft = drafted.value;
-      return { outcome: work.decision, draft: { title: draft.title, tasks: draft.tasks, hours: suggestHours(draft.hours) } };
+      // Code decides the date: the day the owner named, or none for them to choose (draftDate.ts).
+      const date = namedDate(description, now());
+      if (draft.date && draft.date !== date) log("info", "tryout_draft_date_overruled", { named: date !== null });
+      return { outcome: work.decision, draft: { title: draft.title, tasks: draft.tasks, hours: suggestHours(draft.hours), date } };
     },
 
     /**
