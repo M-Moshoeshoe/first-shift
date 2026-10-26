@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { lazy, Suspense, useCallback, useState, type ChangeEvent } from "react";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { CAMERA_COPY } from "@/domain/profileCopy";
@@ -72,7 +71,8 @@ export function PhotoField({ id, label, hint, error, preview, camera, allowGalle
           ))}
         </ul>
       ) : null}
-      {preview && mode !== "open" ? <Image src={preview} alt="The photo you took" width={128} height={128} unoptimized className="size-32 border border-line object-cover" /> : null}
+      {/* eslint-disable-next-line @next/next/no-img-element -- a blob or API URL, already unoptimized: next/image would only add its client code. */}
+      {preview && mode !== "open" ? <img src={preview} alt="The photo you took" width={128} height={128} className="size-32 border border-line object-cover" /> : null}
       <div className="flex flex-col gap-3">
         {mode === "closed" ? (
           <Button variant="secondary" aria-describedby={describedBy} onClick={() => setMode("open")}>

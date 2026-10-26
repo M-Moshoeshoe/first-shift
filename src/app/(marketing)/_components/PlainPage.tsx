@@ -18,27 +18,30 @@ export interface PlainSection {
 export function PlainPage({ title, intro, sections, children }: { title: string; intro: string; sections: readonly PlainSection[]; children?: ReactNode }) {
   return (
     <PageShell>
-      <Band tone="paper">
-        <PageTitle title={title} intro={intro} />
-        {children}
-        {sections.map((section) => (
-          <section key={section.heading} className="flex flex-col gap-2">
-            <h2 className="text-xl font-bold">{section.heading}</h2>
-            {section.body.map((block) =>
-              typeof block === "string" ? (
-                <p key={block} className="text-base">
-                  {block}
-                </p>
-              ) : (
-                <ul key={block.join("|")} className="flex list-disc flex-col gap-1 pl-5 text-base">
-                  {block.map((point) => (
-                    <li key={point}>{point}</li>
-                  ))}
-                </ul>
-              ),
-            )}
-          </section>
-        ))}
+      <Band tone="paper" wide>
+        {/* Wide, so the text lines up with the header logo; the column keeps lines short. */}
+        <div className="flex max-w-2xl flex-col gap-6">
+          <PageTitle title={title} intro={intro} />
+          {children}
+          {sections.map((section) => (
+            <section key={section.heading} className="flex flex-col gap-2">
+              <h2 className="text-xl font-bold">{section.heading}</h2>
+              {section.body.map((block) =>
+                typeof block === "string" ? (
+                  <p key={block} className="text-base">
+                    {block}
+                  </p>
+                ) : (
+                  <ul key={block.join("|")} className="flex list-disc flex-col gap-1 pl-5 text-base">
+                    {block.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
+                ),
+              )}
+            </section>
+          ))}
+        </div>
       </Band>
     </PageShell>
   );

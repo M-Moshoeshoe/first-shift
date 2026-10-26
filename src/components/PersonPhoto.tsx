@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { clientAuth } from "@/lib/firebaseClient";
 
@@ -36,7 +35,8 @@ export function PersonPhoto({ subject, kind, alt }: { subject: string; kind: "pr
   }, [subject, kind]);
 
   // A blob from our own server, already sized on upload: nothing for the image optimiser to do.
-  if (url) return <Image src={url} alt={alt} width={96} height={96} unoptimized className="size-24 shrink-0 border border-line object-cover" />;
+  // eslint-disable-next-line @next/next/no-img-element -- a blob or API URL, already unoptimized: next/image would only add its client code.
+  if (url) return <img src={url} alt={alt} width={96} height={96} className="size-24 shrink-0 border border-line object-cover" />;
   return (
     <div role="img" aria-label={missing ? `${alt}: no photo` : `${alt}: loading`} className={`flex size-24 shrink-0 items-center justify-center border border-mist bg-mist p-1 text-center text-sm text-muted ${missing ? "" : "skeleton"}`}>
       {missing ? "No photo" : null}

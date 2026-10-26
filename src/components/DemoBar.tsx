@@ -29,12 +29,22 @@ export function DemoBar() {
   };
 
   return (
-    <section aria-label="Demo" className="bg-mist px-5 py-3">
-      <div className="mx-auto flex max-w-md flex-col gap-3 lg:max-w-6xl">
-        <p className="font-semibold">{DEMO_COPY.banner}</p>
+    <section aria-label="Demo" className="border-b border-line bg-mist px-5 py-2">
+      <div className="mx-auto flex max-w-md flex-col gap-2 lg:px-5">
+        <div className="flex flex-wrap items-center justify-between gap-x-3">
+          <p className="flex items-center gap-2 text-sm">
+            <span className="border border-ink px-1.5 text-micro font-semibold">Demo</span>
+            {DEMO_COPY.banner}
+          </p>
+          {confirming ? null : (
+            <Button variant="quiet" onClick={() => setConfirming(true)}>
+              {DEMO_COPY.reset}
+            </Button>
+          )}
+        </div>
         {confirming ? (
-          <>
-            <p>{DEMO_COPY.resetConfirm}</p>
+          <div className="flex flex-col gap-3 pb-2">
+            <p className="text-sm">{DEMO_COPY.resetConfirm}</p>
             <Button variant="stop" busy={busy} busyLabel={DEMO_COPY.resetBusy} aria-describedby={ERROR_ID} onClick={() => void reset()}>
               {DEMO_COPY.resetYes}
             </Button>
@@ -42,14 +52,8 @@ export function DemoBar() {
               {DEMO_COPY.resetNo}
             </Button>
             <FormError id={ERROR_ID} message={error} />
-          </>
-        ) : (
-          <div>
-            <Button variant="quiet" onClick={() => setConfirming(true)}>
-              {DEMO_COPY.reset}
-            </Button>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

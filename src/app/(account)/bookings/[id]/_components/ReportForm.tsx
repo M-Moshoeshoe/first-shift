@@ -15,9 +15,9 @@ import { ReportResultSchema } from "@/schemas/booking";
 const ERROR_ID = "report-error";
 
 /** Report a problem, on every booking: a kind (each side has its own), an optional note, and what happens next. Opened with one tap so it never crowds the page. */
-export function ReportForm({ bookingId, party }: { bookingId: string; party: "business" | "young_person" }) {
+export function ReportForm({ bookingId, party, startOpen = false }: { bookingId: string; party: "business" | "young_person"; startOpen?: boolean }) {
   const options = reportCategoriesFor(party).map((value) => ({ value, label: REPORT_LABELS[value] }));
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(startOpen);
   const [category, setCategory] = useState<ReportCategory | undefined>(undefined);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Band } from "@/components/ui/Band";
-import { PageShell } from "@/components/ui/PageShell";
+import { MarketingFooter } from "@/components/MarketingFooter";
+import { SimpleShell } from "@/components/ui/SimpleShell";
 import { RECORD_COPY } from "@/domain/recordCopy";
 import { SharedRecordView } from "./_components/SharedRecordView";
 
@@ -20,10 +21,13 @@ export function generateStaticParams() {
 /** A young person's shared work record. No account needed, no sign-in code loaded; approved content only. */
 export default function SharedRecordPage() {
   return (
-    <PageShell>
-      <Band tone="paper">
-        <SharedRecordView />
+    <SimpleShell footer={<MarketingFooter />}>
+      <Band tone="paper" wide>
+        {/* Wide, so the text lines up with the header logo; the column keeps lines short. */}
+        <div className="flex max-w-2xl flex-col gap-6">
+          <SharedRecordView />
+        </div>
       </Band>
-    </PageShell>
+    </SimpleShell>
   );
 }

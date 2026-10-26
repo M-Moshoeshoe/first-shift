@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { buttonClass, Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -60,7 +59,8 @@ export function EvidenceForm({ bookingId, done }: { bookingId: string; done: () 
         </h2>
         <p className="text-sm text-muted">{EVIDENCE_COPY.hint}</p>
       </div>
-      {image ? <Image src={image.preview} alt="The screenshot you chose" width={128} height={128} unoptimized className="size-32 border border-line object-cover" /> : null}
+      {/* eslint-disable-next-line @next/next/no-img-element -- a blob or API URL, already unoptimized: next/image would only add its client code. */}
+      {image ? <img src={image.preview} alt="The screenshot you chose" width={128} height={128} className="size-32 border border-line object-cover" /> : null}
       <label htmlFor={FILE_ID} className={`${buttonClass("secondary")} relative cursor-pointer focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-ink`}>
         <input id={FILE_ID} type="file" accept="image/*" aria-describedby={ERROR_ID} onChange={(event) => void choose(event)} className="sr-only" />
         <span>{EVIDENCE_COPY.file}</span>

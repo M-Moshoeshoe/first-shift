@@ -15,9 +15,8 @@ import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import { BookingViewSchema, type BookingViewResponse } from "@/schemas/booking";
 import { BookingActions } from "./BookingActions";
+import { BookingExtras } from "./BookingExtras";
 import { BookingPeople } from "./BookingPeople";
-import { CancelPanel } from "./CancelPanel";
-import { ReportForm } from "./ReportForm";
 
 // The day's tools load only once the day has begun (or money is owed), so the booking page stays inside its budget.
 const DayPanel = lazy(() => import("./day/DayPanel").then((module) => ({ default: module.DayPanel })));
@@ -86,9 +85,7 @@ export function BookingDetail() {
         </Suspense>
       ) : null}
       <BookingActions booking={booking} when={`${day}, ${hours}`} />
-      {/* On every booking, before, during and after the day: the scam rules send people here (docs/RULES.md). */}
-      <ReportForm bookingId={booking.id} party={booking.party} />
-      {booking.cancel ? <CancelPanel bookingId={booking.id} cancel={booking.cancel} onCancelled={reload} /> : null}
+      <BookingExtras booking={booking} reload={reload} />
     </>
   );
 }

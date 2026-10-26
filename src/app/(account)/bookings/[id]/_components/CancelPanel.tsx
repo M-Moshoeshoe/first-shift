@@ -14,8 +14,8 @@ const ERROR_ID = "cancel-error";
  * server classified it (free, or late with what's owed); the second does it.
  * The server classifies it again when it happens.
  */
-export function CancelPanel({ bookingId, cancel, onCancelled }: { bookingId: string; cancel: { kind: "free" | "late"; owedCents: number }; onCancelled: () => void }) {
-  const [confirming, setConfirming] = useState(false);
+export function CancelPanel({ bookingId, cancel, onCancelled, startConfirming = false }: { bookingId: string; cancel: { kind: "free" | "late"; owedCents: number }; onCancelled: () => void; startConfirming?: boolean }) {
+  const [confirming, setConfirming] = useState(startConfirming);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
