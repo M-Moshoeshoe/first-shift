@@ -1,6 +1,6 @@
 import { RULES } from "@/config/rules";
 import { sameWorld, type Viewer } from "./demo";
-import { isProfileComplete, type UserRecord } from "./profile";
+import { isProfileComplete, needsWorkerUpdate, type UserRecord } from "./profile";
 import { canTakePart } from "./strikes";
 import type { TryoutWindow } from "./schedule";
 import { addMinutes } from "./time";
@@ -35,7 +35,7 @@ export const bookingOpen = (tryout: Pick<TryoutRecord, "status" | "startAt">, no
 
 const overlaps = (a: TryoutWindow, b: TryoutWindow): boolean => a.start < b.end && b.start < a.end;
 
-export type NotEligibleReason = "not_young_person" | "profile_incomplete" | "no_pay_methods" | "account_paused" | "overlaps_booking";
+export type NotEligibleReason = "not_young_person" | "profile_incomplete" | "profile_update" | "account_paused" | "overlaps_booking";
 export type ClosedReason = "booking_closed" | "not_open";
 
 /** What the detail page offers this young person for this tryout. */
@@ -66,8 +66,8 @@ export function applyState({ worker, tryout, application, bookings, now }: Apply
   if (!worker || worker.role !== "young_person") return { kind: "not_eligible", reason: "not_young_person" };
   if (!canTakePart(worker.status)) return { kind: "not_eligible", reason: "account_paused" };
   if (!isProfileComplete(worker, null)) return { kind: "not_eligible", reason: "profile_incomplete" };
-  // Profiles from before the question was asked: a business must know how to pay before anyone is booked.
-  if (!worker.payMethods?.length) return { kind: "not_eligible", reason: "no_pay_methods" };
+  // Profiles from before these were asked: how to be paid, what they can do, languages and surname, on Profile.
+  if (needsWorkerUpdate(worker)) return { kind: "not_eligible", reason: "profile_update" };
   const settled = applicationState(application, tryout, now);
   if (settled) return settled;
   if (!bookingOpen(tryout, now)) return { kind: "closed", reason: tryout.status === "published" ? "booking_closed" : "not_open" };

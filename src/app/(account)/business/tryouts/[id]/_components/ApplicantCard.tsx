@@ -12,7 +12,7 @@ interface ApplicantCardProps {
   onOffer: () => void;
 }
 
-/** One applicant: who they are, how far they travel, their record, their note, and the one action. */
+/** One applicant: who they are, what they can do, how far they travel, their record, their note, and the one action. */
 export function ApplicantCard({ applicant, canOffer, busy, onOffer }: ApplicantCardProps) {
   const where = [applicant.area, applicant.distance].filter(Boolean).join(", ");
   return (
@@ -21,6 +21,7 @@ export function ApplicantCard({ applicant, canOffer, busy, onOffer }: ApplicantC
         <PersonPhoto subject={applicant.workerId} kind="profile" alt={applicant.firstName} />
         <div className="flex flex-col gap-1">
           <h3 className="text-xl font-bold">{applicant.firstName}</h3>
+          {applicant.intro ? <p className="text-lg">{applicant.intro}</p> : null}
           <p className="text-sm text-muted">{where}</p>
           <p className="text-sm text-muted tabular-nums">{applicant.returnFareCents === null ? FEED_COPY.fareUnknown : OWNER_COPY.returnFare(applicant.returnFareCents)}</p>
           <p className="text-sm text-muted tabular-nums">
@@ -28,6 +29,25 @@ export function ApplicantCard({ applicant, canOffer, busy, onOffer }: ApplicantC
           </p>
         </div>
       </div>
+      {applicant.skills.length > 0 || applicant.languages.length > 0 ? (
+        <div className="flex flex-col gap-1 text-sm">
+          {applicant.canDoThisWork ? <p className="font-bold">{OWNER_COPY.canDo}</p> : null}
+          <dl className="flex flex-col gap-1">
+            {applicant.skills.length > 0 ? (
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="text-muted">{OWNER_COPY.skills}:</dt>
+                <dd>{applicant.skills.join(", ")}</dd>
+              </div>
+            ) : null}
+            {applicant.languages.length > 0 ? (
+              <div className="flex flex-wrap gap-x-2">
+                <dt className="text-muted">{OWNER_COPY.languages}:</dt>
+                <dd>{applicant.languages.join(", ")}</dd>
+              </div>
+            ) : null}
+          </dl>
+        </div>
+      ) : null}
       <div className="flex flex-col gap-1">
         <p className="font-bold tabular-nums">{OWNER_COPY.showUp(applicant.showUp.score)}</p>
         <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">

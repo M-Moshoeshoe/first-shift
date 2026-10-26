@@ -8,7 +8,7 @@ import type { BookingViewResponse } from "@/schemas/booking";
 /**
  * Each side's tools for the day. The owner: the payment line and a WhatsApp
  * chat with the young person. The young person: the check-in code to show at
- * the door, and a trip to share with someone they trust.
+ * the door, a WhatsApp chat with the owner, and a trip to share with someone they trust.
  */
 export function BookingActions({ booking, when }: { booking: BookingViewResponse; when: string }) {
   if (booking.party === "business") {
@@ -38,7 +38,12 @@ export function BookingActions({ booking, when }: { booking: BookingViewResponse
           <p className="text-sm text-muted">{BOOKING_COPY.codeHint}</p>
         </div>
       ) : null}
-      <p className="text-lg">{BOOKING_COPY.chatHint(booking.businessName)}</p>
+      <p className="text-lg">{BOOKING_COPY.chatHint(booking.owner?.firstName ?? booking.businessName)}</p>
+      {booking.whatsappUrl ? (
+        <a href={booking.whatsappUrl} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary")}>
+          {BOOKING_COPY.chat}
+        </a>
+      ) : null}
       {statusLink ? (
         <div className="flex flex-col gap-2">
           <a href={whatsAppUrl("", BOOKING_COPY.shareText(booking.businessName, booking.businessArea, when, statusLink))} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary")}>

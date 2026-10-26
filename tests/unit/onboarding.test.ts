@@ -35,7 +35,7 @@ describe("form errors", () => {
 describe("the person's own profile view", () => {
   it("shows the phone as it's typed and never the counters, hash or photo path", () => {
     expect(displayPhone("27821234567")).toBe("082 123 4567");
-    const user: UserRecord = { ...newAccount("thabo", "young_person").user, firstName: "Thabo", payoutPhone: "27821234567", idLastFour: "0087", profilePhoto: { path: "photos/thabo/profile.jpg", version: "3" } };
+    const user: UserRecord = { ...newAccount("thabo", "young_person").user, firstName: "Thabo", payoutPhone: "27821234567", idLastFour: "0087", legalSurname: "Mokoena", profilePhoto: { path: "photos/thabo/profile.jpg", version: "3" } };
     const view = profileView(user, null);
     expect(view.worker).toMatchObject({ firstName: "Thabo", payoutPhone: "082 123 4567", idLastFour: "0087", hasPhoto: true });
     expect(JSON.stringify(view)).not.toMatch(/completed|photos\/|version/);

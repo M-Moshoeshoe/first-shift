@@ -48,7 +48,7 @@ async function feedIsolation(steps: Record<string, unknown>): Promise<void> {
   await signOut(clientAuth());
   await signInAs("e2e-real-ayanda");
   await post("/api/profile/role", { role: "young_person" });
-  await post("/api/profile/worker", { firstName: "Ayanda", area: "Ivory Park", availability: ["saturdays"], payoutPhone: "0821234567", payMethods: ["ewallet"], idNumber: "0001155800087" });
+  await post("/api/profile/worker", { firstName: "Ayanda", area: "Ivory Park", availability: ["saturdays"], payoutPhone: "0821234567", payMethods: ["ewallet"], skills: ["cleaning"], languages: ["isixhosa"], intro: "", legalSurname: "Nkosi", idNumber: "0001155800087" });
   const realFeed = await nearby();
   steps["10. real feed, same area"] = realFeed.status === "ok" ? realFeed.items.length : realFeed;
   if (realFeed.status !== "ok" || realFeed.items.length !== 0) throw new Error("A real young person must never see a demo tryout.");
@@ -148,8 +148,8 @@ run(async () => {
   steps["2. signed in"] = { destination: view.destination, complete: view.complete, firstName: view.worker?.firstName };
   if (view.destination !== "/work" || !view.complete) throw new Error("The demo young person should land on /work with a complete profile.");
 
-  steps["3. edit the demo profile"] = await refusal(() => post("/api/profile/worker", { firstName: "Hacker", area: "Tembisa", availability: ["saturdays"], payoutPhone: "0821234567", payMethods: ["ewallet"], idNumber: "0001155800087" }));
-  steps["3b. change the demo's pay methods"] = await refusal(() => post("/api/profile/worker/edit", { payMethods: ["cash"] }));
+  steps["3. edit the demo profile"] = await refusal(() => post("/api/profile/worker", { firstName: "Hacker", area: "Tembisa", availability: ["saturdays"], payoutPhone: "0821234567", payMethods: ["ewallet"], skills: ["cleaning"], languages: ["english"], intro: "", legalSurname: "Hacker", idNumber: "0001155800087" }));
+  steps["3b. change the demo's pay methods"] = await refusal(() => post("/api/profile/worker/edit", { payMethods: ["cash"], skills: ["cleaning"], languages: ["english"], intro: "" }));
 
   const user = clientAuth().currentUser;
   if (!user) throw new Error("not signed in");

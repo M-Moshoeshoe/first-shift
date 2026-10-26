@@ -18,6 +18,10 @@ const ApplicantSchema = z.object({
   completedTryouts: z.number(),
   approvedReferences: z.number(),
   note: z.string(),
+  skills: z.array(z.string()),
+  languages: z.array(z.string()),
+  intro: z.string(),
+  canDoThisWork: z.boolean(),
   status: z.enum(["applied", "offered"]),
   showUp: z.object({ score: z.number(), band: z.enum(["high", "medium", "low", "new"]), reasons: z.array(z.string()) }),
   firstTimerPlace: z.boolean(),
@@ -86,6 +90,9 @@ export const BookingViewSchema = z.object({
   pinAccuracyMetres: z.number(),
   photo: z.object({ subject: z.string(), kind: z.enum(["profile", "shopfront"]) }),
   payoutPhone: z.nullable(z.string()),
+  /** The young person's view only, once booked: the owner's first name and face (docs/RULES.md, Accountability). */
+  owner: z.nullable(z.object({ firstName: z.string(), subject: z.string() })),
+  /** WhatsApp with the other side: the owner gets the young person's number, the young person the owner's. */
   whatsappUrl: z.nullable(z.string()),
   checkInCode: z.nullable(z.string()),
   shareToken: z.nullable(z.string()),

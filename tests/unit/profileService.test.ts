@@ -81,13 +81,16 @@ describe("young person profile", () => {
     expect(store.audit.filter((entry) => entry.action === "worker_profile_saved")).toHaveLength(2);
   });
 
-  it("changes how businesses can pay them after onboarding, audited once, and never a demo profile", async () => {
+  it("changes how businesses can pay them and what they can do after onboarding, audited once, and never a demo profile", async () => {
     await service.saveWorker(real("thabo"), workerInput());
-    expect(await service.editWorker(real("thabo"), { payMethods: ["payshap", "cash"] })).toEqual({ status: "saved", complete: false });
-    expect(store.users.get("thabo")?.payMethods).toEqual(["payshap", "cash"]);
+    const edit = { payMethods: ["payshap" as const, "cash" as const], skills: ["cleaning" as const], languages: ["xitsonga" as const], intro: "Call me on 082 123 4567, I'm a hard worker" };
+    expect(await service.editWorker(real("thabo"), edit)).toEqual({ status: "saved", complete: false });
+    // The number is taken out: an owner gets it only once they book.
+    expect(store.users.get("thabo")).toMatchObject({ payMethods: ["payshap", "cash"], skills: ["cleaning"], languages: ["xitsonga"], intro: "Call me on, I'm a hard worker", legalSurname: "Mokoena" });
     expect(store.audit.at(-1)).toEqual({ uid: "thabo", action: "worker_profile_edited" });
-    expect(await service.editWorker(real("thabo"), { payMethods: ["payshap", "cash"] })).toMatchObject({ status: "unchanged" });
-    await expectRefusedWithoutChange(() => service.editWorker({ uid: "thabo", demo: true }, { payMethods: ["cash"] }), PROFILE_MESSAGES.demoLocked);
+    expect(await service.editWorker(real("thabo"), edit)).toMatchObject({ status: "unchanged" });
+    await expectRefusedWithoutChange(() => service.editWorker(real("thabo"), { ...edit, legalSurname: "Someone Else" }), PROFILE_MESSAGES.surnameLocked);
+    await expectRefusedWithoutChange(() => service.editWorker({ uid: "thabo", demo: true }, edit), PROFILE_MESSAGES.demoLocked);
   });
 
   it("refuses a different ID on an account that already has one", async () => {
@@ -149,6 +152,40 @@ describe("business profile", () => {
     expect(store.ledgers.get("sipho")).toHaveLength(1);
     expect(store.audit.filter((entry) => entry.action === "credit_grant")).toHaveLength(1);
     expect((await service.getProfile("sipho")).business?.credits).toEqual({ available: RULES.freeCredits, onlyFree: true });
+  });
+
+  it("saves the owner's details: the ID as a hash in its own scope and the last four digits, the first name for young people, audited", async () => {
+    await service.saveBusiness(real("sipho"), details);
+    const ownerInput = { legalName: "  Sipho   Daniel Dlamini ", idNumber: ADULT_ID, phone: "27831234567", cipc: "2015/123456/07" };
+    expect(await service.saveOwner(real("sipho"), ownerInput)).toEqual({ status: "saved", complete: false });
+    expect(store.users.get("sipho")).toMatchObject({ legalName: "Sipho Daniel Dlamini", idLastFour: "0087", residency: "citizen" });
+    expect(store.businesses.get("sipho")).toMatchObject({ ownerFirstName: "Sipho", ownerPhone: "27831234567", cipc: "2015/123456/07" });
+    // Owners' IDs are held apart: the same person can also hold a young person's account, once each.
+    expect(store.idHashes.get(testHash(`owner:${ADULT_ID}`))).toBe("sipho");
+    expect(store.idHashes.has(testHash(ADULT_ID))).toBe(false);
+    expect(store.audit.at(-1)).toEqual({ uid: "sipho", action: "owner_details_saved" });
+    expect(store.snapshot()).not.toContain(ADULT_ID);
+    expect(await service.saveOwner(real("sipho"), ownerInput)).toMatchObject({ status: "unchanged" });
+    await expectRefusedWithoutChange(() => service.saveOwner(real("sipho"), { ...ownerInput, idNumber: OTHER_ADULT_ID }), PROFILE_MESSAGES.idLocked);
+  });
+
+  it("refuses an owner's ID held by another owner, an under-age ID, and anyone before the business details", async () => {
+    await service.saveBusiness(real("sipho"), details);
+    await service.saveOwner(real("sipho"), { legalName: "Sipho Dlamini", idNumber: ADULT_ID, phone: "27831234567" });
+    await service.setRole(real("lerato"), "business");
+    await expectRefusedWithoutChange(() => service.saveOwner(real("lerato"), { legalName: "Lerato Mahlangu", idNumber: ADULT_ID, phone: "27831234567" }), PROFILE_MESSAGES.detailsFirst);
+    await service.saveBusiness(real("lerato"), { ...details, name: "Lerato's Spaza" });
+    await expectRefusedWithoutChange(() => service.saveOwner(real("lerato"), { legalName: "Lerato Mahlangu", idNumber: ADULT_ID, phone: "27831234567" }), PROFILE_MESSAGES.idInUse);
+    await expectRefusedWithoutChange(() => service.saveOwner(real("lerato"), { legalName: "Lerato Mahlangu", idNumber: BAD_IDS.under_age, phone: "27831234567" }), ID_PROBLEM_MESSAGES.under_age);
+  });
+
+  it("takes the owner's face as their profile photo, once their details are saved", async () => {
+    await service.saveBusiness(real("sipho"), details);
+    store.photos.set("photos/sipho/profile.jpg", { contentType: "image/jpeg", size: 150_000, version: "1" });
+    await expectRefusedWithoutChange(() => service.savePhoto(real("sipho"), "profile"), PROFILE_MESSAGES.detailsFirst);
+    await service.saveOwner(real("sipho"), { legalName: "Sipho Dlamini", idNumber: ADULT_ID, phone: "27831234567" });
+    expect(await service.savePhoto(real("sipho"), "profile")).toMatchObject({ status: "saved" });
+    expect((await service.getProfile("sipho")).business?.owner).toEqual({ legalName: "Sipho Dlamini", idLastFour: "0087", phone: "083 123 4567", cipc: undefined, hasPhoto: true, ready: true });
   });
 
   it("grants nothing to a young person", async () => {

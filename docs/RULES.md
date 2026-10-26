@@ -37,7 +37,7 @@ An owner can always pay more than the amount shown.
 
 | Rule | Value | Code |
 | --- | --- | --- |
-| Ranking | The shortlist of 5 (`ranking.ts`), always with one place kept for someone with no record; then everyone else. Ranked on show-up likelihood (with its reasons) and distance; we don't ask about experience yet, so everyone gets the same fit | `applicantRanking.ts` |
+| Ranking | The shortlist of 5 (`ranking.ts`), always with one place kept for someone with no record; then everyone else. Ranked on skill fit (the tryout's kind of work among "What I can do": a full fit; not among them: a low one; not said yet: in between), show-up likelihood (with its reasons) and distance. Each applicant shows their introduction, what they can do, their languages and "Says they can do this kind of work" when it fits; never their surname, ID or number | `applicantRanking.ts`, `skillFit` |
 | One offer at a time | The owner offers the tryout to one applicant; another only after a decline or once the offer has lapsed | `offers.ts` |
 | Lapsing | An offer lapses at the booking cut-off, an hour before the start | `offerLapsesAt` |
 | Accepting books it | Checked again at that moment: booking still open, a credit the business can hold (it's held), no overlap with another booking, and the 24-hour line with this business | `decideAnswer` |
@@ -45,7 +45,8 @@ An owner can always pay more than the amount shown.
 | The booking page | Both parties: the exact pin with "Open in maps", names and photos. The owner sees the payout number and can message on WhatsApp; at payment, only the ways the young person chose. The young person sees a 6-digit check-in code and can share their trip | `bookings.ts` |
 | Share my trip | A WhatsApp message with a link to a public status page at an unguessable token: first names, the business, the times and the status only, until midnight at the end of the tryout's day | `statusView` |
 | Report a problem | On every booking, before, during and after the day, from either side, each with its own kinds: a young person can report harassment, unsafe work, being asked for money, not being paid, or something else; a business, harassment, unsafe work, paying too much, or something else. Harassment, unsafe work and being asked for money pause the business at once | `decideReport`, `reportCategoriesFor` |
-| Photos | Your own; an applicant's face for the owner they applied to; each other's once booked. Through the server only | `mayViewPhoto` |
+| Photos | Your own; an applicant's face for the owner they applied to; each other's once booked, the owner's face included. Through the server only | `mayViewPhoto` |
+| Who the young person meets | Once booked, the young person sees the owner's first name and photo, and can message them on WhatsApp at the owner's contact number. Not before | `newBooking`, `bookingView` |
 
 ## Cancellations
 
@@ -159,7 +160,7 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 | Rule | Why |
 | --- | --- |
 | A role (looking for work, or running a business) is set once and never changed | One account, one side of the deal; using First Shift the other way means a different Google account |
-| One ID number, one account | Nobody can open a second account to escape strikes |
+| One ID number, one account | Nobody can open a second account to escape strikes. Owners' IDs are held apart from young people's (`owner:` before the number is hashed), so one person can look for work and run a business, each with one account |
 | An ID number is set once per account | A record can't be moved to someone else's identity |
 | Sending the same role, or the same ID with the same details, again is fine and changes nothing | A double tap or a retry on weak signal never fails or duplicates anything |
 | A wrong ID number is corrected only through support | The person is told to contact us; corrections go through the review list in Phase 7 |
@@ -174,6 +175,24 @@ Accounts and IDs (`roles.ts`, `profileDecisions.ts`):
 | A demo account signs in only through our server | Changing its Firebase password or email from the browser gains nothing |
 | `npm run demo:reset` restores the demo world | A clean start before every judging session |
 
+## Accountability and profiles
+
+Both sides of a tryout know who they're dealing with. What's shown, to whom and when:
+
+| Who | What we ask | Shown to | Kept for an admin only |
+| --- | --- | --- | --- |
+| Business owner | Full legal name, SA ID number (the same structure and age checks; a hash and the last four digits kept), a face photo taken live, a contact cellphone number; optionally the CIPC registration number | The young person they book, once booked: the first name, the photo and the number (WhatsApp) | Full name, last four digits, number, CIPC number |
+| Young person | Legal surname, "What I can do" (1 to 4 of the kinds of work a tryout can be), languages spoken (the 11 official languages and South African Sign Language), a one-line introduction (optional, up to 120 characters) | The owner they apply to: the first name, the introduction, what they can do and the languages. The number once booked, as before | Surname, last four digits, number |
+
+| Rule | Value | Code |
+| --- | --- | --- |
+| The introduction | Phone numbers (9 or more digits, however written), email addresses, links, websites and social handles are taken out on the server before it's saved, so contact details reach an owner only once they book | `cleanIntro` |
+| Owners from before | A business that signed up before the owner was asked sees "Add your details as the owner" and can't post until they're saved (`/business/owner`) | `ownerReady`, `owner_missing` |
+| Young people from before | Asked on Profile for their ways to be paid, what they can do, their languages and their surname, and can't apply until they're saved | `needsWorkerUpdate`, `profile_update` |
+| A surname is set once | Like the ID number, so a record can't move to another name; corrections through support | `surname_locked` |
+| Face photos | Taken live in the app with the camera (the front camera for a face, the back one for a shopfront), with a framing guide and three tips: "Use a plain background", "Face the light" and "No sunglasses or hat". A face can't come from the gallery; a shopfront can. If the camera can't open, the phone's own camera opens instead (a file input with capture set), with one line saying so. We don't try to judge backgrounds or clothing, and we don't run face matching | `CameraView`, `PhotoField` |
+| Why an admin keeps them | To find the person behind an account when a safety report, a payment dispute or a strike needs it (review cases). The Privacy page will say so (`docs/PHASES.md`, L) | `SECURITY.md`, Privacy |
+
 ## Location
 
 A tryout shows where it is as a cell about 1 km across (a 6-character geohash) and the cell's centre, never the business's exact pin. The pin stays on the business record (`geo.ts`).
@@ -186,7 +205,7 @@ A tryout shows where it is as a cell about 1 km across (a 6-character geohash) a
 | Within reach | 10 km of the area's centre, measured to the tryout's cell centre and shown as "about 4 km"; or any area with a published direct taxi fare from the young person's area, however far, because people make that trip every day (Ivory Park to Randburg: about 21 km, R56 return) | `nearby.ts`, `withinReach` |
 | Taxi fares | Published one-way fares only, both directions, each with its source (`src/config/fares.ts`); a route we have no fare for shows "Fare not known" | `fares.ts` |
 | What the feed shows | Published tryouts still open for booking, soonest first, in the viewer's world only (demo or real) | `nearby.ts`, `demo.ts` |
-| Who may apply | A young person with a complete, active profile and at least one way to be paid | `applications.ts` |
+| Who may apply | A young person with a complete, active profile, at least one way to be paid, what they can do, their languages and their surname | `applications.ts` |
 | When | While the tryout is published and booking is open (until 1 hour before the start) | `applications.ts` |
 | One each | One application per young person per tryout; applying again changes nothing | `applications.ts` |
 | No overlaps | Never for a tryout that overlaps one they're booked on | `applications.ts` |

@@ -16,7 +16,7 @@ interface ShopfrontStepProps {
   onBack: () => void;
 }
 
-/** Step 3: a photo of the shopfront from the street, taken with the back camera. */
+/** Step 5: a photo of the shopfront from the street, taken with the back camera. */
 export function ShopfrontStep({ details, pin, focusHeading, onSaved, onBack }: ShopfrontStepProps) {
   const rows = [
     { term: "Business name", value: details.name },

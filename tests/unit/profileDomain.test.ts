@@ -12,6 +12,10 @@ const worker: UserRecord = {
   availability: ["saturdays"],
   payoutPhone: "27821234567",
   payMethods: ["ewallet"],
+  skills: ["customer_service"],
+  languages: ["english"],
+  intro: "Good with customers.",
+  legalSurname: "Mokoena",
   idLastFour: "0087",
   residency: "citizen",
 };
@@ -67,7 +71,7 @@ describe("completeness and where a person belongs", () => {
 });
 
 describe("save decisions", () => {
-  const save = { details: { firstName: "Thabo", area: "Ivory Park", availability: ["saturdays" as const], payoutPhone: "27821234567", payMethods: ["ewallet" as const] }, idLastFour: "0087", residency: "citizen" as const, idHash: "h1" };
+  const save = { details: { firstName: "Thabo", area: "Ivory Park", availability: ["saturdays" as const], payoutPhone: "27821234567", payMethods: ["ewallet" as const], skills: ["customer_service" as const], languages: ["english" as const], intro: "Good with customers.", legalSurname: "Mokoena" }, idLastFour: "0087", residency: "citizen" as const, idHash: "h1" };
 
   it("treats an identical worker resend as unchanged, and any change as a save", () => {
     expect(decideWorkerSave("thabo", { user: worker, heldIdHash: "h1", claimOwner: "thabo" }, save)).toEqual({ kind: "unchanged" });
@@ -78,10 +82,11 @@ describe("save decisions", () => {
   });
 
   it("lets a finished young person change how they can be paid, and nothing before onboarding", () => {
-    expect(decideWorkerEdit(worker, { payMethods: ["ewallet"] })).toEqual({ kind: "unchanged" });
-    expect(decideWorkerEdit(worker, { payMethods: ["cash_send", "cash"] })).toMatchObject({ kind: "save", next: { payMethods: ["cash_send", "cash"], firstName: "Thabo" } });
-    expect(decideWorkerEdit({ role: "young_person", status: "active" }, { payMethods: ["cash"] })).toEqual({ kind: "refuse", problem: { code: "details_first" } });
-    expect(decideWorkerEdit(owner, { payMethods: ["cash"] })).toEqual({ kind: "refuse", problem: { code: "role_locked", current: "business" } });
+    const same = { payMethods: ["ewallet" as const], skills: ["customer_service" as const], languages: ["english" as const], intro: "Good with customers." };
+    expect(decideWorkerEdit(worker, same)).toEqual({ kind: "unchanged" });
+    expect(decideWorkerEdit(worker, { ...same, payMethods: ["cash_send", "cash"] })).toMatchObject({ kind: "save", next: { payMethods: ["cash_send", "cash"], firstName: "Thabo" } });
+    expect(decideWorkerEdit({ role: "young_person", status: "active" }, same)).toEqual({ kind: "refuse", problem: { code: "details_first" } });
+    expect(decideWorkerEdit(owner, same)).toEqual({ kind: "refuse", problem: { code: "role_locked", current: "business" } });
   });
 
   it("stores a known area under its official name, so a typed variant of the saved area is unchanged", () => {

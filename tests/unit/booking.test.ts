@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { rankApplicants } from "@/domain/applicantRanking";
 import type { ApplicationRecord } from "@/domain/applications";
-import { cancelOutcome, decideCancel, decideReport, mayViewPhoto, statusExpiresAt, statusView, type BookingRecord } from "@/domain/bookings";
+import { cancelOutcome, decideCancel, decideReport, mayViewPhoto, newBooking, statusExpiresAt, statusView, type BookingRecord } from "@/domain/bookings";
 import { BOOKING_MESSAGES } from "@/domain/tryoutMessages";
 import { ANSWER_PROBLEM_MESSAGES } from "@/domain/bookingMessages";
 import { decideAnswer, decideOffer, offerLapsesAt, openOffer, overlappingApplications, type AcceptInputs } from "@/domain/offers";
@@ -175,5 +175,35 @@ describe("reports, by side", () => {
     expect(decideReport(owner, booked(), "t1", "paid_too_much", "")).toMatchObject({ kind: "report", pauseBusiness: false });
     expect(decideReport(owner, booked(), "t1", "asked_for_money", "")).toEqual({ kind: "refuse", problem: "category" });
     expect(decideReport(worker, booked(), "t1", "paid_too_much", "")).toEqual({ kind: "refuse", problem: "category" });
+  });
+});
+
+describe("who the young person meets", () => {
+  it("copies the owner's first name and number onto the booking, and nothing else about them", () => {
+    const business = { ownerId: "sipho", status: "active" as const, completed: 0, onTime: 0, lateCancellations: 0, noShows: 0, name: "Sipho's Phone Repairs", location: { latitude: -26.09, longitude: 28.0, accuracyMetres: 15 }, ownerFirstName: "Sipho", ownerPhone: "27831234567" };
+    const booking = newBooking("t1", tryout(), business, "thabo", thabo, NOW);
+    expect(booking).toMatchObject({ ownerFirstName: "Sipho", ownerPhone: "27831234567", workerPayMethods: ["ewallet", "cash"] });
+    expect(newBooking("t1", tryout(), { ...business, ownerPhone: undefined }, "thabo", thabo, NOW)).not.toHaveProperty("ownerFirstName");
+  });
+
+  it("shows the owner's face to the young person only once booked, never while applying", () => {
+    expect(mayViewPhoto("thabo", "sipho", "profile", { appliedToViewer: false, bookedTogether: false })).toBe(false);
+    expect(mayViewPhoto("thabo", "sipho", "profile", { appliedToViewer: false, bookedTogether: true })).toBe(true);
+  });
+});
+
+describe("the shortlist", () => {
+  const app = (workerId: string) => application({ workerId });
+  it("ranks someone who says they can do this kind of work above someone who doesn't, and names what they do", () => {
+    const cleaner = { ...thabo, firstName: "Ayanda", skills: ["cleaning" as const], languages: ["isixhosa" as const] };
+    const server = { ...thabo, firstName: "Lerato", skills: ["customer_service" as const], languages: ["english" as const, "sasl" as const], intro: "I love helping people." };
+    const ranked = rankApplicants(tryout({ category: "customer_service" }), [
+      { application: app("ayanda"), worker: cleaner, approvedReferences: 0 },
+      { application: app("lerato"), worker: server, approvedReferences: 0 },
+    ]);
+    expect(ranked.map((view) => view.firstName)).toEqual(["Lerato", "Ayanda"]);
+    expect(ranked[0]).toMatchObject({ canDoThisWork: true, skills: ["Serving customers"], languages: ["English", "South African Sign Language"], intro: "I love helping people." });
+    expect(ranked[1]).toMatchObject({ canDoThisWork: false, skills: ["Cleaning"] });
+    expect(JSON.stringify(ranked)).not.toMatch(/Mokoena|payoutPhone|0087/);
   });
 });

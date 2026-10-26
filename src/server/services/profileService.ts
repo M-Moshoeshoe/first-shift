@@ -3,10 +3,10 @@ import { decideWelcomeGrant, type CreditEntry } from "@/domain/credits";
 import { ID_PROBLEM_MESSAGES, profileProblemMessage } from "@/domain/messages";
 import { isProfileComplete, newAccount, photoPath, profileView, type BusinessRecord, type PhotoKind, type ProfileView, type UserRecord } from "@/domain/profile";
 import type { Viewer } from "@/domain/demo";
-import { decideBusinessSave, decidePhotoSave, decideWorkerEdit, decideWorkerSave, profileEditProblem, type ProfileProblem } from "@/domain/profileDecisions";
+import { decideBusinessSave, decideOwnerSave, decidePhotoSave, decideWorkerEdit, decideWorkerSave, profileEditProblem, type ProfileProblem } from "@/domain/profileDecisions";
 import { decideRole, type Role } from "@/domain/roles";
 import { checkSaId } from "@/domain/saId";
-import type { BusinessProfileInput, SaveResult, WorkerEditInput, YoungPersonProfileInput } from "@/schemas/profile";
+import type { BusinessProfileInput, OwnerInput, SaveResult, WorkerEditInput, YoungPersonProfileInput } from "@/schemas/profile";
 import { AppError } from "../errors";
 import type { PhotoStore } from "../repositories/photoStore";
 import type { Plan, ProfileRepository, StoredProfile } from "../repositories/profileRepository";
@@ -29,6 +29,7 @@ const HTTP_STATUS: Record<ProfileProblem["code"], number> = {
   photo_wrong_type: 422,
   photo_too_big: 422,
   pin_imprecise: 422,
+  surname_locked: 409,
   demo_locked: 403,
 };
 
@@ -41,6 +42,16 @@ function welcomeCredits(user: UserRecord | null, business: BusinessRecord | null
   const grant = decideWelcomeGrant(isProfileComplete(user, business), credits);
   return grant.kind === "append" ? grant.entries : undefined;
 }
+
+/** Checks an ID number and keeps only what may be stored: the last four digits, the residency and the hash. The number itself goes no further. */
+function checkedId(idNumber: string, now: Date, hash: (digits: string) => string) {
+  const check = checkSaId(idNumber, now);
+  if (!check.ok) throw new AppError(422, check.error, ID_PROBLEM_MESSAGES[check.error]);
+  return { lastFour: check.value.lastFour, residency: check.value.residency, idHash: hash(idNumber) };
+}
+
+/** Owners' IDs are held apart from young people's, so one person can do both, each once (docs/RULES.md, Accountability). */
+const OWNER_ID_SCOPE = "owner:";
 
 function refuse(problem: ProfileProblem): never {
   throw new AppError(HTTP_STATUS[problem.code], problem.code, profileProblemMessage(problem));
@@ -74,11 +85,8 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
     async saveWorker(viewer: Viewer, input: YoungPersonProfileInput): Promise<SaveResult> {
       const uid = editableBy(viewer);
       const { idNumber, ...details } = input;
-      const check = checkSaId(idNumber, now());
-      if (!check.ok) throw new AppError(422, check.error, ID_PROBLEM_MESSAGES[check.error]);
-      // Only these two facts and the hash leave this function; the number and date of birth are dropped here.
-      const { lastFour, residency } = check.value;
-      const idHash = hashId(idNumber);
+      // Only these two facts and the hash leave here; the number and date of birth are dropped.
+      const { lastFour, residency, idHash } = checkedId(idNumber, now(), hashId);
 
       return repo.transact<SaveResult>(uid, idHash, (state) => {
         const decision = decideWorkerSave(uid, state, { details, idLastFour: lastFour, residency, idHash });
@@ -100,6 +108,19 @@ export function createProfileService({ repo, photos, hashId, now }: ProfileServi
         if (decision.kind === "refuse") refuse(decision.problem);
         if (decision.kind === "unchanged") return unchanged(state);
         return { write: { user: decision.next, audit: "worker_profile_edited" }, result: { status: "saved", complete: isProfileComplete(decision.next, state.business) } };
+      });
+    },
+
+    /** The business owner's own details: full name, ID (hashed, last four kept), contact number and CIPC number. */
+    async saveOwner(viewer: Viewer, input: OwnerInput): Promise<SaveResult> {
+      const uid = editableBy(viewer);
+      const { lastFour, residency, idHash } = checkedId(input.idNumber, now(), (digits) => hashId(`${OWNER_ID_SCOPE}${digits}`));
+      return repo.transact<SaveResult>(uid, idHash, (state) => {
+        const decision = decideOwnerSave(uid, state, { legalName: input.legalName, phone: input.phone, cipc: input.cipc, idLastFour: lastFour, residency, idHash });
+        if (decision.kind === "refuse") refuse(decision.problem);
+        if (decision.kind === "unchanged") return unchanged(state);
+        const { user, business, claimId } = decision.next;
+        return { write: { user, business, claimIdHash: claimId ? idHash : undefined, audit: "owner_details_saved" }, result: { status: "saved", complete: isProfileComplete(user, business) } };
       });
     },
 

@@ -39,6 +39,8 @@ const BookingSchema = z.object({
   workerArea: z.string(),
   workerPayoutPhone: z.string(),
   workerPayMethods: z.array(z.enum(PAYMENT_METHODS)).optional(),
+  ownerFirstName: z.string().optional(),
+  ownerPhone: z.string().optional(),
   startAt: instant,
   endAt: instant,
   hours: z.number(),

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEMO_EXTRA_OWNERS, demoState } from "@/data/demo";
 import { canPost } from "@/domain/credits";
-import { isProfileComplete } from "@/domain/profile";
+import { isProfileComplete, needsWorkerUpdate, ownerReady } from "@/domain/profile";
 import { fromSast, sastSlot } from "@/domain/time";
 
 const uids = { business: "demo-sipho-uid", youngPerson: "demo-thabo-uid" };
@@ -16,6 +16,9 @@ describe("the demo world npm run demo:reset restores", () => {
     expect(isProfileComplete(state.users[uids.youngPerson] ?? null, null)).toBe(true);
     expect(isProfileComplete(state.users[uids.business] ?? null, state.businesses[uids.business] ?? null)).toBe(true);
     expect(canPost(state.ledger)).toBe(true);
+    // Everything asked since: the owner's details, and the young person's ways to be paid, skills, languages and surname.
+    expect(ownerReady(state.users[uids.business] ?? null, state.businesses[uids.business] ?? null)).toBe(true);
+    expect(needsWorkerUpdate(state.users[uids.youngPerson] ?? { role: "young_person", status: "active" })).toBe(false);
 
     expect(state.tryouts).toHaveLength(4);
     for (const tryout of state.tryouts) {
@@ -32,9 +35,11 @@ describe("the demo world npm run demo:reset restores", () => {
     expect(owners).toEqual(new Set([uids.business, ...DEMO_EXTRA_OWNERS]));
   });
 
-  it("gives the young person no reachable phone number and no ID", () => {
-    const thabo = demoState(uids, new Date()).users[uids.youngPerson];
-    expect(thabo?.payoutPhone).toBe("27000000000");
-    expect(thabo?.idLastFour).toBe("0000");
+  it("gives neither demo account a reachable phone number or a real ID", () => {
+    const state = demoState(uids, new Date());
+    expect(state.users[uids.youngPerson]?.payoutPhone).toBe("27000000000");
+    expect(state.users[uids.youngPerson]?.idLastFour).toBe("0000");
+    expect(state.businesses[uids.business]?.ownerPhone).toBe("27000000001");
+    expect(state.users[uids.business]?.idLastFour).toBe("0000");
   });
 });

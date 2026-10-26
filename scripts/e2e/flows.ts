@@ -68,10 +68,21 @@ async function profileError(rec: Recorder, page: Page, path: string): Promise<vo
 }
 
 async function choosePhoto(page: Page, name: string): Promise<void> {
-  // A screenshot of the page is a real image for the browser to resize, like a phone photo.
+  // A screenshot of the page is a real image for the browser to resize, like a phone photo. Only a shopfront may come from the gallery.
   const buffer = await page.screenshot();
   await page.locator('input[type="file"]:not([capture])').setInputFiles({ name, mimeType: "image/png", buffer });
-  await page.getByAltText("The photo you chose").waitFor();
+  await page.getByAltText("The photo you took").waitFor();
+}
+
+/** A face, taken live with the in-app camera (Edge's fake camera), never from the gallery. */
+async function takeFace(rec: Recorder, page: Page, label: string): Promise<void> {
+  if ((await page.locator('input[type="file"]:not([capture])').count()) > 0) rec.failures.push(`${rec.width} px, ${label}: a face photo offers the gallery`);
+  for (const tip of ["Use a plain background", "Face the light", "No sunglasses or hat"]) await page.getByText(tip).waitFor();
+  await page.getByRole("button", { name: "Open the camera" }).click();
+  await page.getByRole("button", { name: "Take the photo" }).waitFor();
+  await rec.check(page, `${label}, the camera open`);
+  await page.getByRole("button", { name: "Take the photo" }).click();
+  await page.getByAltText("The photo you took").waitFor();
 }
 
 /** From the home page's "Find a paid tryout" to a finished young person profile. */
@@ -106,23 +117,35 @@ export async function youngPerson(rec: Recorder, page: Page): Promise<void> {
   for (const method of ["ewallet", "cash"]) await page.locator(`label[for="work-payMethods-${method}"]`).click();
   await rec.check(page, "young person step 1, ways to be paid chosen");
   await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("heading", { name: "What you can do" }).waitFor();
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByText("Choose at least one kind of work you can do, up to 4.").waitFor();
+  await rec.check(page, "young person step 2 errors");
+  for (const id of ["work-skills-customer_service", "work-skills-stock_and_packing", "work-languages-english", "work-languages-isizulu"]) await page.locator(`label[for="${id}"]`).click();
+  await page.getByLabel("Introduce yourself in one line (optional)").fill("Call me on 082 123 4567, I'm good with customers");
+  await rec.check(page, "young person step 2, what you can do");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByLabel("Surname, as on your ID").fill("Mokoena");
   await page.getByLabel("ID number").fill(ID_NUMBER);
-  await rec.check(page, "young person step 2");
+  await rec.check(page, "young person step 3");
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("heading", { name: "Your photo" }).waitFor();
   await page.getByRole("button", { name: "Back" }).click();
   await page.getByRole("heading", { name: "Your ID number" }).waitFor();
+  if ((await page.getByLabel("Surname, as on your ID").inputValue()) !== "Mokoena") rec.failures.push(`${rec.width} px: Back lost the surname`);
   await page.getByLabel("ID number").fill(ID_NUMBER);
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("heading", { name: "Your photo" }).waitFor();
-  await choosePhoto(page, "face.png");
-  await rec.check(page, "young person step 3, after Back and Next");
+  await takeFace(rec, page, "young person step 4");
+  await rec.check(page, "young person step 4, after Back and Next");
   await page.getByRole("button", { name: "Save my profile" }).click();
   await page.getByText("Profile done").waitFor();
   await pathIs(page, "/work");
   await page.getByRole("heading", { name: "Paid tryouts near you" }).waitFor();
   await rec.check(page, "young person home");
   await expectStoredArea(rec, "users", "firstName", "Thabo", "Ivory Park");
+  const thabo = (await getFirestore(adminApp()).collection("users").where("firstName", "==", "Thabo").get()).docs[0];
+  if (thabo?.get("intro") !== "Call me on, I'm good with customers" || thabo.get("legalSurname") !== "Mokoena") rec.failures.push(`${rec.width} px: stored intro ${JSON.stringify(thabo?.get("intro"))}, the number should be taken out`);
   await workerProfile(rec, page);
   await skeleton(rec, page, "/work");
   await profileError(rec, page, "/work");
@@ -139,7 +162,7 @@ async function workerProfile(rec: Recorder, page: Page): Promise<void> {
   if ((await page.getByText(/bank account number/i).count()) !== 1) rec.failures.push(`${rec.width} px: Profile should say once that we never ask for a bank account number`);
   await page.locator('label[for="profile-payMethods-payshap"]').click();
   await page.getByRole("button", { name: "Save changes" }).click();
-  await page.getByText("Saved. Businesses will see these ways when they book you.").waitFor();
+  await page.getByText("Saved. Businesses see these when you apply.").waitFor();
   await rec.check(page, "profile, ways to be paid saved");
   const stored = await getFirestore(adminApp()).collection("users").where("firstName", "==", "Thabo").get();
   const methods = stored.docs.map((doc) => doc.get("payMethods"));
@@ -167,9 +190,22 @@ export async function business(rec: Recorder, page: Page): Promise<void> {
   await rec.check(page, "business step 1, COIDA not answered");
   await page.locator("label", { hasText: "Yes, we're registered" }).click();
   await page.getByRole("button", { name: "Next" }).click();
-  await page.getByRole("heading", { name: "Your premises pin" }).waitFor();
+  await page.getByRole("heading", { name: "About you, the owner" }).waitFor();
   await page.getByRole("button", { name: "Back" }).click();
   await page.getByRole("heading", { name: "About your business" }).waitFor();
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("heading", { name: "About you, the owner" }).waitFor();
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByText("Enter your full name as it is on your ID", { exact: false }).waitFor();
+  await rec.check(page, "business step 2, owner details errors");
+  await page.getByLabel("Your full name, as on your ID").fill("Lerato Mahlangu");
+  await page.getByLabel("Your ID number").fill(ID_NUMBER);
+  await page.getByLabel("Your cellphone number").fill("083 123 4567");
+  await page.getByLabel("CIPC registration number (optional)").fill("2015/123456/07");
+  await rec.check(page, "business step 2, owner details");
+  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("heading", { name: "Your photo" }).waitFor();
+  await takeFace(rec, page, "business step 3, the owner's face");
   await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("heading", { name: "Your premises pin" }).waitFor();
   await page.getByRole("button", { name: "Use my location" }).click();
@@ -185,6 +221,7 @@ export async function business(rec: Recorder, page: Page): Promise<void> {
   await page.getByText("Profile done").waitFor();
   await pathIs(page, "/business");
   await page.getByRole("heading", { name: "Lerato's Spaza" }).waitFor();
+  if ((await page.getByText("Add your details as the owner").count()) > 0) rec.failures.push(`${rec.width} px: a business with its owner's details still sees the prompt`);
   await rec.check(page, "business home");
   await expectStoredArea(rec, "businesses", "name", "Lerato's Spaza", "Tembisa");
   await skeleton(rec, page, "/business");

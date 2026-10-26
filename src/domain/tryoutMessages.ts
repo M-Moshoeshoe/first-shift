@@ -15,6 +15,7 @@ const hoursRange = `${RULES.minPaidHours} to ${RULES.maxTryoutHours} hours`;
 export const POSTING_PROBLEM_MESSAGES: Record<PostingProblem, string> = {
   not_business: "Only a business account can post tryouts. Sign in with the Google account you used for your business.",
   profile_incomplete: "Finish your business profile first: your details, your premises pin and a photo of your shopfront.",
+  owner_missing: "Add your details as the owner first: your full name, your ID number, a photo of your face and your cellphone number.",
   account_paused: `Your account is paused, so you can't post tryouts right now. Contact us to sort it out.`,
   no_credits: `You've used your free tryouts. Top-ups open soon. Contact us at ${SUPPORT_EMAIL} if you need more now.`,
 };

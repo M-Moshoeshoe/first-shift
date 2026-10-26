@@ -1,6 +1,7 @@
 import { creditBalance, type CreditEntry } from "./credits";
 import type { CoidaAnswer } from "./injuryCover";
 import type { PaymentMethod } from "./paymentFlow";
+import type { Language, Skill } from "./workerProfile";
 import type { Role } from "./roles";
 import type { IdCheck } from "./saId";
 
@@ -58,15 +59,33 @@ export interface BusinessDetails {
   coida?: CoidaAnswer;
 }
 
-/** users/{uid}. Readable by its owner, so it never holds the ID hash. */
-export interface UserRecord extends Partial<Counters>, Partial<WorkerDetails> {
+/** What a young person says about themselves on the owner's shortlist (workerProfile.ts). */
+export interface WorkerAbout {
+  skills: Skill[];
+  languages: Language[];
+  /** Cleaned of contact details (cleanIntro); may be empty. */
+  intro: string;
+}
+
+/**
+ * users/{uid}. Readable only by its owner (firestore.rules), so it never
+ * holds the ID hash. The legal names and the last four ID digits are for an
+ * admin to look someone up (SECURITY.md, Privacy): the server never shows
+ * them to anyone else, except the last four digits at the door.
+ */
+export interface UserRecord extends Partial<Counters>, Partial<WorkerDetails>, Partial<WorkerAbout> {
   role: Role;
   status: AccountStatus;
   /** One of the demo accounts: everything it creates is marked demo too (domain/demo.ts). */
   demo?: boolean;
   idLastFour?: string;
   residency?: Residency;
+  /** The person's face: the young person's, or the business owner's. */
   profilePhoto?: StoredPhoto;
+  /** A young person's legal surname, private: only the first name is ever shown. */
+  legalSurname?: string;
+  /** A business owner's full legal name, private: young people see the first name once booked. */
+  legalName?: string;
 }
 
 /** businesses/{uid}, created with the business role. */
@@ -78,6 +97,12 @@ export interface BusinessRecord extends Counters, Partial<Omit<BusinessDetails, 
   demo?: boolean;
   location?: Location;
   shopfrontPhoto?: StoredPhoto;
+  /** Shown to the young person once booked, with the owner's photo, so they know who to ask for (bookings.ts). */
+  ownerFirstName?: string;
+  /** 27XXXXXXXXX: the owner's contact number, given to the young person once booked, for WhatsApp. */
+  ownerPhone?: string;
+  /** The CIPC registration number, when the business has one. */
+  cipc?: string;
   /** Payments counted towards "Paid on time", and how many were on time (day.ts, payRecordCounters). Absent until the first. */
   payments?: number;
   paidOnTime?: number;
@@ -95,6 +120,17 @@ export function newAccount(uid: string, role: Role, demo = false): { user: UserR
 export function photoPath(uid: string, kind: PhotoKind): string {
   return `photos/${uid}/${kind}.jpg`;
 }
+
+/**
+ * Asked after a profile was first finished: a young person's ways to be
+ * paid, what they can do, their languages and their surname. Without them
+ * they can't apply; Profile asks for them (applications.ts).
+ */
+export const needsWorkerUpdate = (user: UserRecord): boolean => !user.payMethods?.length || !user.skills?.length || !user.languages?.length || !user.legalSurname;
+
+/** The owner's details: full legal name, ID, face and contact number. A business without them can't post (tryoutDecisions.ts). */
+export const ownerReady = (user: UserRecord | null, business: BusinessRecord | null): boolean =>
+  Boolean(user?.legalName && user.idLastFour && user.profilePhoto && business?.ownerPhone && business.ownerFirstName);
 
 export function isProfileComplete(user: UserRecord | null, business: BusinessRecord | null): boolean {
   if (!user) return false;
@@ -118,8 +154,15 @@ export interface ProfileView {
   role: Role | null;
   complete: boolean;
   destination: Destination;
-  worker: (Partial<WorkerDetails> & { idLastFour?: string; hasPhoto: boolean }) | null;
-  business: (Partial<BusinessDetails> & { hasPhoto: boolean; credits: { available: number; onlyFree: boolean } }) | null;
+  worker: (Partial<WorkerDetails> & Partial<WorkerAbout> & { idLastFour?: string; hasPhoto: boolean; hasSurname: boolean }) | null;
+  business:
+    | (Partial<BusinessDetails> & {
+        hasPhoto: boolean;
+        credits: { available: number; onlyFree: boolean };
+        /** The owner's own details, to fill the form back in. Never anyone else's. */
+        owner: { legalName?: string; idLastFour?: string; phone?: string; cipc?: string; hasPhoto: boolean; ready: boolean };
+      })
+    | null;
 }
 
 export function profileView(user: UserRecord | null, business: BusinessRecord | null, credits: readonly CreditEntry[] = []): ProfileView {
@@ -131,8 +174,12 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
           availability: user.availability,
           payoutPhone: user.payoutPhone ? displayPhone(user.payoutPhone) : undefined,
           payMethods: user.payMethods,
+          skills: user.skills,
+          languages: user.languages,
+          intro: user.intro,
           idLastFour: user.idLastFour,
           hasPhoto: Boolean(user.profilePhoto),
+          hasSurname: Boolean(user.legalSurname),
         }
       : null;
   const balance = creditBalance(credits);
@@ -146,6 +193,14 @@ export function profileView(user: UserRecord | null, business: BusinessRecord | 
           coida: business.coida,
           hasPhoto: Boolean(business.shopfrontPhoto),
           credits: { available: balance.available, onlyFree: balance.onlyFree },
+          owner: {
+            legalName: user.legalName,
+            idLastFour: user.idLastFour,
+            phone: business.ownerPhone ? displayPhone(business.ownerPhone) : undefined,
+            cipc: business.cipc,
+            hasPhoto: Boolean(user.profilePhoto),
+            ready: ownerReady(user, business),
+          },
         }
       : null;
   return { role: user?.role ?? null, complete: isProfileComplete(user, business), destination: destinationFor(true, user, business), worker, business: shop };
@@ -162,7 +217,7 @@ export function isDestination(path: string): path is Destination {
 // Ids have the same shape the routes accept (server/validate.ts, parseId).
 const BOOKING_PAGE = /^\/bookings\/[A-Za-z0-9_-]{1,128}$/;
 const SCREENS_OF: Partial<Record<Destination, readonly (string | RegExp)[]>> = {
-  "/business": ["/business/post", /^\/business\/tryouts\/[A-Za-z0-9_-]{1,128}$/, BOOKING_PAGE],
+  "/business": ["/business/post", "/business/owner", /^\/business\/tryouts\/[A-Za-z0-9_-]{1,128}$/, BOOKING_PAGE],
   "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/, "/work/applications", "/work/profile", BOOKING_PAGE],
 };
 

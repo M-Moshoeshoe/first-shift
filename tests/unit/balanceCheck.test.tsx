@@ -8,7 +8,7 @@ const paidBy = (method: "ewallet" | "payshap" | "cash_send" | "cash", amountCent
   id: "booking-1", tryoutId: "t1", party: "young_person", title: "Phone shop helper", businessName: "Sipho's Phone Repairs", businessArea: "Randburg", workerFirstName: "Thabo",
   startAt: "2026-10-27T07:00:00.000Z", endAt: "2026-10-27T13:00:00.000Z", hours: 6, rateCentsPerHour: 3500, payCents: 21000, status: "ended",
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=-26.0939,28.0071", pinAccuracyMetres: 15, photo: { subject: "sipho", kind: "shopfront" },
-  payoutPhone: null, whatsappUrl: null, checkInCode: "482913", shareToken: "share-token-00000001", cancel: null,
+  payoutPhone: null, owner: { firstName: "Sipho", subject: "sipho" }, whatsappUrl: null, checkInCode: "482913", shareToken: "share-token-00000001", cancel: null,
   day: {
     canCheckIn: false, canNoShow: false, canReportNotOpen: false, canCheckOut: false, payable: true, checkedInAt: "2026-10-27T06:55:00.000Z", endReason: "completed",
     owedCents: 21000, owedMinimumCents: 21000, payment: { state: "awaiting_confirmation", method, amountCents, reference: method === "cash" ? null : "FS 27 OCT" },

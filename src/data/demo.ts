@@ -87,7 +87,8 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
   const [lerato, ayanda] = DEMO_EXTRA_OWNERS;
   const businesses: Record<string, BusinessRecord> = {
     // Randburg: about 21 km from Thabo in Ivory Park, on a direct taxi route (R28 each way).
-    [uids.business]: business(uids.business, { name: "Sipho's Phone Repairs", area: "Randburg", latitude: -26.0939, longitude: 28.0071, completed: 0, paidOnTime: 0, coida: "registered" }),
+    // Sipho's own details as the owner: a number nobody can be reached on, like Thabo's.
+    [uids.business]: { ...business(uids.business, { name: "Sipho's Phone Repairs", area: "Randburg", latitude: -26.0939, longitude: 28.0071, completed: 0, paidOnTime: 0, coida: "registered" }), ownerFirstName: "Sipho", ownerPhone: "27000000001" },
     [lerato]: business(lerato, { name: "Lerato's Spaza", area: "Tembisa", latitude: -25.9964, longitude: 28.2268, completed: 6, paidOnTime: 6, coida: "registered" }),
     [ayanda]: business(ayanda, { name: "Ayanda's Car Wash", area: "Ivory Park", latitude: -25.9861, longitude: 28.1958, completed: 2, paidOnTime: 1, coida: "not_sure" }),
   };
@@ -99,6 +100,10 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
     // Not a number anyone can be reached on, so nothing ever messages a real person.
     payoutPhone: "27000000000",
     payMethods: ["ewallet", "cash"],
+    skills: ["customer_service", "stock_and_packing"],
+    languages: ["english", "isizulu", "sepedi"],
+    intro: "I'm good with customers and I keep shelves neat.",
+    legalSurname: "Mokoena",
     idLastFour: "0000",
     residency: "citizen",
     profilePhoto: photo(uids.youngPerson, "profile"),
@@ -110,7 +115,10 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
     { owner: uids.business, daysAhead: 3, startTime: "10:00", hours: RULES.minPaidHours, rateCentsPerHour: RULES.minimumWageCentsPerHour, title: "Stock count helper", tasks: ["Count phone accessories and write down the totals", "Pack stock into labelled boxes"], category: "stock_and_packing" },
   ];
   return {
-    users: { [uids.business]: newAccount(uids.business, "business", true).user, [uids.youngPerson]: thabo },
+    users: {
+      [uids.business]: { ...newAccount(uids.business, "business", true).user, legalName: "Sipho Dlamini", idLastFour: "0000", residency: "citizen", profilePhoto: photo(uids.business, "profile") },
+      [uids.youngPerson]: thabo,
+    },
     businesses,
     ledger: [{ kind: "grant", amount: RULES.freeCredits, reason: "welcome" }],
     tryouts: slots.map((slot) => tryout(slot, businesses, now)),

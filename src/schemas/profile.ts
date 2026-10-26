@@ -3,6 +3,8 @@ import { FIELD_MESSAGES, ID_PROBLEM_MESSAGES, PROFILE_MESSAGES } from "@/domain/
 import { AVAILABILITY, DESTINATIONS, PHOTO_KINDS } from "@/domain/profile";
 import { COIDA_ANSWERS } from "@/domain/injuryCover";
 import { PAYMENT_METHODS } from "@/domain/paymentFlow";
+import { RULES } from "@/config/rules";
+import { LANGUAGES, SKILLS } from "@/domain/workerProfile";
 import { ROLES } from "@/domain/roles";
 
 // Zod's small build (zod/mini): these schemas run in the browser as well as on
@@ -40,12 +42,23 @@ export const PhotoSchema = z.object({ kind: z.enum(PHOTO_KINDS, { error: PROFILE
 const text = (min: number, max: number, message: string, tooLong = message) =>
   z.string({ error: message }).check(z.trim(), z.minLength(min, message), z.maxLength(max, tooLong));
 
+const PayMethodsSchema = z.array(z.enum(PAYMENT_METHODS, { error: FIELD_MESSAGES.payMethods }), { error: FIELD_MESSAGES.payMethods }).check(z.minLength(1, FIELD_MESSAGES.payMethods));
+const SkillsSchema = z.array(z.enum(SKILLS, { error: FIELD_MESSAGES.skills }), { error: FIELD_MESSAGES.skills }).check(z.minLength(1, FIELD_MESSAGES.skills), z.maxLength(RULES.skillsMax, FIELD_MESSAGES.skills));
+const LanguagesSchema = z.array(z.enum(LANGUAGES, { error: FIELD_MESSAGES.languages }), { error: FIELD_MESSAGES.languages }).check(z.minLength(1, FIELD_MESSAGES.languages));
+// The server takes out contact details (workerProfile.ts, cleanIntro); this only bounds the length.
+const IntroSchema = z.string({ error: FIELD_MESSAGES.introLong }).check(z.trim(), z.maxLength(RULES.introMaxChars, FIELD_MESSAGES.introLong));
+const SurnameSchema = text(1, 60, FIELD_MESSAGES.surname);
+
 export const YoungPersonProfileSchema = z.object({
   firstName: text(1, 40, FIELD_MESSAGES.firstNameEmpty, FIELD_MESSAGES.firstNameLong),
   area: text(2, 60, FIELD_MESSAGES.workerArea),
   availability: z.array(z.enum(AVAILABILITY), { error: FIELD_MESSAGES.availability }).check(z.minLength(1, FIELD_MESSAGES.availability)),
   payoutPhone: SaMobileSchema,
-  payMethods: z.array(z.enum(PAYMENT_METHODS, { error: FIELD_MESSAGES.payMethods }), { error: FIELD_MESSAGES.payMethods }).check(z.minLength(1, FIELD_MESSAGES.payMethods)),
+  payMethods: PayMethodsSchema,
+  skills: SkillsSchema,
+  languages: LanguagesSchema,
+  intro: IntroSchema,
+  legalSurname: SurnameSchema,
   idNumber: IdNumberSchema,
 });
 export type YoungPersonProfileInput = z.infer<typeof YoungPersonProfileSchema>;
@@ -53,9 +66,25 @@ export type YoungPersonProfileInput = z.infer<typeof YoungPersonProfileSchema>;
 /** Step 1 of the young person form, checked in the browser before moving on. The server checks it all again. */
 export const WorkerDetailsSchema = z.pick(YoungPersonProfileSchema, { firstName: true, area: true, availability: true, payoutPhone: true, payMethods: true });
 
-/** POST /api/profile/worker/edit: what a young person can change on their profile after onboarding. */
-export const WorkerEditSchema = z.pick(YoungPersonProfileSchema, { payMethods: true });
+/** Step 2 of the young person form: what they can do, their languages and the introduction. */
+export const WorkerAboutSchema = z.pick(YoungPersonProfileSchema, { skills: true, languages: true, intro: true });
+
+/** POST /api/profile/worker/edit: what a young person can change after onboarding. The surname is sent only if it was never set. */
+export const WorkerEditSchema = z.extend(z.pick(YoungPersonProfileSchema, { payMethods: true, skills: true, languages: true, intro: true }), {
+  legalSurname: z.optional(SurnameSchema),
+});
 export type WorkerEditInput = z.infer<typeof WorkerEditSchema>;
+
+/** POST /api/profile/owner: the business owner's own details. The ID number is checked, hashed and dropped. */
+export const OwnerSchema = z.object({
+  legalName: z.string({ error: FIELD_MESSAGES.legalName }).check(z.trim(), z.minLength(3, FIELD_MESSAGES.legalName), z.maxLength(100, FIELD_MESSAGES.legalName), z.regex(/\S\s+\S/, FIELD_MESSAGES.legalName)),
+  idNumber: IdNumberSchema,
+  phone: SaMobileSchema,
+  cipc: z.optional(z.string({ error: FIELD_MESSAGES.cipc }).check(z.trim(), z.regex(/^(\d{4}\/\d{6}\/\d{2})?$/, FIELD_MESSAGES.cipc))),
+});
+export type OwnerInput = z.infer<typeof OwnerSchema>;
+/** The owner form, checked in the browser before sending. */
+export const OwnerDetailsSchema = z.pick(OwnerSchema, { legalName: true, phone: true, cipc: true });
 
 /** GET /api/profile: the person's own safe fields only (domain/profile.ts, profileView). */
 export const ProfileViewSchema = z.object({
@@ -69,8 +98,12 @@ export const ProfileViewSchema = z.object({
       availability: z.optional(z.array(z.enum(AVAILABILITY))),
       payoutPhone: z.optional(z.string()),
       payMethods: z.optional(z.array(z.enum(PAYMENT_METHODS))),
+      skills: z.optional(z.array(z.enum(SKILLS))),
+      languages: z.optional(z.array(z.enum(LANGUAGES))),
+      intro: z.optional(z.string()),
       idLastFour: z.optional(z.string()),
       hasPhoto: z.boolean(),
+      hasSurname: z.boolean(),
     }),
   ),
   business: z.nullable(
@@ -82,6 +115,14 @@ export const ProfileViewSchema = z.object({
       coida: z.optional(z.enum(COIDA_ANSWERS)),
       hasPhoto: z.boolean(),
       credits: z.object({ available: z.number(), onlyFree: z.boolean() }),
+      owner: z.object({
+        legalName: z.optional(z.string()),
+        idLastFour: z.optional(z.string()),
+        phone: z.optional(z.string()),
+        cipc: z.optional(z.string()),
+        hasPhoto: z.boolean(),
+        ready: z.boolean(),
+      }),
     }),
   ),
 });

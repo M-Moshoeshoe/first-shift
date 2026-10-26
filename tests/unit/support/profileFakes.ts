@@ -29,6 +29,10 @@ export const workerInput = (overrides: Partial<{ firstName: string; area: string
   availability: ["saturdays" as const],
   payoutPhone: "27821234567",
   payMethods: ["ewallet" as const],
+  skills: ["customer_service" as const],
+  languages: ["english" as const, "isizulu" as const],
+  intro: "Good with customers.",
+  legalSurname: "Mokoena",
   idNumber: ADULT_ID,
   ...overrides,
 });

@@ -30,6 +30,9 @@ export interface BookingRecord {
   workerPayoutPhone: string;
   /** How the young person can be paid, as their profile said when they were booked. Bookings from before it was asked have none: any method. */
   workerPayMethods?: PaymentMethod[];
+  /** The owner's first name and contact number, for the young person once booked (docs/RULES.md, Accountability). Absent on bookings from before they were asked. */
+  ownerFirstName?: string;
+  ownerPhone?: string;
   startAt: Date;
   endAt: Date;
   hours: number;
@@ -84,6 +87,7 @@ export function newBooking(tryoutId: string, tryout: TryoutRecord, business: Bus
     workerArea: worker.area,
     workerPayoutPhone: worker.payoutPhone,
     ...(worker.payMethods?.length ? { workerPayMethods: worker.payMethods } : {}),
+    ...(business.ownerFirstName && business.ownerPhone ? { ownerFirstName: business.ownerFirstName, ownerPhone: business.ownerPhone } : {}),
     workerIdLastFour: worker.idLastFour,
     startAt: tryout.startAt,
     endAt: tryout.endAt,

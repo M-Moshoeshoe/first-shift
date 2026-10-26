@@ -22,8 +22,8 @@ export const FEED_COPY = {
   fareUnknown: "Fare not known",
   newBusiness: "New on First Shift",
   paidOnTime: (onTime: number, total: number) => `Paid on time: ${onTime} of ${total}`,
-  payMethodsMissingTitle: "How can businesses pay you?",
-  payMethodsMissing: "Choose at least one way before you apply, so a business that books you knows how to pay you.",
+  profileUpdateTitle: "Finish your profile",
+  profileUpdate: "Add how businesses can pay you, what you can do, the languages you speak and your surname before you apply.",
   openProfile: "Open Profile",
 } as const;
 
@@ -54,7 +54,7 @@ export const DETAIL_COPY = {
 export const NOT_ELIGIBLE_MESSAGES: Record<NotEligibleReason, string> = {
   not_young_person: "Only someone looking for work can apply for tryouts. Sign in with the Google account you use to find work.",
   profile_incomplete: "Finish your profile first: your details, your ID number and a photo of your face.",
-  no_pay_methods: "Choose how businesses can pay you first. Open Profile and pick at least one way.",
+  profile_update: "Finish your profile first: open Profile and add how businesses can pay you, what you can do, the languages you speak and your surname.",
   account_paused: "Your account is paused, so you can't apply for tryouts right now. Contact us to sort it out.",
   overlaps_booking: "You're booked on another tryout at this time, so you can't apply for this one. Pick a tryout on another day.",
 };

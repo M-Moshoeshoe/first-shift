@@ -110,8 +110,11 @@ describe("applying", () => {
     expect(applyState({ ...inputs, worker: { role: "business", status: "active" } })).toEqual({ kind: "not_eligible", reason: "not_young_person" });
     expect(applyState({ ...inputs, worker: { ...thabo, profilePhoto: undefined } })).toEqual({ kind: "not_eligible", reason: "profile_incomplete" });
     // A profile from before the question: no business could know how to pay, so no applying until they choose.
-    expect(applyState({ ...inputs, worker: { ...thabo, payMethods: undefined } })).toEqual({ kind: "not_eligible", reason: "no_pay_methods" });
-    expect(applyState({ ...inputs, worker: { ...thabo, payMethods: [] } })).toEqual({ kind: "not_eligible", reason: "no_pay_methods" });
+    for (const missing of [{ payMethods: undefined }, { payMethods: [] }, { skills: [] }, { languages: undefined }, { legalSurname: undefined }]) {
+      expect(applyState({ ...inputs, worker: { ...thabo, ...missing } })).toEqual({ kind: "not_eligible", reason: "profile_update" });
+    }
+    // The introduction is optional.
+    expect(applyState({ ...inputs, worker: { ...thabo, intro: "" } }).kind).toBe("can_apply");
     expect(applyState({ ...inputs, tryout: { ...tryout, status: "withdrawn" } })).toEqual({ kind: "closed", reason: "not_open" });
     expect(applyState({ ...inputs, now: new Date("2026-10-27T06:30:00Z") })).toEqual({ kind: "closed", reason: "booking_closed" });
     const overlapping = { start: new Date("2026-10-27T12:00:00Z"), end: new Date("2026-10-27T15:00:00Z") };

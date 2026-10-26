@@ -4,7 +4,7 @@ import type { Viewer } from "./demo";
 import { coarseLocation, type CoarseLocation } from "./geo";
 import type { Cents } from "./money";
 import { agreedPayCents } from "./pay";
-import { isProfileComplete, type BusinessRecord, type UserRecord } from "./profile";
+import { isProfileComplete, ownerReady, type BusinessRecord, type UserRecord } from "./profile";
 import { fail, ok, type Result } from "./result";
 import { validateTryoutWindow, type ScheduleProblem, type TryoutWindow } from "./schedule";
 import { canTakePart } from "./strikes";
@@ -50,13 +50,15 @@ export interface TryoutRecord {
   bookingId?: string | null;
 }
 
-export type PostingProblem = "not_business" | "profile_incomplete" | "account_paused" | "no_credits";
+export type PostingProblem = "not_business" | "profile_incomplete" | "owner_missing" | "account_paused" | "no_credits";
 
-/** Only a business with a complete, active profile and an available credit may draft or post. */
+/** Only a business with a complete, active profile, its owner's details and an available credit may draft or post. */
 export function postingProblem(user: UserRecord | null, business: BusinessRecord | null, credits: readonly CreditEntry[]): PostingProblem | null {
   if (!user || user.role !== "business" || !business) return "not_business";
   if (!canTakePart(user.status) || !canTakePart(business.status)) return "account_paused";
   if (!isProfileComplete(user, business)) return "profile_incomplete";
+  // A young person is told who they'll meet: a business from before the owner was asked adds them first (docs/RULES.md, Accountability).
+  if (!ownerReady(user, business)) return "owner_missing";
   if (!canPost(credits)) return "no_credits";
   return null;
 }

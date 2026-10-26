@@ -32,8 +32,8 @@ interface PhotoStepFormProps {
 /**
  * The last step of both onboarding forms. The photo is resized and turned
  * into a JPEG the moment it's chosen, so a photo the phone can't open is
- * caught straight away; saving uploads it with a live percentage. "Take a
- * photo" opens the front camera for a face and the back camera for a shopfront.
+ * caught straight away; saving uploads it with a live percentage. The camera
+ * opens in the page: the front one for a face, the back one for a shopfront.
  */
 export function PhotoStepForm({ kind, fieldId, heading, focusHeading, summary, label, hint, saveLabel, neededMessage, onSaved, onBack }: PhotoStepFormProps) {
   const { user } = useAuth();
@@ -72,6 +72,7 @@ export function PhotoStepForm({ kind, fieldId, heading, focusHeading, summary, l
         label={label}
         hint={hint}
         camera={kind === "profile" ? "user" : "environment"}
+        allowGallery={kind === "shopfront"}
         preview={photos.preview}
         error={error}
         onSelect={(file) => void handleSelect(file)}

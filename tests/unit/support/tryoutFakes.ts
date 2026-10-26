@@ -17,7 +17,7 @@ export const PIN = { latitude: -25.996341, longitude: 28.227113, accuracyMetres:
 /** The free credits every complete business starts with. */
 export const WELCOME: CreditEntry = { kind: "grant", amount: 3, reason: "welcome" };
 
-export const owner: UserRecord = { role: "business", status: "active" };
+export const owner: UserRecord = { role: "business", status: "active", legalName: "Lerato Mahlangu", idLastFour: "0087", residency: "citizen", profilePhoto: { path: "photos/lerato/profile.jpg", version: "1" } };
 export const shop: BusinessRecord = {
   ownerId: "lerato",
   status: "active",
@@ -30,6 +30,8 @@ export const shop: BusinessRecord = {
   openingHours: "Monday to Saturday, 8:00 to 17:00",
   location: PIN,
   shopfrontPhoto: { path: "photos/lerato/shopfront.jpg", version: "1" },
+  ownerFirstName: "Lerato",
+  ownerPhone: "27831234567",
 };
 
 /** Tomorrow, 09:00 to 15:00, at the minimum wage: passes every rule. */

@@ -46,7 +46,8 @@ function bookingView(bookingId: string, booking: BookingRecord, secrets: Booking
     pinAccuracyMetres: booking.location.accuracyMetres,
     photo: isOwner ? { subject: booking.workerId, kind: "profile" } : { subject: booking.ownerId, kind: "shopfront" },
     payoutPhone: isOwner ? displayPhone(booking.workerPayoutPhone) : null,
-    whatsappUrl: isOwner ? whatsAppUrl(booking.workerPayoutPhone) : null,
+    owner: !isOwner && booking.ownerFirstName ? { firstName: booking.ownerFirstName, subject: booking.ownerId } : null,
+    whatsappUrl: isOwner ? whatsAppUrl(booking.workerPayoutPhone) : booking.ownerPhone ? whatsAppUrl(booking.ownerPhone) : null,
     // The code is the young person's to show at the door: the owner never receives it.
     checkInCode: isOwner ? null : secrets.checkInCode,
     shareToken: isOwner ? null : secrets.shareToken,

@@ -5,6 +5,7 @@ import { ACCOUNT_STATUSES, AVAILABILITY, type BusinessRecord, type UserRecord } 
 import { COIDA_ANSWERS } from "@/domain/injuryCover";
 import { PAYMENT_METHODS } from "@/domain/paymentFlow";
 import { ROLES } from "@/domain/roles";
+import { LANGUAGES, SKILLS } from "@/domain/workerProfile";
 import { adminDb } from "../firebaseAdmin";
 import { appendLedger, readLedger } from "./firestoreLedger";
 import type { ProfileRepository } from "./profileRepository";
@@ -26,6 +27,11 @@ const UserRecordSchema = z.object({
   availability: z.array(z.enum(AVAILABILITY)).optional(),
   payoutPhone: z.string().optional(),
   payMethods: z.array(z.enum(PAYMENT_METHODS)).optional(),
+  skills: z.array(z.enum(SKILLS)).optional(),
+  languages: z.array(z.enum(LANGUAGES)).optional(),
+  intro: z.string().optional(),
+  legalSurname: z.string().optional(),
+  legalName: z.string().optional(),
   idLastFour: z.string().optional(),
   residency: z.enum(["citizen", "permanent_resident"]).optional(),
   profilePhoto: PhotoSchema.optional(),
@@ -48,6 +54,9 @@ const BusinessRecordSchema = z.object({
   coida: z.enum(COIDA_ANSWERS).optional(),
   payments: counter.optional(),
   paidOnTime: counter.optional(),
+  ownerFirstName: z.string().optional(),
+  ownerPhone: z.string().optional(),
+  cipc: z.string().optional(),
 });
 
 export const parseUser = (data: unknown): UserRecord => UserRecordSchema.parse(data);

@@ -6,13 +6,12 @@ import type { UserRecord } from "./profile";
 import { shortlist } from "./ranking";
 import { predictShowUp, type ShowUpBand } from "./showUp";
 import type { TryoutRecord } from "./tryoutDecisions";
+import { LANGUAGE_LABELS, SKILL_LABELS } from "./profileCopy";
+import { skillFit } from "./workerProfile";
 
-/**
- * We don't collect work experience yet, so every applicant gets the same
- * fit and the ranking rests on show-up likelihood and distance, which come
- * from their own record. Said plainly to the owner (findingMessages.ts).
- */
-const NEUTRAL_FIT = 0.5;
+// Fit is whether the young person says they can do this kind of work ("What I can do", workerProfile.ts),
+// ranked with show-up likelihood and distance from their own record. Said plainly to the owner.
+
 /** An area we can't place counts as this far away for ranking, and shows no distance. */
 const UNKNOWN_DISTANCE_KM = 20;
 
@@ -32,6 +31,12 @@ export interface ApplicantView {
   completedTryouts: number;
   approvedReferences: number;
   note: string;
+  /** "What I can do" and the languages, by name, so the owner's page needs no list of its own. */
+  skills: string[];
+  languages: string[];
+  intro: string;
+  /** This tryout's kind of work is one they say they can do. */
+  canDoThisWork: boolean;
   status: "applied" | "offered";
   showUp: { score: number; band: ShowUpBand; reasons: string[] };
   /** Holds the shortlist place kept for someone with no record yet (ranking.ts). */
@@ -54,7 +59,7 @@ export function rankApplicants(tryout: TryoutRecord, inputs: readonly ApplicantI
     return { application, worker, approvedReferences, km, fare, showUp };
   });
   const byId = new Map(prepared.map((item) => [item.application.workerId, item]));
-  const ranking = prepared.map((item) => ({ id: item.application.workerId, fit: NEUTRAL_FIT, showUpScore: item.showUp.score, rating: null, distanceKm: item.km ?? UNKNOWN_DISTANCE_KM, completedTryouts: item.worker.completed ?? 0 }));
+  const ranking = prepared.map((item) => ({ id: item.application.workerId, fit: skillFit(item.worker.skills, tryout.category), showUpScore: item.showUp.score, rating: null, distanceKm: item.km ?? UNKNOWN_DISTANCE_KM, completedTryouts: item.worker.completed ?? 0 }));
   const top = shortlist(ranking);
   const topIds = new Set(top.map((entry) => entry.id));
   const rest = shortlist(ranking, ranking.length).filter((entry) => !topIds.has(entry.id));
@@ -72,6 +77,10 @@ export function rankApplicants(tryout: TryoutRecord, inputs: readonly ApplicantI
       completedTryouts: worker.completed ?? 0,
       approvedReferences: item.approvedReferences,
       note: application.note,
+      skills: (worker.skills ?? []).map((skill) => SKILL_LABELS[skill]),
+      languages: (worker.languages ?? []).map((language) => LANGUAGE_LABELS[language]),
+      intro: worker.intro ?? "",
+      canDoThisWork: skillFit(worker.skills, tryout.category) === 1,
       status: application.status === "offered" ? "offered" : "applied",
       showUp: item.showUp,
       firstTimerPlace: entry.firstTimerPlace,

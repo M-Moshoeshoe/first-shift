@@ -67,6 +67,11 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
   await rec.check(page, "dashboard, new applicant badge");
   await page.goto(`${BASE}/business/tryouts/${tryoutId}`);
   await page.getByRole("heading", { name: "Who applied" }).waitFor();
+  // The shortlist shows what Thabo said he can do (stock and packing, this tryout's kind of work) and his languages, never his surname.
+  await page.getByText("Says they can do this kind of work", { exact: true }).waitFor();
+  await page.getByText("Serving customers, Stock and packing").waitFor();
+  await page.getByText("English, isiZulu").waitFor();
+  if ((await page.getByText("Mokoena").count()) > 0) rec.failures.push(`${rec.width} px: the owner can see the young person's surname`);
   await rec.check(page, "owner's tryout, applicants ranked");
   await page.getByRole("button", { name: "Offer the tryout to Thabo" }).click();
   await page.getByText("Offered to Thabo.").waitFor();
@@ -86,6 +91,10 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
   await page.waitForURL((url) => url.pathname.startsWith("/bookings/"));
   const bookingPath = new URL(page.url()).pathname;
   await page.getByRole("heading", { name: "Your check-in code" }).waitFor();
+  // Once booked, the young person sees who they'll meet and can message them; never the owner's surname.
+  await page.getByRole("heading", { name: "Lerato, the owner" }).waitFor();
+  if ((await page.getByRole("link", { name: "Chat on WhatsApp" }).getAttribute("href")) !== "https://wa.me/27831234567") rec.failures.push(`${rec.width} px: the young person can't message the owner`);
+  if ((await page.getByText("Mahlangu").count()) > 0) rec.failures.push(`${rec.width} px: the young person can see the owner's surname`);
   await rec.check(page, "booking, young person");
 
   const share = await page.getByRole("link", { name: "Share my trip" }).getAttribute("href");

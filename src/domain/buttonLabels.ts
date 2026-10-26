@@ -10,6 +10,8 @@ export const BUTTON_LABELS = {
   saveMyBusiness: "Save my business",
   useMyLocation: "Use my location",
   takeAPhoto: "Take a photo",
+  openTheCamera: "Open the camera",
+  takeThePhoto: "Take the photo",
   chooseAPhoto: "Choose a photo",
   next: "Next",
   back: "Back",

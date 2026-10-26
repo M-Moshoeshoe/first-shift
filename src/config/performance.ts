@@ -32,6 +32,8 @@ export const JS_BUDGETS_KB = {
   // The young person's profile (how businesses can pay them), measured 245.3 KB on 26 October 2026; + 10% is over the cap.
   "/work/profile": 260,
   "/bookings/booking": 260,
+  // The owner's details, for a business from before they were asked (26 October 2026). + 10% is over the cap.
+  "/business/owner": 260,
   // The trusted contact's status page: a marketing page, no sign-in code, so it keeps the home page's budget. Measured 198.7 KB.
   "/status/token": 200,
 } as const;

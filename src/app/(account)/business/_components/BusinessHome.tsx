@@ -18,9 +18,22 @@ export function BusinessHome() {
     <>
       <PageTitle headingRef={heading} title={business?.name} intro={business?.area} />
       {business ? <CreditsPanel available={business.credits.available} onlyFree={business.credits.onlyFree} /> : null}
-      <Link href="/business/post" className={buttonClass("primary")}>
-        Post a tryout
-      </Link>
+      {business && !business.owner.ready ? (
+        // A business from before the owner was asked: posting waits for them (tryoutDecisions.ts, owner_missing).
+        <section aria-labelledby="owner-missing" className="flex flex-col gap-3 border-2 border-ink p-4">
+          <h2 id="owner-missing" className="text-xl font-bold">
+            Add your details as the owner
+          </h2>
+          <p className="text-lg">Young people you book will see your first name, your photo and your number. You can post tryouts once it&apos;s done.</p>
+          <Link href="/business/owner" className={buttonClass("primary")}>
+            Add my details
+          </Link>
+        </section>
+      ) : (
+        <Link href="/business/post" className={buttonClass("primary")}>
+          Post a tryout
+        </Link>
+      )}
       <section aria-labelledby="your-tryouts" className="flex flex-col gap-4">
         <h2 id="your-tryouts" className="text-xl font-bold">
           Your tryouts

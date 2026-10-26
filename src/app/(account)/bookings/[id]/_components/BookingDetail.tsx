@@ -76,6 +76,18 @@ export function BookingDetail() {
           ) : null}
         </div>
       </section>
+      {booking.owner ? (
+        // The young person's view: who they'll meet, so they know who to ask for at the door.
+        <section aria-labelledby="owner-heading" className="flex gap-4">
+          <PersonPhoto subject={booking.owner.subject} kind="profile" alt={booking.owner.firstName} />
+          <div className="flex flex-col gap-1">
+            <h2 id="owner-heading" className="text-xl font-bold">
+              {BOOKING_COPY.ownerTitle(booking.owner.firstName)}
+            </h2>
+            <p className="text-sm text-muted">{BOOKING_COPY.ownerHint}</p>
+          </div>
+        </section>
+      ) : null}
       <section aria-labelledby="where-heading" className="flex flex-col gap-2">
         <h2 id="where-heading" className="text-xl font-bold">
           {BOOKING_COPY.where}

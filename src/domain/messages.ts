@@ -42,14 +42,15 @@ export const PROFILE_MESSAGES = {
   pinMissing: `Your profile is saved. To finish, come back and tap ${BUTTON_LABELS.useMyLocation} while you're at the business.`,
   fallback: "Some of your details couldn't be saved. Check the form and try again.",
   // Step 5 additions, for review.
-  photoUnreadable: `This photo can't be opened on this phone. Tap ${BUTTON_LABELS.takeAPhoto}, or tap ${BUTTON_LABELS.chooseAPhoto} and pick a different one.`,
-  photoNeeded: `Add a photo of your face first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
+  photoUnreadable: `This photo can't be opened on this phone. Tap ${BUTTON_LABELS.openTheCamera} and take it again.`,
+  photoNeeded: `Add a photo of your face first. Tap ${BUTTON_LABELS.openTheCamera}, then ${BUTTON_LABELS.takeThePhoto}.`,
   profileUnavailable: `Your profile didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`,
   // Step 6 additions, for review.
-  shopfrontNeeded: `Add a photo of your shopfront first. Tap ${BUTTON_LABELS.takeAPhoto} or ${BUTTON_LABELS.chooseAPhoto}.`,
+  shopfrontNeeded: `Add a photo of your shopfront first. Tap ${BUTTON_LABELS.openTheCamera} or ${BUTTON_LABELS.chooseAPhoto}.`,
   pinImprecise: `Your location isn't precise enough yet. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
   // Approved in step 3; moved here when the Sign out button became shared.
   signOutFailed: `We couldn't sign you out. Check your connection, then tap ${BUTTON_LABELS.signOut} again.`,
+  surnameLocked: `Your surname is already saved. If it's wrong, ${CONTACT_PHRASE} to correct it.`,
   // Demo isolation, for review.
   demoLocked: `This is a demo account, so its profile is set up for you and can't be changed. To make your own, tap ${BUTTON_LABELS.signOut} and ${BUTTON_LABELS.continueWithGoogle}.`,
 } as const;
@@ -96,6 +97,8 @@ export function profileProblemMessage(problem: ProfileProblem): string {
       return PROFILE_MESSAGES.photoTooBig;
     case "pin_imprecise":
       return PROFILE_MESSAGES.pinImprecise;
+    case "surname_locked":
+      return PROFILE_MESSAGES.surnameLocked;
     case "demo_locked":
       return PROFILE_MESSAGES.demoLocked;
   }
@@ -115,6 +118,12 @@ export const FIELD_MESSAGES = {
   availability: "Choose at least one time you can work.",
   payoutPhone: "Enter a South African cellphone number, like 082 123 4567.",
   payMethods: "Choose at least one way businesses can pay you.",
+  skills: "Choose at least one kind of work you can do, up to 4.",
+  languages: "Choose at least one language you speak.",
+  introLong: "Your introduction can be up to 120 characters. Make it shorter.",
+  surname: "Enter your surname as it is on your ID.",
+  legalName: "Enter your full name as it is on your ID, first name and surname.",
+  cipc: "Enter the CIPC number like 2015/123456/07, or leave it empty.",
   businessName: "Enter your business name.",
   businessArea: "Enter the area your business is in, like Midrand.",
   openingHours: "Enter your opening hours, like Monday to Saturday, 8:00 to 17:00.",

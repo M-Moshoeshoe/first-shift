@@ -29,8 +29,9 @@ export interface Recorder {
   check(page: Page, name: string, options?: { heading?: boolean }): Promise<void>;
 }
 
+/** Edge with a fake camera that plays a test pattern, and no permission prompt: the in-app camera (CameraView) is walked for real. */
 export function launchEdge(): Promise<Browser> {
-  return chromium.launch({ channel: "msedge" });
+  return chromium.launch({ channel: "msedge", args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"] });
 }
 
 export async function newPage(browser: Browser, width: number, extra: { geolocation?: boolean } = {}): Promise<Page> {
@@ -40,7 +41,7 @@ export async function newPage(browser: Browser, width: number, extra: { geolocat
     deviceScaleFactor: phone ? 2 : 1,
     isMobile: phone,
     hasTouch: phone,
-    permissions: extra.geolocation ? ["geolocation"] : [],
+    permissions: extra.geolocation ? ["geolocation", "camera"] : ["camera"],
     geolocation: { latitude: -25.99634, longitude: 28.22711, accuracy: 20 }, // Tembisa
   });
   // Next's dev-tools badge exists only under next dev and sits over the bottom of the screen.

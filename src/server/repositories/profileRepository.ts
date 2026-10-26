@@ -1,7 +1,7 @@
 import type { CreditEntry } from "@/domain/credits";
 import type { BusinessRecord, UserRecord } from "@/domain/profile";
 
-export type AuditAction = "role_set" | "worker_profile_saved" | "worker_profile_edited" | "business_profile_saved" | "photo_saved";
+export type AuditAction = "role_set" | "worker_profile_saved" | "worker_profile_edited" | "business_profile_saved" | "owner_details_saved" | "photo_saved";
 
 /** Everything a profile decision needs about one account, read inside the transaction. */
 export interface StoredProfile {

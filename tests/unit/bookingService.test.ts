@@ -131,7 +131,10 @@ describe("the booking", () => {
     const { bookingService } = await booked();
     expect(await bookingService.view(sipho, "booking-1")).toMatchObject({ party: "business", payoutPhone: "082 123 4567", whatsappUrl: "https://wa.me/27821234567", checkInCode: null, shareToken: null, cancel: { kind: "free", owedCents: 0 } });
     const young = await bookingService.view(thaboViewer, "booking-1");
-    expect(young).toMatchObject({ party: "young_person", payoutPhone: null, whatsappUrl: null, checkInCode: expect.stringMatching(/^\d{6}$/), photo: { subject: "sipho", kind: "shopfront" } });
+    // Once booked, the young person meets the owner: first name, face and WhatsApp, never the owner's legal name or ID.
+    expect(young).toMatchObject({ party: "young_person", payoutPhone: null, whatsappUrl: "https://wa.me/27831234567", owner: { firstName: "Lerato", subject: "sipho" }, checkInCode: expect.stringMatching(/^\d{6}$/), photo: { subject: "sipho", kind: "shopfront" } });
+    expect(JSON.stringify(young)).not.toMatch(/Mahlangu|legalName|idLastFour/);
+    expect((await bookingService.view(sipho, "booking-1")).owner).toBeNull();
     // The exact pin from the business record, revealed only now that they are booked.
     expect(young.mapsUrl).toBe("https://www.google.com/maps/search/?api=1&query=-25.996341,28.227113");
     expect(await refusal(bookingService.view(lerato, "booking-1"))).toMatchObject({ status: 404, publicMessage: BOOKING_COPY.notFound });

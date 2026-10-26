@@ -113,6 +113,7 @@ Native first, because the phone's own controls cost no JavaScript and work the w
 - **Hours:** a row of five square chips, 4 to 8, 48 px each: real radio inputs, visually hidden; the chosen chip is filled `ink` with `paper` text.
 - **Undo buttons:** withdrawing or anything else that takes something down uses the `stop` button, a 2 px `stop` outline with `stop` text, never a filled red button.
 - **Invalid fields:** a 2 px `stop` border. Focused, a valid field gets the 3 px `ink` focus outline 2 px out; an invalid one gets a 3 px `stop` outline flush against its border instead, so it shows one thick red edge, not two outlines.
+- **Photos:** `PhotoField` opens the camera in the page (`CameraView`, getUserMedia): a square view with a dashed `paper` framing guide, square-edged, never an oval; a face shows mirrored and saves the right way round. The camera code loads only when opened. No motion. A face can't come from the gallery; a shopfront can.
 - **Areas:** `AreaField`, a text input with a native `<datalist>` of known areas from `src/config/areas.ts`. The phone suggests them as you type, and any other area can still be typed. React Aria's ComboBox was measured against this and lost: it would add JavaScript to onboarding pages already close to their cap, for behaviour the phone gives for free.
 - **React Aria Components** is used once only: the withdraw confirmation sheet on `/business` (Modal and Dialog), styled with our tokens through its data attributes (`[data-entering]`, `[data-exiting]`, `[data-pressed]`, `[data-focus-visible]`) and moving only with sheet-enter and sheet-exit. No default React Aria styles and no other React Aria component (`AGENTS.md`).
 
@@ -171,7 +172,8 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/business/post` | 260 KB (the cap) | 249.4 KB, 15 scripts |
 | `/business/tryouts/[id]` | 260 KB (the cap) | 256.0 KB, 17 scripts (the owner's tryout and applicants, 26 October 2026) |
 | `/work/applications` | 260 KB (the cap) | 249.0 KB, 16 scripts |
-| `/work/profile` | 260 KB (the cap) | 245.3 KB, 16 scripts (how businesses can pay you, 26 October 2026) |
+| `/work/profile` | 260 KB (the cap) | 247.8 KB, 16 scripts (ways to be paid, what you can do, 26 October 2026) |
+| `/business/owner` | 260 KB (the cap) | 254.3 KB, 17 scripts (the owner's details, 26 October 2026) |
 | `/bookings/[id]` | 260 KB (the cap) | 258.2 KB, 17 scripts (payment methods, 26 October 2026); the day's panels (check-in, check-out, paying, confirming) load only once the day has begun, and the proof form and its resizing code only after Not received |
 | `/status/[token]` | 200 KB (a marketing page) | 198.7 KB, 10 scripts: no sign-in code; the status words have their own module (`bookingStatus.ts`) so the page loads none of the booking rules |
 

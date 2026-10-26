@@ -28,7 +28,7 @@ interface PinStepProps {
 }
 
 /**
- * Step 2: the premises pin, taken at the business with the phone's location.
+ * Step 4: the premises pin, taken at the business with the phone's location.
  * Shown as words, not a map, to save data. Only a reading of 150 metres or
  * better is accepted; anything else says why and what to do, and the owner
  * can skip for now and come back.

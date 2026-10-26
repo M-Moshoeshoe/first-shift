@@ -16,7 +16,7 @@ describe("payout phone", () => {
 });
 
 describe("young person profile", () => {
-  const valid = { firstName: " Thabo ", area: "Ivory Park", availability: ["saturdays"], payoutPhone: "0821234567", payMethods: ["ewallet"], idNumber: "000115 5800 087" };
+  const valid = { firstName: " Thabo ", area: "Ivory Park", availability: ["saturdays"], payoutPhone: "0821234567", payMethods: ["ewallet"], skills: ["cleaning"], languages: ["setswana", "sasl"], intro: "", legalSurname: "Mokoena", idNumber: "000115 5800 087" };
 
   it("trims names and strips spaces from the ID number", () => {
     expect(YoungPersonProfileSchema.parse(valid)).toMatchObject({ firstName: "Thabo", idNumber: "0001155800087", payoutPhone: "27821234567" });

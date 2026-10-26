@@ -4,9 +4,9 @@ import { SavedSummary } from "@/components/SavedSummary";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { useGatedProfile } from "@/lib/auth/gatedProfile";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
-import { PayMethodsForm } from "./PayMethodsForm";
+import { WorkerEditForm } from "./WorkerEditForm";
 
-/** The young person's own profile: what onboarding saved, and what they can change, such as how businesses pay them. */
+/** The young person's own profile: what onboarding saved, and what they can change: how businesses pay them and what they can do. */
 export function WorkerProfile() {
   const view = useGatedProfile();
   const heading = useHeadingFocus(true);
@@ -21,7 +21,10 @@ export function WorkerProfile() {
     <>
       <PageTitle headingRef={heading} title="Your profile" intro="What businesses see when you apply, and how they can pay you." />
       <SavedSummary id="profile-saved" rows={rows} />
-      <PayMethodsForm initial={worker?.payMethods ?? []} />
+      <WorkerEditForm
+        initial={{ payMethods: worker?.payMethods ?? [], about: { skills: worker?.skills ?? [], languages: worker?.languages ?? [], intro: worker?.intro ?? "" } }}
+        askSurname={!worker?.hasSurname}
+      />
     </>
   );
 }

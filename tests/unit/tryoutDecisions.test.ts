@@ -14,6 +14,13 @@ describe("postingProblem", () => {
     expect(postingProblem(owner, { ...shop, location: undefined }, [WELCOME])).toBe("profile_incomplete");
   });
 
+  it("needs the owner's details: full name, ID, face and contact number", () => {
+    expect(postingProblem({ ...owner, legalName: undefined }, shop, [WELCOME])).toBe("owner_missing");
+    expect(postingProblem({ ...owner, profilePhoto: undefined }, shop, [WELCOME])).toBe("owner_missing");
+    expect(postingProblem({ ...owner, idLastFour: undefined }, shop, [WELCOME])).toBe("owner_missing");
+    expect(postingProblem(owner, { ...shop, ownerPhone: undefined }, [WELCOME])).toBe("owner_missing");
+  });
+
   it("needs an available credit", () => {
     expect(postingProblem(owner, shop, [])).toBe("no_credits");
     const allHeld = [WELCOME, ...["a", "b", "c"].map((tryoutId) => ({ kind: "hold" as const, tryoutId }))];

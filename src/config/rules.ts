@@ -81,6 +81,10 @@ export const RULES = {
   applicationNoteMaxChars: 200,
   /** The reference an owner may add when paying electronically, as their bank shows it. */
   paymentReferenceMaxChars: 40,
+  /** The young person's one-line introduction on the owner's shortlist. */
+  introMaxChars: 120,
+  /** Kinds of work a young person can say they do ("What I can do"). */
+  skillsMax: 4,
   /** The note that goes with a screenshot added after "Not received". */
   evidenceNoteMaxChars: 500,
   /** A screenshot added after "Not received": the photo limits, at a size a banking screen stays readable. */
