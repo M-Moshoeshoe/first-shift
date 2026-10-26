@@ -63,7 +63,7 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
   await page.getByRole("heading", { name: "You've applied" }).waitFor();
 
   await switchTo(page, "e2e-lerato", "/business");
-  await page.getByText("(1 new)").filter({ visible: true }).first().waitFor();
+  await page.getByText("1 new", { exact: true }).filter({ visible: true }).first().waitFor();
   await rec.check(page, "dashboard, new applicant badge");
   await page.goto(`${BASE}/business/tryouts/${tryoutId}`);
   await page.getByRole("heading", { name: "Who applied" }).waitFor();
@@ -78,7 +78,7 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
   await rec.check(page, "owner's tryout, offer waiting");
 
   await switchTo(page, "e2e-thabo", "/work");
-  await page.getByText("(1 new)").filter({ visible: true }).first().waitFor();
+  await page.getByText("1 new", { exact: true }).filter({ visible: true }).first().waitFor();
   await page.goto(`${BASE}/work/applications`);
   await page.getByText("Offered to you").waitFor();
   await rec.check(page, "applications, an offer waiting");

@@ -86,9 +86,9 @@ async function postingStates(rec: Recorder, page: Page): Promise<Timing[]> {
   await page.unroute("**/api/tryouts/draft");
 
   await describe(page, "Fix the wiring in my shop and the plugs at the back");
-  await page.getByRole("heading", { name: "This work cannot be a tryout" }).waitFor({ timeout: 90_000 });
+  await page.getByRole("heading", { name: "This cannot be posted" }).waitFor({ timeout: 90_000 });
   await rec.check(page, "post, blocked");
-  await page.getByRole("button", { name: "Change my request" }).click();
+  await page.getByRole("button", { name: "Edit my request" }).click();
 
   await describe(page, "Help sorting stock and serving customers on Saturday");
   await page.getByRole("heading", { name: "Check your tryout" }).waitFor({ timeout: 90_000 });
@@ -130,7 +130,7 @@ async function dashboardStates(rec: Recorder, page: Page): Promise<void> {
   await page.getByRole("heading", { name: "Withdraw this tryout?" }).waitFor({ state: "detached" });
   await rec.check(page, "dashboard, tryout withdrawn");
 
-  await answer(page, "/api/tryouts/draft", 200, { outcome: "allowed", draft: { title: "Shop helper", tasks: ["Pack shelves"], hours: 5, date: sastDateKey(addDays(new Date(), 1)) } });
+  await answer(page, "/api/tryouts/draft", 200, { outcome: "allowed", draft: { options: [{ title: "Shop helper", tasks: ["Pack shelves"] }], hours: 5, date: sastDateKey(addDays(new Date(), 1)) } });
   await answer(page, "/api/tryouts", 200, { outcome: "review", id: "forced-review" });
   await page.goto(`${BASE}/business/post`);
   await describe(page, "Help with something at the shop");

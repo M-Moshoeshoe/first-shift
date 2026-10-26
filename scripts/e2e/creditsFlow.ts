@@ -16,7 +16,7 @@ export async function creditsWalk(rec: Recorder, page: Page, bookingPath: string
   await page.getByRole("link", { name: "See your credits" }).click();
   await pathIs(page, "/business/credits");
   await page.getByRole("heading", { name: "Credits", exact: true }).waitFor();
-  for (const line of ["3 credits added, free", `1 credit used: ${BOOKING_TITLE}`, `1 credit set aside for ${BOOKING_TITLE}`, "Credit packs", "R125.00", "R250.00"]) {
+  for (const line of ["3 credits added, free", `1 credit used: ${BOOKING_TITLE}`, `1 credit set aside for ${BOOKING_TITLE}`, "Credit packs", "R125", "R250"]) {
     await page.getByText(line, { exact: true }).first().waitFor();
   }
   await rec.check(page, "credits, before a request");
