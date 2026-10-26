@@ -18,8 +18,8 @@ const SPECS: Record<string, Spec> = {
   "/onboarding/role": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "role" },
   "/onboarding/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 2 }, body: "form" },
   "/onboarding/business": { title: { phone: 1, desktop: 1 }, intro: { phone: 3, desktop: 2 }, body: "form" },
-  "/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 2 }, body: "feed", nav: true },
-  "/business": { title: { phone: 2, desktop: 2 }, intro: { phone: 1, desktop: 1 }, body: "dashboard", nav: true },
+  "/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 0, desktop: 0 }, body: "feed", nav: true },
+  "/business": { title: { phone: 2, desktop: 2 }, intro: { phone: 0, desktop: 0 }, body: "dashboard", nav: true },
   "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 3, desktop: 3 }, body: "form", nav: true },
 };
 
@@ -66,9 +66,12 @@ export function ScreenSkeleton({ path }: { path: string }) {
         <div>
           <LineBars lines={spec.title} lineClass="h-8 lg:h-10" barClass="h-6 lg:h-8" />
         </div>
-        <div>
-          <LineBars lines={spec.intro} lineClass="h-6" barClass="h-4" />
-        </div>
+        {/* The dashboards have no intro line: their summary band follows the title. */}
+        {Math.max(spec.intro.phone, spec.intro.desktop) > 0 ? (
+          <div>
+            <LineBars lines={spec.intro} lineClass="h-6" barClass="h-4" />
+          </div>
+        ) : null}
       </div>
       {spec.body === "role" ? (
         <div className="flex flex-col gap-3">

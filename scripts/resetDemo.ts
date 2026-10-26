@@ -13,7 +13,7 @@ async function main(): Promise<void> {
   announceTarget();
   const summary = await resetDemoWorld(new Date(), await seededReferenceText());
   console.log(`Removed ${summary.removed} demo documents.`);
-  console.log(`Restored: 2 demo accounts, 3 businesses, ${summary.history} finished tryouts between Sipho and Thabo, ${summary.tryouts} live tryouts, and Thabo's application to Sipho's first one.`);
+  console.log(`Restored: 2 demo accounts, 3 businesses, ${summary.history} finished tryouts between Sipho and Thabo, ${summary.tryouts} live tryouts, and Thabo's application to Sipho's first one, beside six example applicants.`);
 }
 
 main().then(

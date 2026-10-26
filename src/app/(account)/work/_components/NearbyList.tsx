@@ -52,7 +52,8 @@ export function NearbyList({ feed }: { feed: NearbyTryouts }) {
         </div>
       ) : (
         <>
-          <p role="status" className="text-sm font-semibold">
+          {/* The summary band shows the count; this line is for screen readers, so a refresh is announced. */}
+          <p role="status" className="sr-only">
             {feedCountLine(data.items.length)}
           </p>
           {/* Sorts what is already loaded: no new request, no motion. */}

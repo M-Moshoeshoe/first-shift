@@ -141,7 +141,7 @@ export async function youngPerson(rec: Recorder, page: Page): Promise<void> {
   await page.getByRole("button", { name: "Save my profile" }).click();
   await page.getByText("Profile done").waitFor();
   await pathIs(page, "/work");
-  await page.getByRole("heading", { name: "Paid tryouts near you" }).waitFor();
+  await page.getByRole("heading", { name: "Tryouts near Ivory Park, including places on direct taxi routes." }).waitFor();
   await rec.check(page, "young person home");
   await expectStoredArea(rec, "users", "firstName", "Thabo", "Ivory Park");
   const thabo = (await getFirestore(adminApp()).collection("users").where("firstName", "==", "Thabo").get()).docs[0];

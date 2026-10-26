@@ -15,7 +15,7 @@ export function SafetySection() {
     <Band tone="mist" wide>
       <section aria-labelledby="safety" className="reveal flex flex-col gap-8">
         <SectionHeading id="safety" number="04" title={SAFETY.title} />
-        <ScenePhoto scene={SCENES.corner} crop="band" sizes="(min-width: 1024px) 72rem, 100vw" className="aspect-8/3" />
+        <ScenePhoto scene={SCENES.corner} crop="band" sizes="(min-width: 1024px) 72rem, 100vw" className="aspect-8/3 lg:aspect-4/1" />
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SAFETY.cards.map((card) => {
             const Icon = SAFETY_ICONS[card.icon];

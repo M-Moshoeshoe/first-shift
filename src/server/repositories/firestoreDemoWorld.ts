@@ -17,7 +17,7 @@ import { firestoreTryoutRepository } from "./firestoreTryoutRepository";
  * Puts the demo world back to its known state (src/data/demo.ts): Sipho's
  * complete business with its credits, Thabo's complete profile, their two
  * finished tryouts this month, four live tryouts in the next three days, and
- * Thabo's application to Sipho's first one. Everything the demo accounts made
+ * Thabo's application to Sipho's first one with six example applicants. Everything the demo accounts made
  * since (tryouts, applications, bookings and their secrets, credits, cases,
  * strikes, proof screenshots, references, job offers, daily limits) is
  * deleted first. It touches only demo records: the demo accounts' own uids,

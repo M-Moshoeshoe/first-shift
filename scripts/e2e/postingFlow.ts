@@ -146,7 +146,7 @@ async function dashboardStates(rec: Recorder, page: Page): Promise<void> {
   await page.getByText("You've used your credits").waitFor();
   await rec.check(page, "post, no credits left");
   await page.goto(`${BASE}/business`);
-  await page.getByText("Free tryouts left: 0").waitFor();
+  await page.getByText("No credits left. Request more under Credits.").waitFor();
   await rec.check(page, "dashboard, no credits left");
   await restore();
 }

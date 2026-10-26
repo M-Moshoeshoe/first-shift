@@ -87,7 +87,7 @@ async function forcedStates(rec: Recorder, page: Page, detailPath: string): Prom
     ["overlapping a booking", { kind: "not_eligible", reason: "overlaps_booking" }, "You're booked on another tryout at this time"],
   ] as const) {
     const restore = await answerGet(page, "**/api/tryouts/forced", 200, {
-      item: { id: "forced", title: "Shop helper", businessName: "Lerato's Spaza", area: "Tembisa", startAt: "2026-10-27T07:00:00.000Z", endAt: "2026-10-27T13:00:00.000Z", hours: 6, rateCentsPerHour: 3500, payCents: 21000, returnFareCents: null, distance: "about 3 km", injuryCover: "Injury cover: not confirmed", payRecord: "New on First Shift" },
+      item: { id: "forced", title: "Shop helper", businessName: "Lerato's Spaza", area: "Tembisa", startAt: "2026-10-27T07:00:00.000Z", endAt: "2026-10-27T13:00:00.000Z", hours: 6, rateCentsPerHour: 3500, payCents: 21000, returnFareCents: null, distance: "about 3 km", km: 3, injuryCover: "Injury cover: not confirmed", payRecord: "New on First Shift" },
       tasks: ["Pack shelves"],
       state,
     });

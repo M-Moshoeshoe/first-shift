@@ -1,6 +1,7 @@
 import { PersonPhoto } from "@/components/PersonPhoto";
 import { OWNER_COPY } from "@/domain/bookingMessages";
 import { FEED_COPY } from "@/domain/findingMessages";
+import { formatRand } from "@/domain/money";
 import type { ApplicantResponse } from "@/schemas/booking";
 
 /**
@@ -10,7 +11,7 @@ import type { ApplicantResponse } from "@/schemas/booking";
  * still reads at a glance.
  */
 export function ApplicantRow({ applicant, rank, onOpen }: { applicant: ApplicantResponse; rank: number; onOpen: () => void }) {
-  const fare = applicant.returnFareCents === null ? FEED_COPY.fareUnknown.toLowerCase() : OWNER_COPY.returnFare(applicant.returnFareCents).toLowerCase();
+  const fare = applicant.returnFareCents === null ? FEED_COPY.fareUnknown.toLowerCase() : `return taxi ${formatRand(applicant.returnFareCents)}`;
   const where = [applicant.distance ?? applicant.area, fare].join(", ");
   return (
     <button type="button" aria-haspopup="dialog" onClick={onOpen} className="lift flex min-h-16 w-full items-center gap-3 border border-line bg-paper p-3 text-left">
@@ -24,7 +25,7 @@ export function ApplicantRow({ applicant, rank, onOpen }: { applicant: Applicant
           {applicant.example ? <span className="border border-line px-1.5 text-micro text-muted">{OWNER_COPY.example}</span> : null}
         </span>
         <span className="text-sm text-muted tabular-nums">{where}</span>
-        {applicant.skills.length > 0 ? <span className="truncate text-sm">{applicant.skills.slice(0, 2).join(", ")}</span> : null}
+        {applicant.skills.length > 0 ? <span className="text-sm">{applicant.skills.slice(0, 2).join(", ")}</span> : null}
       </span>
       <span className="flex shrink-0 flex-col items-center border border-ink px-2 py-1 tabular-nums">
         <span className="text-base font-bold">{applicant.showUp.score}</span>
