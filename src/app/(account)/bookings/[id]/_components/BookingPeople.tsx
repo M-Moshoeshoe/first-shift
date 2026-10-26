@@ -67,7 +67,7 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
       ))}
       {isOwner && booking.status === "booked" ? (
         <Collapsible title={BOOKING_COPY.ownerNextTitle} open={false} boxed>
-          {BOOKING_COPY.ownerNext(booking.workerFirstName, opensAt(booking.startAt)).map((line) => (
+          {BOOKING_COPY.ownerNext(booking.workerFirstName, booking.day.canCheckIn ? null : opensAt(booking.startAt)).map((line) => (
             <p key={line} className="text-base">
               {line}
             </p>
