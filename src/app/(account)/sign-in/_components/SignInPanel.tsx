@@ -99,11 +99,10 @@ export function SignInPanel() {
             <DemoSignIn />
           </Suspense>
         ) : (
-          <div>
-            <Button variant="quiet" onClick={() => setShowDemo(true)}>
-              Testers: sign in with a demo email
-            </Button>
-          </div>
+          // Most people use the role cards above, so the email form waits behind a small link.
+          <button type="button" onClick={() => setShowDemo(true)} className="inline-flex min-h-11 items-center self-start text-left text-sm">
+            <span className="link">Have demo login details? Sign in with email.</span>
+          </button>
         )}
       </DemoChoice>
       {TestSignIn ? <TestSignIn /> : null}
