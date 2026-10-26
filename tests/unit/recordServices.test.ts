@@ -49,7 +49,7 @@ function referenceFakes(stored: BookingRecord = booking()) {
       return result;
     },
     async workerRecord() {
-      return { firstName: "Thabo", bookings: [{ id: "b1", booking: structuredClone(stored) }], references: new Map(references) };
+      return { firstName: "Thabo", bookings: [{ id: "b1", booking: structuredClone(stored) }], references: new Map(references), jobs: [{ businessName: "Sipho's Phone Repairs", outcome: "hired" as const }] };
     },
     async shareToken(_uid, fresh) {
       token ??= fresh;
@@ -107,41 +107,90 @@ describe("references and the work record", () => {
 
 describe("job offers", () => {
   function hireFakes(completed: number) {
-    const offers: HireOfferRecord[] = [];
+    let stored: (HireOfferRecord & { id: string }) | null = null;
+    const audit: string[] = [];
     const hires: HireRepository = {
       async pair() {
-        return { completed, slots: [], offered: offers.length > 0 };
+        return { completed, slots: [], offer: stored };
       },
       async create(offer) {
-        if (offers.length > 0) return "exists";
-        offers.push(offer);
+        if (stored) return "exists";
+        stored = { ...offer, id: "sipho_thabo" };
         return "created";
       },
+      async transact(id, _actor, plan) {
+        const { write, result } = plan(stored && stored.id === id ? structuredClone(stored) : null);
+        if (write && stored) {
+          stored = { ...stored, ...("answer" in write ? { answer: write.answer } : { outcome: write.outcome }) };
+          audit.push(write.audit);
+        }
+        return result;
+      },
       async forWorker() {
-        return offers;
+        return stored ? [stored] : [];
       },
     };
-    const service = createHireService({ hires, bookings: { get: async (id) => (id === "b1" ? { booking: booking(), secrets: { checkInCode: "1", shareToken: "x", expiresAt: new Date() } } : null) }, now: () => fromSast(2026, 10, 27, 16, 0) });
-    return { service, offers };
+    const service = createHireService({ hires, bookings: { get: async (id) => (id === "b1" ? { booking: booking({ ownerFirstName: "Sipho", ownerPhone: "27831234567" }), secrets: { checkInCode: "1", shareToken: "x", expiresAt: new Date() } } : null) }, now: () => fromSast(2026, 10, 27, 16, 0) });
+    return { service, audit, offer: () => stored };
   }
+  const JOB = { kind: "offer" as const, role: "Shop assistant", daysPerWeek: 5, rateCentsPerHour: 3500, message: "You were great with customers." };
 
-  it("offers a job after three tryouts together, once, with a WhatsApp message the owner sends", async () => {
-    const { service, offers } = hireFakes(3);
-    expect(await service.view(sipho, "b1")).toEqual({ due: true, offered: false, whatsappUrl: null });
-    const offered = await service.offer(sipho, "b1");
-    expect(offered).toMatchObject({ offered: true });
-    expect(decodeURIComponent(offered.whatsappUrl ?? "")).toContain("Hi Thabo, it's Sipho from Sipho's Phone Repairs.");
+  it("offers a job after three tryouts together, once, with its details in a WhatsApp message the owner sends", async () => {
+    const { service, offer } = hireFakes(3);
+    expect(await service.view(sipho, "b1")).toEqual({ due: true, offer: null, whatsappUrl: null });
+    const offered = await service.offer(sipho, "b1", JOB);
+    expect(offered).toMatchObject({ due: false, offer: { kind: "offer", details: { role: "Shop assistant", daysPerWeek: 5, rateCentsPerHour: 3500 }, answer: null, outcome: null } });
+    const text = decodeURIComponent(offered.whatsappUrl ?? "");
+    expect(text).toContain("Hi Thabo, it's Sipho from Sipho's Phone Repairs.");
+    expect(text).toContain("We would like to offer you a job: Shop assistant, 5 days a week at R35.00 an hour. You were great with customers.");
     expect(offered.whatsappUrl?.startsWith("https://wa.me/27821234567?text=")).toBe(true);
-    expect(await service.offer(sipho, "b1")).toMatchObject({ offered: true });
-    expect(offers).toHaveLength(1);
+    expect(await service.offer(sipho, "b1", { kind: "talk", message: "" })).toMatchObject({ offer: { kind: "offer" } });
+    expect(offer()?.kind).toBe("offer");
+  });
+
+  it("refuses pay below the minimum wage in code, whatever the form sent, and records nothing", async () => {
+    const { service, offer } = hireFakes(3);
+    await expect(service.offer(sipho, "b1", { ...JOB, rateCentsPerHour: 3000 })).rejects.toMatchObject({ status: 422, code: "below_minimum_wage" });
+    await expect(service.offer(sipho, "b1", { ...JOB, daysPerWeek: 7 })).rejects.toMatchObject({ status: 422, code: "days" });
+    expect(offer()).toBeNull();
+  });
+
+  it("can invite them to talk instead, with no details", async () => {
+    const { service } = hireFakes(3);
+    const invited = await service.offer(sipho, "b1", { kind: "talk", message: "" });
+    expect(invited.offer).toMatchObject({ kind: "talk", details: null });
+    expect(decodeURIComponent(invited.whatsappUrl ?? "")).toContain("We would like to talk to you about a job here.");
+  });
+
+  it("lets the young person answer once, giving them a WhatsApp message to the owner when interested, and the owner sees it", async () => {
+    const { service, audit } = hireFakes(3);
+    await service.offer(sipho, "b1", JOB);
+    await expect(service.answer(sipho, "sipho_thabo", "interested")).rejects.toMatchObject({ status: 404 });
+    const answered = await service.answer(thabo, "sipho_thabo", "interested");
+    expect(answered.status).toBe("answered");
+    expect(decodeURIComponent(answered.whatsappUrl ?? "")).toContain("https://wa.me/27831234567?text=Hi Sipho, I'm interested in the job at Sipho's Phone Repairs.");
+    expect((await service.answer(thabo, "sipho_thabo", "interested")).status).toBe("unchanged");
+    await expect(service.answer(thabo, "sipho_thabo", "not_now")).rejects.toMatchObject({ code: "already_answered" });
+    expect((await service.view(sipho, "b1")).offer?.answer).toBe("interested");
+    expect(audit).toEqual(["hire_answer_interested"]);
+  });
+
+  it("lets the owner mark Hired or Did not work out, once, and only the owner", async () => {
+    const { service, audit } = hireFakes(3);
+    await service.offer(sipho, "b1", JOB);
+    await expect(service.outcome(thabo, "b1", "hired")).rejects.toMatchObject({ status: 404 });
+    expect((await service.outcome(sipho, "b1", "hired")).offer?.outcome).toBe("hired");
+    await expect(service.outcome(sipho, "b1", "did_not_work_out")).rejects.toMatchObject({ code: "already_marked" });
+    expect(audit).toEqual(["hire_hired"]);
   });
 
   it("isn't due before then, and is the owner's alone", async () => {
     const { service } = hireFakes(1);
-    await expect(service.offer(sipho, "b1")).rejects.toMatchObject({ code: "not_due" });
+    await expect(service.offer(sipho, "b1", JOB)).rejects.toMatchObject({ code: "not_due" });
     await expect(service.view(thabo, "b1")).rejects.toMatchObject({ status: 404 });
   });
 });
+
 
 describe("resolving a case", () => {
   const open: ReviewCase = { kind: "booking_review", reason: "not_received", bookingId: "b1", businessId: "sipho", workerId: "thabo", status: "open" };

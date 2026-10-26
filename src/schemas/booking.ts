@@ -1,4 +1,5 @@
 import * as z from "zod/mini";
+import { HIRE_ANSWERS, HIRE_KINDS } from "@/domain/hire";
 import { APPLICATION_STATUSES } from "@/domain/applications";
 import { CHECKOUT_REASONS } from "@/domain/bookings";
 import { BOOKING_STATUSES } from "@/domain/bookingStatus";
@@ -58,7 +59,20 @@ export const ApplicationsSchema = z.object({
     }),
   ),
   /** "Job offer from {business}": offers made after tryouts together (domain/hire.ts). */
-  jobOffers: z.array(z.object({ businessName: z.string(), at: z.string() })),
+  jobOffers: z.array(
+    z.object({
+      id: z.string(),
+      businessName: z.string(),
+      ownerFirstName: z.string(),
+      kind: z.enum(HIRE_KINDS),
+      details: z.nullable(z.object({ role: z.string(), daysPerWeek: z.number(), rateCentsPerHour: z.number() })),
+      message: z.string(),
+      answer: z.nullable(z.enum(HIRE_ANSWERS)),
+      /** For "I'm interested": a WhatsApp message to the owner, ready to send. Null when there's no number to send it to. */
+      whatsappUrl: z.nullable(z.string()),
+      at: z.string(),
+    }),
+  ),
 });
 export type ApplicationsResponse = z.infer<typeof ApplicationsSchema>;
 

@@ -55,7 +55,8 @@ Six weeks in Ivory Park, Tembisa and Midrand, after a labour lawyer has reviewed
 | Repeat businesses | Businesses with 2 or more completed tryouts | Half of the active ones |
 | Safety reports | Reports by kind, and how long each took to close | Every one closed within 48 hours |
 | References approved | Approved, out of all references written; challenges and how they ended | 9 in 10 approved |
-| Job offers made | "Offer {name} a job" tapped by the owner | 5 |
+| Job offers made | "Offer {name} a job" recorded by the owner | 5 |
+| Tryout to job | Job offers the owner marked "Hired" | Tracked from week 1; no target yet |
 
 A week where a safety report stays open, or a payment isn't confirmed, is reviewed before more tryouts are posted that week.
 

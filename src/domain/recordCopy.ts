@@ -1,3 +1,5 @@
+import { RULES } from "@/config/rules";
+import { formatRand } from "./money";
 import type { OwnerAnswers } from "./references";
 
 /*
@@ -67,10 +69,58 @@ export const RECORD_COPY = {
 
 export const HIRE_COPY = {
   offer: (name: string) => `Offer ${name} a job`,
-  why: (name: string) => `You and ${name} have worked together enough that a job is the next step. Tryouts aren't meant for regular work.`,
-  offered: (name: string) => `Your job offer to ${name} is recorded. Send it on WhatsApp and talk about the details.`,
-  send: "Send the offer on WhatsApp",
-  message: (name: string, owner: string, business: string) => `Hi ${name}, it's ${owner} from ${business}. You've done great work on your tryouts. We'd like to offer you a job. When can we talk about it?`,
+  why: (name: string) => `You and ${name} have worked together enough that a job is the next step. Tryouts are not meant for regular work.`,
+  kindLabel: "How do you want to start?",
+  talk: "Invite to talk about a job",
+  offerJob: "Offer a job",
+  role: "The job",
+  roleHint: "A few words, like shop assistant.",
+  days: "Days a week",
+  rate: "Pay per hour",
+  rateHint: `At least ${formatRand(RULES.minimumWageCentsPerHour)}, the national minimum wage.`,
+  messageLabel: "A message from you (optional)",
+  eti: "Hiring someone aged 18 to 29? You may qualify for the Employment Tax Incentive. Check with SARS or your accountant.",
+  record: "Record it",
+  recording: "Recording it",
+  problems: {
+    role: `Say what the job is, in up to ${RULES.jobRoleMaxChars} characters.`,
+    days: `Choose 1 to ${RULES.jobDaysPerWeekMax} days a week.`,
+    below_minimum_wage: `The pay must be at least ${formatRand(RULES.minimumWageCentsPerHour)} an hour, the national minimum wage.`,
+    message: `Keep your message to ${RULES.jobMessageMaxChars} characters.`,
+  },
+  offered: (name: string) => `Recorded. Send it to ${name} on WhatsApp, where you can change the words first.`,
+  send: "Send it on WhatsApp",
+  summary: (details: { role: string; daysPerWeek: number; rateCentsPerHour: number }) => `${details.role}, ${details.daysPerWeek} ${details.daysPerWeek === 1 ? "day" : "days"} a week, ${formatRand(details.rateCentsPerHour)} an hour.`,
+  talkSummary: "An invitation to talk about a job.",
+  waiting: (name: string) => `Waiting for ${name} to answer.`,
+  interested: (name: string) => `${name} is interested.`,
+  notNow: (name: string) => `${name} said not right now. You can keep doing tryouts together, up to the 24-hour line each month.`,
+  outcomeTitle: "How did it go?",
+  hired: "Hired",
+  didNotWorkOut: "Did not work out",
+  markedHired: (name: string) => `Marked: you hired ${name}.`,
+  markedNotWorkedOut: "Marked: it did not work out.",
+  whatsapp: (name: string, owner: string, business: string, details: { role: string; daysPerWeek: number; rateCentsPerHour: number } | null, note: string) =>
+    [
+      `Hi ${name}, it's ${owner} from ${business}. You've done great work on your tryouts.`,
+      details
+        ? `We would like to offer you a job: ${details.role}, ${details.daysPerWeek} ${details.daysPerWeek === 1 ? "day" : "days"} a week at ${formatRand(details.rateCentsPerHour)} an hour.`
+        : "We would like to talk to you about a job here.",
+      note.trim(),
+      "When can we talk?",
+    ]
+      .filter(Boolean)
+      .join(" "),
   received: (business: string) => `Job offer from ${business}`,
-  receivedHint: "The business will contact you on WhatsApp about it.",
+  receivedTalk: (business: string) => `${business} would like to talk to you about a job`,
+  answerInterested: "I'm interested",
+  answerNotNow: "Not right now",
+  answering: "Sending your answer",
+  youInterested: (owner: string) => `You said you're interested. Message ${owner} on WhatsApp to talk about it.`,
+  youNotNow: "You said not right now. Nothing else changes: you can keep doing tryouts, here and anywhere else.",
+  messageOwner: (owner: string) => `Message ${owner} on WhatsApp`,
+  interestedText: (owner: string, business: string) => `Hi ${owner}, I'm interested in the job at ${business}. When can we talk?`,
+  answerFailed: "Your answer did not send. Check your connection, then tap it again.",
+  offeredBy: (business: string) => `Offered a job by ${business}`,
+  hiredBy: (business: string) => `Hired by ${business}`,
 } as const;

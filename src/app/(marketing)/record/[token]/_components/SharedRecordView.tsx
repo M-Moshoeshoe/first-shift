@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { RecordEntry } from "@/components/RecordEntry";
+import { RecordJobs } from "@/components/RecordJobs";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { RECORD_COPY } from "@/domain/recordCopy";
 import { fetchSharedRecord } from "@/lib/fetchSharedRecord";
@@ -26,6 +27,7 @@ export function SharedRecordView() {
   return (
     <>
       <PageTitle title={RECORD_COPY.publicTitle(record.firstName)} intro={RECORD_COPY.publicIntro} />
+      <RecordJobs jobs={record.jobs} />
       <div className="flex flex-col gap-4">
         {record.entries.map((entry, index) => (
           <RecordEntry key={`${entry.day}-${index}`} entry={entry} />

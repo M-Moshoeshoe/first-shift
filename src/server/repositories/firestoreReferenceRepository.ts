@@ -1,6 +1,7 @@
 import "server-only";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
+import { HIRE_OUTCOMES } from "@/domain/hire";
 import { REFERENCE_STATUSES, type ReferenceRecord } from "@/domain/references";
 import { adminDb } from "../firebaseAdmin";
 import { parseBooking } from "./firestoreRecords";
@@ -20,6 +21,8 @@ const ReferenceSchema = z.object({
 });
 const parseReference = (data: unknown): ReferenceRecord => ReferenceSchema.parse(data);
 const TasksSchema = z.object({ tasks: z.array(z.string()) });
+// What the record shows of a job offer: who made it, and whether it ended in a hire (hire.ts).
+const JobSchema = z.object({ businessName: z.string(), outcome: z.enum(HIRE_OUTCOMES).nullable().default(null) });
 
 export const firestoreReferenceRepository: ReferenceRepository = {
   async forBooking(bookingId) {
@@ -61,15 +64,17 @@ export const firestoreReferenceRepository: ReferenceRepository = {
 
   async workerRecord(workerId) {
     const db = adminDb();
-    const [user, bookings, references] = await Promise.all([
+    const [user, bookings, references, offers] = await Promise.all([
       db.collection("users").doc(workerId).get(),
       db.collection("bookings").where("workerId", "==", workerId).get(),
       db.collection("references").where("workerId", "==", workerId).get(),
+      db.collection("hireOffers").where("workerId", "==", workerId).get(),
     ]);
     return {
       firstName: String(user.get("firstName") ?? ""),
       bookings: bookings.docs.map((doc) => ({ id: doc.id, booking: parseBooking(doc.data()) })),
       references: new Map(references.docs.map((doc) => [doc.id, parseReference(doc.data())])),
+      jobs: offers.docs.map((doc) => JobSchema.parse(doc.data())),
     };
   },
 

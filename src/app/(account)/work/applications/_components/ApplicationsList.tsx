@@ -8,11 +8,11 @@ import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { APPLICATION_LABELS, APPLICATIONS_COPY } from "@/domain/bookingMessages";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
-import { HIRE_COPY } from "@/domain/recordCopy";
 import { sastSlot } from "@/domain/time";
 import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import { ApplicationsSchema } from "@/schemas/booking";
+import { JobOfferCard } from "./JobOfferCard";
 
 const FALLBACK = `Your applications didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
 
@@ -37,16 +37,11 @@ export function ApplicationsList() {
         </div>
       ) : null}
       {resource.status === "ready" && resource.data.jobOffers.length > 0 ? (
-        <section aria-label="Job offers" className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           {resource.data.jobOffers.map((offer) => (
-            <div key={offer.at} className="flex flex-col gap-1 border-2 border-ink p-4">
-              <h2 className="text-xl font-bold">
-                {HIRE_COPY.received(offer.businessName)}
-              </h2>
-              <p className="text-lg">{HIRE_COPY.receivedHint}</p>
-            </div>
+            <JobOfferCard key={offer.id} offer={offer} onAnswered={reload} />
           ))}
-        </section>
+        </div>
       ) : null}
       {resource.status !== "ready" ? null : resource.data.items.length === 0 ? (
         <p className="text-lg">{APPLICATIONS_COPY.empty}</p>

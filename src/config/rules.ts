@@ -56,6 +56,10 @@ export const RULES = {
   postsPerDay: 5,
 
   hirePromptAfterTryouts: 3,
+  /** A job offer: the role in a few words, the days a week, and an optional personal message. */
+  jobRoleMaxChars: 60,
+  jobDaysPerWeekMax: 6,
+  jobMessageMaxChars: 300,
   /**
    * From this many hours a month with the same employer, UIF and the BCEA's
    * working-time and leave chapters apply in full (docs/COMPLIANCE.md). A

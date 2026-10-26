@@ -10,7 +10,7 @@ import { DemoResetSchema } from "../../src/schemas/demoReset";
 import * as z from "zod/mini";
 import { ApplicationsSchema, BookingViewSchema, StepResultSchema } from "../../src/schemas/booking";
 import { CreditRequestResultSchema, CreditsViewSchema } from "../../src/schemas/credits";
-import { DraftResultSchema, HireViewSchema, RecordViewSchema } from "../../src/schemas/record";
+import { DraftResultSchema, HireAnswerResultSchema, HireViewSchema, RecordViewSchema } from "../../src/schemas/record";
 import { SharedRecordSchema } from "../../src/schemas/sharedRecord";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
@@ -121,10 +121,25 @@ async function demoDay(steps: Record<string, unknown>): Promise<string> {
   // Their third tryout together: the owner is asked to offer a job.
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
-  steps["13c. job offer due"] = await apiGet(`/api/bookings/${bookingId}/hire`, HireViewSchema);
-  if (!(steps["13c. job offer due"] as { due: boolean }).due) throw new Error("A third finished tryout together should bring up the job offer.");
+  const due = await apiGet(`/api/bookings/${bookingId}/hire`, HireViewSchema);
+  if (!due.due) throw new Error("A third finished tryout together should bring up the job offer.");
+  const belowWage = await refusal(() => apiPost(`/api/bookings/${bookingId}/hire`, { kind: "offer", role: "Shop assistant", daysPerWeek: 5, rateCentsPerHour: 2000, message: "" }, HireViewSchema));
+  const offered = await apiPost(`/api/bookings/${bookingId}/hire`, { kind: "offer", role: "Shop assistant", daysPerWeek: 5, rateCentsPerHour: 3500, message: "You were great with customers." }, HireViewSchema);
   await signOut(clientAuth());
   await demoSignIn(THABO.email, THABO.password);
+  const [jobOffer] = (await apiGet("/api/applications", ApplicationsSchema)).jobOffers;
+  const jobAnswer = await apiPost(`/api/job-offers/${jobOffer?.id ?? ""}/answer`, { answer: "interested" }, HireAnswerResultSchema);
+  await signOut(clientAuth());
+  await demoSignIn(SIPHO.email, SIPHO.password);
+  const marked = await apiPost(`/api/bookings/${bookingId}/hire/outcome`, { outcome: "hired" }, HireViewSchema);
+  await signOut(clientAuth());
+  await demoSignIn(THABO.email, THABO.password);
+  const jobs = (await apiGet("/api/record", RecordViewSchema)).jobs;
+  const sharedJobs = SharedRecordSchema.parse(await (await fetch(`/api/record/${record.shareToken}`)).json()).jobs;
+  steps["13c. job offer"] = { belowWage: belowWage.status, offered: offered.offer, seen: jobOffer?.details, answered: jobAnswer.status, toOwner: Boolean(jobAnswer.whatsappUrl), owner: marked.offer, jobs, sharedJobs };
+  if (![400, 422].includes(belowWage.status) || offered.offer?.kind !== "offer" || jobOffer?.details?.rateCentsPerHour !== 3500 || jobAnswer.status !== "answered" || marked.offer?.answer !== "interested" || marked.offer.outcome !== "hired" || !sharedJobs[0]?.hired) {
+    throw new Error(`The job offer should go from offer to answer to Hired, and onto the shared record: ${JSON.stringify(steps["13c. job offer"])}`);
+  }
   const final = await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema);
   steps["13. demo tryout, offer to Received"] = { booked: answered.status, status: final.status, owed: final.day.owedCents, payment: final.day.payment?.state };
   if (final.day.payment?.state !== "received") throw new Error("The demo tryout should end at Received.");

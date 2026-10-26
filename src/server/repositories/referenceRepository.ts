@@ -1,3 +1,4 @@
+import type { HireOfferRecord } from "@/domain/hire";
 import type { BookingRecord } from "@/domain/bookings";
 import type { ReviewCase } from "@/domain/cases";
 import type { ReferenceRecord, ReferenceStatus } from "@/domain/references";
@@ -18,7 +19,8 @@ export interface ReferenceRepository {
   create(bookingId: string, reference: ReferenceRecord, actorUid: string): Promise<ReferenceRecord>;
   transactDecide<R>(referenceId: string, actorUid: string, plan: Planned<ReferenceRecord | null, ReferenceWrite, R>): Promise<R>;
   /** Everything the young person's record is built from: their first name, their bookings and their references. */
-  workerRecord(workerId: string): Promise<{ firstName: string; bookings: { id: string; booking: BookingRecord }[]; references: Map<string, ReferenceRecord> }>;
+  /** Everything on the work record: the first name, the bookings, their references, and the job offers made (hire.ts). */
+  workerRecord(workerId: string): Promise<{ firstName: string; bookings: { id: string; booking: BookingRecord }[]; references: Map<string, ReferenceRecord>; jobs: Pick<HireOfferRecord, "businessName" | "outcome">[] }>;
   /** The record's share token: the one already set, or this new one, set once. */
   shareToken(workerId: string, fresh: string): Promise<string>;
   /** Whose record a share token opens; null for an unknown token. */

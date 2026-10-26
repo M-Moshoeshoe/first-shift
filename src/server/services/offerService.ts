@@ -8,6 +8,7 @@ import { decideAnswer, decideOffer, offerLapsesAt, openOffer, overlappingApplica
 import type { TryoutRecord } from "@/domain/tryoutDecisions";
 import type { ApplicationsResponse, BadgesResponse, OwnerTryoutResponse } from "@/schemas/booking";
 import { AppError } from "../errors";
+import { jobOfferView } from "./hireService";
 import type { HireRepository } from "../repositories/hireRepository";
 import type { OfferRepository } from "../repositories/offerRepository";
 import type { ProfileRepository } from "../repositories/profileRepository";
@@ -117,7 +118,7 @@ export function createOfferService({ offers, profiles, hires, newSecrets, now }:
           if (!tryout) return [];
           return [applicationItem(application, tryout, now())];
         }),
-        jobOffers: jobOffers.map((offer) => ({ businessName: offer.businessName, at: offer.at.toISOString() })),
+        jobOffers: jobOffers.map(jobOfferView),
       };
     },
 

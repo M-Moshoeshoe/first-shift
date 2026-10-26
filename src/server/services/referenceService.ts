@@ -2,6 +2,7 @@ import "server-only";
 import { partyOf } from "@/domain/bookings";
 import type { Viewer } from "@/domain/demo";
 import { decideReference, newReference, referenceDraftProblem, type OwnerAnswers } from "@/domain/references";
+import { recordJobs } from "@/domain/hire";
 import { REFERENCE_COPY } from "@/domain/recordCopy";
 import { isRecordToken, recordEntries, sharedRecord, type SharedRecord } from "@/domain/workRecord";
 import type { RecordViewResponse, ReferenceViewResponse } from "@/schemas/record";
@@ -77,9 +78,9 @@ export function createReferenceService({ references, writeReference, consumeQuot
 
     /** The young person's own record, with a share link made on first visit. */
     async record(viewer: Viewer): Promise<RecordViewResponse> {
-      const { firstName, bookings, references: refs } = await references.workerRecord(viewer.uid);
+      const { firstName, bookings, references: refs, jobs } = await references.workerRecord(viewer.uid);
       const shareToken = await references.shareToken(viewer.uid, newToken());
-      return { firstName, shareToken, entries: recordEntries(bookings, refs) };
+      return { firstName, shareToken, entries: recordEntries(bookings, refs), jobs: recordJobs(jobs) };
     },
 
     /** The shared record: approved content only. An unknown token and a malformed one look the same. */
@@ -87,8 +88,8 @@ export function createReferenceService({ references, writeReference, consumeQuot
       if (!isRecordToken(token)) return null;
       const uid = await references.byShareToken(token);
       if (!uid) return null;
-      const { firstName, bookings, references: refs } = await references.workerRecord(uid);
-      return sharedRecord(firstName, recordEntries(bookings, refs));
+      const { firstName, bookings, references: refs, jobs } = await references.workerRecord(uid);
+      return sharedRecord(firstName, recordEntries(bookings, refs), recordJobs(jobs));
     },
   };
 }

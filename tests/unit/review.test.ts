@@ -64,7 +64,7 @@ describe("pilot metrics", () => {
     expect(weekOf(fromSast(2026, 11, 2, 0, 5))).toBe("2026-11-02");
   });
 
-  it("counts completed and paid tryouts, the on-time rate, repeat businesses, safety reports, references and job offers", () => {
+  it("counts completed and paid tryouts, the on-time rate, repeat businesses, safety reports, references, job offers and hires", () => {
     const day = (n: number, hour = 9) => fromSast(2026, 10, n, hour, 0);
     const paid = (owner: string, n: number, markedHour: number) => ({ ownerId: owner, startAt: day(n), dueAt: day(n, 15), markedPaidAt: day(n, markedHour), received: true });
     const rows = pilotMetrics({
@@ -72,6 +72,7 @@ describe("pilot metrics", () => {
       cases: [{ kind: "report", detail: "harassment", openedAt: day(27, 10), closedAt: day(27, 22) }, { kind: "booking_review", detail: "not_received", openedAt: day(28), closedAt: null }],
       references: [{ status: "approved", challenged: false, at: day(26) }, { status: "challenged", challenged: true, at: day(27) }],
       hireOffers: [day(28)],
+      hires: [day(30)],
     });
     expect(rows.map((row) => row.week)).toEqual(["2026-10-26", "total"]);
     expect(rows.at(-1)).toEqual({
@@ -84,6 +85,7 @@ describe("pilot metrics", () => {
       referencesApproved: "50% (1 of 2)",
       challenges: 1,
       hireOffers: 1,
+      hired: 1,
     });
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { RecordEntry } from "@/components/RecordEntry";
+import { RecordJobs } from "@/components/RecordJobs";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
 import { Button, buttonClass } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
@@ -62,6 +63,7 @@ export function WorkRecord() {
             </a>
             <p className="break-all text-sm">{link}</p>
           </section>
+          <RecordJobs jobs={record.jobs} />
           <div className="flex flex-col gap-4">
             {record.entries.map((entry) => (
               <RecordEntry key={entry.bookingId} entry={{ ...entry, reference: entry.reference?.status === "approved" ? entry.reference : null }} note={noteFor(entry.reference)} />

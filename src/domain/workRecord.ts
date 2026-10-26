@@ -50,13 +50,16 @@ export function recordEntries(bookings: readonly { id: string; booking: BookingR
 
 export interface SharedRecord {
   firstName: string;
+  /** "Offered a job by", and "Hired by" once marked (hire.ts, recordJobs). */
+  jobs: { businessName: string; hired: boolean }[];
   entries: (Omit<RecordEntry, "bookingId" | "reference"> & { reference: { text: string; answers: OwnerAnswers } | null })[];
 }
 
 /** What the share link shows: the first name and the verified entries, with approved references only. */
-export function sharedRecord(firstName: string, entries: readonly RecordEntry[]): SharedRecord {
+export function sharedRecord(firstName: string, entries: readonly RecordEntry[], jobs: readonly { businessName: string; hired: boolean }[] = []): SharedRecord {
   return {
     firstName,
+    jobs: [...jobs],
     entries: entries.map((entry) => ({
       businessName: entry.businessName,
       businessArea: entry.businessArea,

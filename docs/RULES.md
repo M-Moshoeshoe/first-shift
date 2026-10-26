@@ -238,7 +238,12 @@ The AI sorts every request into a category; `allowedWork.ts` decides. Blocked ca
 | Rule | Value | Code |
 | --- | --- | --- |
 | When it's offered | After a tryout ends, if the pair has 3 completed tryouts together, or even a 4-hour tryout more this month would reach the 24-hour line, the owner sees "Offer {name} a job" on the booking | `hireOfferDue` |
-| What it does | Records the offer once per pair (counted in `npm run pilot:metrics`), then the owner sends a prefilled WhatsApp message they can change. The young person sees "Job offer from {business}" under Applications | `hireOffers`, `HIRE_COPY` |
+| What the owner chooses | "Invite to talk about a job", or "Offer a job" with the role, days a week (1 to 6) and hourly pay, at least the minimum wage, checked in code whatever the form sends; plus an optional message. One line at that moment: "Hiring someone aged 18 to 29? You may qualify for the Employment Tax Incentive. Check with SARS or your accountant." Nothing more, because it isn't advice | `jobOfferProblem`, `HIRE_COPY.eti` |
+| What it does | Records it once per pair (counted in `npm run pilot:metrics`), then the owner sends a prefilled WhatsApp message with the details, which they can change | `hireOffers`, `HIRE_COPY.whatsapp` |
+| The young person answers | Under Applications: the details and the message, then "I'm interested" (opens a WhatsApp message to the owner) or "Not right now", once. The owner sees the answer on the booking | `decideHireAnswer` |
+| Not right now | Changes nothing else: the young person keeps doing tryouts, there and anywhere, and the 24-hour line still applies with that business | `crossesRegularEmploymentLine` |
+| The outcome | Later, the owner marks "Hired" or "Did not work out", once. Hires count in `npm run pilot:metrics` as tryout to job | `decideHireOutcome`, `pilotMetrics` |
+| On the record | The work record and the shared record show "Offered a job by {business}" once an offer is made, and "Hired by {business}" once marked | `recordJobs` |
 
 ## The review list
 

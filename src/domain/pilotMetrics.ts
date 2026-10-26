@@ -41,6 +41,8 @@ export interface WeekMetrics {
   referencesApproved: string;
   challenges: number;
   hireOffers: number;
+  /** Tryout to job: offers the owner marked Hired (hire.ts). */
+  hired: number;
 }
 
 const SAFETY = new Set(["harassment", "unsafe_work", "asked_for_money", "safety_stop"]);
@@ -55,7 +57,7 @@ export function weekOf(date: Date): string {
 
 const percent = (part: number, whole: number): string => (whole === 0 ? "none yet" : `${Math.round((part / whole) * 100)}% (${part} of ${whole})`);
 
-function summarise(week: string, bookings: readonly MetricBooking[], cases: readonly MetricCase[], references: readonly MetricReference[], hireOffers: number, everCompleted: readonly MetricBooking[]): WeekMetrics {
+function summarise(week: string, bookings: readonly MetricBooking[], cases: readonly MetricCase[], references: readonly MetricReference[], jobs: { offers: number; hired: number }, everCompleted: readonly MetricBooking[]): WeekMetrics {
   const paid = bookings.filter((booking) => booking.received);
   const onTime = paid.filter((booking) => booking.dueAt && booking.markedPaidAt && paidOnTime(booking.dueAt, booking.markedPaidAt));
   const perOwner = new Map<string, number>();
@@ -74,22 +76,24 @@ function summarise(week: string, bookings: readonly MetricBooking[], cases: read
     safetyHoursToClose: closed.length === 0 ? (open > 0 ? `${open} still open` : "none") : `longest ${Math.max(...hours).toFixed(1)} h${open > 0 ? `, ${open} still open` : ""}`,
     referencesApproved: percent(references.filter((reference) => reference.status === "approved").length, references.length),
     challenges: references.filter((reference) => reference.challenged).length,
-    hireOffers,
+    hireOffers: jobs.offers,
+    hired: jobs.hired,
   };
 }
 
 /** One row per week that had any activity, oldest first, then the totals. Repeat businesses count every week up to and including that one. */
-export function pilotMetrics(input: { bookings: readonly MetricBooking[]; cases: readonly MetricCase[]; references: readonly MetricReference[]; hireOffers: readonly Date[] }): WeekMetrics[] {
-  const weeks = [...new Set([...input.bookings.map((item) => weekOf(item.startAt)), ...input.cases.map((item) => weekOf(item.openedAt)), ...input.references.map((item) => weekOf(item.at)), ...input.hireOffers.map(weekOf)])].sort();
+export function pilotMetrics(input: { bookings: readonly MetricBooking[]; cases: readonly MetricCase[]; references: readonly MetricReference[]; hireOffers: readonly Date[]; hires?: readonly Date[] }): WeekMetrics[] {
+  const hires = input.hires ?? [];
+  const weeks = [...new Set([...input.bookings.map((item) => weekOf(item.startAt)), ...input.cases.map((item) => weekOf(item.openedAt)), ...input.references.map((item) => weekOf(item.at)), ...input.hireOffers.map(weekOf), ...hires.map(weekOf)])].sort();
   const rows = weeks.map((week) =>
     summarise(
       week,
       input.bookings.filter((item) => weekOf(item.startAt) === week),
       input.cases.filter((item) => weekOf(item.openedAt) === week),
       input.references.filter((item) => weekOf(item.at) === week),
-      input.hireOffers.filter((at) => weekOf(at) === week).length,
+      { offers: input.hireOffers.filter((at) => weekOf(at) === week).length, hired: hires.filter((at) => weekOf(at) === week).length },
       input.bookings.filter((item) => weekOf(item.startAt) <= week),
     ),
   );
-  return [...rows, summarise("total", input.bookings, input.cases, input.references, input.hireOffers.length, input.bookings)];
+  return [...rows, summarise("total", input.bookings, input.cases, input.references, { offers: input.hireOffers.length, hired: hires.length }, input.bookings)];
 }

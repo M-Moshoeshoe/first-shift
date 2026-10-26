@@ -43,12 +43,15 @@ async function main(): Promise<void> {
   const metricReferences: MetricReference[] = references.docs
     .filter((doc) => !doc.get("demo"))
     .map((doc) => ({ status: String(doc.get("status")), challenged: Boolean(doc.get("challengedAt")), at: at(doc.get("createdAt")) ?? new Date(0) }));
-  const hireOffers = offers.docs.filter((doc) => !doc.get("demo")).flatMap((doc) => at(doc.get("at")) ?? []);
+  const realOffers = offers.docs.filter((doc) => !doc.get("demo"));
+  const hireOffers = realOffers.flatMap((doc) => at(doc.get("at")) ?? []);
+  // Tryout to job: offers the owner marked Hired, counted in the week they were marked.
+  const hires = realOffers.filter((doc) => doc.get("outcome") === "hired").flatMap((doc) => at(doc.get("outcomeAt")) ?? at(doc.get("at")) ?? []);
 
-  const rows = pilotMetrics({ bookings: metricBookings, cases: metricCases, references: metricReferences, hireOffers });
+  const rows = pilotMetrics({ bookings: metricBookings, cases: metricCases, references: metricReferences, hireOffers, hires });
   if (rows.length === 1 && rows[0]?.completedAndPaid === 0) console.log("No real tryouts yet: every number below is zero.");
   console.table(rows);
-  console.log("Targets by week 6: 60 completed and paid; half of active businesses repeat; every safety report closed within 48 hours; 9 in 10 references approved; 5 job offers.");
+  console.log("Targets by week 6: 60 completed and paid; half of active businesses repeat; every safety report closed within 48 hours; 9 in 10 references approved; 5 job offers, and the hires they lead to.");
 }
 
 main().then(

@@ -17,5 +17,7 @@ export const SharedRecordSchema = z.object({
       reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema })),
     }),
   ),
+  /** "Offered a job by {business}", and "Hired by {business}" once the owner marks it (domain/hire.ts). */
+  jobs: z.array(z.object({ businessName: z.string(), hired: z.boolean() })),
 });
 export type SharedRecordResponse = z.infer<typeof SharedRecordSchema>;
