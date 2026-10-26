@@ -1,6 +1,6 @@
 # Audit 2: the judge's view, submission day
 
-> A dated snapshot: what was true at the commit named below. It is kept as a record and isn't updated; the code and the other documents have moved on since.
+> A dated snapshot: what was true at the commit named below. It is kept as a record and is not updated; the code and the other documents have moved on since.
 
 Read-only audit, Monday 26 October 2026, 08:40 to 09:30 SAST, at commit `577db6f` ("Phase 6: records and hiring"), deployed to https://firstshiftza.netlify.app at 08:43. Nothing in the code was changed. This replaces nothing: `docs/audits/AUDIT.md` is the Sunday 00:10 snapshot.
 
