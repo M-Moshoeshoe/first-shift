@@ -7,7 +7,7 @@ export const CreditsViewSchema = z.object({
   available: z.number(),
   held: z.number(),
   freeLeft: z.number(),
-  history: z.array(z.object({ at: z.string(), text: z.string() })),
+  history: z.array(z.object({ at: z.string(), text: z.string(), kind: z.enum(["granted", "held", "used", "returned", "requested"]), change: z.number(), balance: z.number() })),
   request: z.nullable(z.object({ requestedAt: z.string() })),
 });
 export type CreditsViewResponse = z.infer<typeof CreditsViewSchema>;

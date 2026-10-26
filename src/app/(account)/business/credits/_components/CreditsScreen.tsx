@@ -6,10 +6,10 @@ import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { CREDIT_PACKS, CREDITS_COPY } from "@/domain/creditsCopy";
-import { sastDay } from "@/domain/time";
 import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import { CreditsViewSchema } from "@/schemas/credits";
+import { CreditHistory } from "./CreditHistory";
 import { RequestCredits } from "./RequestCredits";
 
 /** One number with its name, in a row of three. */
@@ -84,14 +84,7 @@ export function CreditsScreen() {
         {credits.history.length === 0 ? (
           <p className="text-base">{CREDITS_COPY.empty}</p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {credits.history.map((line, index) => (
-              <li key={`${line.at}-${index}`} className="flex flex-wrap gap-x-2 text-base">
-                <span className="text-muted tabular-nums">{sastDay(new Date(line.at))}</span>
-                <span>{line.text}</span>
-              </li>
-            ))}
-          </ul>
+          <CreditHistory history={credits.history} />
         )}
       </section>
     </>

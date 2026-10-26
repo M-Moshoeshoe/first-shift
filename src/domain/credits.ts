@@ -102,20 +102,35 @@ export interface CreditEvent {
   free: boolean;
   /** The tryout a hold, use or return was for, when it's known. */
   tryoutTitle: string | null;
+  /** What it did to the credits available: +3 for a grant, -1 for a hold, +1 for a return, 0 for a use (already set aside) or a request. */
+  change: number;
+  /** Credits available just after it. */
+  balance: number;
 }
+
+const CHANGE: Record<CreditEventKind, (amount: number) => number> = { granted: (amount) => amount, held: () => -1, used: () => 0, returned: () => 1, requested: () => 0 };
 
 /** The ledger and the requests as one history in plain words (creditsCopy.ts), newest first. */
 export function creditHistory(entries: readonly { entry: CreditEntry; at: Date }[], requests: readonly Date[], titles: ReadonlyMap<string, string>): CreditEvent[] {
   const kinds = { grant: "granted", hold: "held", use: "used", release: "returned" } as const;
-  const fromLedger = entries.map(({ entry, at }): CreditEvent => ({
+  const fromLedger = entries.map(({ entry, at }) => ({
     kind: kinds[entry.kind],
     at,
     amount: entry.kind === "grant" ? entry.amount : 1,
     free: entry.kind === "grant" && entry.reason === "welcome",
     tryoutTitle: entry.kind === "grant" ? null : (titles.get(entry.tryoutId) ?? null),
   }));
-  const asked = requests.map((at): CreditEvent => ({ kind: "requested", at, amount: 0, free: false, tryoutTitle: null }));
-  return [...fromLedger, ...asked].sort((a, b) => b.at.getTime() - a.at.getTime());
+  const asked = requests.map((at) => ({ kind: "requested" as const, at, amount: 0, free: false, tryoutTitle: null }));
+  // Oldest first to carry the balance forward, then newest first for the screen.
+  let balance = 0;
+  return [...fromLedger, ...asked]
+    .sort((a, b) => a.at.getTime() - b.at.getTime())
+    .map((event): CreditEvent => {
+      const change = CHANGE[event.kind](event.amount);
+      balance += change;
+      return { ...event, change, balance };
+    })
+    .reverse();
 }
 
 export type CreditRequestDecision = { kind: "request" } | { kind: "unchanged" } | { kind: "refuse"; problem: "not_business" };

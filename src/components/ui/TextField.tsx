@@ -29,7 +29,7 @@ export function TextField({ id, label, hint, error, ...inputProps }: TextFieldPr
         id={id}
         aria-describedby={hint ? `${hintId} ${errorId}` : errorId}
         aria-invalid={error ? true : undefined}
-        className="min-h-11 w-full border border-edge bg-paper px-3 text-base text-ink placeholder:text-muted aria-invalid:border-2 aria-invalid:border-stop aria-invalid:focus-visible:outline-stop aria-invalid:focus-visible:outline-offset-0"
+        className="min-h-11 w-full border border-edge bg-paper px-3 text-[1rem] text-ink placeholder:text-muted aria-invalid:border-2 aria-invalid:border-stop aria-invalid:focus-visible:outline-stop aria-invalid:focus-visible:outline-offset-0"
       />
       <FormError id={errorId} message={error} />
     </div>

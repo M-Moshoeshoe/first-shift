@@ -104,7 +104,8 @@ export const ProfileViewSchema = z.object({
       idLastFour: z.optional(z.string()),
       hasPhoto: z.boolean(),
       hasSurname: z.boolean(),
-      tryoutsDone: z.number(),
+      // Optional, so a page from a new deploy still reads a reply from the previous one for the minute both are live.
+      tryoutsDone: z.optional(z.number()),
     }),
   ),
   business: z.nullable(

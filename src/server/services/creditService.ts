@@ -30,7 +30,7 @@ export function createCreditService({ credits, now }: CreditServiceDeps) {
         available: balance.available,
         held: balance.held,
         freeLeft: freeLeft(state.ledger),
-        history: creditHistory(entries, requests, titles).map((event) => ({ at: event.at.toISOString(), text: historyLine(event) })),
+        history: creditHistory(entries, requests, titles).map((event) => ({ at: event.at.toISOString(), text: historyLine(event), kind: event.kind, change: event.change, balance: event.balance })),
         request: open ? { requestedAt: open.at.toISOString() } : null,
       };
     },

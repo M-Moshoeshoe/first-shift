@@ -146,6 +146,21 @@ describe("applying", () => {
     expect(decideApply(real, { ...inputs, tryoutId: "t1", application: applied }, "")).toEqual({ kind: "unchanged" });
   });
 
+  it("drops a booked, withdrawn or closing tryout from the feed, and refuses an application to it", () => {
+    const open = listing("open");
+    const booked = listing("booked", { status: "booked" });
+    const withdrawn = listing("withdrawn", { status: "withdrawn" });
+    const ids = nearbyFeed(real, from, [open, booked, withdrawn], NOW).map((item) => item.id);
+    expect(ids).toEqual(["open"]);
+    // Within the hour before the start, booking has closed: gone from the feed too.
+    const closing = new Date(open.tryout.startAt.getTime() - 30 * 60_000);
+    expect(nearbyFeed(real, from, [open], closing)).toEqual([]);
+    for (const tryout of [booked.tryout, withdrawn.tryout]) {
+      expect(decideApply(real, { ...inputs, tryoutId: "t1", tryout }, "")).toMatchObject({ kind: "refuse" });
+    }
+    expect(decideApply(real, { ...inputs, tryoutId: "t1", tryout: open.tryout, now: closing }, "")).toMatchObject({ kind: "refuse" });
+  });
+
   it("lets only the applicant withdraw, and twice changes nothing", () => {
     expect(decideWithdrawApplication("thabo", applied)).toEqual({ kind: "withdraw" });
     expect(decideWithdrawApplication("thabo", { ...applied, status: "withdrawn" })).toEqual({ kind: "unchanged" });

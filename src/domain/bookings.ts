@@ -173,6 +173,13 @@ export function statusView(booking: BookingRecord, now: Date): { workerFirstName
  * applied to; and each other's, once booked together (the young person sees
  * the shopfront to find the door). Nobody else, so demo and real never meet.
  */
+/**
+ * The check-in code is the young person's, to show at the door: never the
+ * owner's, and gone once they are checked in or the booking has ended, so an
+ * old code is never on screen to be copied.
+ */
+export const showsCheckInCode = (party: Party, booking: Pick<BookingRecord, "status">): boolean => party === "young_person" && booking.status === "booked";
+
 export function mayViewPhoto(viewerUid: string, subjectUid: string, kind: "profile" | "shopfront", relation: { appliedToViewer: boolean; bookedTogether: boolean }): boolean {
   if (viewerUid === subjectUid) return true;
   return kind === "profile" ? relation.appliedToViewer || relation.bookedTogether : relation.bookedTogether;

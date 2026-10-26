@@ -31,7 +31,7 @@ export function TaskListField({ id, tasks, error, onChange }: TaskListFieldProps
               maxLength={120}
               aria-invalid={error && task.trim().length < 3 ? true : undefined}
               onChange={(event) => set(index, event.target.value)}
-              className="min-h-22 w-full resize-y border border-edge field-sizing-content bg-paper px-3 py-2 text-base text-ink aria-invalid:border-2 aria-invalid:border-stop aria-invalid:focus-visible:outline-stop aria-invalid:focus-visible:outline-offset-0"
+              className="min-h-22 w-full resize-y border border-edge field-sizing-content bg-paper px-3 py-2 text-[1rem] text-ink aria-invalid:border-2 aria-invalid:border-stop aria-invalid:focus-visible:outline-stop aria-invalid:focus-visible:outline-offset-0"
             />
             {tasks.length > 1 ? (
               <Button variant="quiet" aria-label={`Remove task ${index + 1}`} onClick={() => onChange(tasks.filter((_, at) => at !== index))}>

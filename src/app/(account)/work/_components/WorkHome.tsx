@@ -38,7 +38,7 @@ export function WorkHome() {
           label="Your week"
           figures={[
             { label: "Tryouts near you", value: near },
-            { label: "Tryouts done", value: worker.tryoutsDone },
+            { label: "Tryouts done", value: worker.tryoutsDone ?? 0 },
           ]}
         />
       ) : null}

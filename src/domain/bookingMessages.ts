@@ -42,6 +42,8 @@ export const APPLICATIONS_COPY = {
   intro: "Where each tryout you applied for stands. Tap one to see it.",
   empty: "You have not applied for any tryouts yet. Find one under Tryouts.",
   offerEnded: "Offer ended",
+  open: "Open",
+  past: "Past",
 };
 
 export const OWNER_COPY = {
@@ -105,6 +107,8 @@ export const BOOKING_COPY = {
   chat: "Chat on WhatsApp",
   ownerTitle: (name: string) => `${name}, the owner`,
   ownerHint: "Ask for them when you arrive. They check your ID at the door.",
+  viewDetails: "View details",
+  meet: (name: string) => `Ask for ${name} at the door`,
   chatHint: (name: string) => `${name} can message you on WhatsApp at your number for payments.`,
   share: "Share my trip",
   shareHint: "Send a trusted person a link that shows where you'll be and how the day is going. It stops working the next day.",

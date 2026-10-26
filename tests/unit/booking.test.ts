@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { rankApplicants } from "@/domain/applicantRanking";
 import type { ApplicationRecord } from "@/domain/applications";
-import { cancelOutcome, decideCancel, decideReport, mayViewPhoto, newBooking, statusExpiresAt, statusView, type BookingRecord } from "@/domain/bookings";
+import { cancelOutcome, decideCancel, decideReport, mayViewPhoto, newBooking, showsCheckInCode, statusExpiresAt, statusView, type BookingRecord } from "@/domain/bookings";
 import { BOOKING_MESSAGES } from "@/domain/tryoutMessages";
 import { ANSWER_PROBLEM_MESSAGES } from "@/domain/bookingMessages";
 import { decideAnswer, decideOffer, offerLapsesAt, openOffer, overlappingApplications, type AcceptInputs } from "@/domain/offers";
@@ -186,6 +186,12 @@ describe("who the young person meets", () => {
     const booking = newBooking("t1", tryout(), business, "thabo", thabo, NOW);
     expect(booking).toMatchObject({ ownerFirstName: "Sipho", ownerPhone: "27831234567", workerPayMethods: ["ewallet", "cash"] });
     expect(newBooking("t1", tryout(), { ...business, ownerPhone: undefined }, "thabo", thabo, NOW)).not.toHaveProperty("ownerFirstName");
+  });
+
+  it("shows the check-in code to the young person only while booked and not yet checked in", () => {
+    expect(showsCheckInCode("young_person", { status: "booked" })).toBe(true);
+    for (const status of ["checked_in", "ended", "no_show", "cancelled"] as const) expect(showsCheckInCode("young_person", { status })).toBe(false);
+    expect(showsCheckInCode("business", { status: "booked" })).toBe(false);
   });
 
   it("shows the owner's face to the young person only once booked, never while applying", () => {

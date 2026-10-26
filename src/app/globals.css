@@ -24,6 +24,11 @@
   --tracking-title: -0.02em;
 
   /* The v4 type scale (docs/DESIGN.md, Type): size and line height together. */
+  /* Final round, denser: body 15 px and small 13 px. Form controls stay at 16 px (base layer below): under that, iPhones zoom in on focus. */
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.375rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.125rem;
   --text-micro: 0.75rem;
   --text-micro--line-height: 1rem;
   --text-xl: 1.25rem;

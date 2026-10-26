@@ -29,7 +29,7 @@ export function TextAreaField({ id, label, hint, error, rows = 3, ...props }: Te
         rows={rows}
         aria-describedby={hint ? `${hintId} ${errorId}` : errorId}
         aria-invalid={error ? true : undefined}
-        className="w-full resize-y border border-edge bg-paper px-3 py-2 text-base text-ink placeholder:text-muted aria-invalid:border-2 aria-invalid:border-stop aria-invalid:focus-visible:outline-stop aria-invalid:focus-visible:outline-offset-0"
+        className="w-full resize-y border border-edge bg-paper px-3 py-2 text-[1rem] text-ink placeholder:text-muted aria-invalid:border-2 aria-invalid:border-stop aria-invalid:focus-visible:outline-stop aria-invalid:focus-visible:outline-offset-0"
       />
       <FormError id={errorId} message={error} />
     </div>

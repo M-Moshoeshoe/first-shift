@@ -2,7 +2,7 @@ import "server-only";
 import { RULES } from "@/config/rules";
 import { BOOKING_COPY, REPORT_COPY } from "@/domain/bookingMessages";
 import { DEMO_COPY } from "@/domain/demoCopy";
-import { cancelOutcome, decideCancel, type CancelOutcome, decideReport, mapsUrl, mayViewPhoto, partyOf, statusView, whatsAppUrl, type BookingRecord } from "@/domain/bookings";
+import { cancelOutcome, decideCancel, type CancelOutcome, decideReport, mapsUrl, mayViewPhoto, partyOf, showsCheckInCode, statusView, whatsAppUrl, type BookingRecord } from "@/domain/bookings";
 import type { Party } from "@/domain/cancellation";
 import type { ReportCategory } from "@/domain/cases";
 import { dayOptions, decideSkipToDay, methodsFor } from "@/domain/day";
@@ -49,8 +49,8 @@ function bookingView(bookingId: string, booking: BookingRecord, secrets: Booking
     payoutPhone: isOwner ? displayPhone(booking.workerPayoutPhone) : null,
     owner: !isOwner && booking.ownerFirstName ? { firstName: booking.ownerFirstName, subject: booking.ownerId } : null,
     whatsappUrl: isOwner ? whatsAppUrl(booking.workerPayoutPhone) : booking.ownerPhone ? whatsAppUrl(booking.ownerPhone) : null,
-    // The code is the young person's to show at the door: the owner never receives it.
-    checkInCode: isOwner ? null : secrets.checkInCode,
+    // The young person's to show at the door, and only until they are checked in (domain/bookings.ts).
+    checkInCode: showsCheckInCode(party, booking) ? secrets.checkInCode : null,
     shareToken: isOwner ? null : secrets.shareToken,
     cancel: outcome ? { kind: outcome.kind, owedCents: outcome.settlement.wage?.amountCents ?? 0 } : null,
     // What the First Shift team decided on anything looked into about this booking, for both sides.

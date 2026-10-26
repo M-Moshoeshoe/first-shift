@@ -29,6 +29,7 @@ export const CREDITS_COPY = {
   packsNote: "At launch, by card or Instant EFT. Paying online is not open yet: tap Request more credits and we'll add them.",
   unavailable: "Your credits did not load. Check your connection, then tap Try again.",
   seeCredits: "See your credits",
+  balanceAfter: (balance: number) => `${balance} left`,
 } as const;
 
 /** One line of the history, without its date (the screen shows that beside it). */

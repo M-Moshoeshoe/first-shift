@@ -40,6 +40,25 @@ describe("the history, in plain words", () => {
     ]);
   });
 
+  it("signs each change to the credits available and carries the balance after it", () => {
+    const entries = [
+      { entry: WELCOME, at: day(20) },
+      { entry: { kind: "hold", tryoutId: "t1" } as CreditEntry, at: day(21) },
+      { entry: { kind: "use", tryoutId: "t1" } as CreditEntry, at: day(22) },
+      { entry: { kind: "hold", tryoutId: "t2" } as CreditEntry, at: day(23) },
+      { entry: { kind: "release", tryoutId: "t2" } as CreditEntry, at: day(24) },
+    ];
+    const history = creditHistory(entries, [day(25)], new Map());
+    expect(history.map((event) => [event.kind, event.change, event.balance])).toEqual([
+      ["requested", 0, 2],
+      ["returned", 1, 2],
+      ["held", -1, 1],
+      ["used", 0, 2],
+      ["held", -1, 2],
+      ["granted", 3, 3],
+    ]);
+  });
+
   it("says the launch prices as text only, from the credit price", () => {
     expect(CREDITS_COPY.launch).toBe("At launch: 5 tryouts for R125 or 10 for R250, by card or Instant EFT.");
     expect(CREDITS_COPY.requested("Mon 26 Oct")).toBe("Requested on Mon 26 Oct. We'll add them and let you know.");

@@ -77,10 +77,11 @@ Premium comes from the contrast between large and small, not from size: a big ti
 | Page title | 28/32 | 36/40 | `text-title lg:text-title-lg` |
 | Section heading | 20/26 | 20/26 | `text-xl` |
 | Pay on a slip | 24/32 | 24/32 | `text-2xl` |
-| Body | 16/24 | 16/24 | `text-base` |
-| Small, secondary | 14/20 | 14/20 | `text-sm`, `muted` |
+| Body (final round: 15 px) | 15/22 | 15/22 | `text-base` |
+| Small, secondary (final round: 13 px) | 13/18 | 13/18 | `text-sm`, `muted` |
+| Form inputs and textareas | 16/24 | 16/24 | `text-[1rem]`: never smaller, or iPhones zoom in on focus |
 | Micro: chips, tags, step numbers | 12/16 | 12/16 | `text-micro` |
-| Errors | 14/20, `stop`, never bold | | |
+| Errors | 13/18, `stop`, never bold | | |
 
 Keep lines under 70 characters. Left-align everything. `text-wrap: balance` on the hero.
 

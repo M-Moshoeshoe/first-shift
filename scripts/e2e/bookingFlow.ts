@@ -96,7 +96,11 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
   const bookingPath = new URL(page.url()).pathname;
   await page.getByRole("heading", { name: "Your check-in code" }).waitFor();
   // Once booked, the young person sees who they'll meet and can message them; never the owner's surname.
-  await page.getByRole("heading", { name: "Lerato, the owner" }).waitFor();
+  await page.getByText("Ask for Lerato at the door").waitFor();
+  await page.getByRole("button", { name: "View details" }).click();
+  await page.getByRole("dialog").getByRole("heading", { name: "Lerato, the owner" }).waitFor();
+  await rec.check(page, "booking, the business's details sheet");
+  await page.keyboard.press("Escape");
   if ((await page.getByRole("link", { name: "Chat on WhatsApp" }).getAttribute("href")) !== "https://wa.me/27831234567") rec.failures.push(`${rec.width} px: the young person can't message the owner`);
   if ((await page.getByText("Mahlangu").count()) > 0) rec.failures.push(`${rec.width} px: the young person can see the owner's surname`);
   await rec.check(page, "booking, young person");

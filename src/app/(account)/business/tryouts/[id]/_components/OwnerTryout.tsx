@@ -7,6 +7,7 @@ import { ShiftSlip } from "@/components/ShiftSlip";
 import { SlipSkeleton } from "@/components/SlipSkeleton";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
+import { Collapsible } from "@/components/ui/Collapsible";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { OWNER_COPY } from "@/domain/bookingMessages";
@@ -125,25 +126,15 @@ export function OwnerTryout() {
             { title: OWNER_COPY.others, group: others, folded: others.length > FOLD_OTHERS_AFTER },
           ].map(({ title, group, folded }) =>
             group.length > 0 ? (
-              // Native details: each group folds with no JavaScript, keyboard and screen reader ready.
-              <details key={title} open={!folded} className="group flex flex-col">
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 text-base font-bold [&::-webkit-details-marker]:hidden">
-                  {title} ({group.length})
-                  <span aria-hidden="true" className="text-xl leading-none font-normal group-open:hidden">
-                    +
-                  </span>
-                  <span aria-hidden="true" className="hidden text-xl leading-none font-normal group-open:inline">
-                    −
-                  </span>
-                </summary>
-                <ol className="flex flex-col gap-2 pt-2">
+              <Collapsible key={title} title={title} count={group.length} open={!folded}>
+                <ol className="flex flex-col gap-2">
                   {group.map((applicant: ApplicantResponse) => (
                     <li key={applicant.workerId}>
                       <ApplicantRow applicant={applicant} rank={rankOf.get(applicant.workerId) ?? 0} onOpen={() => openSheet(applicant.workerId)} />
                     </li>
                   ))}
                 </ol>
-              </details>
+              </Collapsible>
             ) : null,
           )}
         </section>

@@ -19,6 +19,9 @@ export const canWithdraw = (status: TryoutStatus): boolean => status === "review
 
 const STILL_ON: ReadonlySet<TryoutStatus> = new Set(["review", "published", "booked"]);
 
+/** Still to happen: being checked, live or booked. The dashboard shows these open and folds the rest. */
+export const isStillOn = (status: TryoutStatus): boolean => STILL_ON.has(status);
+
 /** Tryouts still on come first, soonest first; then the rest, most recent first. */
 export function orderTryouts(tryouts: readonly OwnTryout[]): OwnTryout[] {
   const on = tryouts.filter((tryout) => STILL_ON.has(tryout.status)).sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
