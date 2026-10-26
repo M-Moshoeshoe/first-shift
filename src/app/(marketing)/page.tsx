@@ -1,42 +1,64 @@
+import Link from "next/link";
+import { Band } from "@/components/ui/Band";
+import { buttonClass } from "@/components/ui/Button";
 import { PageShell } from "@/components/ui/PageShell";
-import { RULES } from "@/config/rules";
-import { formatRand } from "@/domain/money";
-import { BandRow } from "./_components/BandRow";
-import { HeroBand } from "./_components/HeroBand";
-import { HowItWorksBand } from "./_components/HowItWorksBand";
-import { Pitch } from "./_components/Pitch";
-import { StartBand } from "./_components/StartBand";
+import { HomeHero } from "./_components/HomeHero";
+import { HowItWorksTabs } from "./_components/HowItWorksTabs";
+import { CLOSING, HOW, WHAT } from "./_components/homeContent";
+import { CostSection } from "./_components/CostSection";
+import { FaqSection } from "./_components/FaqSection";
+import { SafetySection } from "./_components/SafetySection";
+import { SectionHeading } from "./_components/SectionHeading";
 
-// Tones alternate from the top at every width. Phone: hero paper, slip mist, how it works paper,
-// the three pitches mist, paper, mist, start paper. Desktop: hero paper, how it works mist, pitches paper, start mist.
-const pitches = [
-  {
-    id: "for-young-people",
-    tone: "mist",
-    heading: "For young people",
-    text: `Get paid the same day, at least ${formatRand(RULES.minimumWageCentsPerHour)} an hour, and leave with a reference from the business that paid.`,
-  },
-  {
-    id: "for-businesses",
-    tone: "paper",
-    heading: "For businesses",
-    text: "Post a tryout in one sentence, see who's likely to show up, and pay them yourself by FNB eWallet, PayShap, a cash-send or cash.",
-  },
-  {
-    id: "safe-for-both-sides",
-    tone: "mist",
-    heading: "Safe for both sides",
-    text: "Tryouts happen in daylight at business premises. IDs are checked at the door, and trips can be shared with someone you trust.",
-  },
-] as const;
-
+/**
+ * The home page, in numbered sections (docs/DESIGN.md, v4): the hero, what a
+ * tryout is, how it works for each side, safety, what it costs, and the
+ * questions people ask. No live activity strip: there is none to show yet,
+ * and the page never invents any. Tones alternate paper and mist.
+ */
 export default function HomePage() {
   return (
     <PageShell>
-      <HeroBand />
-      <HowItWorksBand />
-      <BandRow lgTone="paper" columns={3} align="start" cells={pitches.map((pitch) => ({ key: pitch.id, tone: pitch.tone, content: <Pitch {...pitch} /> }))} />
-      <StartBand />
+      <HomeHero />
+      <Band tone="mist" wide>
+        <section aria-labelledby="what" className="reveal flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:gap-16">
+          <div className="flex flex-col gap-3">
+            <SectionHeading id="what" number="02" title={WHAT.title} />
+            <p className="text-base lg:text-xl">{WHAT.sentence}</p>
+          </div>
+          <ul className="flex flex-col gap-3">
+            {WHAT.facts.map((fact) => (
+              <li key={fact} className="border-t border-line pt-3 text-base font-semibold">
+                {fact}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </Band>
+      <Band tone="paper" wide>
+        <section id="how-it-works" aria-labelledby="how" className="flex scroll-mt-20 flex-col gap-8">
+          <SectionHeading id="how" number="03" title={HOW.title} />
+          <HowItWorksTabs />
+        </section>
+      </Band>
+      <SafetySection />
+      <CostSection />
+      <FaqSection />
+      <Band tone="paper" wide>
+        <section aria-labelledby="closing" className="reveal flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <h2 id="closing" className="text-title lg:text-title-lg">
+            {CLOSING.title}
+          </h2>
+          <div className="flex flex-col gap-3 sm:flex-row lg:w-md">
+            <Link href="/work?intent=work" className={buttonClass("primary")}>
+              Find a paid tryout
+            </Link>
+            <Link href="/business?intent=business" className={buttonClass("secondary")}>
+              Post a tryout
+            </Link>
+          </div>
+        </section>
+      </Band>
     </PageShell>
   );
 }
