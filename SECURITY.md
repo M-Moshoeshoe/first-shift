@@ -106,6 +106,23 @@ The demo accounts' passwords are public, so what keeps real people safe is that 
    | 25 October 2026 | `claude-haiku-5-5`, effort low | 8 of 8 | 8 of 8 | 4 of 4 | **20 of 20 passed**, on the first run, with no prompt changes. Every blocked and hostile case was sorted into its exact expected category, except the R5-an-hour instruction, which went to review (not allowed, as required); the pay floor is enforced in code whatever the model says |
    | 25 October 2026, after two prompt changes | `claude-haiku-5-5`, effort low | 8 of 8, each allowed draft also passing the check again at publish, unedited | 8 of 8 | 4 of 4 | **20 of 20 passed.** The changes: the draft prompt now names lengths (title under 50 characters, tasks under 100), and lists the blocked kinds of work to leave out, from the same definitions the check uses. The browser walkthrough had caught a drafted "learn the till" task that the publish check then refused. The eval now checks every allowed draft at publish, so this kind of problem fails it |
 
+## Sign-in review against OWASP ASVS level 1 (26 October 2026)
+
+Authentication and session management, checked against ASVS 4.0.3 level 1 (V2 and V3) before submission. Two gaps were found and fixed the same day.
+
+| Check | Result | How |
+| --- | --- | --- |
+| Rate limiting on the demo sign-in (V2.2.1) | **Fixed** | Had none. `POST /api/demo/sign-in` and `/api/demo/try` now allow 30 sign-ins per network address in 10 minutes, shared between the two (`RULES.demoSignInsPerWindow`), counted in a transaction before any other work, the address kept only as a SHA-256 hash (`consumeWindowQuota`, `tests/unit/rateLimit.test.ts`); past it, a 429 with "Wait 10 minutes, then try again." Google sign-in is rate limited by Firebase (`auth/too-many-requests`) |
+| Generic errors that never say whether an account exists (V2.2.1, V3.2) | **Fixed** | The message was already the same for an unknown email and a wrong password, but an unknown email skipped the password hash and so answered faster. Now every attempt runs one scrypt check (`NO_ACCOUNT` in `demoSignInService.ts`) and gets the same 401 and message; only the server log says which it was |
+| ID tokens verified, with revocation checks (V3.5.3) | Pass | `requireUser` calls `verifyIdToken(token, true)` on every signed-in route; a revoked, expired or forged token is a 401. Password sign-ins and demo tokens moved off `@firstshift.demo` are refused (`tests/unit/auth.test.ts`, `signIn.test.ts`) |
+| Sign-out ends the session (V3.3.1) | Pass, with one accepted limit | Sign out calls Firebase's `signOut`, which deletes the stored refresh and ID tokens from the browser, and the `fs_signed_in` hint is cleared whenever nobody is signed in (`AuthProvider`). An ID token copied before sign-out stays valid until it expires (at most an hour), because Firebase ID tokens are stateless. Revoking refresh tokens at sign-out would also sign out every judge sharing a demo account, so we don't; an admin can revoke one account's sessions in the Firebase console |
+| Session tokens never in URLs (V3.1.1) | Pass | Tokens travel only in the `Authorization` header; share and status links carry their own 144-bit tokens, not sessions |
+| Cookie attributes (V3.4) | Pass | Our only cookie, `fs_signed_in`, is a hint ("work" or "business"), not a session: `Path=/`, `SameSite=Lax`, `Secure` on HTTPS, 30 days at most. It isn't `HttpOnly` on purpose, because the public header reads it, and it holds no identity; every account screen and route checks the real sign-in |
+| Security headers | Pass | On the live site: CSP as in `next.config.ts` (with `frame-ancestors 'none'`), `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` (Netlify sends a one-year value on `netlify.app`), `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy` |
+| Demo isolation | Pass | Re-run: `tests/unit` (demo, sign-in and reset tests) and `npm run rules`; `npm run e2e:demo` in the emulators |
+| No secrets in the client bundle (V14) | Pass | The production build's `.next/static` searched for a PEM private key, an Anthropic key, the Admin client email, the ID hashing secret, the demo passwords and server-only names (`createCustomToken`, `demoAccounts`): none found |
+| New sign-in screens | Pass | The "Signing you in" and "Signing you out" cover holds no data and is drawn by the server; it only hides the form between a finished sign-in and the next screen |
+
 ## Reporting a vulnerability
 
 Email mokhachane.moshoeshoe@gmail.com with steps to reproduce. Please don't test against other users' data.

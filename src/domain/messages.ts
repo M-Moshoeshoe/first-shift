@@ -151,6 +151,7 @@ export const DEMO_MESSAGES = {
   wrongCredentials: "That email and password do not match a demo account. Check them, then try again.",
   notSetUp: "The demo accounts are not set up on this site yet. Sign in with Google instead.",
   noRole: "Choose Thabo or Sipho to try the demo.",
+  tooMany: "There have been too many demo sign-ins from this network. Wait 10 minutes, then try again.",
 } as const;
 
 const demoSignInMessages = (button: string): Record<string, string> => ({

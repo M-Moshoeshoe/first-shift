@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import { RULES } from "@/config/rules";
+import { DEMO_MESSAGES } from "@/domain/messages";
 import { DemoTrySchema } from "@/schemas/demo";
 import { toErrorResponse } from "@/server/errors";
+import { clientAddress, consumeWindowQuota } from "@/server/rateLimit";
 import { liveDemoSignInService } from "@/server/services/liveDemoSignInService";
 import { parseBody } from "@/server/validate";
 
@@ -11,6 +14,8 @@ import { parseBody } from "@/server/validate";
  */
 export async function POST(request: Request) {
   try {
+    // Before anyone is signed in, so counted per network address: one tap and the email form share the count.
+    await consumeWindowQuota(`demo_sign_in:${clientAddress(request)}`, RULES.demoSignInsPerWindow, RULES.demoSignInWindowMinutes, DEMO_MESSAGES.tooMany);
     const { role } = await parseBody(request, DemoTrySchema);
     return NextResponse.json(await liveDemoSignInService().tryAs(role), { headers: { "cache-control": "no-store" } });
   } catch (error) {

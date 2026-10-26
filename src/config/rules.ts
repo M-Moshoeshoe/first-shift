@@ -54,6 +54,9 @@ export const RULES = {
 
   applicationsPerDay: 10,
   postsPerDay: 5,
+  /** Demo sign-ins (one tap or email) from one network address in each window, so nobody can flood the route. */
+  demoSignInsPerWindow: 30,
+  demoSignInWindowMinutes: 10,
 
   hirePromptAfterTryouts: 3,
   /** A job offer: the role in a few words, the days a week, and an optional personal message. */
