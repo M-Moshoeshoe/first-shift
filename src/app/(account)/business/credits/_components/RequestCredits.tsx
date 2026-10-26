@@ -31,7 +31,7 @@ export function RequestCredits({ requestedAt, onRequested }: { requestedAt: stri
   };
 
   return (
-    <section aria-label={CREDITS_COPY.request} className="flex flex-col gap-3">
+    <section aria-label={CREDITS_COPY.request} className="flex flex-col gap-3 border border-line p-4">
       {requestedAt ? (
         <p role="status" className="text-base font-semibold">
           {CREDITS_COPY.requested(sastDay(new Date(requestedAt)))}

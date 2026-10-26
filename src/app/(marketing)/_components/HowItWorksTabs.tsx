@@ -43,21 +43,21 @@ export function HowItWorksTabs() {
         {SIDES.map((side, index) => (
           <section key={side.id} id={side.id} role="tabpanel" aria-labelledby={`tab-${side.id}`} className={`flex scroll-mt-20 flex-col gap-4 ${selected === index ? "" : "hidden lg:flex"}`}>
             <h3 className="hidden text-xl lg:block">{side.title}</h3>
-            <ol className="flex flex-col gap-4">
+            <ol className="flex flex-col gap-3">
               {side.steps.map((step, number) => (
-                <li key={step} className="flex gap-4 border-t border-line pt-4">
+                <li key={step} className="flex gap-4 border border-line p-4">
                   <span aria-hidden="true" className="w-6 shrink-0 text-sm font-semibold text-muted tabular-nums">
                     {String(number + 1).padStart(2, "0")}
                   </span>
-                  <span className="flex flex-col gap-4 text-base">
+                  <div className="flex flex-col gap-4 text-base">
                     {step}
                     {/* The young person's last step ends with the money: a small slip whose Paid Stamp lands as it comes into view. */}
                     {side.id === HOW.young.id && number === side.steps.length - 1 ? (
-                      <span className="block max-w-xs pt-6">
+                      <div className="max-w-xs pt-6">
                         <OnView before={<ShiftSlip {...PAID_SLIP} />} later={<ShiftSlip {...PAID_SLIP} stamp="Paid" />} />
-                      </span>
+                      </div>
                     ) : null}
-                  </span>
+                  </div>
                 </li>
               ))}
             </ol>

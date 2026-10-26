@@ -5,7 +5,7 @@ import { OWNER_COPY } from "@/domain/bookingMessages";
 /** Once someone is booked: who, what happens next, and the way to the booking, instead of the list of applicants. */
 export function BookedPanel({ bookingId, name }: { bookingId: string; name: string | null }) {
   return (
-    <section aria-labelledby="booked-heading" className="flex flex-col gap-3">
+    <section aria-labelledby="booked-heading" className="flex flex-col gap-3 border border-line p-4">
       <h2 id="booked-heading" className="text-xl font-bold">
         {name ? OWNER_COPY.booked(name) : OWNER_COPY.bookedNoName}
       </h2>

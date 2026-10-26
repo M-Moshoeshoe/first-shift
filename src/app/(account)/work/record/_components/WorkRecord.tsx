@@ -53,7 +53,7 @@ export function WorkRecord() {
         <p className="text-base">{RECORD_COPY.empty}</p>
       ) : (
         <>
-          <section aria-labelledby="share-record" className="flex flex-col gap-2">
+          <section aria-labelledby="share-record" className="flex flex-col gap-2 border border-line p-4">
             <h2 id="share-record" className="text-xl font-bold">
               {RECORD_COPY.share}
             </h2>

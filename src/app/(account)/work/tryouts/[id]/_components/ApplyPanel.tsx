@@ -63,7 +63,7 @@ export function ApplyPanel({ tryoutId, businessName, state, onState, onReload }:
 
   if (state.kind === "applied") {
     return (
-      <section aria-labelledby="applied-heading" className="flex flex-col gap-3">
+      <section aria-labelledby="applied-heading" className="flex flex-col gap-3 border border-line p-4">
         <div className="flex flex-col gap-2">
           <h2 id="applied-heading" className="text-xl font-bold text-go">
             {DETAIL_COPY.appliedTitle}

@@ -37,7 +37,7 @@ export function OfferAnswer({ tryoutId, state, onReload }: { tryoutId: string; s
   if (state.kind === "not_selected") return <p className="text-base">{OFFER_COPY.notSelected}</p>;
   if (state.kind === "booked") {
     return (
-      <section aria-labelledby="booked-heading" className="flex flex-col items-start gap-3">
+      <section aria-labelledby="booked-heading" className="flex flex-col items-start gap-3 border border-line p-4">
         {/* Lands the moment the offer is accepted (motion 2). */}
         <Stamp label="Booked" />
         <h2 id="booked-heading" className="text-xl font-bold text-go">
@@ -50,7 +50,7 @@ export function OfferAnswer({ tryoutId, state, onReload }: { tryoutId: string; s
     );
   }
   return (
-    <section aria-labelledby="offer-heading" className="flex flex-col gap-3">
+    <section aria-labelledby="offer-heading" className="flex flex-col gap-3 border border-line p-4">
       <div className="flex flex-col gap-2">
         <h2 id="offer-heading" className="text-xl font-bold">
           {OFFER_COPY.offeredTitle}

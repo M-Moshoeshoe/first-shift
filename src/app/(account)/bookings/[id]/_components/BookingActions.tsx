@@ -13,7 +13,7 @@ import type { BookingViewResponse } from "@/schemas/booking";
 export function BookingActions({ booking, when }: { booking: BookingViewResponse; when: string }) {
   if (booking.party === "business") {
     return (
-      <section aria-labelledby="pay-line" className="flex flex-col gap-3">
+      <section aria-labelledby="pay-line" className="flex flex-col gap-3 border border-line p-4">
         <p id="pay-line" className="text-base">
           {BOOKING_COPY.payment}
         </p>
@@ -28,7 +28,7 @@ export function BookingActions({ booking, when }: { booking: BookingViewResponse
   // Built here, from this page's own address, so the link always points at the site the young person is using.
   const statusLink = booking.shareToken && typeof window !== "undefined" ? `${window.location.origin}/status/${booking.shareToken}` : null;
   return (
-    <section aria-labelledby="code-heading" className="flex flex-col gap-3">
+    <section aria-labelledby="code-heading" className="flex flex-col gap-3 border border-line p-4">
       {booking.checkInCode ? (
         <div className="flex flex-col gap-2 border border-line p-4">
           <h2 id="code-heading" className="text-xl font-bold">

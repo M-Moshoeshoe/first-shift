@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Ban, Cpu, Database, Eye, Lock, ShieldCheck, Users, X } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/config/contact";
 import { PlainPage, type PlainSection } from "../_components/PlainPage";
 
@@ -8,10 +9,12 @@ export const metadata: Metadata = { title: "Privacy notice for First Shift", des
 const SECTIONS: readonly PlainSection[] = [
   {
     heading: "Who we are",
+    icon: Users,
     body: [`First Shift connects young people with paid one-day tryouts at small businesses. We are responsible for the personal information described here. Ask us anything about it at ${SUPPORT_EMAIL}.`],
   },
   {
     heading: "What we collect, and why",
+    icon: Database,
     body: [
       "From everyone: the Google account you sign in with, so you can sign in again.",
       "From a young person looking for work:",
@@ -29,10 +32,12 @@ const SECTIONS: readonly PlainSection[] = [
   },
   {
     heading: "What we never collect",
-    body: [["Bank account numbers", "Your face for matching: we do not run face matching", "Advertising trackers: we do not use any, and we do not sell personal information"]],
+    icon: Ban,
+    body: [{ icon: X, points: ["Bank account numbers", "Your face for matching: we do not run face matching", "Advertising trackers: we do not use any, and we do not sell personal information"] }],
   },
   {
     heading: "Who sees what",
+    icon: Eye,
     body: [
       [
         "When you apply, the business sees your first name, photo, introduction, what you can do and your languages. Never your surname, ID number or phone number",
@@ -45,10 +50,12 @@ const SECTIONS: readonly PlainSection[] = [
   },
   {
     heading: "AI",
+    icon: Cpu,
     body: ["Claude, an AI model made by Anthropic, drafts a tryout from what the owner typed, checks that the work is allowed, and writes a reference from the owner's three answers and the tasks. No name, ID number or phone number is sent to it."],
   },
   {
     heading: "Where it is kept, and for how long",
+    icon: Lock,
     body: [
       "Your information is stored with Google Firebase and the site runs on Netlify. Your own records can be read only by you, by our server, and by the First Shift team when they look into a report.",
       "We keep your information while your account is open, so your work record and references stay yours. A dispute screenshot is kept for the review it belongs to.",
@@ -56,6 +63,7 @@ const SECTIONS: readonly PlainSection[] = [
   },
   {
     heading: "Your rights",
+    icon: ShieldCheck,
     body: [
       `You can ask to see, correct or delete your information by emailing ${SUPPORT_EMAIL}. Deleting an account is not in the app yet: email us and we complete it within 30 days.`,
       "If you are unhappy with how we handle your information, you can complain to the Information Regulator.",

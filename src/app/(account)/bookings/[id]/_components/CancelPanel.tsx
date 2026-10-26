@@ -39,7 +39,7 @@ export function CancelPanel({ bookingId, cancel, onCancelled, startConfirming = 
     );
   }
   return (
-    <section aria-labelledby="cancel-heading" className="flex flex-col gap-3">
+    <section aria-labelledby="cancel-heading" className="flex flex-col gap-3 border border-line p-4">
       <p id="cancel-heading" className="text-base font-semibold">
         {cancel.kind === "free" ? BOOKING_COPY.cancelFree : BOOKING_COPY.cancelLate(cancel.owedCents)}
       </p>

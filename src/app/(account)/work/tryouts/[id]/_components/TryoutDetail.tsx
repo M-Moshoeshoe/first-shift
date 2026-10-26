@@ -24,7 +24,7 @@ const backLink = (
 /** A titled list of plain lines: the tasks, and the safety lines. */
 function LineList({ id, heading, lines }: { id: string; heading: string; lines: readonly string[] }) {
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-2">
+    <section aria-labelledby={id} className="flex flex-col gap-2 border border-line p-4">
       <h2 id={id} className="text-xl font-bold">
         {heading}
       </h2>
@@ -78,7 +78,7 @@ export function TryoutDetail() {
       <PageTitle headingRef={heading} title={item.title} intro={`${item.businessName}, ${item.area}`} />
       <FeedSlip item={item} />
       <LineList id="tasks-heading" heading={DETAIL_COPY.tasks} lines={tasks} />
-      <section aria-labelledby="pay-heading" className="flex flex-col gap-2">
+      <section aria-labelledby="pay-heading" className="flex flex-col gap-2 border border-line p-4">
         <h2 id="pay-heading" className="text-xl font-bold">
           {DETAIL_COPY.pay}
         </h2>

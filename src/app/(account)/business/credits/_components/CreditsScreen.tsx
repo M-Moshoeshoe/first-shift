@@ -77,7 +77,7 @@ export function CreditsScreen() {
         <p className="text-sm text-muted">{CREDITS_COPY.packsNote}</p>
       </section>
       <RequestCredits requestedAt={credits.request?.requestedAt ?? null} onRequested={(requestedAt) => set({ ...credits, request: { requestedAt } })} />
-      <section aria-labelledby="credit-history" className="flex flex-col gap-2">
+      <section aria-labelledby="credit-history" className="flex flex-col gap-2 border border-line p-4">
         <h2 id="credit-history" className="text-xl font-bold">
           {CREDITS_COPY.history}
         </h2>

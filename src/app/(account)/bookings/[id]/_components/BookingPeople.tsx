@@ -18,7 +18,7 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
   const other = isOwner ? booking.workerFirstName : booking.businessName;
   return (
     <>
-      <section aria-labelledby="who-heading" className="flex gap-4">
+      <section aria-labelledby="who-heading" className="flex gap-4 border border-line p-4">
         <PersonPhoto subject={booking.photo.subject} kind={booking.photo.kind} alt={other} />
         <div className="flex flex-col gap-1">
           <h2 id="who-heading" className="text-xl font-bold">
@@ -33,7 +33,7 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
       </section>
       {booking.owner ? (
         // The young person's view: who they'll meet, so they know who to ask for at the door.
-        <section aria-labelledby="owner-heading" className="flex gap-4">
+        <section aria-labelledby="owner-heading" className="flex gap-4 border border-line p-4">
           <PersonPhoto subject={booking.owner.subject} kind="profile" alt={booking.owner.firstName} />
           <div className="flex flex-col gap-1">
             <h2 id="owner-heading" className="text-xl font-bold">
@@ -50,7 +50,7 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
         </p>
       ))}
       {isOwner && booking.status === "booked" ? (
-        <section aria-labelledby="next-heading" className="flex flex-col gap-2">
+        <section aria-labelledby="next-heading" className="flex flex-col gap-2 border border-line p-4">
           <h2 id="next-heading" className="text-xl font-bold">
             {BOOKING_COPY.ownerNextTitle}
           </h2>

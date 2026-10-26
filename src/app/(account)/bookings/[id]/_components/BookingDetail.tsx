@@ -70,7 +70,7 @@ export function BookingDetail() {
       <PageTitle headingRef={heading} title={booking.title} intro={booking.status === "booked" ? undefined : STATUS_LABELS[booking.status]} />
       <ShiftSlip day={day} hours={hours} business={booking.businessName} area={booking.businessArea} payCents={booking.payCents} stamp={booking.status === "booked" ? "Booked" : undefined} />
       <BookingPeople booking={booking} />
-      <section aria-labelledby="where-heading" className="flex flex-col gap-2">
+      <section aria-labelledby="where-heading" className="flex flex-col gap-2 border border-line p-4">
         <h2 id="where-heading" className="text-xl font-bold">
           {BOOKING_COPY.where}
         </h2>

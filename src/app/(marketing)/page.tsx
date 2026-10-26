@@ -28,7 +28,7 @@ export default function HomePage() {
           </div>
           <ul className="flex flex-col gap-3">
             {WHAT.facts.map((fact) => (
-              <li key={fact} className="border-t border-line pt-3 text-base font-semibold">
+              <li key={fact} className="border border-line bg-paper p-4 text-base font-semibold">
                 {fact}
               </li>
             ))}
