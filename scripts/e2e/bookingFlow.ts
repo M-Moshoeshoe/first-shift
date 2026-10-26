@@ -129,7 +129,7 @@ export async function bookingWalk(rec: Recorder, page: Page): Promise<string> {
   await page.goto(`${BASE}/work`);
   await switchTo(page, "e2e-lerato", "/business");
   await page.goto(`${BASE}${bookingPath}`);
-  await page.getByText("Their number for payments", { exact: false }).waitFor();
+  await page.getByText("Their number for payments", { exact: false }).first().waitFor();
   if ((await page.getByText("Your check-in code").count()) > 0) rec.failures.push(`${rec.width} px: the owner can see the check-in code`);
   await rec.check(page, "booking, business");
   return bookingPath;

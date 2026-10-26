@@ -20,7 +20,7 @@ const SPECS: Record<string, Spec> = {
   "/onboarding/business": { title: { phone: 1, desktop: 1 }, intro: { phone: 3, desktop: 2 }, body: "form" },
   "/work": { title: { phone: 1, desktop: 1 }, intro: { phone: 0, desktop: 0 }, body: "feed", nav: true },
   "/business": { title: { phone: 2, desktop: 2 }, intro: { phone: 0, desktop: 0 }, body: "dashboard", nav: true },
-  "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 3, desktop: 3 }, body: "form", nav: true },
+  "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 3, desktop: 2 }, body: "form", nav: true },
   // Shown by each segment's loading.tsx during a navigation, before the screen's own loading state takes over.
   "/work/applications": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "feed", nav: true },
   "/work/record": { title: { phone: 1, desktop: 1 }, intro: { phone: 2, desktop: 1 }, body: "feed", nav: true },
@@ -79,7 +79,7 @@ export function ScreenSkeleton({ path }: { path: string }) {
         {/* The dashboards have no intro line: their summary band follows the title. */}
         {Math.max(spec.intro.phone, spec.intro.desktop) > 0 ? (
           <div>
-            <LineBars lines={spec.intro} lineClass="h-6" barClass="h-4" />
+            <LineBars lines={spec.intro} lineClass="h-[1.375rem]" barClass="h-4" />
           </div>
         ) : null}
       </div>
