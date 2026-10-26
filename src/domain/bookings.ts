@@ -48,6 +48,8 @@ export interface BookingRecord {
   owedMinimumCents?: number | null;
   /** For the door check: the last four digits on the young person's ID card. Shown to the owner only at check-in. */
   workerIdLastFour: string;
+  /** Demo only: when a judge tapped "Skip to the day", which opens the door at any hour and keeps the times (day.ts, demoDayOpen). Ignored on a real booking. */
+  dayOpenedAt?: Date | null;
   checkedInAt?: Date | null;
   /** answers: the owner's three, required at check-out; the reference is written from them only (references.ts). */
   ended?: { at: Date; reason: CheckoutReason; minutesWorked: number; answers?: OwnerAnswers } | null;

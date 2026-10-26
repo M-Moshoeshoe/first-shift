@@ -5,9 +5,9 @@
 export const DEMO_COPY = {
   banner: "Demo account. Everything here is made up.",
   skip: "Skip to the day",
-  skipBusy: "Moving the day",
-  skipHint: "Demo only: this moves the tryout to start a few minutes ago, so you can try check-in, pay and the reference now.",
-  skipFailed: "The day did not move. Check your connection, then tap Skip to the day again.",
+  skipBusy: "Opening the door",
+  skipHint: "Demo only: this opens the door now, so you can try check-in, pay and the reference. The tryout keeps its date and times.",
+  skipFailed: "The door did not open. Check your connection, then tap Skip to the day again.",
   skipNotBooked: "Only a booked tryout can skip to its day.",
   notDemo: "Only the demo accounts can do this.",
   reset: "Reset the demo",

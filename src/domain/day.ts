@@ -27,17 +27,31 @@ export interface DoorCheck {
 export type CheckInProblem = "not_found" | "not_booked" | "too_early" | "over" | "door_check" | "locked" | "wrong_code";
 
 /**
+ * Demo only: a demo booking whose day a judge opened with "Skip to the day"
+ * (decideSkipToDay). Its door is open at any hour while it keeps its own
+ * date and times. Never a real booking, even if one somehow carried the field.
+ */
+export const demoDayOpen = (booking: Pick<BookingRecord, "demo" | "dayOpenedAt">): boolean => booking.demo === true && booking.dayOpenedAt instanceof Date;
+
+/** Whether the door is open now: from an hour before the start until the end, or at any hour on a demo day opened early. */
+function doorTiming(booking: BookingRecord, now: Date): "open" | "too_early" | "over" {
+  if (demoDayOpen(booking)) return "open";
+  if (now < addMinutes(booking.startAt, -RULES.checkInOpensMinutesBefore)) return "too_early";
+  return now < booking.endAt ? "open" : "over";
+}
+
+/**
  * The owner checks the young person in at the door: the face matches the
  * photo, the ID card's name and last four digits match, and the code they
  * show matches. Wrong codes are counted; after a few the booking locks, so a
- * code can't be guessed without the young person there.
+ * code cannot be guessed without the young person there.
  */
 export function decideCheckIn(viewer: Viewer, booking: BookingRecord | null, secrets: { checkInCode: string; codeAttempts?: number } | null, check: DoorCheck, now: Date): { kind: "check_in" } | { kind: "unchanged" } | { kind: "refuse"; problem: CheckInProblem } {
   if (!asOwner(viewer, booking) || !secrets) return { kind: "refuse", problem: "not_found" };
   if (booking.status === "checked_in") return { kind: "unchanged" };
   if (booking.status !== "booked") return { kind: "refuse", problem: "not_booked" };
-  if (now < addMinutes(booking.startAt, -RULES.checkInOpensMinutesBefore)) return { kind: "refuse", problem: "too_early" };
-  if (now >= booking.endAt) return { kind: "refuse", problem: "over" };
+  const timing = doorTiming(booking, now);
+  if (timing !== "open") return { kind: "refuse", problem: timing };
   if (!check.faceMatches || !check.nameMatches || !check.lastFourMatches) return { kind: "refuse", problem: "door_check" };
   if ((secrets.codeAttempts ?? 0) >= RULES.checkInCodeAttempts) return { kind: "refuse", problem: "locked" };
   return check.code.replace(/\s+/g, "") === secrets.checkInCode ? { kind: "check_in" } : { kind: "refuse", problem: "wrong_code" };
@@ -65,6 +79,17 @@ export const wasOnTime = (booking: Pick<BookingRecord, "startAt" | "checkedInAt"
   Boolean(booking.checkedInAt && booking.checkedInAt <= addMinutes(booking.startAt, RULES.onTimeGraceMinutes));
 
 /**
+ * Minutes from check-in to check-out, never below 0. On a demo day opened
+ * early the door opens hours before the start, so there it is also never
+ * above the agreed hours: the record never shows more than was agreed, and
+ * pay keeps its 4-hour floor (pay.ts).
+ */
+function workedMinutes(booking: BookingRecord, checkedInAt: Date, now: Date): number {
+  const counted = Math.max(0, Math.round(minutesBetween(checkedInAt, now)));
+  return demoDayOpen(booking) ? Math.min(counted, booking.hours * 60) : counted;
+}
+
+/**
  * The owner checks out with how the day ended and their three answers (on
  * time, did the work, would hire again), which the reference is written
  * from. settle() works out what's owed (pay.ts): the full amount, or for
@@ -75,7 +100,7 @@ export function decideCheckOut(viewer: Viewer, bookingId: string, booking: Booki
   if (!asOwner(viewer, booking)) return { kind: "refuse", problem: "not_found" };
   if (booking.status === "ended") return { kind: "unchanged" };
   if (booking.status !== "checked_in" || !booking.checkedInAt) return { kind: "refuse", problem: "not_now" };
-  const minutesWorked = Math.max(0, Math.round(minutesBetween(booking.checkedInAt, now)));
+  const minutesWorked = workedMinutes(booking, booking.checkedInAt, now);
   const terms = { rateCentsPerHour: booking.rateCentsPerHour, agreedHours: booking.hours };
   const event: SettleEvent = reason === "worker_left_early" || reason === "safety" ? { kind: reason, ...terms, minutesWorked } : { kind: reason, ...terms };
   const review = reason === "safety" ? bookingReview("safety_stop", { bookingId, ...booking }) : null;
@@ -85,8 +110,16 @@ export function decideCheckOut(viewer: Viewer, bookingId: string, booking: Booki
 /** A booking with money owed: ended, or cancelled late by the business. */
 export const isPayable = (booking: BookingRecord): boolean => (booking.status === "ended" || booking.status === "cancelled") && (booking.owedCents ?? 0) > 0;
 
-/** When the payment was due: check-out, or the late cancellation. The owner has until 23:59 that day (paymentFlow.ts). */
-export const dueFrom = (booking: BookingRecord): Date | null => booking.ended?.at ?? booking.cancellation?.at ?? null;
+/**
+ * When the payment was due: check-out, or the late cancellation. The owner
+ * has until 23:59 that day (paymentFlow.ts). A demo day opened early and
+ * checked out before its start is due on the tryout's own day, like any other.
+ */
+export function dueFrom(booking: BookingRecord): Date | null {
+  const checkedOut = booking.ended?.at;
+  if (!checkedOut) return booking.cancellation?.at ?? null;
+  return demoDayOpen(booking) && checkedOut < booking.startAt ? booking.startAt : checkedOut;
+}
 
 /** The methods the owner may pay by: the ones the young person chose. A booking from before they were asked takes any. */
 export const methodsFor = (booking: Pick<BookingRecord, "workerPayMethods">): readonly PaymentMethod[] =>
@@ -178,7 +211,8 @@ export function dayOptions(party: "business" | "young_person", booking: BookingR
   const isOwner = party === "business";
   const booked = booking.status === "booked";
   return {
-    canCheckIn: isOwner && booked && now >= addMinutes(booking.startAt, -RULES.checkInOpensMinutesBefore) && now < booking.endAt,
+    // Check-in, and with it the day's panels (BookingDetail), from when the door opens.
+    canCheckIn: isOwner && booked && doorTiming(booking, now) === "open",
     canNoShow: isOwner && booked && now >= addMinutes(booking.startAt, RULES.noShowAfterMinutes),
     canReportNotOpen: !isOwner && booked && now >= booking.startAt,
     canCheckOut: isOwner && booking.status === "checked_in",
@@ -187,26 +221,24 @@ export function dayOptions(party: "business" | "young_person", booking: BookingR
   };
 }
 
-/** Before the door opens on a demo booking: "Skip to the day" is offered to both parties (decideSkipToDay). */
-const canSkipToDay = (booking: BookingRecord, now: Date): boolean =>
-  booking.demo && booking.status === "booked" && now < addMinutes(booking.startAt, -RULES.checkInOpensMinutesBefore);
+/** A demo booking whose door is not open yet, by the clock or by an earlier skip: "Skip to the day" is offered to both parties (decideSkipToDay). */
+const canSkipToDay = (booking: BookingRecord, now: Date): boolean => booking.demo === true && booking.status === "booked" && doorTiming(booking, now) === "too_early";
 
-export type SkipToDayDecision = { kind: "skip"; startAt: Date; endAt: Date } | { kind: "unchanged" } | { kind: "refuse"; problem: "not_found" | "not_demo" | "not_booked" };
+export type SkipToDayDecision = { kind: "skip"; dayOpenedAt: Date } | { kind: "unchanged" } | { kind: "refuse"; problem: "not_found" | "not_demo" | "not_booked" };
 
 /**
- * "Skip to the day", for the demo only: a judge can't wait until tomorrow's
- * start to try the door, so a demo booking's day moves to start a few minutes
- * ago, keeping its hours. Real bookings never move: their times are locked
- * once booked (docs/RULES.md). Either party may skip; once the door is open
- * it changes nothing.
+ * "Skip to the day", for the demo only: a judge cannot wait until tomorrow's
+ * start to try the door, so a demo booking's door opens now, at any hour
+ * (demoDayOpen). The tryout keeps its date and times, so it still reads as a
+ * daytime tryout. Real bookings never open early. Either party may skip; once
+ * the door is open it changes nothing.
  */
 export function decideSkipToDay(viewer: Viewer, booking: BookingRecord | null, now: Date): SkipToDayDecision {
   if (!booking || !partyOf(viewer, booking)) return { kind: "refuse", problem: "not_found" };
   if (!viewer.demo || !booking.demo) return { kind: "refuse", problem: "not_demo" };
   if (booking.status !== "booked") return { kind: "refuse", problem: "not_booked" };
   if (!canSkipToDay(booking, now)) return { kind: "unchanged" };
-  const startAt = addMinutes(new Date(Math.floor(now.getTime() / 60_000) * 60_000), -RULES.demoSkipStartsMinutesAgo);
-  return { kind: "skip", startAt, endAt: addMinutes(startAt, booking.hours * 60) };
+  return { kind: "skip", dayOpenedAt: now };
 }
 
 /** What a business paused for an unpaid tryout is paused for; paying that tryout lifts it. */
