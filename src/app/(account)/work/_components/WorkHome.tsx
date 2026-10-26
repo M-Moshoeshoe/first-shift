@@ -17,11 +17,11 @@ export function WorkHome() {
     <>
       <PageTitle headingRef={heading} title={FEED_COPY.title} intro={worker?.area ? FEED_COPY.intro(worker.area) : undefined} />
       {worker && (!worker.payMethods?.length || !worker.skills?.length || !worker.languages?.length || !worker.hasSurname) ? (
-        <section aria-labelledby="profile-update" className="flex flex-col gap-3 border-2 border-ink p-4">
+        <section aria-labelledby="profile-update" className="flex flex-col gap-3 border border-line p-4">
           <h2 id="profile-update" className="text-xl font-bold">
             {FEED_COPY.profileUpdateTitle}
           </h2>
-          <p className="text-lg">{FEED_COPY.profileUpdate}</p>
+          <p className="text-base">{FEED_COPY.profileUpdate}</p>
           <Link href="/work/profile" className={buttonClass("secondary")}>
             {FEED_COPY.openProfile}
           </Link>

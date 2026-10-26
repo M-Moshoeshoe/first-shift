@@ -46,7 +46,7 @@ export function CheckOutForm({ bookingId, name, done }: { bookingId: string; nam
   };
 
   return (
-    <form noValidate onSubmit={submit} aria-labelledby="check-out-heading" className="flex flex-col gap-4 border-2 border-ink p-4">
+    <form noValidate onSubmit={submit} aria-labelledby="check-out-heading" className="flex flex-col gap-4 border border-line p-4">
       <h2 id="check-out-heading" className="text-xl font-bold">
         {DAY_COPY.checkOutTitle}
       </h2>

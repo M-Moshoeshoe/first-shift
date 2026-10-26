@@ -44,23 +44,23 @@ export function HirePanel({ bookingId, name }: { bookingId: string; name: string
   };
 
   return (
-    <section aria-labelledby="hire-heading" className="flex flex-col gap-3 border-2 border-ink p-4">
+    <section aria-labelledby="hire-heading" className="flex flex-col gap-3 border border-line p-4">
       <h2 id="hire-heading" className="text-xl font-bold">
         {HIRE_COPY.offer(name)}
       </h2>
       {hire.offer ? (
         <>
-          <p className="text-lg">{hire.offer.details ? HIRE_COPY.summary(hire.offer.details) : HIRE_COPY.talkSummary}</p>
-          <p className="text-lg">{HIRE_COPY.offered(name)}</p>
+          <p className="text-base">{hire.offer.details ? HIRE_COPY.summary(hire.offer.details) : HIRE_COPY.talkSummary}</p>
+          <p className="text-base">{HIRE_COPY.offered(name)}</p>
           {hire.whatsappUrl ? (
             <a href={hire.whatsappUrl} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary")}>
               {HIRE_COPY.send}
             </a>
           ) : null}
-          <p className="text-lg font-bold">{answerLine(hire.offer, name)}</p>
-          <h3 className="text-lg font-bold">{HIRE_COPY.outcomeTitle}</h3>
+          <p className="text-base font-semibold">{answerLine(hire.offer, name)}</p>
+          <h3 className="text-base font-bold">{HIRE_COPY.outcomeTitle}</h3>
           {hire.offer.outcome ? (
-            <p className="text-lg">{hire.offer.outcome === "hired" ? HIRE_COPY.markedHired(name) : HIRE_COPY.markedNotWorkedOut}</p>
+            <p className="text-base">{hire.offer.outcome === "hired" ? HIRE_COPY.markedHired(name) : HIRE_COPY.markedNotWorkedOut}</p>
           ) : (
             <>
               <Button variant="secondary" busy={busy === "hired"} busyLabel="Saving" onClick={() => void mark("hired")}>
@@ -75,7 +75,7 @@ export function HirePanel({ bookingId, name }: { bookingId: string; name: string
         </>
       ) : (
         <>
-          <p className="text-lg">{HIRE_COPY.why(name)}</p>
+          <p className="text-base">{HIRE_COPY.why(name)}</p>
           <JobOfferForm path={path} done={set} />
         </>
       )}

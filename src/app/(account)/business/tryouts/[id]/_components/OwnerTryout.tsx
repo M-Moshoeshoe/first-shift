@@ -37,7 +37,7 @@ export function OwnerTryout() {
   if (resource.status === "loading") {
     return (
       <div role="status" aria-label="Loading your tryout" className="flex flex-col gap-6">
-        <div className="h-11 w-2/3 animate-skeleton bg-mist" />
+        <div className="h-11 w-2/3 skeleton" />
         <SlipSkeleton />
       </div>
     );
@@ -77,18 +77,18 @@ export function OwnerTryout() {
       <PageTitle headingRef={heading} title={tryout.title} intro={STATUS_LINE[tryout.status]} />
       <ShiftSlip day={day} hours={hours} business={tryout.title} area={tryout.area} payCents={tryout.payCents} />
       {bookingId ? <BookedPanel bookingId={bookingId} name={booked} /> : null}
-      {offer ? <p className="text-lg font-bold">{OWNER_COPY.offered(offer.firstName, sastWhen(new Date(offer.lapsesAt)))}</p> : null}
+      {offer ? <p className="text-base font-semibold">{OWNER_COPY.offered(offer.firstName, sastWhen(new Date(offer.lapsesAt)))}</p> : null}
       <FormError message={error} />
       {bookingId ? null : (
         <section aria-labelledby="applicants-heading" className="flex flex-col gap-4">
           <h2 id="applicants-heading" className="text-xl font-bold">
             {OWNER_COPY.applicantsTitle}
           </h2>
-          {applicants.length === 0 ? <p className="text-lg">{OWNER_COPY.noApplicants}</p> : <p className="text-sm text-muted">{OWNER_COPY.fitNote}</p>}
+          {applicants.length === 0 ? <p className="text-base">{OWNER_COPY.noApplicants}</p> : <p className="text-sm text-muted">{OWNER_COPY.fitNote}</p>}
           {[{ title: OWNER_COPY.shortlist, group: shortlist }, { title: OWNER_COPY.others, group: others }].map(({ title, group }) =>
             group.length > 0 ? (
               <div key={title} className="flex flex-col gap-4">
-                <h3 className="text-lg font-bold">{title}</h3>
+                <h3 className="text-base font-bold">{title}</h3>
                 {group.map((applicant: ApplicantResponse) => (
                   <ApplicantCard key={applicant.workerId} applicant={applicant} canOffer={canOffer} busy={offering === applicant.workerId} onOffer={() => void makeOffer(applicant.workerId)} />
                 ))}

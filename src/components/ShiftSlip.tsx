@@ -30,7 +30,7 @@ export function ShiftSlip({ day, hours, business, area, payCents, returnFareCent
     <article className="relative border-2 border-ink bg-paper">
       <div className="flex">
         <div className="flex w-28 shrink-0 flex-col justify-center border-r-2 border-dashed border-ink bg-gold px-3 py-4 lg:w-32">
-          <p className="text-sm font-bold">{day}</p>
+          <p className="text-sm font-semibold">{day}</p>
           <p className="text-sm">{hours}</p>
         </div>
         <div className="flex-1 px-4 py-4">
@@ -52,7 +52,7 @@ export function ShiftSlip({ day, hours, business, area, payCents, returnFareCent
               {note}
             </p>
           ))}
-          {record ? <p className="text-sm font-bold">{record}</p> : null}
+          {record ? <p className="text-sm font-semibold">{record}</p> : null}
         </div>
       </div>
       {footer ? <div className="border-t-2 border-ink px-4 py-2">{footer}</div> : null}

@@ -43,11 +43,11 @@ export function ReferencePanel({ bookingId }: { bookingId: string }) {
     void write();
   });
 
-  if (!view) return resource.status === "error" ? <FormError message={resource.message} /> : <div role="status" aria-label={REFERENCE_COPY.writing} className="h-32 animate-skeleton bg-mist" />;
+  if (!view) return resource.status === "error" ? <FormError message={resource.message} /> : <div role="status" aria-label={REFERENCE_COPY.writing} className="h-32 skeleton" />;
   if (view.party === "business") {
     if (!view.answers) return null;
     return (
-      <section aria-labelledby="answers-heading" className="flex flex-col gap-2 border-2 border-ink p-4">
+      <section aria-labelledby="answers-heading" className="flex flex-col gap-2 border border-line p-4">
         <h2 id="answers-heading" className="text-xl font-bold">
           {REFERENCE_COPY.answersTitle}
         </h2>
@@ -57,15 +57,15 @@ export function ReferencePanel({ bookingId }: { bookingId: string }) {
     );
   }
   return (
-    <section aria-labelledby="reference-heading" className="flex flex-col gap-3 border-2 border-ink p-4">
+    <section aria-labelledby="reference-heading" className="flex flex-col gap-3 border border-line p-4">
       <h2 id="reference-heading" className="text-xl font-bold">
         {REFERENCE_COPY.title}
       </h2>
-      {view.withdrawn ? <p className="text-lg">{REFERENCE_COPY.withdrawn}</p> : null}
+      {view.withdrawn ? <p className="text-base">{REFERENCE_COPY.withdrawn}</p> : null}
       {view.reference ? <ReferenceReview bookingId={bookingId} reference={view.reference} done={reload} /> : null}
       {!view.reference && !view.withdrawn ? (
         <>
-          <p className="text-lg">{writing ? REFERENCE_COPY.writing : view.canWrite ? REFERENCE_COPY.notYet : REFERENCE_COPY.notYetWaiting}</p>
+          <p className="text-base">{writing ? REFERENCE_COPY.writing : view.canWrite ? REFERENCE_COPY.notYet : REFERENCE_COPY.notYetWaiting}</p>
           {view.canWrite && !writing ? (
             <Button variant="secondary" onClick={() => void write()}>
               {REFERENCE_COPY.write}

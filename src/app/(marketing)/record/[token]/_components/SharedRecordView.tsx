@@ -22,7 +22,7 @@ export function SharedRecordView() {
     };
   }, [token]);
 
-  if (record === undefined) return <div role="status" aria-label="Loading the record" className="h-48 animate-skeleton bg-mist" />;
+  if (record === undefined) return <div role="status" aria-label="Loading the record" className="h-48 skeleton" />;
   if (record === null) return <PageTitle title={RECORD_COPY.metaTitle} intro={RECORD_COPY.publicMissing} />;
   return (
     <>

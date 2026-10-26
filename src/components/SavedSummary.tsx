@@ -7,7 +7,7 @@ interface SavedSummaryProps {
 /** What's already saved, so a person who comes back sees it and only what's left to do. Used by both onboarding forms. */
 export function SavedSummary({ id, title = "Your details are saved", rows }: SavedSummaryProps) {
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-2 border-2 border-ink p-4">
+    <section aria-labelledby={id} className="flex flex-col gap-2 border border-line p-4">
       <h3 id={id} className="font-bold">
         {title}
       </h3>

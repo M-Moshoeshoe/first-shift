@@ -36,7 +36,7 @@ export function AppShell({ nav = [], children }: AppShellProps) {
         </Suspense>
       ) : null}
       <main className={`flex-1 lg:bg-mist lg:px-5 lg:py-12 ${items.length > 0 ? "pb-16 lg:pb-12" : ""}`}>
-        <div className="lg:mx-auto lg:max-w-md lg:border-2 lg:border-ink lg:bg-paper">{children}</div>
+        <div className="lg:mx-auto lg:max-w-md lg:border lg:border-line lg:bg-paper">{children}</div>
       </main>
       {items.length > 0 ? <AppNav items={items} badge={badge} /> : null}
     </div>

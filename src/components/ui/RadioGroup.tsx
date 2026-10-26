@@ -25,7 +25,7 @@ export function RadioGroup<T extends string>({ id, legend, options, value, onCha
   const errorId = `${id}-error`;
   return (
     <fieldset id={id} data-field={id} aria-describedby={hint ? `${hintId} ${errorId}` : errorId} className="flex flex-col gap-2">
-      <legend className="mb-2 font-bold">{legend}</legend>
+      <legend className="mb-2 font-semibold">{legend}</legend>
       {hint ? (
         <p id={hintId} className="text-sm text-muted">
           {hint}
@@ -36,10 +36,10 @@ export function RadioGroup<T extends string>({ id, legend, options, value, onCha
         return (
           <label key={option.value} htmlFor={optionId} className="flex min-h-11 items-center gap-3 focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-ink">
             <input id={optionId} type="radio" name={id} value={option.value} checked={value === option.value} onChange={() => onChange(option.value)} className="peer sr-only" />
-            <span aria-hidden="true" className="size-6 shrink-0 border-2 border-edge bg-paper p-1 peer-checked:border-ink peer-checked:[&>span]:block">
+            <span aria-hidden="true" className="size-6 shrink-0 border border-edge bg-paper p-1 peer-checked:border-ink peer-checked:[&>span]:block">
               <span className="hidden size-full bg-ink" />
             </span>
-            <span className="text-lg">{option.label}</span>
+            <span className="text-base">{option.label}</span>
           </label>
         );
       })}

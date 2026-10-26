@@ -44,15 +44,15 @@ export function NearbyList() {
     <div className="flex flex-col gap-4">
       {data.items.length === 0 ? (
         <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-bold">{FEED_COPY.emptyTitle}</h3>
-          <p className="text-lg">{FEED_COPY.empty(data.area)}</p>
+          <h3 className="text-base font-bold">{FEED_COPY.emptyTitle}</h3>
+          <p className="text-base">{FEED_COPY.empty(data.area)}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-4">
           {data.items.map((item) => (
             <li key={item.id} className={fresh.has(item.id) ? "animate-item-enter" : undefined}>
               <Link href={`/work/tryouts/${item.id}`} className="block focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink">
-                <FeedSlip item={item} footer={<p className="flex min-h-11 items-center font-bold underline underline-offset-4">{item.title}</p>} />
+                <FeedSlip item={item} footer={<p className="flex min-h-11 items-center font-semibold underline underline-offset-4">{item.title}</p>} />
               </Link>
             </li>
           ))}

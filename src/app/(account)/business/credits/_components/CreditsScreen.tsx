@@ -30,7 +30,7 @@ export function CreditsScreen() {
   if (resource.status === "loading") {
     return (
       <div role="status" aria-label="Loading your credits" className="flex flex-col gap-6">
-        <div className="h-11 w-2/3 animate-skeleton bg-mist" />
+        <div className="h-11 w-2/3 skeleton" />
         <SlipSkeleton />
       </div>
     );
@@ -50,7 +50,7 @@ export function CreditsScreen() {
   return (
     <>
       <PageTitle headingRef={heading} title={CREDITS_COPY.title} intro={CREDITS_COPY.intro} />
-      <dl className="grid grid-cols-3 gap-4 border-2 border-ink p-4">
+      <dl className="grid grid-cols-3 gap-4 border border-line p-4">
         <Figure label={CREDITS_COPY.available} value={credits.available} />
         <Figure label={CREDITS_COPY.held} value={credits.held} />
         <Figure label={CREDITS_COPY.free} value={credits.freeLeft} />
@@ -62,11 +62,11 @@ export function CreditsScreen() {
           {CREDITS_COPY.history}
         </h2>
         {credits.history.length === 0 ? (
-          <p className="text-lg">{CREDITS_COPY.empty}</p>
+          <p className="text-base">{CREDITS_COPY.empty}</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {credits.history.map((line, index) => (
-              <li key={`${line.at}-${index}`} className="flex flex-wrap gap-x-2 text-lg">
+              <li key={`${line.at}-${index}`} className="flex flex-wrap gap-x-2 text-base">
                 <span className="text-muted tabular-nums">{sastDay(new Date(line.at))}</span>
                 <span>{line.text}</span>
               </li>

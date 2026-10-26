@@ -71,14 +71,14 @@ export function PinStep({ details, pin, hasPhoto, focusHeading, onPinned, onNext
         Your shop&apos;s location
       </h2>
       {hasPhoto && !pin ? (
-        <p role="status" className="text-lg font-bold">
+        <p role="status" className="text-base font-semibold">
           {PROFILE_MESSAGES.pinMissing}
         </p>
       ) : null}
       <p>Tap {BUTTON_LABELS.useMyLocation} while you&apos;re at your business, so young people come to the right place.</p>
       <div data-field={FIELD_ID} className="flex flex-col gap-2">
         {pin ? (
-          <p role="status" className="font-bold text-go">
+          <p role="status" className="font-semibold text-go">
             {pinPrecisionText(pin.accuracyMetres)}
           </p>
         ) : null}

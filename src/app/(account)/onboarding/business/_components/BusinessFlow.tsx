@@ -15,7 +15,7 @@ import { BUSINESS_STEPS as STEPS, useBusinessSteps } from "./useBusinessSteps";
 const OwnerDetailsForm = lazy(() => import("@/components/OwnerDetailsForm").then((module) => ({ default: module.OwnerDetailsForm })));
 const OwnerPhotoStep = lazy(() => import("@/components/OwnerPhotoStep").then((module) => ({ default: module.OwnerPhotoStep })));
 
-const loading = <div role="status" aria-label="Loading the next step" className="h-96 animate-skeleton bg-mist" />;
+const loading = <div role="status" aria-label="Loading the next step" className="h-96 skeleton" />;
 
 /**
  * Five steps: the business, the owner's details, the owner's photo, the
@@ -35,7 +35,7 @@ export function BusinessFlow({ view }: { view: ProfileViewResponse }) {
     return (
       <div className="flex flex-col gap-6">
         <StepProgress current={STEPS} done={STEPS} total={STEPS} />
-        {pin ? <p className="font-bold text-go">{pinPrecisionText(pin.accuracyMetres)}</p> : null}
+        {pin ? <p className="font-semibold text-go">{pinPrecisionText(pin.accuracyMetres)}</p> : null}
         <ProfileDone next="/business" />
       </div>
     );

@@ -25,7 +25,7 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
             {other}
           </h2>
           {isOwner && booking.payoutPhone ? (
-            <p className="text-lg tabular-nums">
+            <p className="text-base tabular-nums">
               {BOOKING_COPY.payoutPhone}: {booking.payoutPhone}
             </p>
           ) : null}
@@ -45,7 +45,7 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
       ) : null}
       {booking.reviews.map((review) => (
         // Both sides see what the First Shift team decided on anything looked into about this booking.
-        <p key={review.at} className="border-2 border-ink p-4 text-lg">
+        <p key={review.at} className="border border-line p-4 text-base">
           {BOOKING_COPY.reviewed(sastSlot(new Date(review.at), new Date(review.at)).day, review.outcome)}
         </p>
       ))}
@@ -55,7 +55,7 @@ export function BookingPeople({ booking }: { booking: BookingViewResponse }) {
             {BOOKING_COPY.ownerNextTitle}
           </h2>
           {BOOKING_COPY.ownerNext(booking.workerFirstName, opensAt(booking.startAt)).map((line) => (
-            <p key={line} className="text-lg">
+            <p key={line} className="text-base">
               {line}
             </p>
           ))}

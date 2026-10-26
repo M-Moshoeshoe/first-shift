@@ -44,13 +44,13 @@ export function ReferenceReview({ bookingId, reference, done }: { bookingId: str
   const open = reference.status === "draft";
   return (
     <>
-      <p className="text-sm font-bold">{REFERENCE_COPY.criteria}</p>
+      <p className="text-sm font-semibold">{REFERENCE_COPY.criteria}</p>
       <AnswerList answers={reference.answers} />
-      <p className="text-lg">{reference.text}</p>
+      <p className="text-base">{reference.text}</p>
       <p className="text-sm text-muted">{REFERENCE_COPY.writtenWithAi}</p>
-      {reference.status === "approved" ? <p className="font-bold text-go">{REFERENCE_COPY.added}</p> : null}
-      {reference.status === "challenged" ? <p className="text-lg">{REFERENCE_COPY.challenged}</p> : null}
-      {open && reference.challengeRejected ? <p className="text-lg">{REFERENCE_COPY.rejectedNote}</p> : null}
+      {reference.status === "approved" ? <p className="font-semibold text-go">{REFERENCE_COPY.added}</p> : null}
+      {reference.status === "challenged" ? <p className="text-base">{REFERENCE_COPY.challenged}</p> : null}
+      {open && reference.challengeRejected ? <p className="text-base">{REFERENCE_COPY.rejectedNote}</p> : null}
       {open ? (
         <div className="flex flex-col gap-3">
           <Button busy={busy} busyLabel="Saving" aria-describedby={ERROR_ID} onClick={() => void decide({ action: "approve" })}>

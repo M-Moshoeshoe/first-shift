@@ -58,7 +58,7 @@ export function ApplyPanel({ tryoutId, businessName, state, onState, onReload }:
   };
 
   if (state.kind === "not_selected" || state.kind === "booked" || state.kind === "offered") return <OfferAnswer tryoutId={tryoutId} state={state} onReload={onReload} />;
-  if (state.kind === "closed") return <p className="text-lg font-bold">{CLOSED_MESSAGES[state.reason]}</p>;
+  if (state.kind === "closed") return <p className="text-base font-semibold">{CLOSED_MESSAGES[state.reason]}</p>;
   if (state.kind === "not_eligible") return <FormError message={NOT_ELIGIBLE_MESSAGES[state.reason]} />;
 
   if (state.kind === "applied") {
@@ -68,7 +68,7 @@ export function ApplyPanel({ tryoutId, businessName, state, onState, onReload }:
           <h2 id="applied-heading" className="text-xl font-bold text-go">
             {DETAIL_COPY.appliedTitle}
           </h2>
-          <p className="text-lg">{DETAIL_COPY.applied(businessName)}</p>
+          <p className="text-base">{DETAIL_COPY.applied(businessName)}</p>
         </div>
         <Button variant="stop" busy={busy} busyLabel="Withdrawing" aria-describedby={ERROR_ID} onClick={() => void send(`/api/applications/${encodeURIComponent(tryoutId)}/withdraw`, {}, true)}>
           {BUTTON_LABELS.withdrawApplication}
@@ -80,7 +80,7 @@ export function ApplyPanel({ tryoutId, businessName, state, onState, onReload }:
 
   return (
     <form noValidate onSubmit={apply} className="flex flex-col gap-4">
-      {withdrawn ? <p className="text-lg">{DETAIL_COPY.withdrawn}</p> : null}
+      {withdrawn ? <p className="text-base">{DETAIL_COPY.withdrawn}</p> : null}
       <TextAreaField
         id={NOTE_ID}
         label={DETAIL_COPY.noteLabel}

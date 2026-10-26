@@ -55,13 +55,13 @@ export function WithdrawSheet({ tryoutId, onClose }: WithdrawSheetProps) {
       onOpenChange={(open) => (open ? undefined : close())}
       className="fixed inset-0 z-20 flex items-end justify-center bg-ink/40 data-entering:animate-scrim-in data-exiting:animate-scrim-out"
     >
-      <Modal className="w-full max-w-md border-2 border-b-0 border-ink bg-paper data-entering:animate-sheet-enter data-exiting:animate-sheet-exit">
+      <Modal className="w-full max-w-md border border-b-0 border-line bg-paper data-entering:animate-sheet-enter data-exiting:animate-sheet-exit">
         <Dialog className="flex flex-col gap-6 px-5 pt-6 pb-8 outline-none">
           <div className="flex flex-col gap-2">
-            <Heading slot="title" className="text-xl font-bold">
+            <Heading slot="title" className="text-xl font-semibold">
               Withdraw this tryout?
             </Heading>
-            <p className="text-lg">Young people will not see it anymore. You can post a new one at any time.</p>
+            <p className="text-base">Young people will not see it anymore. You can post a new one at any time.</p>
           </div>
           <div className="flex flex-col gap-3">
             <Button variant="stop" busy={busy} busyLabel="Withdrawing" aria-describedby={ERROR_ID} onClick={() => void withdraw()}>

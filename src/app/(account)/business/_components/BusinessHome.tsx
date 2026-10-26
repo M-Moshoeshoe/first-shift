@@ -22,11 +22,11 @@ export function BusinessHome() {
       {business ? <CreditsPanel available={business.credits.available} onlyFree={business.credits.onlyFree} /> : null}
       {business?.pause ? (
         // Why it's paused and what lifts it; posting waits until then (docs/RULES.md, Strikes, pauses and limits).
-        <section aria-labelledby="paused" className="flex flex-col gap-3 border-2 border-stop p-4">
+        <section aria-labelledby="paused" className="flex flex-col gap-3 border border-stop p-4">
           <h2 id="paused" className="text-xl font-bold">
             {PAUSE_COPY.title}
           </h2>
-          {business.pause.reason === "other" ? <FormError message={PAUSE_COPY.other} /> : <p className="text-lg">{PAUSE_COPY[business.pause.reason]}</p>}
+          {business.pause.reason === "other" ? <FormError message={PAUSE_COPY.other} /> : <p className="text-base">{PAUSE_COPY[business.pause.reason]}</p>}
           {business.pause.bookingId ? (
             <Link href={`/bookings/${business.pause.bookingId}`} className={buttonClass("primary")}>
               {PAUSE_COPY.openBooking}
@@ -35,11 +35,11 @@ export function BusinessHome() {
         </section>
       ) : business && !business.owner.ready ? (
         // A business from before the owner was asked: posting waits for them (tryoutDecisions.ts, owner_missing).
-        <section aria-labelledby="owner-missing" className="flex flex-col gap-3 border-2 border-ink p-4">
+        <section aria-labelledby="owner-missing" className="flex flex-col gap-3 border border-line p-4">
           <h2 id="owner-missing" className="text-xl font-bold">
             Add your details as the owner
           </h2>
-          <p className="text-lg">Young people you book will see your first name, your photo and your number. You can post tryouts once it&apos;s done.</p>
+          <p className="text-base">Young people you book will see your first name, your photo and your number. You can post tryouts once it&apos;s done.</p>
           <Link href="/business/owner" className={buttonClass("primary")}>
             Add my details
           </Link>

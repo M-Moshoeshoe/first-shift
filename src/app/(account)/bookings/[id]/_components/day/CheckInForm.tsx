@@ -25,7 +25,7 @@ export function CheckInForm({ bookingId, name, lastFour, done }: { bookingId: st
   };
 
   return (
-    <form noValidate onSubmit={submit} aria-labelledby="door-heading" className="flex flex-col gap-4 border-2 border-ink p-4">
+    <form noValidate onSubmit={submit} aria-labelledby="door-heading" className="flex flex-col gap-4 border border-line p-4">
       <div className="flex flex-col gap-2">
         <h2 id="door-heading" className="text-xl font-bold">
           {DAY_COPY.doorTitle}

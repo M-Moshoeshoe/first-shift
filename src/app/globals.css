@@ -18,9 +18,24 @@
   --color-gold: #ffb81c;
   --color-go: #0a6b47;
   --color-stop: #b42318;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Archivo through next/font (src/app/layout.tsx sets --font-archivo); system fonts until it loads. */
+  --font-sans: var(--font-archivo), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --tracking-title: -0.02em;
+
+  /* The v4 type scale (docs/DESIGN.md, Type): size and line height together. */
+  --text-micro: 0.75rem;
+  --text-micro--line-height: 1rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.625rem;
+  --text-title: 1.75rem;
+  --text-title--line-height: 2rem;
+  --text-title-lg: 2.25rem;
+  --text-title-lg--line-height: 2.5rem;
+  --text-hero: 2.5rem;
+  --text-hero--line-height: 2.75rem;
+  --text-hero-lg: 4rem;
+  --text-hero-lg--line-height: 4.25rem;
 
   /* Sharp edges only: with no radius tokens the scale classes (rounded-lg and
      the like) generate nothing. rounded-full and arbitrary values still work,
@@ -44,7 +59,13 @@
   --animate-item-enter: item-enter var(--dur-base) var(--ease-out) both;
   --animate-field-shake: field-shake var(--dur-base) linear;
   --animate-error-in: error-in var(--dur-base) var(--ease-out) both;
-  --animate-skeleton: skeleton 1.4s ease-in-out infinite;
+  /* v4: a light band crossing the placeholder, by transform (the skeleton utility below). */
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-toast-in: item-enter-up var(--dur-base) var(--ease-out) both;
+  --animate-toast-out: fade-out var(--dur-base) var(--ease-out) both;
+  --animate-drawer-in: drawer-in var(--dur-slow) var(--ease-out) both;
+  --animate-drawer-out: drawer-out var(--dur-base) var(--ease-out) both;
+  --animate-tick: tick var(--dur-base) var(--ease-spring) both;
 
   /* Marketing only: the one load animation in the product. */
   --animate-slip-enter: slip-enter var(--dur-slow) var(--ease-out) both;
@@ -132,6 +153,55 @@
     }
     to {
       opacity: 1;
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      translate: -100% 0;
+    }
+    to {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes item-enter-up {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes drawer-in {
+    from {
+      translate: 100% 0;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+
+  @keyframes drawer-out {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes tick {
+    from {
+      opacity: 0;
+      scale: 0.6;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
     }
   }
 
@@ -225,14 +295,65 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* v4: headings semi-condensed at 700; everything else normal width (docs/DESIGN.md, Type). */
+  h1,
+  h2,
+  h3 {
+    font-stretch: 87%;
+    font-weight: 700;
+    letter-spacing: var(--tracking-title);
+  }
+
+  /* v4: a 2 px ink ring, 2 px out (docs/DESIGN.md, Shape). */
   :focus-visible {
-    outline: 3px solid var(--color-ink);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
 
   /* Headings and sentences that receive focus only so a screen reader announces them (useHeadingFocus) aren't controls: no ring. */
   [tabindex="-1"]:focus-visible {
     outline: none;
+  }
+}
+
+/* Links in text: a 1 px underline that thickens to 2 px on hover and focus (motion 10). */
+@utility link {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  transition: background-size 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  &:hover,
+  &:focus-visible {
+    background-size: 100% 2px;
+  }
+}
+
+/* Loading placeholders: mist, with a lighter band crossing them (motion 13). */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-mist);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+    animation: var(--animate-shimmer);
+  }
+}
+
+/* Desktop cards lift 2 px under a real pointer (motion 12). */
+@utility lift {
+  @media (hover: hover) and (min-width: 1024px) {
+    transition: translate 120ms var(--ease-out);
+
+    &:hover {
+      translate: 0 -2px;
+    }
   }
 }
 

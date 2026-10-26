@@ -34,7 +34,7 @@ export function DemoChoice() {
       <h2 id="demo-heading" className="text-xl font-bold">
         Try the demo
       </h2>
-      <p className="text-lg">Two demo accounts with made-up people and businesses. Nothing you do in them reaches real people.</p>
+      <p className="text-base">Two demo accounts with made-up people and businesses. Nothing you do in them reaches real people.</p>
       <Button variant="secondary" busy={busy === "young_person"} busyLabel="Signing in" onClick={() => void choose("young_person")} aria-describedby={ERROR_ID}>
         {BUTTON_LABELS.tryAsThabo}
       </Button>

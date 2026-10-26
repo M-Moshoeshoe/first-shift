@@ -27,8 +27,8 @@ export function SkipToDay({ bookingId, onSkipped }: { bookingId: string; onSkipp
   };
 
   return (
-    <section aria-label={DEMO_COPY.skip} className="flex flex-col gap-3 border-2 border-ink p-4">
-      <p className="text-lg">{DEMO_COPY.skipHint}</p>
+    <section aria-label={DEMO_COPY.skip} className="flex flex-col gap-3 border border-line p-4">
+      <p className="text-base">{DEMO_COPY.skipHint}</p>
       <Button variant="secondary" busy={busy} busyLabel={DEMO_COPY.skipBusy} aria-describedby={ERROR_ID} onClick={() => void skip()}>
         {DEMO_COPY.skip}
       </Button>

@@ -6,7 +6,7 @@ export function RecordJobs({ jobs }: { jobs: readonly { businessName: string; hi
   return (
     <ul aria-label="Job offers" className="flex flex-col gap-2">
       {jobs.map((job) => (
-        <li key={job.businessName} className="border-2 border-ink p-4 text-lg font-bold">
+        <li key={job.businessName} className="border border-line p-4 text-base font-semibold">
           {job.hired ? HIRE_COPY.hiredBy(job.businessName) : HIRE_COPY.offeredBy(job.businessName)}
         </li>
       ))}

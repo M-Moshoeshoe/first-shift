@@ -23,7 +23,7 @@ export function ProfileDone({ next }: { next: keyof typeof LINES }) {
   return (
     <div role="status" className="flex flex-col items-start gap-4 py-4">
       <Stamp label="Profile done" />
-      <p className="text-lg">{LINES[next]}</p>
+      <p className="text-base">{LINES[next]}</p>
     </div>
   );
 }

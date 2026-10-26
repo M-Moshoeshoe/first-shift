@@ -30,12 +30,12 @@ export function TryoutExplainer() {
   };
 
   return (
-    <section aria-labelledby="tryout-explainer" className="flex flex-col gap-3 border-2 border-ink p-4">
+    <section aria-labelledby="tryout-explainer" className="flex flex-col gap-3 border border-line p-4">
       <div className="flex flex-col gap-2">
         <h2 id="tryout-explainer" className="text-xl font-bold">
           {FEED_COPY.explainerTitle}
         </h2>
-        <p className="text-lg">{FEED_COPY.explainer}</p>
+        <p className="text-base">{FEED_COPY.explainer}</p>
       </div>
       <div>
         <Button variant="quiet" onClick={dismiss}>

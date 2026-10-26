@@ -19,7 +19,7 @@ const SECTIONS: readonly PlainSection[] = [
 export default function ContactPage() {
   return (
     <PlainPage title="Contact us" intro="For anything else, including your personal information and deleting your account, email us." sections={SECTIONS}>
-      <a href={`mailto:${SUPPORT_EMAIL}`} className="inline-flex min-h-11 items-center self-start text-lg font-bold underline underline-offset-4">
+      <a href={`mailto:${SUPPORT_EMAIL}`} className="inline-flex min-h-11 items-center self-start text-base font-semibold underline underline-offset-4">
         {SUPPORT_EMAIL}
       </a>
     </PlainPage>

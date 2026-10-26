@@ -28,7 +28,7 @@ function LineList({ id, heading, lines }: { id: string; heading: string; lines: 
       <h2 id={id} className="text-xl font-bold">
         {heading}
       </h2>
-      <ul className="flex list-disc flex-col gap-1 pl-5 text-lg">
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-base">
         {lines.map((line) => (
           <li key={line}>{line}</li>
         ))}
@@ -47,7 +47,7 @@ export function TryoutDetail() {
   if (detail.status === "loading") {
     return (
       <div role="status" aria-label="Loading the tryout" className="flex flex-col gap-6">
-        <div className="h-11 w-2/3 animate-skeleton bg-mist" />
+        <div className="h-11 w-2/3 skeleton" />
         <SlipSkeleton />
       </div>
     );
@@ -82,11 +82,11 @@ export function TryoutDetail() {
         <h2 id="pay-heading" className="text-xl font-bold">
           {DETAIL_COPY.pay}
         </h2>
-        <p className="text-lg tabular-nums">{DETAIL_COPY.payLine(item.rateCentsPerHour, item.hours, item.payCents)}</p>
+        <p className="text-base tabular-nums">{DETAIL_COPY.payLine(item.rateCentsPerHour, item.hours, item.payCents)}</p>
         {item.returnFareCents !== null && keep !== null ? (
           <>
-            <p className="text-lg tabular-nums">{DETAIL_COPY.returnFare(item.returnFareCents)}</p>
-            <p className="text-lg font-bold tabular-nums">{DETAIL_COPY.keep(keep)}</p>
+            <p className="text-base tabular-nums">{DETAIL_COPY.returnFare(item.returnFareCents)}</p>
+            <p className="text-base font-semibold tabular-nums">{DETAIL_COPY.keep(keep)}</p>
           </>
         ) : null}
       </section>

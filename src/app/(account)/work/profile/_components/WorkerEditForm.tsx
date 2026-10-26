@@ -97,7 +97,7 @@ export function WorkerEditForm({ initial, askSurname }: WorkerEditFormProps) {
         <Button type="submit" busy={busy} busyLabel="Saving" aria-describedby={ERROR_ID}>
           Save changes
         </Button>
-        <p role="status" className="font-bold text-go">
+        <p role="status" className="font-semibold text-go">
           {saved ? "Saved. Businesses see these when you apply." : ""}
         </p>
         <FormError id={ERROR_ID} message={formError} />

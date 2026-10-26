@@ -27,7 +27,7 @@ export function WorkRecord() {
   if (resource.status === "loading") {
     return (
       <div role="status" aria-label="Loading your record" className="flex flex-col gap-6">
-        <div className="h-11 w-2/3 animate-skeleton bg-mist" />
+        <div className="h-11 w-2/3 skeleton" />
         <SlipSkeleton />
       </div>
     );
@@ -50,7 +50,7 @@ export function WorkRecord() {
     <>
       <PageTitle headingRef={heading} title={RECORD_COPY.title} intro={RECORD_COPY.intro} />
       {record.entries.length === 0 ? (
-        <p className="text-lg">{RECORD_COPY.empty}</p>
+        <p className="text-base">{RECORD_COPY.empty}</p>
       ) : (
         <>
           <section aria-labelledby="share-record" className="flex flex-col gap-2">

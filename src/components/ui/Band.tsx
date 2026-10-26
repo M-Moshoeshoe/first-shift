@@ -17,7 +17,8 @@ interface BandProps {
 /** A full-width tonal band holding the single 28 rem column (docs/DESIGN.md, Layout). */
 export function Band({ tone, lgTone, wide = false, children }: BandProps) {
   return (
-    <div className={`${BAND_TONES[tone]} ${lgTone ? BAND_TONES_LG[lgTone] : ""} px-5 py-8`}>
+    // Marketing sections breathe more: 48 px on a phone, 96 on a desktop; app screens keep 32 (docs/DESIGN.md, Spacing).
+    <div className={`${BAND_TONES[tone]} ${lgTone ? BAND_TONES_LG[lgTone] : ""} px-5 ${wide ? "py-12 lg:py-24" : "py-8"}`}>
       <div className={`mx-auto flex max-w-md flex-col gap-6 ${wide ? "lg:max-w-6xl" : ""}`}>{children}</div>
     </div>
   );

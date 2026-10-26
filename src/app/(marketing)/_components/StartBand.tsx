@@ -12,7 +12,7 @@ export function StartBand() {
           <h2 id="what-it-costs" className="text-xl font-bold">
             What it costs
           </h2>
-          <p className="text-lg">
+          <p className="text-base">
             Free for young people. Businesses pay {formatRand(RULES.creditPriceCents)} for each completed tryout, and their first {RULES.freeCredits} are free.
           </p>
         </section>

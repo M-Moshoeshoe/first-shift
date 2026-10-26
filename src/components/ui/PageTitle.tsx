@@ -11,11 +11,11 @@ interface PageTitleProps {
 /** The screen's one h1 and the sentence under it, the same on every page (docs/DESIGN.md, Type). */
 export function PageTitle({ title, intro, headingRef }: PageTitleProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <h1 ref={headingRef} tabIndex={headingRef ? -1 : undefined} className="text-4xl font-bold leading-tight tracking-title">
+    <div className="flex flex-col gap-2">
+      <h1 ref={headingRef} tabIndex={headingRef ? -1 : undefined} className="text-title text-balance lg:text-title-lg">
         {title}
       </h1>
-      {intro ? <p className="text-lg text-muted">{intro}</p> : null}
+      {intro ? <p className="text-base text-muted">{intro}</p> : null}
     </div>
   );
 }

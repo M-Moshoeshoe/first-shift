@@ -33,7 +33,7 @@ export function OfferAnswer({ tryoutId, state, onReload }: { tryoutId: string; s
     }
   };
 
-  if (state.kind === "not_selected") return <p className="text-lg">{OFFER_COPY.notSelected}</p>;
+  if (state.kind === "not_selected") return <p className="text-base">{OFFER_COPY.notSelected}</p>;
   if (state.kind === "booked") {
     return (
       <section aria-labelledby="booked-heading" className="flex flex-col gap-3">
@@ -52,7 +52,7 @@ export function OfferAnswer({ tryoutId, state, onReload }: { tryoutId: string; s
         <h2 id="offer-heading" className="text-xl font-bold">
           {OFFER_COPY.offeredTitle}
         </h2>
-        <p className="text-lg">{OFFER_COPY.offered(sastWhen(new Date(state.lapsesAt)))}</p>
+        <p className="text-base">{OFFER_COPY.offered(sastWhen(new Date(state.lapsesAt)))}</p>
       </div>
       <Button busy={busy === "accept"} busyLabel="Accepting" aria-describedby={ERROR_ID} onClick={() => void answer("accept")}>
         {OFFER_COPY.accept}

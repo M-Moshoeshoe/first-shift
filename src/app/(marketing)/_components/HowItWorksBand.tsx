@@ -14,7 +14,7 @@ export function HowItWorksBand() {
         <ol className="reveal-steps flex flex-col gap-2 lg:grid lg:grid-cols-3 lg:gap-12">
           {steps.map((step, index) => (
             <li key={step} className="reveal-step flex gap-2" style={{ "--step": index } as CSSProperties}>
-              <span className="font-bold">{index + 1}.</span>
+              <span className="font-semibold">{index + 1}.</span>
               <span>{step}</span>
             </li>
           ))}

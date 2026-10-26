@@ -43,7 +43,7 @@ export function ReportForm({ bookingId, party }: { bookingId: string; party: "bu
     setBusy(false);
   };
 
-  if (sent) return <p className="text-lg font-bold text-go">{sent}</p>;
+  if (sent) return <p className="text-base font-semibold text-go">{sent}</p>;
   if (!open) {
     return (
       <Button variant="secondary" onClick={() => setOpen(true)}>
@@ -52,8 +52,8 @@ export function ReportForm({ bookingId, party }: { bookingId: string; party: "bu
     );
   }
   return (
-    <form noValidate onSubmit={(event) => void submit(event)} aria-label={BOOKING_COPY.report} className="flex flex-col gap-4 border-2 border-ink p-4">
-      <p className="text-lg font-bold">{REPORT_COPY.emergency}</p>
+    <form noValidate onSubmit={(event) => void submit(event)} aria-label={BOOKING_COPY.report} className="flex flex-col gap-4 border border-line p-4">
+      <p className="text-base font-semibold">{REPORT_COPY.emergency}</p>
       <Link href="/safety" className="inline-flex min-h-11 items-center self-start underline underline-offset-4">
         {REPORT_COPY.safetyLink}
       </Link>

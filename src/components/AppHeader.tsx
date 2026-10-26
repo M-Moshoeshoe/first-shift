@@ -17,9 +17,9 @@ export function AppHeader({ nav, badge }: { nav: readonly NavItem[]; badge: numb
   const { user } = useAuth();
   const pathname = usePathname();
   return (
-    <header className="bg-paper px-5 pt-5 lg:border-b-2 lg:border-ink lg:py-2">
+    <header className="bg-paper px-5 pt-5 lg:border-b lg:border-line lg:py-2">
       <div className="mx-auto flex max-w-md items-start justify-between gap-4 lg:max-w-6xl lg:items-center">
-        <Link href="/" className="inline-flex min-h-11 items-center text-lg font-bold">
+        <Link href="/" className="inline-flex min-h-11 items-center text-base font-semibold">
           First Shift
         </Link>
         <div className="flex items-center gap-6">
@@ -31,7 +31,7 @@ export function AppHeader({ nav, badge }: { nav: readonly NavItem[]; badge: numb
                     <Link
                       href={item.href}
                       aria-current={pathname === item.href ? "page" : undefined}
-                      className="inline-flex min-h-11 items-center font-bold text-muted aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:underline-offset-4"
+                      className="inline-flex min-h-11 items-center font-semibold text-muted aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:underline-offset-4"
                     >
                       <NavLabel item={item} count={badge} />
                     </Link>

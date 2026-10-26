@@ -26,11 +26,11 @@ export function PlainPage({ title, intro, sections, children }: { title: string;
             <h2 className="text-xl font-bold">{section.heading}</h2>
             {section.body.map((block) =>
               typeof block === "string" ? (
-                <p key={block} className="text-lg">
+                <p key={block} className="text-base">
                   {block}
                 </p>
               ) : (
-                <ul key={block.join("|")} className="flex list-disc flex-col gap-1 pl-5 text-lg">
+                <ul key={block.join("|")} className="flex list-disc flex-col gap-1 pl-5 text-base">
                   {block.map((point) => (
                     <li key={point}>{point}</li>
                   ))}

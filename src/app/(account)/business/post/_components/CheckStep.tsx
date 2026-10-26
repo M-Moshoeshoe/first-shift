@@ -75,7 +75,7 @@ export function CheckStep({ initial, description, busy, formError, onPost, onBac
         error={errors.rate}
         onChange={(event) => update("rate", event.target.value)}
       />
-      <p role="status" className="text-lg font-bold tabular-nums">
+      <p role="status" className="text-base font-semibold tabular-nums">
         {pay === null ? "" : `Pay for the day: ${formatRand(pay)}`}
       </p>
       <CheckboxField id={fieldId("supervision")} label="I'll be on site to supervise." checked={form.supervision} error={errors.supervision} onChange={(checked) => update("supervision", checked)} />

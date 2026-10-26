@@ -14,7 +14,7 @@ export function BookingActions({ booking, when }: { booking: BookingViewResponse
   if (booking.party === "business") {
     return (
       <section aria-labelledby="pay-line" className="flex flex-col gap-3">
-        <p id="pay-line" className="text-lg">
+        <p id="pay-line" className="text-base">
           {BOOKING_COPY.payment}
         </p>
         {booking.whatsappUrl ? (
@@ -30,15 +30,15 @@ export function BookingActions({ booking, when }: { booking: BookingViewResponse
   return (
     <section aria-labelledby="code-heading" className="flex flex-col gap-3">
       {booking.checkInCode ? (
-        <div className="flex flex-col gap-2 border-2 border-ink p-4">
+        <div className="flex flex-col gap-2 border border-line p-4">
           <h2 id="code-heading" className="text-xl font-bold">
             {BOOKING_COPY.code}
           </h2>
-          <p className="text-4xl font-bold tracking-title tabular-nums">{`${booking.checkInCode.slice(0, 3)} ${booking.checkInCode.slice(3)}`}</p>
+          <p className="text-4xl font-semibold tracking-title tabular-nums">{`${booking.checkInCode.slice(0, 3)} ${booking.checkInCode.slice(3)}`}</p>
           <p className="text-sm text-muted">{BOOKING_COPY.codeHint}</p>
         </div>
       ) : null}
-      <p className="text-lg">{BOOKING_COPY.chatHint(booking.owner?.firstName ?? booking.businessName)}</p>
+      <p className="text-base">{BOOKING_COPY.chatHint(booking.owner?.firstName ?? booking.businessName)}</p>
       {booking.whatsappUrl ? (
         <a href={booking.whatsappUrl} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary")}>
           {BOOKING_COPY.chat}

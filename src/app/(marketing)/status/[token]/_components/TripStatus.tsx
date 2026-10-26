@@ -20,21 +20,21 @@ export function TripStatus() {
     };
   }, [token]);
 
-  if (view === undefined) return <div role="status" aria-label="Loading the status" className="h-36 animate-skeleton bg-mist" />;
+  if (view === undefined) return <div role="status" aria-label="Loading the status" className="h-36 skeleton" />;
   if (view === null) return <PageTitle title="Tryout status" intro={STATUS_PAGE_COPY.unavailable} />;
   const { day, hours } = sastSlot(new Date(view.startAt), new Date(view.endAt));
   return (
     <>
       <PageTitle title={STATUS_PAGE_COPY.title(view.workerFirstName)} intro={STATUS_PAGE_COPY.at(view.businessName, view.businessArea)} />
-      <dl className="flex flex-col gap-4 text-lg">
+      <dl className="flex flex-col gap-4 text-base">
         <div className="flex flex-col gap-1">
-          <dt className="font-bold">When</dt>
+          <dt className="font-semibold">When</dt>
           <dd>
             {day}, {hours}
           </dd>
         </div>
         <div className="flex flex-col gap-1">
-          <dt className="font-bold">Status</dt>
+          <dt className="font-semibold">Status</dt>
           <dd>{STATUS_LABELS[view.status]}</dd>
         </div>
       </dl>

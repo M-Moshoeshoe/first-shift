@@ -44,7 +44,7 @@ export function ApplicationsList() {
         </div>
       ) : null}
       {resource.status !== "ready" ? null : resource.data.items.length === 0 ? (
-        <p className="text-lg">{APPLICATIONS_COPY.empty}</p>
+        <p className="text-base">{APPLICATIONS_COPY.empty}</p>
       ) : (
         <ul className="flex flex-col gap-4">
           {resource.data.items.map((item) => {
@@ -60,7 +60,7 @@ export function ApplicationsList() {
                     business={item.businessName}
                     area={item.area}
                     payCents={item.payCents}
-                    footer={<p className="flex min-h-11 items-center font-bold underline underline-offset-4">{label}</p>}
+                    footer={<p className="flex min-h-11 items-center font-semibold underline underline-offset-4">{label}</p>}
                   />
                 </Link>
               </li>

@@ -37,7 +37,7 @@ export function DemoSignIn() {
   };
 
   return (
-    <form noValidate onSubmit={(event) => void handleSubmit(event)} aria-labelledby="demo-email-heading" className="flex flex-col gap-4 border-2 border-edge p-4">
+    <form noValidate onSubmit={(event) => void handleSubmit(event)} aria-labelledby="demo-email-heading" className="flex flex-col gap-4 border border-edge p-4">
       <h2 id="demo-email-heading" className="text-xl font-bold">
         Sign in with a demo email
       </h2>

@@ -52,13 +52,13 @@ export function PayForm({ bookingId, name, phone, methods, owedCents, minimumCen
   };
 
   return (
-    <form noValidate onSubmit={submit} aria-labelledby="pay-heading" className="flex flex-col gap-4 border-2 border-ink p-4">
+    <form noValidate onSubmit={submit} aria-labelledby="pay-heading" className="flex flex-col gap-4 border border-line p-4">
       <h2 id="pay-heading" className="text-xl font-bold">
         {DAY_COPY.payTitle}
       </h2>
-      <p className="text-lg">{BOOKING_COPY.payment}</p>
+      <p className="text-base">{BOOKING_COPY.payment}</p>
       <RadioGroup id="pay-method" legend={DAY_COPY.methodLegend} hint={DAY_COPY.methodHint(name, phone)} options={options} value={method} onChange={setMethod} />
-      {method === "cash" ? <p className="text-lg font-bold">{DAY_COPY.cashHandover(name)}</p> : null}
+      {method === "cash" ? <p className="text-base font-semibold">{DAY_COPY.cashHandover(name)}</p> : null}
       {method && isElectronic(method) ? (
         <TextField id="pay-reference" label={DAY_COPY.reference} hint={DAY_COPY.referenceHint(name)} autoComplete="off" maxLength={RULES.paymentReferenceMaxChars} value={reference} onChange={(event) => setReference(event.target.value)} />
       ) : null}

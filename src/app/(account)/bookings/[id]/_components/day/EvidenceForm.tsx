@@ -53,14 +53,14 @@ export function EvidenceForm({ bookingId, done }: { bookingId: string; done: () 
   };
 
   return (
-    <form noValidate onSubmit={submit} aria-labelledby="evidence-heading" className="flex flex-col gap-4 border-2 border-ink p-4">
+    <form noValidate onSubmit={submit} aria-labelledby="evidence-heading" className="flex flex-col gap-4 border border-line p-4">
       <div className="flex flex-col gap-2">
         <h2 id="evidence-heading" className="text-xl font-bold">
           {EVIDENCE_COPY.title}
         </h2>
         <p className="text-sm text-muted">{EVIDENCE_COPY.hint}</p>
       </div>
-      {image ? <Image src={image.preview} alt="The screenshot you chose" width={128} height={128} unoptimized className="size-32 border-2 border-ink object-cover" /> : null}
+      {image ? <Image src={image.preview} alt="The screenshot you chose" width={128} height={128} unoptimized className="size-32 border border-line object-cover" /> : null}
       <label htmlFor={FILE_ID} className={`${buttonClass("secondary")} relative cursor-pointer focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-ink`}>
         <input id={FILE_ID} type="file" accept="image/*" aria-describedby={ERROR_ID} onChange={(event) => void choose(event)} className="sr-only" />
         <span>{EVIDENCE_COPY.file}</span>

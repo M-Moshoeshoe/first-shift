@@ -11,7 +11,7 @@ export function Pitch({ id, heading, text }: PitchProps) {
       <h2 id={id} className="text-xl font-bold">
         {heading}
       </h2>
-      <p className="text-lg">{text}</p>
+      <p className="text-base">{text}</p>
     </section>
   );
 }

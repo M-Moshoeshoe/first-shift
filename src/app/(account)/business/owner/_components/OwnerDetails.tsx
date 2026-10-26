@@ -33,7 +33,7 @@ export function OwnerDetails() {
       {step === "photo" ? <OwnerPhotoStep owner={draft} onBack={() => setStep("details")} onSaved={() => setStep("done")} /> : null}
       {step === "done" ? (
         <div className="flex flex-col gap-3">
-          <p role="status" className="text-lg font-bold text-go">
+          <p role="status" className="text-base font-semibold text-go">
             {OWNER_FORM_COPY.saved}
           </p>
           <Link href="/business" className={buttonClass("primary")}>

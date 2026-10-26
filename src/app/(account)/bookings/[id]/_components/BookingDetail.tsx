@@ -39,7 +39,7 @@ export function BookingDetail() {
   if (resource.status === "loading") {
     return (
       <div role="status" aria-label="Loading your booking" className="flex flex-col gap-6">
-        <div className="h-11 w-2/3 animate-skeleton bg-mist" />
+        <div className="h-11 w-2/3 skeleton" />
         <SlipSkeleton />
       </div>
     );
@@ -68,10 +68,10 @@ export function BookingDetail() {
         <h2 id="where-heading" className="text-xl font-bold">
           {BOOKING_COPY.where}
         </h2>
-        <p className="text-lg">
+        <p className="text-base">
           {booking.businessName}, {booking.businessArea}. {BOOKING_COPY.pin(booking.pinAccuracyMetres)}
         </p>
-        <a href={booking.mapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center self-start font-bold underline underline-offset-4">
+        <a href={booking.mapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center self-start font-semibold underline underline-offset-4">
           {BOOKING_COPY.openMaps}
         </a>
       </section>
@@ -81,7 +81,7 @@ export function BookingDetail() {
         </Suspense>
       ) : null}
       {hasDay(booking) ? (
-        <Suspense fallback={<div role="status" aria-label="Loading the day" className="h-44 animate-skeleton bg-mist" />}>
+        <Suspense fallback={<div role="status" aria-label="Loading the day" className="h-44 skeleton" />}>
           <DayPanel booking={booking} reload={reload} />
         </Suspense>
       ) : null}

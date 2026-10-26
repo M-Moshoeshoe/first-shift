@@ -23,7 +23,7 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
     return (
       <div role="status" className="flex flex-col items-start gap-4">
         <Stamp label="Posted" />
-        <p ref={heading} tabIndex={-1} className="text-lg">
+        <p ref={heading} tabIndex={-1} className="text-base">
           Your tryout is live. Young people nearby can now apply.
         </p>
         {backToTryouts}
@@ -37,7 +37,7 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
         <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
           We&apos;re checking this one
         </h2>
-        <p className="text-lg">We could not tell what kind of work this is, so someone will check it before it goes live. You&apos;ll see it on your dashboard.</p>
+        <p className="text-base">We could not tell what kind of work this is, so someone will check it before it goes live. You&apos;ll see it on your dashboard.</p>
         {backToTryouts}
       </div>
     );
@@ -49,7 +49,7 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
         <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
           This work cannot be a tryout
         </h2>
-        <p className="border-2 border-stop p-4 text-lg">{outcome.saferOption}</p>
+        <p className="border border-stop p-4 text-base">{outcome.saferOption}</p>
         <Button onClick={onChangeRequest}>Change my request</Button>
       </div>
     );
@@ -57,7 +57,7 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
 
   return (
     <div className="flex flex-col gap-4">
-      <p ref={heading} tabIndex={-1} className="text-lg">
+      <p ref={heading} tabIndex={-1} className="text-base">
         {POSTING_PROBLEM_MESSAGES.no_credits}
       </p>
       <Link href="/business/credits" className={buttonClass("primary")}>

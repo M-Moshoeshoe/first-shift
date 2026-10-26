@@ -31,7 +31,7 @@ export function DemoBar() {
   return (
     <section aria-label="Demo" className="bg-mist px-5 py-3">
       <div className="mx-auto flex max-w-md flex-col gap-3 lg:max-w-6xl">
-        <p className="font-bold">{DEMO_COPY.banner}</p>
+        <p className="font-semibold">{DEMO_COPY.banner}</p>
         {confirming ? (
           <>
             <p>{DEMO_COPY.resetConfirm}</p>

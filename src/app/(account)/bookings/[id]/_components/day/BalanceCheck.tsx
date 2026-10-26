@@ -13,7 +13,7 @@ const AROUND_CODES = new RegExp(`(${EWALLET_BALANCE_CODES.map((code) => code.rep
 export function BalanceCheck({ method }: { method: PaymentMethod | null }) {
   const text = method ? BALANCE_CHECKS[method] : BALANCE_CHECK_ANY;
   return (
-    <p className="text-lg font-bold">
+    <p className="text-base font-semibold">
       {text.split(AROUND_CODES).map((part, index) =>
         isCode(part) ? (
           <a key={index} href={`tel:${encodeURIComponent(part)}`} className="whitespace-nowrap underline underline-offset-4">

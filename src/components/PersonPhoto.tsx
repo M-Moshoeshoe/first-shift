@@ -36,9 +36,9 @@ export function PersonPhoto({ subject, kind, alt }: { subject: string; kind: "pr
   }, [subject, kind]);
 
   // A blob from our own server, already sized on upload: nothing for the image optimiser to do.
-  if (url) return <Image src={url} alt={alt} width={96} height={96} unoptimized className="size-24 shrink-0 border-2 border-ink object-cover" />;
+  if (url) return <Image src={url} alt={alt} width={96} height={96} unoptimized className="size-24 shrink-0 border border-line object-cover" />;
   return (
-    <div role="img" aria-label={missing ? `${alt}: no photo` : `${alt}: loading`} className={`flex size-24 shrink-0 items-center justify-center border-2 border-mist bg-mist p-1 text-center text-sm text-muted ${missing ? "" : "animate-skeleton"}`}>
+    <div role="img" aria-label={missing ? `${alt}: no photo` : `${alt}: loading`} className={`flex size-24 shrink-0 items-center justify-center border border-mist bg-mist p-1 text-center text-sm text-muted ${missing ? "" : "skeleton"}`}>
       {missing ? "No photo" : null}
     </div>
   );

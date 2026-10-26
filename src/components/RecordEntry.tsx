@@ -11,22 +11,22 @@ interface RecordEntryProps {
 /** One verified line on a work record: the tryout, confirmed paid by both sides, and its approved reference if there is one. */
 export function RecordEntry({ entry, note }: RecordEntryProps) {
   return (
-    <article className="flex flex-col gap-3 border-2 border-ink p-4">
+    <article className="flex flex-col gap-3 border border-line p-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-xl font-bold">{entry.title}</h3>
-        <p className="text-lg">
+        <p className="text-base">
           {entry.businessName}, {entry.businessArea}
         </p>
         <p className="text-sm text-muted tabular-nums">
           {entry.day}, {RECORD_COPY.hours(entry.hours)}
         </p>
-        <p className="font-bold text-go">{RECORD_COPY.verified}</p>
+        <p className="font-semibold text-go">{RECORD_COPY.verified}</p>
       </div>
       {entry.reference ? (
-        <div className="flex flex-col gap-2 border-t-2 border-ink pt-3">
-          <p className="text-sm font-bold">{REFERENCE_COPY.criteria}</p>
+        <div className="flex flex-col gap-2 border-t border-line pt-3">
+          <p className="text-sm font-semibold">{REFERENCE_COPY.criteria}</p>
           <AnswerList answers={entry.reference.answers} />
-          <p className="text-lg">{entry.reference.text}</p>
+          <p className="text-base">{entry.reference.text}</p>
           <p className="text-sm text-muted">{REFERENCE_COPY.writtenWithAi}</p>
         </div>
       ) : null}

@@ -27,7 +27,7 @@ export function ConfirmStep({ path, label, explain, yes, fallback, done }: Confi
   }
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-lg">{explain}</p>
+      <p className="text-base">{explain}</p>
       <Button variant="stop" busy={step.busy} busyLabel="Sending" onClick={() => void step.send()}>
         {yes}
       </Button>

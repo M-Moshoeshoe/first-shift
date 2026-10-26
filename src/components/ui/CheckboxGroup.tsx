@@ -32,7 +32,7 @@ export function CheckboxGroup<T extends string>({ id, legend, options, values, o
 
   return (
     <fieldset data-field={id} aria-describedby={hint ? `${hintId} ${errorId}` : errorId} className="flex flex-col gap-2">
-      <legend className="mb-2 font-bold">{legend}</legend>
+      <legend className="mb-2 font-semibold">{legend}</legend>
       {hint ? (
         <p id={hintId} className="text-sm text-muted">
           {hint}
@@ -55,7 +55,7 @@ export function CheckboxGroup<T extends string>({ id, legend, options, values, o
               onChange={(event) => toggle(option.value, event.target.checked)}
               className="peer sr-only"
             />
-            <span aria-hidden="true" className="size-6 shrink-0 border-2 border-edge bg-paper peer-checked:border-ink peer-checked:bg-ink" />
+            <span aria-hidden="true" className="size-6 shrink-0 border border-edge bg-paper peer-checked:border-ink peer-checked:bg-ink" />
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
@@ -64,7 +64,7 @@ export function CheckboxGroup<T extends string>({ id, legend, options, values, o
               <path d="M6 12l4 4 8-9" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
             </svg>
             <span className="flex flex-col">
-              <span className="text-lg">{option.label}</span>
+              <span className="text-base">{option.label}</span>
               {option.detail ? <span className="text-sm text-muted">{option.detail}</span> : null}
             </span>
           </label>

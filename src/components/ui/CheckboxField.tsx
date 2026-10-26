@@ -26,11 +26,11 @@ export function CheckboxField({ id, label, checked, onChange, error }: CheckboxF
           onChange={(event) => onChange(event.target.checked)}
           className="peer sr-only"
         />
-        <span aria-hidden="true" className="size-6 shrink-0 border-2 border-edge bg-paper peer-checked:border-ink peer-checked:bg-ink peer-aria-invalid:border-stop" />
+        <span aria-hidden="true" className="size-6 shrink-0 border border-edge bg-paper peer-checked:border-ink peer-checked:bg-ink peer-aria-invalid:border-stop" />
         <svg aria-hidden="true" viewBox="0 0 24 24" className="pointer-events-none absolute top-1/2 left-0 hidden size-6 -translate-y-1/2 text-paper peer-checked:block">
           <path d="M6 12l4 4 8-9" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
         </svg>
-        <span className="text-lg">{label}</span>
+        <span className="text-base">{label}</span>
       </label>
       <FormError id={errorId} message={error} />
     </div>

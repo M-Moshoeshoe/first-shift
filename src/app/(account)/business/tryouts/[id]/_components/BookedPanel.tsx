@@ -9,7 +9,7 @@ export function BookedPanel({ bookingId, name }: { bookingId: string; name: stri
       <h2 id="booked-heading" className="text-xl font-bold">
         {name ? OWNER_COPY.booked(name) : OWNER_COPY.bookedNoName}
       </h2>
-      <p className="text-lg">{OWNER_COPY.bookedNext}</p>
+      <p className="text-base">{OWNER_COPY.bookedNext}</p>
       <Link href={`/bookings/${bookingId}`} className={buttonClass("primary")}>
         {OWNER_COPY.seeBooking}
       </Link>

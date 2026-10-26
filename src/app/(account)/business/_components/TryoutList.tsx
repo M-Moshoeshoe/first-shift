@@ -61,8 +61,8 @@ export function TryoutList({ uid }: { uid: string }) {
   if (list.tryouts.length === 0) {
     return (
       <div className="flex flex-col gap-2">
-        <h3 className="text-lg font-bold">No tryouts yet</h3>
-        <p className="text-lg">Post your first tryout in one sentence. Young people nearby will see it straight away.</p>
+        <h3 className="text-base font-bold">No tryouts yet</h3>
+        <p className="text-base">Post your first tryout in one sentence. Young people nearby will see it straight away.</p>
       </div>
     );
   }
@@ -82,7 +82,7 @@ export function TryoutList({ uid }: { uid: string }) {
                 payCents={tryout.payCents}
                 footer={
                   <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-4">
-                    <Link href={`/business/tryouts/${tryout.id}`} aria-label={`${statusLine(tryout)}: open ${tryout.title} on ${day}`} className="inline-flex min-h-11 items-center font-bold underline underline-offset-4 tabular-nums">
+                    <Link href={`/business/tryouts/${tryout.id}`} aria-label={`${statusLine(tryout)}: open ${tryout.title} on ${day}`} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4 tabular-nums">
                       {statusLine(tryout)}
                     </Link>
                     {canWithdraw(tryout.status) ? (

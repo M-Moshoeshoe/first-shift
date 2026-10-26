@@ -59,7 +59,7 @@ export function PhotoField({ id, label, hint, error, preview, camera, allowGalle
 
   return (
     <div data-field={id} className="flex flex-col gap-2">
-      <p className="font-bold">{label}</p>
+      <p className="font-semibold">{label}</p>
       {hint ? (
         <p id={hintId} className="text-sm text-muted">
           {hint}
@@ -72,7 +72,7 @@ export function PhotoField({ id, label, hint, error, preview, camera, allowGalle
           ))}
         </ul>
       ) : null}
-      {preview && mode !== "open" ? <Image src={preview} alt="The photo you took" width={128} height={128} unoptimized className="size-32 border-2 border-ink object-cover" /> : null}
+      {preview && mode !== "open" ? <Image src={preview} alt="The photo you took" width={128} height={128} unoptimized className="size-32 border border-line object-cover" /> : null}
       <div className="flex flex-col gap-3">
         {mode === "closed" ? (
           <Button variant="secondary" aria-describedby={describedBy} onClick={() => setMode("open")}>
@@ -80,7 +80,7 @@ export function PhotoField({ id, label, hint, error, preview, camera, allowGalle
           </Button>
         ) : null}
         {mode === "open" ? (
-          <Suspense fallback={<div role="status" aria-label={CAMERA_COPY.opening} className="aspect-square w-full animate-skeleton bg-mist" />}>
+          <Suspense fallback={<div role="status" aria-label={CAMERA_COPY.opening} className="aspect-square w-full skeleton" />}>
             <CameraView
               facing={camera}
               onUnavailable={unavailable}

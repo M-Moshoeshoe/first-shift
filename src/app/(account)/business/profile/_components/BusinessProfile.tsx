@@ -39,7 +39,7 @@ export function BusinessProfile() {
       <PageTitle headingRef={heading} title="Your business" intro="What young people see when they book you, and what we keep private." />
       <SavedSummary id="business-saved" title="The business" rows={shop} />
       <SavedSummary id="owner-saved" title="You, the owner" rows={you} />
-      <p className="text-lg">
+      <p className="text-base">
         To change any of these, email us at{" "}
         <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">
           {SUPPORT_EMAIL}

@@ -80,7 +80,7 @@ export function SignInPanel() {
   // Signed in, but the profile didn't load: say why, and offer Try again and Sign out.
   if (user && profileError?.uid === user.uid) return <ProfileErrorState message={profileError.message} onRetry={retry} />;
   // A placeholder the exact height of the button while it works out who this is and where they go.
-  if (loading || user) return <div role="status" aria-label="Checking whether you're signed in" className="h-13 animate-skeleton bg-mist" />;
+  if (loading || user) return <div role="status" aria-label="Checking whether you're signed in" className="h-13 skeleton" />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -103,7 +103,7 @@ export function SignInPanel() {
       </div>
       <DemoChoice />
       {showDemo ? (
-        <Suspense fallback={<div role="status" aria-label="Opening the demo sign-in" className="h-64 animate-skeleton bg-mist" />}>
+        <Suspense fallback={<div role="status" aria-label="Opening the demo sign-in" className="h-64 skeleton" />}>
           <DemoSignIn />
         </Suspense>
       ) : (

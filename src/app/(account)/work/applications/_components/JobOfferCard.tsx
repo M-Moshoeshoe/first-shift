@@ -35,15 +35,15 @@ export function JobOfferCard({ offer, onAnswered }: { offer: JobOffer; onAnswere
   };
 
   return (
-    <section aria-labelledby={`job-${offer.id}`} className="flex flex-col gap-3 border-2 border-ink p-4">
+    <section aria-labelledby={`job-${offer.id}`} className="flex flex-col gap-3 border border-line p-4">
       <h2 id={`job-${offer.id}`} className="text-xl font-bold">
         {offer.kind === "offer" ? HIRE_COPY.received(offer.businessName) : HIRE_COPY.receivedTalk(offer.businessName)}
       </h2>
-      {offer.details ? <p className="text-lg">{HIRE_COPY.summary(offer.details)}</p> : null}
-      {offer.message ? <p className="text-lg">&ldquo;{offer.message}&rdquo;</p> : null}
+      {offer.details ? <p className="text-base">{HIRE_COPY.summary(offer.details)}</p> : null}
+      {offer.message ? <p className="text-base">&ldquo;{offer.message}&rdquo;</p> : null}
       {offer.answer === "interested" ? (
         <>
-          <p className="text-lg">{HIRE_COPY.youInterested(offer.ownerFirstName)}</p>
+          <p className="text-base">{HIRE_COPY.youInterested(offer.ownerFirstName)}</p>
           {offer.whatsappUrl ? (
             <a href={offer.whatsappUrl} target="_blank" rel="noopener noreferrer" className={buttonClass("secondary")}>
               {HIRE_COPY.messageOwner(offer.ownerFirstName)}
@@ -51,7 +51,7 @@ export function JobOfferCard({ offer, onAnswered }: { offer: JobOffer; onAnswere
           ) : null}
         </>
       ) : offer.answer === "not_now" ? (
-        <p className="text-lg">{HIRE_COPY.youNotNow}</p>
+        <p className="text-base">{HIRE_COPY.youNotNow}</p>
       ) : (
         <>
           <Button variant="secondary" busy={busy === "interested"} busyLabel={HIRE_COPY.answering} onClick={() => void answer("interested")}>

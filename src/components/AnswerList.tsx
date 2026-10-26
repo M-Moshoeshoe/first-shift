@@ -8,7 +8,7 @@ export function AnswerList({ answers }: { answers: OwnerAnswers }) {
       {ANSWER_ORDER.map((key) => (
         <div key={key} className="flex flex-wrap gap-x-2">
           <dt className="text-muted">{ANSWER_QUESTIONS[key]}</dt>
-          <dd className="font-bold">{yesNo(answers[key])}</dd>
+          <dd className="font-semibold">{yesNo(answers[key])}</dd>
         </div>
       ))}
     </dl>

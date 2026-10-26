@@ -21,7 +21,7 @@ const SPECS: Record<string, Spec> = {
   "/business/post": { title: { phone: 1, desktop: 1 }, intro: { phone: 4, desktop: 3 }, body: "form" },
 };
 
-const block = "animate-skeleton bg-mist";
+const block = "skeleton";
 
 /** One line of text: the bar sits inside a box the line's exact height. */
 function LineBars({ lines, lineClass, barClass }: { lines: Lines; lineClass: string; barClass: string }) {

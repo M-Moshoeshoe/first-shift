@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Archivo } from "next/font/google";
 import type { ReactNode } from "react";
 import { THEME_COLOR } from "@/config/theme";
 import "./globals.css";
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "First Shift", statusBarStyle: "default" },
 };
 
+// Archivo, variable in weight and width, self-hosted by next/font: no JavaScript, no third-party request (docs/DESIGN.md, Type).
+const archivo = Archivo({ subsets: ["latin"], display: "swap", axes: ["wdth"], variable: "--font-archivo" });
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -20,7 +24,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-ZA">
+    <html lang="en-ZA" className={archivo.variable}>
       <body className="min-h-dvh font-sans antialiased">{children}</body>
     </html>
   );

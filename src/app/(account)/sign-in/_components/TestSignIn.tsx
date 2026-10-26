@@ -35,7 +35,7 @@ export function TestSignIn() {
   };
 
   return (
-    <form data-marker={TEST_SIGN_IN_MARKER} onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4 border-2 border-edge p-4">
+    <form data-marker={TEST_SIGN_IN_MARKER} onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4 border border-edge p-4">
       <TextField id="test-account" label="Test account (emulators only)" value={name} onChange={(event) => setName(event.target.value)} autoComplete="off" />
       <Button type="submit" variant="secondary" busy={busy} busyLabel="Signing in">
         Sign in as test account

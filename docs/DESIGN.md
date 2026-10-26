@@ -4,6 +4,14 @@
 
 Young people on cheap Android phones, often outdoors in bright sun, and busy small-business owners who aren't fond of forms. The app is a working tool, so it should look like one: confident, plain and readable at a glance.
 
+## Version 4 (26 October 2026)
+
+A quieter, denser system after the audit (`docs/AUDIT-2.md`): Archivo type with a semi-condensed heading width, a smaller type scale, 1 px borders, smaller buttons, Lucide icons, and the owner's logo. The palette, the contrast ratios, the slip, the Stamp and the sharp edges are unchanged. References: our own builds (Citrus Aura, Dragon Pilates), Findra and PopArt Studio for density and numbered sections; Nielsen's heuristics, NN/g's error-message guidelines and WCAG 2.2 AA as the bar.
+
+## Logo
+
+The owner's mark (`public/icons/app_logo.png`, 1024 by 1024, transparent; green `#0E5A43` and gold `#C9A24E`) and wordmark (`header_logo.png`, 2400 by 760, transparent; adds ink `#20332C`). Their green and gold sit in the same hues as `primary` and `gold`, a little deeper, so the tokens stay as they are. Web copies, trimmed and sized for 2x screens, are in `src/assets`; the app icons are generated from the mark. Alt text "First Shift". The logo is an image, so the "gold only on the slip and the Stamp" rule applies to our CSS, not to it.
+
 ## Concept: green and gold
 
 Green and gold, picked for the team: South Africa's sporting colours. Green means paid and go. Gold means reward.
@@ -53,45 +61,62 @@ Never put text on `line`. Never put white text on `gold`, and never put `ink` te
 
 Gold is used for exactly two things: the stub of a shift slip and the Stamp. Not for highlights, badges, borders, links, icons or backgrounds. In code it is applied only by `ShiftSlip` and `Stamp`. Primary green fills only the one primary action per screenful, and is applied only by the primary button style.
 
-## Type
+## Type (v4, 26 October 2026)
 
-System fonts only, for speed on weak signal: `system-ui` and the platform defaults.
+**Archivo**, a variable font with width and weight axes, self-hosted through `next/font` (latin subset, `display: swap`), so it costs no JavaScript and no third-party request. System fonts stay as the fallback.
 
-| Role | Size | Weight |
-| --- | --- | --- |
-| Page title | 36 px (`text-4xl`) | Bold, letter-spacing -0.02em (`tracking-title`) |
-| Pay on a slip | 24 px (`text-2xl`) | Bold |
-| Section heading | 20 px (`text-xl`) | Bold |
-| Body | 16 to 18 px | Regular |
-| Stamp label | 16 px (`text-base`) | Bold |
-| Secondary | 14 px (`text-sm`) | Regular, `muted` |
-| Errors | 14 px (`text-sm`) | Regular, `stop`; never bold, so four errors at once don't become a wall |
+- Headings (`h1` to `h3`): semi-condensed (width 87, `font-stretch: 87%`) at weight 700, tracking -0.02em. Set once in `globals.css`.
+- Body and UI: normal width at 400, and 600 for labels, buttons and emphasis. Never 700 outside headings.
+- Money always uses tabular numerals (`tabular-nums`).
 
-Money always uses tabular numerals (`tabular-nums`), so amounts line up and don't shift as they change.
+Premium comes from the contrast between large and small, not from size: a big title, quiet text around it.
 
-Keep lines under 70 characters. Left-align everything.
+| Role | Phone | Desktop (1024 px) | Class |
+| --- | --- | --- | --- |
+| Hero (home only) | 40/44 | 64/68 | `text-hero lg:text-hero-lg` |
+| Page title | 28/32 | 36/40 | `text-title lg:text-title-lg` |
+| Section heading | 20/26 | 20/26 | `text-xl` |
+| Pay on a slip | 24/32 | 24/32 | `text-2xl` |
+| Body | 16/24 | 16/24 | `text-base` |
+| Small, secondary | 14/20 | 14/20 | `text-sm`, `muted` |
+| Micro: chips, tags, step numbers | 12/16 | 12/16 | `text-micro` |
+| Errors | 14/20, `stop`, never bold | | |
+
+Keep lines under 70 characters. Left-align everything. `text-wrap: balance` on the hero.
 
 ## Shape
 
-- Sharp edges everywhere: border radius 0 on cards, slips, inputs and buttons. The radius tokens are removed in `globals.css`, so the scale classes (`rounded`, `rounded-lg` and the like) generate nothing. `rounded-full`, `rounded-none` and arbitrary values such as `rounded-[8px]` still work in Tailwind v4, so never use any `rounded-*` class.
+- Sharp edges everywhere: border radius 0. The radius tokens are removed in `globals.css`; never use any `rounded-*` class.
 - Photos are square. No circles anywhere.
-- Edges are drawn, not shaded: a 2 px `ink` border on slips, cards, the Stamp and secondary buttons, `edge` on inputs. No shadows.
+- **Borders are 1 px.** Cards and dividers use `line`; inputs and secondary buttons use `edge` or `ink` (control edges need 3:1). **2 px `ink` only for the shift slip and focus rings.** No shadows.
 
 ## Spacing
 
-Seven steps, each with one job. Every gap and margin in `src/` is one of them, used for its job.
-
 | Step | Tailwind | Use |
 | --- | --- | --- |
-| 4 px | `1` | Tight pairs: a term and its value, lines inside one slip |
-| 8 px | `2` | Inside a field: label, hint, input and error; a heading and its one sentence |
-| 12 px | `3` | Button stacks: buttons, and the error under them |
-| 16 px | `4` | Between fields in a form; a page title and the sentence under it |
-| 24 px | `6` | Between groups: the title block, the form, the actions (`Band`'s gap) |
-| 32 px | `8` | Band padding, top and bottom |
-| 48 px | `12` | Page sections on a desktop: between columns, around the app column |
+| 4 px | `1` | Tight pairs: a term and its value |
+| 8 to 12 px | `2`, `3` | Related items: label, hint, input and error; a button stack |
+| 16 px | `4` | Card padding; between fields in a form |
+| 24 px | `6` | Between groups (`Band`'s gap) |
+| 48 px | `12` | Between sections on a phone; app screens' band padding stays 32 (`8`) |
+| 96 px | `24` | Between sections on a desktop (marketing bands) |
 
-The side gutter stays 20 px (`px-5`), a layout value rather than a spacing step: it's what keeps a 360 px phone's column at 320 px.
+The side gutter stays 20 px (`px-5`): it keeps a 360 px phone's column at 320 px.
+
+## Buttons and links
+
+| Kind | Size | Look | Use |
+| --- | --- | --- | --- |
+| Primary | 48 px tall | Green fill, white 600 text | The one main action per screenful |
+| Secondary | 44 px tall | 1 px `ink` outline, 600 text | Every other action |
+| Tertiary | 44 px tap target | Text with the animated underline | Quiet actions: Sign out, Back, Keep going |
+| Stop | 44 px tall | 1 px `stop` outline, `stop` text | Undoing: withdraw, cancel |
+
+Links in running text carry a 1 px underline that thickens to 2 px on hover and focus, over 0.3 s, `cubic-bezier(.2,.7,.2,1)` (`link` utility).
+
+## Icons
+
+One set only: **Lucide** (ISC licence), `lucide-react` pinned, imported per icon so each page carries only its own. 20 px in tabs and buttons, 1.75 stroke, always next to a text label or with an accessible name. No sparkle icons, no AI badges.
 
 ## Layout
 
@@ -131,7 +156,7 @@ CSS only, no animation libraries. Tokens in `globals.css`:
 
 Motion animates `transform` and `opacity` only. No JavaScript scroll listeners and no timers.
 
-These eight are the only motion allowed. Anything not listed here is not allowed, including hover animations and spinners.
+These are the only motion allowed: the eight below, and the v4 additions after them. Anything not listed is not allowed, including spinners.
 
 ### App screens
 
@@ -148,6 +173,18 @@ Responses to what the person did, or to new data. App screens never use scroll r
 
 7. **Scroll reveal.** The `reveal` utility fades an element in from 12 px below as it enters the viewport, with a CSS scroll-driven animation (`animation-timeline: view()`, `animation-range: entry 0% entry 100%`) inside `@supports (animation-timeline: view())`. It finishes the moment the element is fully on screen; a later end such as `cover 30%` is never reached by a short band at the foot of the page, which stays half faded. Use it only on elements shorter than the viewport. Without support, content is simply visible. The steps in "How it works" use `reveal-steps` and `reveal-step` to arrive one after another through their own slices of the list's scroll range, not timers.
 8. **The one load sequence.** The example slip slides in from 16 px below and fades from opacity 0 to 1, both over `--dur-slow`, then its Booked Stamp lands 240 ms after the slide ends (`load-sequence`). This is the only load animation in the product.
+
+### Added in v4 (26 October 2026)
+
+9. **Header hide and show** (marketing only): the header slides up out of view while scrolling down and back on scrolling up, `transform` over `--dur-base`. A passive scroll listener, no library.
+10. **Link underline**: 1 px to 2 px over 0.3 s, `cubic-bezier(.2,.7,.2,1)`.
+11. **Drawer**: the phone menu slides in from the right over `--dur-slow` with `--ease-out`, its `ink` 40% scrim fading with it.
+12. **Card hover lift**: desktop and a real pointer only (`@media (hover: hover)`), `translateY(-2px)` over 120 ms.
+13. **Skeleton shimmer**: a light band crossing the placeholder, by `transform`, replacing the opacity pulse.
+14. **Toast**: enters from 8 px below and fades in; leaves by fading out.
+15. **The AI guide's ticks**: each step's tick lands (scale 0.6 to 1 and fade) when that step really completes. Never on a timer.
+
+No smooth-scroll library.
 
 ### Reduced motion
 

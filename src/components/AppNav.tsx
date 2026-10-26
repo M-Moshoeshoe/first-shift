@@ -9,14 +9,14 @@ import { NavLabel } from "./NavLabel";
 export function AppNav({ items, badge }: { items: readonly NavItem[]; badge: number }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 border-t-2 border-ink bg-paper lg:hidden">
+    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 border-t border-line bg-paper lg:hidden">
       <ul className="mx-auto flex max-w-md">
         {items.map((item) => (
           <li key={item.href} className="flex-1">
             <Link
               href={item.href}
               aria-current={pathname === item.href ? "page" : undefined}
-              className="flex min-h-14 items-center justify-center font-bold text-muted aria-[current=page]:bg-mist aria-[current=page]:text-ink"
+              className="flex min-h-14 items-center justify-center font-semibold text-muted aria-[current=page]:bg-mist aria-[current=page]:text-ink"
             >
               <NavLabel item={item} count={badge} />
             </Link>
