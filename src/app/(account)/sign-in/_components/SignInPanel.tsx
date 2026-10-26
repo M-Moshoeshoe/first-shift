@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 import { ProfileErrorState } from "@/components/ProfileErrorState";
@@ -15,6 +14,8 @@ import { useAuth } from "@/lib/auth/useAuth";
 import { signInWithGoogle } from "@/lib/auth/signInWithGoogle";
 import { testSignInAllowed } from "@/lib/emulators";
 import { DemoChoice } from "./DemoChoice";
+import { GoogleButton } from "./GoogleButton";
+import { TermsLine } from "./TermsLine";
 
 const ERROR_ID = "sign-in-error";
 
@@ -85,34 +86,26 @@ export function SignInPanel() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
-        <Button busy={busy} busyLabel="Opening Google" onClick={() => void handleSignIn()} aria-describedby={ERROR_ID}>
-          {BUTTON_LABELS.continueWithGoogle}
-        </Button>
+        <GoogleButton busy={busy} onClick={() => void handleSignIn()} aria-describedby={ERROR_ID}>
+          {busy ? "Opening Google" : BUTTON_LABELS.continueWithGoogle}
+        </GoogleButton>
         <FormError id={ERROR_ID} message={message} />
-        <p className="text-sm text-muted">
-          By continuing, you agree to the{" "}
-          <Link href="/terms" className="underline">
-            Terms
-          </Link>{" "}
-          and the{" "}
-          <Link href="/privacy" className="underline">
-            Privacy notice
-          </Link>
-          .
-        </p>
+        <TermsLine />
       </div>
-      <DemoChoice />
-      {showDemo ? (
-        <Suspense fallback={<div role="status" aria-label="Opening the demo sign-in" className="h-64 skeleton" />}>
-          <DemoSignIn />
-        </Suspense>
-      ) : (
-        <div>
-          <Button variant="quiet" onClick={() => setShowDemo(true)}>
-            Testers: sign in with a demo email
-          </Button>
-        </div>
-      )}
+      <div role="separator" className="h-px bg-line" />
+      <DemoChoice>
+        {showDemo ? (
+          <Suspense fallback={<div role="status" aria-label="Opening the demo sign-in" className="h-64 skeleton" />}>
+            <DemoSignIn />
+          </Suspense>
+        ) : (
+          <div>
+            <Button variant="quiet" onClick={() => setShowDemo(true)}>
+              Testers: sign in with a demo email
+            </Button>
+          </div>
+        )}
+      </DemoChoice>
       {TestSignIn ? <TestSignIn /> : null}
     </div>
   );

@@ -1,19 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import type { DemoRole } from "@/config/demo";
-import { Button } from "@/components/ui/Button";
+import { useState, type ReactNode } from "react";
+import { BrandMark } from "@/components/BrandMark";
 import { FormError } from "@/components/ui/FormError";
+import type { DemoRole } from "@/config/demo";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 
 const ERROR_ID = "demo-choice-error";
 
+const ROLES: readonly { role: DemoRole; label: string; line: string }[] = [
+  { role: "young_person", label: BUTTON_LABELS.tryAsThabo, line: "Find tryouts near Ivory Park, apply, and build a work record." },
+  { role: "business", label: BUTTON_LABELS.tryAsSipho, line: "Post a tryout, book Thabo, pay them, and offer a job." },
+];
+
 /**
- * The judges' way in: one tap to either demo account, no password to type
- * (lib/auth/signInWithDemo.ts). The sign-in code loads only on tap, so the
- * page stays light. Once signed in, SignInPanel sends them on as for Google.
+ * The judges' way in, apart from real sign-in: one tap to either demo account,
+ * no password to type (lib/auth/signInWithDemo.ts). The sign-in code loads
+ * only on tap, so the page stays light. Once signed in, SignInPanel sends them
+ * on as for Google. The testers' email form sits underneath (children).
  */
-export function DemoChoice() {
+export function DemoChoice({ children }: { children?: ReactNode }) {
   const [busy, setBusy] = useState<DemoRole | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,18 +36,29 @@ export function DemoChoice() {
   };
 
   return (
-    <section id="demo" aria-labelledby="demo-heading" className="flex flex-col gap-3">
-      <h2 id="demo-heading" className="text-xl font-bold">
-        Try the demo
+    <section id="demo" aria-labelledby="demo-heading" className="flex flex-col gap-3 bg-mist p-4">
+      <h2 id="demo-heading" className="text-xl">
+        Judging First Shift? Try a demo account
       </h2>
-      <p className="text-base">Two demo accounts with made-up people and businesses. Nothing you do in them reaches real people.</p>
-      <Button variant="secondary" busy={busy === "young_person"} busyLabel="Signing in" onClick={() => void choose("young_person")} aria-describedby={ERROR_ID}>
-        {BUTTON_LABELS.tryAsThabo}
-      </Button>
-      <Button variant="secondary" busy={busy === "business"} busyLabel="Signing in" onClick={() => void choose("business")} aria-describedby={ERROR_ID}>
-        {BUTTON_LABELS.tryAsSipho}
-      </Button>
+      {ROLES.map(({ role, label, line }) => (
+        <button
+          key={role}
+          type="button"
+          aria-busy={busy === role || undefined}
+          aria-describedby={ERROR_ID}
+          onClick={() => void choose(role)}
+          className="lift flex min-h-16 w-full items-center gap-3 border border-line bg-paper p-3 text-left transition-transform duration-(--dur-fast) active:scale-97"
+        >
+          <BrandMark height={28} />
+          <span className="flex flex-col">
+            <span className="text-base font-semibold">{busy === role ? "Signing in" : label}</span>
+            <span className="text-sm text-muted">{line}</span>
+          </span>
+        </button>
+      ))}
       <FormError id={ERROR_ID} message={error} />
+      <p className="text-sm text-muted">Made-up people and businesses. Nothing you do reaches real users.</p>
+      {children}
     </section>
   );
 }

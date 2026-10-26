@@ -14,6 +14,8 @@ const DemoBar = lazy(() => import("./DemoBar").then((module) => ({ default: modu
 interface AppShellProps {
   /** The role's destinations; shown once there are enough of them to be worth a bar (src/config/nav.ts). */
   nav?: readonly NavItem[];
+  /** The screen draws its own card on the mist backdrop at every width (sign-in), instead of the desktop app column. */
+  bare?: boolean;
   children: ReactNode;
 }
 
@@ -23,7 +25,7 @@ interface AppShellProps {
  * backdrop, paper inside a 2 px ink edge, so it reads as a deliberate app
  * rather than a stretched phone page (docs/DESIGN.md, Layout).
  */
-export function AppShell({ nav = [], children }: AppShellProps) {
+export function AppShell({ nav = [], bare = false, children }: AppShellProps) {
   const items = nav.length >= NAV_MIN_ITEMS ? nav : [];
   const badge = useBadge(items.length > 0);
   const { user } = useAuth();
@@ -35,9 +37,13 @@ export function AppShell({ nav = [], children }: AppShellProps) {
           <DemoBar />
         </Suspense>
       ) : null}
-      <main className={`flex-1 lg:bg-mist lg:px-5 lg:py-12 ${items.length > 0 ? "pb-16 lg:pb-12" : ""}`}>
-        <div className="lg:mx-auto lg:max-w-md lg:border lg:border-line lg:bg-paper">{children}</div>
-      </main>
+      {bare ? (
+        <main className="flex-1 bg-mist px-5 py-8 lg:py-12">{children}</main>
+      ) : (
+        <main className={`flex-1 lg:bg-mist lg:px-5 lg:py-12 ${items.length > 0 ? "pb-16 lg:pb-12" : ""}`}>
+          <div className="lg:mx-auto lg:max-w-md lg:border lg:border-line lg:bg-paper">{children}</div>
+        </main>
+      )}
       {items.length > 0 ? <AppNav items={items} badge={badge} /> : null}
     </div>
   );
