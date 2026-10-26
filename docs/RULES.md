@@ -234,6 +234,8 @@ A business pays for tryouts with prepaid credits (`credits.ts`), so nobody has t
 | Booking | Needs an available credit, and holds it (wired in with booking) |
 | Available | Granted, minus used, minus held |
 | Expiry | Credits never expire |
-| Top-ups | Not open yet. A business that needs more contacts support. Unused paid credits will be refundable on request, less the gateway fee |
+| The Credits screen | In the business's tab bar: credits available, held for booked tryouts and free credits left (free credits are spent first), and the history in plain words: added, held, used, returned and requested | `freeLeft`, `creditHistory` |
+| Asking for more | "Request more credits" opens a case for an admin, once: tapping again shows "Requested on {date}. We'll add them and let you know." An admin adds them with `npm run credits:grant` (1 to 50 at a time, always with a reason, audit-logged under the admin's name), which closes the request | `decideCreditRequest`, `decideAdminGrant` |
+| Top-ups | Not open yet, so there's no payment button. The screen says, as text only: "At launch: 5 tryouts for R125 or 10 for R250, by card or Instant EFT." Unused paid credits will be refundable on request, less the gateway fee | `CREDITS_COPY.launch` |
 
 The ledger is append-only: entries are only ever added, by the server, in the same transaction as the event that causes them, each with an audit entry.

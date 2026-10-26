@@ -26,6 +26,7 @@
     "e2e:demo": "tsx scripts/e2e/demo.ts",
     "eval:ai": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/evalAi.ts",
     "credits:backfill": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/backfillCredits.ts",
+    "credits:grant": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/grantCredits.ts",
     "review:tryout": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/reviewTryout.ts",
     "demo:accounts": "tsx --conditions=react-server --env-file-if-exists=.env.local --env-file-if-exists=.env.demo.local scripts/createDemoAccounts.ts",
     "demo:reset": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/resetDemo.ts"

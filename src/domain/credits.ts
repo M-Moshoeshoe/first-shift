@@ -7,7 +7,8 @@ import { RULES } from "@/config/rules";
  * it if the booking is cancelled. Entries are only ever added, never changed.
  */
 export type CreditEntry =
-  | { kind: "grant"; amount: number; reason: "welcome" | "top_up" }
+  // welcome: the free credits; top_up: bought (once top-ups open); granted: added by First Shift on request (npm run credits:grant).
+  | { kind: "grant"; amount: number; reason: "welcome" | "top_up" | "granted" }
   | { kind: "hold"; tryoutId: string }
   | { kind: "use"; tryoutId: string }
   | { kind: "release"; tryoutId: string };
@@ -80,4 +81,57 @@ export function decideUse(entries: readonly CreditEntry[], tryoutId: string): Cr
 /** When a booking is cancelled: return the held credit. Nothing held means nothing to do. */
 export function decideRelease(entries: readonly CreditEntry[], tryoutId: string): CreditDecision {
   return lastFor(entries, tryoutId) === "hold" ? { kind: "append", entries: [{ kind: "release", tryoutId }] } : { kind: "unchanged" };
+}
+
+/** The free credits not yet spent: they're spent first, so they're what's left of the welcome grant after every use and hold. */
+export function freeLeft(entries: readonly CreditEntry[]): number {
+  const welcome = entries.reduce((sum, entry) => (entry.kind === "grant" && entry.reason === "welcome" ? sum + entry.amount : sum), 0);
+  const { used, held } = creditBalance(entries);
+  return Math.max(0, welcome - used - held);
+}
+
+export type CreditEventKind = "granted" | "held" | "used" | "returned" | "requested";
+
+/** One line of the Credits screen's history, newest first. */
+export interface CreditEvent {
+  kind: CreditEventKind;
+  at: Date;
+  /** Credits added, for a grant; 1 otherwise. */
+  amount: number;
+  /** The free credits, or credits added on request: said differently. */
+  free: boolean;
+  /** The tryout a hold, use or return was for, when it's known. */
+  tryoutTitle: string | null;
+}
+
+/** The ledger and the requests as one history in plain words (creditsCopy.ts), newest first. */
+export function creditHistory(entries: readonly { entry: CreditEntry; at: Date }[], requests: readonly Date[], titles: ReadonlyMap<string, string>): CreditEvent[] {
+  const kinds = { grant: "granted", hold: "held", use: "used", release: "returned" } as const;
+  const fromLedger = entries.map(({ entry, at }): CreditEvent => ({
+    kind: kinds[entry.kind],
+    at,
+    amount: entry.kind === "grant" ? entry.amount : 1,
+    free: entry.kind === "grant" && entry.reason === "welcome",
+    tryoutTitle: entry.kind === "grant" ? null : (titles.get(entry.tryoutId) ?? null),
+  }));
+  const asked = requests.map((at): CreditEvent => ({ kind: "requested", at, amount: 0, free: false, tryoutTitle: null }));
+  return [...fromLedger, ...asked].sort((a, b) => b.at.getTime() - a.at.getTime());
+}
+
+export type CreditRequestDecision = { kind: "request" } | { kind: "unchanged" } | { kind: "refuse"; problem: "not_business" };
+
+/** A business asks for more credits: one request open at a time, so a second tap changes nothing. */
+export function decideCreditRequest(isBusiness: boolean, openRequest: boolean): CreditRequestDecision {
+  if (!isBusiness) return { kind: "refuse", problem: "not_business" };
+  return openRequest ? { kind: "unchanged" } : { kind: "request" };
+}
+
+export type GrantProblem = "amount" | "reason" | "not_business";
+
+/** An admin adds credits (npm run credits:grant): a whole number from 1 to the limit, always with a reason. */
+export function decideAdminGrant(isBusiness: boolean, amount: number, reason: string): { kind: "append"; entries: CreditEntry[] } | { kind: "refuse"; problem: GrantProblem } {
+  if (!isBusiness) return { kind: "refuse", problem: "not_business" };
+  if (!Number.isInteger(amount) || amount < 1 || amount > RULES.adminGrantMaxCredits) return { kind: "refuse", problem: "amount" };
+  if (reason.trim().length < 3) return { kind: "refuse", problem: "reason" };
+  return { kind: "append", entries: [{ kind: "grant", amount, reason: "granted" }] };
 }

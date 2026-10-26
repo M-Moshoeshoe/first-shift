@@ -54,10 +54,16 @@ export function sastClock(date: Date): string {
   return `${hour}:${String(minute).padStart(2, "0")}`;
 }
 
+/** A South African day as the slips show it: "Tue 27 Oct". */
+export function sastDay(date: Date): string {
+  const { day, month } = sastParts(date);
+  return `${DAYS[sastWeekday(date)]} ${day} ${MONTHS[month - 1]}`;
+}
+
 /** A tryout's day and hours as a slip shows them, in South African time: "Tue 27 Oct", "9:00 to 15:00". */
 export function sastSlot(start: Date, end: Date): { day: string; hours: string } {
   const from = sastParts(start);
   const to = sastParts(end);
   const clock = (parts: { hour: number; minute: number }) => `${parts.hour}:${String(parts.minute).padStart(2, "0")}`;
-  return { day: `${DAYS[sastWeekday(start)]} ${from.day} ${MONTHS[from.month - 1]}`, hours: `${clock(from)} to ${clock(to)}` };
+  return { day: sastDay(start), hours: `${clock(from)} to ${clock(to)}` };
 }

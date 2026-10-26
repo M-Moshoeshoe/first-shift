@@ -24,4 +24,5 @@ export const BUTTON_LABELS = {
   refresh: "Refresh",
   apply: "Apply",
   withdrawApplication: "Withdraw my application",
+  requestMoreCredits: "Request more credits",
 } as const;

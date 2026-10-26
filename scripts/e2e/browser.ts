@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type { Browser } from "playwright-core";
 import { business, youngPerson } from "./flows";
 import { bookingWalk } from "./bookingFlow";
+import { creditsWalk } from "./creditsFlow";
 import { dayWalk } from "./dayFlow";
 import { postingAndDashboard } from "./postingFlow";
 import { BASE, launchEdge, newPage, pathIs, recorder, signIn, throttle, type Recorder } from "./kit";
@@ -38,6 +39,7 @@ async function walk(browser: Browser, width: number): Promise<{ rec: Recorder; t
     const timings = await postingAndDashboard(rec, page);
     const bookingPath = await bookingWalk(rec, page);
     await dayWalk(rec, page, bookingPath);
+    await creditsWalk(rec, page);
     return { rec, timings };
   } catch (error) {
     // The screen as it was when a step failed, next to the others.

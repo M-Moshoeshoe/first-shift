@@ -62,6 +62,8 @@ export const RULES = {
   creditPriceCents: 2500,
   /** Granted once, when a business profile is first complete. */
   freeCredits: 3,
+  /** The most credits an admin can add in one grant (npm run credits:grant), so a typo can't add thousands. */
+  adminGrantMaxCredits: 50,
   minimumAge: 18,
 
   /** Profile and shopfront photos. storage.rules enforces the same limits on upload. */

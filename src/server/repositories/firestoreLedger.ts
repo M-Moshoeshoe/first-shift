@@ -12,12 +12,15 @@ import type { CreditEntry } from "@/domain/credits";
  * event that causes each entry, with an audit entry for each.
  */
 const EntrySchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("grant"), amount: z.number().int().positive(), reason: z.enum(["welcome", "top_up"]) }),
+  z.object({ kind: z.literal("grant"), amount: z.number().int().positive(), reason: z.enum(["welcome", "top_up", "granted"]) }),
   z.object({ kind: z.literal("hold"), tryoutId: z.string() }),
   z.object({ kind: z.literal("use"), tryoutId: z.string() }),
   z.object({ kind: z.literal("release"), tryoutId: z.string() }),
 ]);
 const StoredSchema = z.object({ seq: z.number().int().positive() });
+
+/** One stored entry, checked on the way in. */
+export const parseEntry = (data: unknown): CreditEntry => EntrySchema.parse(data);
 
 const ledger = (db: Firestore) => db.collection("creditLedger");
 const entryId = (businessId: string, seq: number) => `${businessId}_${String(seq).padStart(6, "0")}`;

@@ -34,6 +34,8 @@ export const JS_BUDGETS_KB = {
   "/bookings/booking": 260,
   // The owner's details, for a business from before they were asked (26 October 2026). + 10% is over the cap.
   "/business/owner": 260,
+  // The Credits screen, measured 245.8 KB (26 October 2026); + 10% is over the cap.
+  "/business/credits": 260,
   // The trusted contact's status page: a marketing page, no sign-in code, so it keeps the home page's budget. Measured 198.7 KB.
   "/status/token": 200,
 } as const;

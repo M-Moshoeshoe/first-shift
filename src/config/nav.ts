@@ -14,6 +14,7 @@ export const NAV = {
     // The badge counts new applicants the owner hasn't looked at yet.
     { href: "/business", label: "Tryouts", badge: true },
     { href: "/business/post", label: "Post", badge: false },
+    { href: "/business/credits", label: "Credits", badge: false },
   ],
 } as const satisfies Record<"young_person" | "business", readonly { href: string; label: string; badge: boolean }[]>;
 

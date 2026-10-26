@@ -1,7 +1,7 @@
 /**
- * Review cases: everything a person on the team must look at. Two kinds so
- * far: a young person challenging a reference (references.ts), and a report
- * about a tryout from either side. Opening a case never decides it; a person
+ * Review cases: everything a person on the team must look at: a young person
+ * challenging a reference (references.ts), a report about a tryout from
+ * either side, the day's own reviews, and a business asking for more credits. Opening a case never decides it; a person
  * does, on review.
  */
 export const REPORT_CATEGORIES = ["harassment", "unsafe_work", "asked_for_money", "not_paid", "paid_too_much", "other"] as const;
@@ -26,7 +26,8 @@ export type BookingReviewReason = (typeof BOOKING_REVIEW_REASONS)[number];
 export type ReviewCase =
   | { kind: "reference_challenge"; referenceId: string; workerId: string; ownerId: string; reason: string; status: CaseStatus }
   | { kind: "report"; category: ReportCategory; tryoutId: string; reporterId: string; businessId: string; note: string; status: CaseStatus }
-  | { kind: "booking_review"; reason: BookingReviewReason; bookingId: string; businessId: string; workerId: string; status: CaseStatus };
+  | { kind: "booking_review"; reason: BookingReviewReason; bookingId: string; businessId: string; workerId: string; status: CaseStatus }
+  | { kind: "credit_request"; businessId: string; status: CaseStatus };
 
 export const bookingReview = (reason: BookingReviewReason, booking: { bookingId: string; ownerId: string; workerId: string }): ReviewCase => ({
   kind: "booking_review",

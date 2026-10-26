@@ -217,7 +217,7 @@ export function isDestination(path: string): path is Destination {
 // Ids have the same shape the routes accept (server/validate.ts, parseId).
 const BOOKING_PAGE = /^\/bookings\/[A-Za-z0-9_-]{1,128}$/;
 const SCREENS_OF: Partial<Record<Destination, readonly (string | RegExp)[]>> = {
-  "/business": ["/business/post", "/business/owner", /^\/business\/tryouts\/[A-Za-z0-9_-]{1,128}$/, BOOKING_PAGE],
+  "/business": ["/business/post", "/business/owner", "/business/credits", /^\/business\/tryouts\/[A-Za-z0-9_-]{1,128}$/, BOOKING_PAGE],
   "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/, "/work/applications", "/work/profile", BOOKING_PAGE],
 };
 

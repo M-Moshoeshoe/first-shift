@@ -41,6 +41,7 @@ Whether a cancellation is free or late is decided by `cancellation.ts` (free unt
 | Settling | The held credit is used or returned, by the rule above (`settlementCredit`) |
 | Available | Granted, minus used, minus held |
 | Expiry | Never. Credits don't expire |
+| More credits | Until top-ups open: the business taps "Request more credits", an admin adds them with `npm run credits:grant` (audit-logged, with a reason) and the request closes. At launch: 5 for R125 or 10 for R250, by card or Instant EFT |
 | Refunds | Unused **paid** credits are refundable on request. The payment gateway's fee isn't refunded. Free credits have no cash value. Not built yet; recorded here for when top-ups open |
 
 The ledger is append-only: entries are only added, by the server, in the same transaction as the event that causes them, each with an audit entry (`SECURITY.md`, A08).

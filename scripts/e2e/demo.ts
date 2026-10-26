@@ -8,6 +8,7 @@ import { ProfileViewSchema } from "../../src/schemas/profile";
 import { DemoTokenSchema } from "../../src/schemas/demo";
 import * as z from "zod/mini";
 import { ApplicationsSchema, BookingViewSchema, StepResultSchema } from "../../src/schemas/booking";
+import { CreditRequestResultSchema, CreditsViewSchema } from "../../src/schemas/credits";
 import { getStorage } from "firebase-admin/storage";
 import { adminApp, clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser, startNow } from "./session";
 
@@ -136,6 +137,20 @@ async function demoDispute(steps: Record<string, unknown>, firstTryoutId: string
   if (evidenceBefore.status !== 409 || twice.status !== 409 || notImage.status !== 422 || files.length !== 2) throw new Error(`Proof should be refused before Not received, taken once from each side, and stored privately: ${JSON.stringify(steps["14. dispute: proof after Not received"])}`);
 }
 
+/** Sipho asks for more credits, an admin grants them with npm run credits:grant (audit-logged), and the request closes. */
+async function demoCredits(steps: Record<string, unknown>): Promise<void> {
+  await signOut(clientAuth());
+  await demoSignIn(SIPHO.email, SIPHO.password);
+  const siphoUid = clientAuth().currentUser?.uid ?? "";
+  const asked = await apiPost("/api/credits/request", {}, CreditRequestResultSchema);
+  const again = await apiPost("/api/credits/request", {}, CreditRequestResultSchema);
+  const before = await apiGet("/api/credits", CreditsViewSchema);
+  script("credits:grant", [siphoUid, "5", "--reason", "e2e-pilot-grant", "--admin", "e2e"]);
+  const after = await apiGet("/api/credits", CreditsViewSchema);
+  steps["15. credits: request, then an admin grant"] = { asked: asked.status, again: again.status, before: before.available, after: after.available, open: after.request, latest: after.history[0]?.text };
+  if (again.status !== "unchanged" || after.available !== before.available + 5 || after.request !== null || after.history[0]?.text !== "5 credits added by First Shift") throw new Error(`Credits should be requested once and granted: ${JSON.stringify(steps["15. credits: request, then an admin grant"])}`);
+}
+
 run(async () => {
   await clearEmulators();
   script("demo:accounts", ["--business-email", SIPHO.email, "--business-password", SIPHO.password, "--young-person-email", THABO.email, "--young-person-password", THABO.password]);
@@ -175,6 +190,7 @@ run(async () => {
   await feedIsolation(steps);
   const first = await demoDay(steps);
   await demoDispute(steps, first);
+  await demoCredits(steps);
 
   console.log(JSON.stringify(steps, null, 2));
   const refused = ["1. wrong password", "3. edit the demo profile", "3b. change the demo's pay methods", "4. Firebase password changed, then used", "6. email moved off the demo domain", "11. real opens a demo tryout", "12. real applies to a demo tryout"].map((key) => (steps[key] as { status: number }).status);

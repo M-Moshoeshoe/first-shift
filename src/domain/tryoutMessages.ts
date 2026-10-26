@@ -1,5 +1,5 @@
-import { SUPPORT_EMAIL } from "@/config/contact";
 import { RULES } from "@/config/rules";
+import { BUTTON_LABELS } from "./buttonLabels";
 import { formatRand } from "./money";
 import type { PostingProblem, TermsProblem } from "./tryoutDecisions";
 
@@ -17,7 +17,7 @@ export const POSTING_PROBLEM_MESSAGES: Record<PostingProblem, string> = {
   profile_incomplete: "Finish your business profile first: your details, your premises pin and a photo of your shopfront.",
   owner_missing: "Add your details as the owner first: your full name, your ID number, a photo of your face and your cellphone number.",
   account_paused: `Your account is paused, so you can't post tryouts right now. Contact us to sort it out.`,
-  no_credits: `You've used your free tryouts. Top-ups open soon. Contact us at ${SUPPORT_EMAIL} if you need more now.`,
+  no_credits: `You've used your credits. Open Credits and tap ${BUTTON_LABELS.requestMoreCredits}. We'll add them and let you know.`,
 };
 
 export const TERMS_MESSAGES: Record<TermsProblem, string> = {
