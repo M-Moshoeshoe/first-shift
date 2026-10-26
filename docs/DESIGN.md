@@ -229,3 +229,13 @@ Every account page also carries the app shell (the header with Sign out, about 4
 ## Avoid (these read as AI-made)
 
 Warm cream with a terracotta accent, near-black with an acid accent, gradient washes, rounded corners, identical cards with soft grey shadows, all-caps eyebrow labels, middle-dot separators, arrows on buttons, sparkle icons, emoji, and one highlighted word in a headline.
+
+## AI mark
+
+One mark for AI, used wherever AI contributes and nowhere else (`src/components/AiMark.tsx`): the gold clipboard, a small boxed "AI" label and one line saying what the AI did.
+
+- Draft versions: "Drafted by AI from your sentence".
+- The safety check, on the AI assist panel and on a blocked request: "Checked by AI, decided by our rules". The panel says what the AI did and what our rules enforced (minimum wage, daylight hours, notice).
+- References: "Written with AI from the business's answers". The hand-written demo example says "Example reference for the demo" instead, with no mark.
+- While drafting: the clipboard, one line and an indeterminate bar on the skeleton shimmer. No steps, no percentages.
+- Never on the show-up score or the ranking: those are our own rules (`src/domain/showUp.ts`, `ranking.ts`), with every reason shown.

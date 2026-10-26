@@ -1,5 +1,6 @@
 "use client";
 
+import { AiMark } from "@/components/AiMark";
 import { useState, type FormEvent } from "react";
 import { AnswerList } from "@/components/AnswerList";
 import { Button } from "@/components/ui/Button";
@@ -47,7 +48,7 @@ export function ReferenceReview({ bookingId, reference, done }: { bookingId: str
       <p className="text-sm font-semibold">{REFERENCE_COPY.criteria}</p>
       <AnswerList answers={reference.answers} />
       <p className="text-base">{reference.text}</p>
-      <p className="text-sm text-muted">{reference.example ? REFERENCE_COPY.example : REFERENCE_COPY.writtenWithAi}</p>
+      {reference.example ? <p className="text-sm text-muted">{REFERENCE_COPY.example}</p> : <AiMark>{REFERENCE_COPY.writtenWithAi}</AiMark>}
       {reference.status === "approved" ? <p className="font-semibold text-go">{REFERENCE_COPY.added}</p> : null}
       {reference.status === "challenged" ? <p className="text-base">{REFERENCE_COPY.challenged}</p> : null}
       {open && reference.challengeRejected ? <p className="text-base">{REFERENCE_COPY.rejectedNote}</p> : null}

@@ -70,3 +70,13 @@ export const TRYOUT_FIELD_MESSAGES = {
 
 /** The first problem is the one the owner sees from the server; the form shows each next to its field. */
 export const termsMessage = (problems: readonly TermsProblem[]): string => TERMS_MESSAGES[problems[0] ?? "invalid_hours"];
+
+/** Where AI contributes to posting, said the same way everywhere beside the AI mark (components/AiMark.tsx). */
+export const AI_COPY = {
+  drafted: "Drafted by AI from your sentence",
+  checked: "Checked by AI, decided by our rules",
+  assist: "AI assist",
+  /** What the AI did, and what our rules enforced whatever it wrote (tryoutDecisions.ts). */
+  did: "AI turned your sentence into a title and tasks, and checked it is work that is safe for a first day.",
+  enforced: `Our rules set the rest: at least ${formatRand(RULES.minimumWageCentsPerHour)} an hour for at least ${RULES.minPaidHours} hours, between ${clock(RULES.daylightStartHour)} and ${clock(RULES.daylightEndHour)}, and at least ${RULES.minNoticeMinutes / 60} hours' notice.`,
+} as const;

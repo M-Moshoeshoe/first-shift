@@ -16,6 +16,8 @@ import { CHECK_FIELDS, checkForm, dayPay, MAX_TASKS, type CheckDraft, type Check
 import { HoursField } from "./HoursField";
 import { TaskListField } from "./TaskListField";
 import { DraftOptions, type DraftOption } from "./DraftOptions";
+import { AiMark } from "@/components/AiMark";
+import { AI_COPY } from "@/domain/tryoutMessages";
 
 const fieldId = (field: CheckField) => `post-${field}`;
 const FORM_ERROR_ID = "post-check-error";
@@ -65,6 +67,12 @@ export function CheckStep({ initial, options, description, busy, formError, onPo
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
         Check your tryout
       </h2>
+      {/* What the AI did and what our rules decided, so nobody mistakes the draft for the decision. */}
+      <section aria-label={AI_COPY.assist} className="flex flex-col gap-2 border border-line bg-mist p-4">
+        <AiMark>{AI_COPY.checked}</AiMark>
+        <p className="text-sm">{AI_COPY.did}</p>
+        <p className="text-sm">{AI_COPY.enforced}</p>
+      </section>
       {options.length > 1 ? (
         <DraftOptions
           options={options}

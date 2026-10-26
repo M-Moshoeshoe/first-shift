@@ -1,5 +1,7 @@
 "use client";
 
+import { AiMark } from "@/components/AiMark";
+import { AI_COPY } from "@/domain/tryoutMessages";
 export interface DraftOption {
   title: string;
   tasks: readonly string[];
@@ -14,7 +16,10 @@ export interface DraftOption {
 export function DraftOptions({ options, chosen, onChoose }: { options: readonly DraftOption[]; chosen: number; onChoose: (index: number) => void }) {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 font-semibold">Choose a version to start from</legend>
+      <legend className="mb-2 flex flex-col gap-1">
+        <span className="font-semibold">Choose a version to start from</span>
+        <AiMark>{AI_COPY.drafted}</AiMark>
+      </legend>
       {options.map((option, index) => (
         <label key={option.title} className="lift flex cursor-pointer gap-3 border border-line p-3 has-checked:border-ink has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink">
           <input type="radio" name="draft-option" checked={chosen === index} onChange={() => onChoose(index)} className="mt-1 size-4 shrink-0 accent-ink" />

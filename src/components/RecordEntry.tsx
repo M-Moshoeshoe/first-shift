@@ -1,3 +1,4 @@
+import { AiMark } from "@/components/AiMark";
 import { RECORD_COPY, REFERENCE_COPY } from "@/domain/recordCopy";
 import type { OwnerAnswers } from "@/domain/references";
 import { AnswerList } from "./AnswerList";
@@ -27,7 +28,7 @@ export function RecordEntry({ entry, note }: RecordEntryProps) {
           <p className="text-sm font-semibold">{REFERENCE_COPY.criteria}</p>
           <AnswerList answers={entry.reference.answers} />
           <p className="text-base">{entry.reference.text}</p>
-          <p className="text-sm text-muted">{entry.reference.example ? REFERENCE_COPY.example : REFERENCE_COPY.writtenWithAi}</p>
+          {entry.reference.example ? <p className="text-sm text-muted">{REFERENCE_COPY.example}</p> : <AiMark>{REFERENCE_COPY.writtenWithAi}</AiMark>}
         </div>
       ) : null}
       {note ? <p className="text-sm text-muted">{note}</p> : null}

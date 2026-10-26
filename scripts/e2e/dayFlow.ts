@@ -65,7 +65,7 @@ export async function dayWalk(rec: Recorder, page: Page, bookingPath: string): P
 
 /** Phase 6: the reference written from Lerato's answers (the real model), added to the record, and the record shared. */
 async function referenceAndRecord(rec: Recorder, page: Page): Promise<void> {
-  await page.getByText("Written with AI from the business's answers.").waitFor({ timeout: 90_000 });
+  await page.getByText("Written with AI from the business's answers").waitFor({ timeout: 90_000 });
   for (const question of ["On time?", "Did the work as asked?", "Would you hire them again?"]) await page.getByText(question, { exact: true }).waitFor();
   await rec.check(page, "young person, the reference to review");
   await page.getByRole("button", { name: "Add to my record" }).click();
@@ -78,7 +78,7 @@ async function referenceAndRecord(rec: Recorder, page: Page): Promise<void> {
   if (!/\/record\/[A-Za-z0-9_-]{24}$/.test(link)) rec.failures.push(`${rec.width} px: the share link looks wrong: ${link}`);
   await page.goto(link.replace(/^https?:\/\/[^/]+/, BASE));
   await page.getByRole("heading", { name: "Thabo's work record" }).waitFor();
-  await page.getByText("Written with AI from the business's answers.").waitFor();
+  await page.getByText("Written with AI from the business's answers").waitFor();
   if ((await page.getByText(/Mokoena|082 123 4567|27821234567|0087/).count()) > 0) rec.failures.push(`${rec.width} px: the shared record shows private details`);
   await rec.check(page, "shared work record, no sign-in");
   await page.goto(`${BASE}/record/not-a-real-token-at-all`);

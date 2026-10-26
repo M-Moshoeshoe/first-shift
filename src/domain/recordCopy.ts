@@ -25,7 +25,7 @@ export const REFERENCE_COPY = {
   answersNeeded: "Answer the three questions about the day.",
   title: "Your reference",
   criteria: "What the business said",
-  writtenWithAi: "Written with AI from the business's answers.",
+  writtenWithAi: "Written with AI from the business's answers",
   example: "Example reference for the demo.",
   add: "Add to my record",
   added: "Added to your record.",

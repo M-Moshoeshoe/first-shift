@@ -1,5 +1,7 @@
 "use client";
 
+import { AiMark } from "@/components/AiMark";
+import { AI_COPY } from "@/domain/tryoutMessages";
 import { OctagonAlert } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/Button";
@@ -39,6 +41,7 @@ export function BlockedResult({ request, reason, saferRequest, phrase, onUseInst
         <OctagonAlert aria-hidden="true" size={22} strokeWidth={2} />
         This cannot be posted
       </h2>
+      <AiMark>{AI_COPY.checked}</AiMark>
       <p className="text-base">{reason}</p>
       {request ? (
         <div className="flex flex-col gap-1">
