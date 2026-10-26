@@ -8,9 +8,9 @@ import { readIntent, withIntent } from "@/domain/intent";
 import { destinationFor, redirectFor } from "@/domain/profile";
 import { GatedProfileContext } from "@/lib/auth/gatedProfile";
 import { useOwnProfile } from "@/lib/auth/useOwnProfile";
+import { hideSessionCover } from "@/lib/sessionCover";
 import { setSignedInHint } from "@/lib/signedInHint";
 import { AppShell } from "./AppShell";
-import { NavProgress } from "./NavProgress";
 import { ProfileErrorState } from "./ProfileErrorState";
 import { ScreenSkeleton } from "./ScreenSkeleton";
 
@@ -48,11 +48,16 @@ export function ProfileGate({ children }: { children: ReactNode }) {
     if (target) router.replace(withIntent(target, readIntent(window.location.search)));
   }, [target, router]);
 
+  // The screen they signed in to has drawn, or an error needs to be read: the "Signing you in" cover goes.
+  const settled = (profile.status === "ready" && !target) || profile.status === "error";
+  useEffect(() => {
+    if (settled) hideSessionCover("in");
+  }, [settled]);
+
   if (profile.status === "ready" && !target) {
     const nav = profile.view.complete && profile.view.role ? NAV[profile.view.role] : [];
     return (
       <GatedProfileContext.Provider value={profile.view}>
-        <NavProgress />
         <AppShell nav={nav}>{children}</AppShell>
       </GatedProfileContext.Provider>
     );

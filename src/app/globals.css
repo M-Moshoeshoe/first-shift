@@ -71,6 +71,8 @@
   --animate-drawer-in: drawer-in var(--dur-slow) var(--ease-out) both;
   --animate-drawer-out: drawer-out var(--dur-base) var(--ease-out) both;
   --animate-tick: tick var(--dur-base) var(--ease-spring) both;
+  /* Final round: the session cover's bar grows to 90% and waits there for the next screen (motion 17). */
+  --animate-session-bar: session-bar 3s var(--ease-out) both;
 
   /* Marketing only: the one load animation in the product. */
   --animate-slip-enter: slip-enter var(--dur-slow) var(--ease-out) both;
@@ -207,6 +209,15 @@
     to {
       opacity: 1;
       scale: 1;
+    }
+  }
+
+  @keyframes session-bar {
+    from {
+      scale: 0.08 1;
+    }
+    to {
+      scale: 0.9 1;
     }
   }
 

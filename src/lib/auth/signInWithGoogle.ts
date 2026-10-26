@@ -3,11 +3,13 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { signInErrorMessage } from "@/domain/messages";
 import { fail, ok, type Result } from "@/domain/result";
 import { clientAuth } from "@/lib/firebaseClient";
+import { showSessionCover } from "@/lib/sessionCover";
 
 /** Opens Google's sign-in window. A failure comes back as one plain sentence from src/domain/messages.ts. */
 export async function signInWithGoogle(): Promise<Result<true, string>> {
   try {
     await signInWithPopup(clientAuth(), new GoogleAuthProvider());
+    showSessionCover("in");
     return ok(true);
   } catch (error) {
     const code = error instanceof FirebaseError ? error.code : "unknown";

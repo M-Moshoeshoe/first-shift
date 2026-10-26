@@ -7,12 +7,14 @@ import { fail, ok, type Result } from "@/domain/result";
 import { DemoTokenSchema } from "@/schemas/demo";
 import { ApiError, apiPostSignedOut } from "@/lib/api";
 import { clientAuth } from "@/lib/firebaseClient";
+import { showSessionCover } from "@/lib/sessionCover";
 
 /** Signs in with the server's token, saying which button to tap again if the last step fails. */
 async function signInWithToken(fetchToken: () => Promise<{ token: string }>, button: string): Promise<Result<true, string>> {
   try {
     const { token } = await fetchToken();
     await signInWithCustomToken(clientAuth(), token);
+    showSessionCover("in");
     return ok(true);
   } catch (error) {
     if (error instanceof ApiError) return fail(error.message);
