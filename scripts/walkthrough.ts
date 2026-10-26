@@ -70,7 +70,7 @@ async function signInAs(page: Page, who: "Sipho" | "Thabo"): Promise<void> {
   await page.locator("main h1").first().waitFor();
 }
 
-async function post(page: Page): Promise<void> {
+async function post(page: Page): Promise<string> {
   await caption(page, "1. Sipho posts a tryout in one sentence");
   await signInAs(page, "Sipho");
   await page.getByRole("link", { name: "Post a tryout" }).first().click();
@@ -79,14 +79,18 @@ async function post(page: Page): Promise<void> {
   await caption(page, "2. AI drafts it; our rules check pay, hours and notice");
   await page.getByRole("heading", { name: "Check your tryout" }).waitFor({ timeout: 90_000 });
   await page.getByLabel("Pay per hour").fill("35");
+  // Six hours, so a later tryout together would reach the 24-hour line (the claims check uses it).
+  await page.locator("label", { hasText: /^6$/ }).click();
+  const title = await page.getByLabel("Title").inputValue();
   await page.locator("label", { hasText: "I'll be on site to supervise." }).click();
   await shot(page, "1-post");
   await page.getByRole("button", { name: "Post tryout" }).click();
   await page.getByText("Your tryout is live").waitFor({ timeout: 90_000 });
   await page.waitForTimeout(MODE === "video" ? 1500 : 0);
+  return title;
 }
 
-async function find(page: Page): Promise<void> {
+async function find(page: Page, title: string): Promise<void> {
   await caption(page, "3. Thabo sees nearby tryouts, with the taxi fare");
   await signInAs(page, "Thabo");
   const gotIt = page.getByRole("button", { name: "Got it" });
@@ -95,7 +99,7 @@ async function find(page: Page): Promise<void> {
   await shot(page, "2-find");
   await page.waitForTimeout(MODE === "video" ? 1500 : 0);
   await caption(page, "4. He applies in one tap");
-  await page.locator('a[href^="/work/tryouts/"]', { hasText: "Sipho's Phone Repairs" }).first().click();
+  await page.getByRole("link", { name: title }).first().click();
   await page.getByRole("button", { name: "Apply" }).click();
   await page.getByRole("heading", { name: "You've applied" }).waitFor();
 }
@@ -198,8 +202,8 @@ async function main(): Promise<void> {
       await page.waitForTimeout(4000);
     }
     await page.goto(`${BASE}/sign-in`);
-    await post(page);
-    await find(page);
+    const title = await post(page);
+    await find(page, title);
     await shortlist(page);
     const code = await book(page);
     const bookingPath = await door(page, code);
