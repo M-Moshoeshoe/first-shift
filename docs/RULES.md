@@ -247,7 +247,7 @@ The AI sorts every request into a category; `allowedWork.ts` decides. Blocked ca
 
 ## The review list
 
-`npm run review:case` (admin only, needs the Admin credentials): open cases by priority (safety, then payment, then references, then tryouts and credit requests, oldest first within each), each case's full context (both profiles, the booking timeline, the payment, the evidence, earlier cases and strikes), and resolving one with an outcome and the reasoning. Actions: pause or unpause either side, add or overturn a strike, uphold or reject a reference challenge, grant credits. Every action is audit-logged under the admin's name with the reasoning (`review.ts`, `reviewService.ts`).
+`npm run review:case` (admin only, needs the Admin credentials): open cases by priority (safety, then payment, then references, then tryouts and credit requests, oldest first within each), each case's full context (both profiles, the booking timeline, the payment, the evidence, earlier cases and strikes), and resolving one with an outcome and the reasoning. Actions: pause or unpause either side, add or overturn a strike, uphold or reject a reference challenge, grant credits. Every action is audit-logged under the admin's name with the reasoning (`review.ts`, `reviewService.ts`). The outcome is shown on the booking to both sides, as "Looked into on {date}: {outcome}", so it is written for them, in plain words; the reasoning stays with the team (`BookingRepository.reviews`).
 
 `npm run pilot:metrics` reports, per week and in total, from real records only: tryouts completed and paid, the paid-on-time rate, repeat businesses, safety reports by kind and how long they took to close, references approved and challenged, and job offers (`pilotMetrics.ts`).
 

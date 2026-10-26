@@ -6,7 +6,7 @@ import type { BookingViewResponse } from "@/schemas/booking";
 /** The young person's booking once the owner has tapped Paid: what GET /api/bookings/[id] sends. */
 const paidBy = (method: "ewallet" | "payshap" | "cash_send" | "cash", amountCents = 21000): BookingViewResponse => ({
   id: "booking-1", tryoutId: "t1", party: "young_person", title: "Phone shop helper", businessName: "Sipho's Phone Repairs", businessArea: "Randburg", workerFirstName: "Thabo",
-  startAt: "2026-10-27T07:00:00.000Z", endAt: "2026-10-27T13:00:00.000Z", hours: 6, rateCentsPerHour: 3500, payCents: 21000, status: "ended",
+  startAt: "2026-10-27T07:00:00.000Z", endAt: "2026-10-27T13:00:00.000Z", hours: 6, rateCentsPerHour: 3500, payCents: 21000, status: "ended", reviews: [],
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=-26.0939,28.0071", pinAccuracyMetres: 15, photo: { subject: "sipho", kind: "shopfront" },
   payoutPhone: null, owner: { firstName: "Sipho", subject: "sipho" }, whatsappUrl: null, checkInCode: "482913", shareToken: "share-token-00000001", cancel: null,
   day: {

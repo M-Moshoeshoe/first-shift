@@ -202,6 +202,11 @@ async function demoReview(steps: Record<string, unknown>): Promise<void> {
   const business = await db.collection("businesses").doc(String(closed.get("businessId"))).get();
   const audit = await db.collection("auditLog").where("target", "==", caseId).where("action", "==", "case_resolved").get();
   const metrics = scriptOutput("pilot:metrics");
+  // Both sides now see what was decided, on the booking.
+  await signOut(clientAuth());
+  await demoSignIn(THABO.email, THABO.password);
+  const outcome = (await apiGet(`/api/bookings/${String(closed.get("bookingId"))}`, BookingViewSchema)).reviews.at(-1)?.outcome;
+  if (outcome !== "paid-in-cash-confirmed") throw new Error(`The booking should show the review's outcome to both sides, got ${outcome}`);
   steps["16. review:case and pilot:metrics"] = { caseId, showsEvidence: context.includes("Nothing in my hand"), status: closed.get("status"), business: business.get("status"), audited: audit.size, metricsLeaveOutDemo: metrics.includes("No real tryouts yet") };
   if (closed.get("status") !== "closed" || business.get("status") !== "active" || audit.size !== 1 || !context.includes("Nothing in my hand") || !metrics.includes("No real tryouts yet")) {
     throw new Error(`review:case should show the evidence, close the case and unpause the business, audited; pilot:metrics should leave demo out: ${JSON.stringify(steps["16. review:case and pilot:metrics"])}`);

@@ -1,5 +1,5 @@
 import "server-only";
-import { FieldValue, type Firestore, type Transaction } from "firebase-admin/firestore";
+import { FieldValue, type Firestore, type Timestamp, type Transaction } from "firebase-admin/firestore";
 import { applicationId } from "@/domain/applications";
 import { adminDb } from "../firebaseAdmin";
 import type { BookingRecord } from "@/domain/bookings";
@@ -36,6 +36,21 @@ export const firestoreBookingRepository: BookingRepository = {
     const db = adminDb();
     const [booking, secrets] = await Promise.all([db.collection("bookings").doc(bookingId).get(), db.collection("bookingSecrets").doc(bookingId).get()]);
     return booking.exists && secrets.exists ? { booking: parseBooking(booking.data()), secrets: parseSecrets(secrets.data()) } : null;
+  },
+
+  async reviews(bookingId, tryoutId) {
+    const db = adminDb();
+    // A case names its booking one of three ways: a review by its id, a challenged reference by its id (the same), a report by its tryout.
+    const snapshots = await Promise.all([
+      db.collection("cases").where("bookingId", "==", bookingId).get(),
+      db.collection("cases").where("referenceId", "==", bookingId).get(),
+      db.collection("cases").where("tryoutId", "==", tryoutId).get(),
+    ]);
+    const closed = new Map(snapshots.flatMap((snapshot) => snapshot.docs).filter((doc) => doc.get("status") === "closed").map((doc) => [doc.id, doc]));
+    return [...closed.values()]
+      .map((doc) => ({ closedAt: (doc.get("closedAt") as Timestamp | undefined)?.toDate() ?? new Date(0), outcome: String(doc.get("outcome") ?? "") }))
+      .filter((review) => review.outcome !== "")
+      .sort((a, b) => a.closedAt.getTime() - b.closedAt.getTime());
   },
 
   async graceCancelsSince(uid, since) {

@@ -81,6 +81,7 @@ export const BOOKING_NOT_FOUND = "We cannot find that booking. Go back and check
 
 export const BOOKING_COPY = {
   ownerNextTitle: "What happens next",
+  reviewed: (day: string, outcome: string) => `Looked into on ${day}: ${outcome}`,
   ownerNext: (name: string, opens: string) => [
     `Check-in opens at ${opens}, an hour before the start.`,
     `When ${name} arrives, check their face against their photo, and the name and last four digits on their ID card.`,

@@ -129,6 +129,9 @@ function fakeBookingRepository({ store, applications, bookings, secrets, cases, 
       const id = [...secrets].find(([, secret]) => secret.shareToken === token)?.[0];
       return id ? structuredClone(bookings.get(id) ?? null) : null;
     },
+    async reviews() {
+      return [];
+    },
     async relation(viewer, subject) {
       const apps = [...applications.values()];
       const all = [...bookings.values()];

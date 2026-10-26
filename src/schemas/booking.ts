@@ -115,6 +115,8 @@ export const BookingViewSchema = z.object({
   checkInCode: z.nullable(z.string()),
   shareToken: z.nullable(z.string()),
   cancel: z.nullable(z.object({ kind: z.enum(["free", "late"]), owedCents: z.number() })),
+  /** "Looked into on {date}: {outcome}": the First Shift team's decisions on this booking, for both sides. */
+  reviews: z.array(z.object({ at: z.string(), outcome: z.string() })),
   day: z.object({
     canCheckIn: z.boolean(),
     canNoShow: z.boolean(),

@@ -27,7 +27,7 @@ const notFound = () => new AppError(404, "not_found", BOOKING_COPY.notFound);
 const GRACE_WINDOW_DAYS = 30;
 
 /** What this party may see of the booking: the owner gets the payout number, the young person the check-in code. */
-function bookingView(bookingId: string, booking: BookingRecord, secrets: BookingSecrets, party: Party, outcome: CancelOutcome | null, now: Date, remind: boolean): BookingViewResponse {
+function bookingView(bookingId: string, booking: BookingRecord, secrets: BookingSecrets, party: Party, outcome: CancelOutcome | null, now: Date, remind: boolean, reviews: BookingViewResponse["reviews"]): BookingViewResponse {
   const isOwner = party === "business";
   return {
     id: bookingId,
@@ -53,6 +53,8 @@ function bookingView(bookingId: string, booking: BookingRecord, secrets: Booking
     checkInCode: isOwner ? null : secrets.checkInCode,
     shareToken: isOwner ? null : secrets.shareToken,
     cancel: outcome ? { kind: outcome.kind, owedCents: outcome.settlement.wage?.amountCents ?? 0 } : null,
+    // What the First Shift team decided on anything looked into about this booking, for both sides.
+    reviews,
     day: {
       ...dayOptions(party, booking, now),
       checkedInAt: booking.checkedInAt?.toISOString() ?? null,
@@ -89,7 +91,8 @@ export function createBookingService({ bookings, photos, now }: BookingServiceDe
     async view(viewer: Viewer, bookingId: string, reminders: readonly string[] = []): Promise<BookingViewResponse> {
       const { booking, secrets, party } = await own(viewer, bookingId);
       const outcome = booking.status === "booked" ? cancelOutcome(party, booking, now(), await graceCancels(viewer.uid)) : null;
-      return bookingView(bookingId, booking, secrets, party, outcome, now(), reminders.includes(bookingId));
+      const reviews = (await bookings.reviews(bookingId, booking.tryoutId)).map((review) => ({ at: review.closedAt.toISOString(), outcome: review.outcome }));
+      return bookingView(bookingId, booking, secrets, party, outcome, now(), reminders.includes(bookingId), reviews);
     },
 
     /** Cancels, classified free or late by the cancellation rules and settled by settle(): wage, credit and strike together. */

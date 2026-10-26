@@ -57,6 +57,8 @@ export interface BookingRepository {
   /** Saves a report as a review case, and pauses the business if it must be paused, with audit entries. */
   report(reviewCase: ReviewCase, reporterUid: string, pauseBusiness: boolean): Promise<string>;
   byShareToken(token: string): Promise<BookingRecord | null>;
+  /** What the First Shift team decided on this booking's closed cases (a review, a report, a challenged reference), oldest first. */
+  reviews(bookingId: string, tryoutId: string): Promise<{ closedAt: Date; outcome: string }[]>;
   /** How two people are linked, for photo permissions: an application from subject to viewer, or a booking between them. */
   relation(viewerUid: string, subjectUid: string): Promise<{ appliedToViewer: boolean; bookedTogether: boolean }>;
 }
