@@ -12,7 +12,7 @@ const AnswersSchema = z.object({ onTime: z.boolean(), didTheWork: z.boolean(), w
 export const ReferenceViewSchema = z.object({
   party: z.enum(["business", "young_person"]),
   answers: z.nullable(AnswersSchema),
-  reference: z.nullable(z.object({ status: z.enum(REFERENCE_STATUSES), text: z.string(), answers: AnswersSchema, challengeRejected: z.boolean() })),
+  reference: z.nullable(z.object({ status: z.enum(REFERENCE_STATUSES), text: z.string(), answers: AnswersSchema, challengeRejected: z.boolean(), example: z.optional(z.boolean()) })),
   /** A challenge upheld on review took it off. */
   withdrawn: z.optional(z.boolean()),
   canWrite: z.boolean(),
@@ -38,7 +38,7 @@ const EntrySchema = z.object({
 export const RecordViewSchema = z.object({
   firstName: z.string(),
   shareToken: z.string(),
-  entries: z.array(z.extend(EntrySchema, { bookingId: z.string(), reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema, status: z.enum(REFERENCE_STATUSES) })) })),
+  entries: z.array(z.extend(EntrySchema, { bookingId: z.string(), reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema, example: z.optional(z.boolean()), status: z.enum(REFERENCE_STATUSES) })) })),
   jobs: z.array(z.object({ businessName: z.string(), hired: z.boolean() })),
 });
 export type RecordViewResponse = z.infer<typeof RecordViewSchema>;

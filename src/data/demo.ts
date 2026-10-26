@@ -93,7 +93,8 @@ export function demoApplication(tryoutId: string, tryout: TryoutRecord, youngPer
 }
 
 /** The whole demo world as of now: two complete profiles, three businesses and four live tryouts in the next three days. */
-export function demoState(uids: DemoUids, now: Date): DemoState {
+/** referenceText: the seeded reference written by the live model at reset, or null for the labelled example (demoHistory.ts). */
+export function demoState(uids: DemoUids, now: Date, referenceText: string | null = null): DemoState {
   const [lerato, ayanda] = DEMO_EXTRA_OWNERS;
   const businesses: Record<string, BusinessRecord> = {
     // Randburg: about 21 km from Thabo in Ivory Park, on a direct taxi route (R28 each way).
@@ -131,7 +132,7 @@ export function demoState(uids: DemoUids, now: Date): DemoState {
   const sipho = businesses[uids.business];
   const [phoneShop] = tryouts;
   if (!sipho || !phoneShop) throw new Error("the demo always has Sipho's business and a phone shop tryout");
-  const history = pastTryouts([phoneShop, phoneShop], DEMO_HISTORY_IDS, sipho, uids.youngPerson, thabo);
+  const history = pastTryouts([phoneShop, phoneShop], DEMO_HISTORY_IDS, sipho, uids.youngPerson, thabo, referenceText);
   return {
     users: {
       [uids.business]: { ...newAccount(uids.business, "business", true).user, legalName: "Sipho Dlamini", idLastFour: "0000", residency: "citizen", profilePhoto: photo(uids.business, "profile") },

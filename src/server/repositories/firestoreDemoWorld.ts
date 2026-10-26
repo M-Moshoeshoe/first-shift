@@ -89,12 +89,13 @@ async function clearDemo(uids: { business: string; youngPerson: string }): Promi
   return removed;
 }
 
-export async function resetDemoWorld(now: Date): Promise<DemoResetSummary> {
+/** referenceText: the seeded reference from the live model, or null for the labelled example (server/demoReference.ts). */
+export async function resetDemoWorld(now: Date, referenceText: string | null = null): Promise<DemoResetSummary> {
   const db = adminDb();
   const uids = await demoUids();
   const removed = await clearDemo(uids);
 
-  const state = demoState(uids, now);
+  const state = demoState(uids, now, referenceText);
   const at = FieldValue.serverTimestamp();
   await db.runTransaction(async (tx) => {
     // set without merge: each record becomes exactly the known state, whatever it held before.

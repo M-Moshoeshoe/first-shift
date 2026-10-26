@@ -1,3 +1,4 @@
+import { seededReferenceText } from "../src/server/demoReference";
 import { resetDemoWorld } from "../src/server/repositories/firestoreDemoWorld";
 import { announceTarget } from "./adminTarget";
 
@@ -10,7 +11,7 @@ import { announceTarget } from "./adminTarget";
  */
 async function main(): Promise<void> {
   announceTarget();
-  const summary = await resetDemoWorld(new Date());
+  const summary = await resetDemoWorld(new Date(), await seededReferenceText());
   console.log(`Removed ${summary.removed} demo documents.`);
   console.log(`Restored: 2 demo accounts, 3 businesses, ${summary.history} finished tryouts between Sipho and Thabo, ${summary.tryouts} live tryouts, and Thabo's application to Sipho's first one.`);
 }

@@ -80,4 +80,14 @@ describe("the demo world npm run demo:reset restores", () => {
     expect(hireOfferDue(2, slots, now, false)).toBe(false);
     expect(hireOfferDue(3, [...slots, { startAt: next.startAt, hours: next.hours }], now, false)).toBe(true);
   });
+
+  it("labels the seeded reference honestly: the model's words as written with AI, the hand-written fallback as an example", () => {
+    const now = fromSast(2026, 10, 26, 10, 0);
+    const written = demoState(uids, now, "Thabo arrived on time and greeted every customer.").history.find((past) => past.reference)?.reference;
+    expect(written).toMatchObject({ text: "Thabo arrived on time and greeted every customer.", status: "approved" });
+    expect(written?.example).toBeUndefined();
+    const fallback = demoState(uids, now, null).history.find((past) => past.reference)?.reference;
+    expect(fallback).toMatchObject({ status: "approved", example: true });
+  });
 });
+

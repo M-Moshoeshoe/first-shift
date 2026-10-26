@@ -30,6 +30,8 @@ export interface ReferenceRecord {
   demo: boolean;
   /** A challenge rejected on review: it's back with the young person to add or leave off, and can't be challenged again. */
   challengeRejected?: boolean;
+  /** Demo only: written by hand because the model was unavailable at demo:reset, so labelled as an example, never as written with AI. */
+  example?: boolean;
 }
 
 export type DraftProblem = "not_found" | "not_received" | "no_answers";

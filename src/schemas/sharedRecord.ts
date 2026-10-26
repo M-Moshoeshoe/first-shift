@@ -14,7 +14,7 @@ export const SharedRecordSchema = z.object({
       title: z.string(),
       day: z.string(),
       hours: z.number(),
-      reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema })),
+      reference: z.nullable(z.object({ text: z.string(), answers: AnswersSchema, example: z.optional(z.boolean()) })),
     }),
   ),
   /** "Offered a job by {business}", and "Hired by {business}" once the owner marks it (domain/hire.ts). */

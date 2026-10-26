@@ -18,6 +18,7 @@ const ReferenceSchema = z.object({
   status: z.enum(REFERENCE_STATUSES),
   demo: z.boolean(),
   challengeRejected: z.boolean().optional(),
+  example: z.boolean().optional(),
 });
 const parseReference = (data: unknown): ReferenceRecord => ReferenceSchema.parse(data);
 const TasksSchema = z.object({ tasks: z.array(z.string()) });

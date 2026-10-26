@@ -37,7 +37,7 @@ export function createReferenceService({ references, writeReference, consumeQuot
       if (!booking || !party) throw notFound();
       const answers = booking.ended?.answers ?? null;
       if (party === "business") return { party, answers, reference: null, canWrite: false };
-      const shown = reference && reference.status !== "withdrawn" ? { status: reference.status, text: reference.text, answers: reference.answers, challengeRejected: reference.challengeRejected ?? false } : null;
+      const shown = reference && reference.status !== "withdrawn" ? { status: reference.status, text: reference.text, answers: reference.answers, challengeRejected: reference.challengeRejected ?? false, ...(reference.example ? { example: true } : {}) } : null;
       return { party, answers, reference: shown, withdrawn: reference?.status === "withdrawn", canWrite: !reference && referenceDraftProblem(viewer.uid, booking) === null };
     },
 

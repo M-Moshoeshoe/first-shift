@@ -3,7 +3,7 @@ import type { OwnerAnswers } from "@/domain/references";
 import { AnswerList } from "./AnswerList";
 
 interface RecordEntryProps {
-  entry: { businessName: string; businessArea: string; title: string; day: string; hours: number; reference: { text: string; answers: OwnerAnswers } | null };
+  entry: { businessName: string; businessArea: string; title: string; day: string; hours: number; reference: { text: string; answers: OwnerAnswers; example?: boolean } | null };
   /** The young person's own view: a reference not yet added says where it stands. */
   note?: string;
 }
@@ -27,7 +27,7 @@ export function RecordEntry({ entry, note }: RecordEntryProps) {
           <p className="text-sm font-semibold">{REFERENCE_COPY.criteria}</p>
           <AnswerList answers={entry.reference.answers} />
           <p className="text-base">{entry.reference.text}</p>
-          <p className="text-sm text-muted">{REFERENCE_COPY.writtenWithAi}</p>
+          <p className="text-sm text-muted">{entry.reference.example ? REFERENCE_COPY.example : REFERENCE_COPY.writtenWithAi}</p>
         </div>
       ) : null}
       {note ? <p className="text-sm text-muted">{note}</p> : null}

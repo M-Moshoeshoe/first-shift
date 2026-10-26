@@ -26,6 +26,7 @@ export const REFERENCE_COPY = {
   title: "Your reference",
   criteria: "What the business said",
   writtenWithAi: "Written with AI from the business's answers.",
+  example: "Example reference for the demo.",
   add: "Add to my record",
   added: "Added to your record.",
   challenge: "Challenge it",

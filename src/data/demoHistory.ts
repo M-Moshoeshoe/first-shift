@@ -23,10 +23,10 @@ export interface PastTryout {
 const ANSWERS = { onTime: true, didTheWork: true, wouldHireAgain: true };
 
 /**
- * Written by hand for the demo, from the same three answers and the tasks a
- * real one is written from, in the style the model writes them (prompts.ts).
+ * Used only when the model can't be reached at demo:reset: written by hand from
+ * the same answers and tasks, and labelled "Example reference for the demo".
  */
-const SEEDED_REFERENCE =
+export const EXAMPLE_REFERENCE =
   "Thabo arrived on time and did the work as asked: greeting customers, writing repairs in the book and keeping the phone cases neat on the shelves. Sipho's Phone Repairs would hire Thabo again.";
 
 /** A tryout from the demo's own builder, moved into the past and finished: its day happened, the booking ended and the money was confirmed. */
@@ -52,7 +52,11 @@ function paidAndReceived(tryoutId: string, tryout: TryoutRecord, business: Busin
 }
 
 /** The two past tryouts, from two of the demo's tryout shapes, with the ids the store will give them. */
-export function pastTryouts(shapes: readonly [TryoutRecord, TryoutRecord], ids: readonly [string, string, string, string], business: BusinessRecord, workerId: string, worker: UserRecord): PastTryout[] {
+/** The three answers the seeded reference rests on, so the live model can write it from them (server/demoReference.ts). */
+export const SEEDED_ANSWERS = ANSWERS;
+
+/** referenceText: the live model's wording, or null to use the labelled example. */
+export function pastTryouts(shapes: readonly [TryoutRecord, TryoutRecord], ids: readonly [string, string, string, string], business: BusinessRecord, workerId: string, worker: UserRecord, referenceText: string | null = null): PastTryout[] {
   const [firstShape, secondShape] = shapes;
   const [firstTryoutId, firstBookingId, secondTryoutId, secondBookingId] = ids;
   return [
@@ -61,8 +65,8 @@ export function pastTryouts(shapes: readonly [TryoutRecord, TryoutRecord], ids: 
   ].map(({ tryoutId, bookingId, shape, daysAgo, withReference }) => {
     const tryout = { ...finished(shape, daysAgo), bookingId };
     const booking = paidAndReceived(tryoutId, tryout, business, workerId, worker);
-    const draft = withReference ? newReference(booking, tryout.tasks, SEEDED_REFERENCE) : null;
-    return { tryoutId, bookingId, tryout, booking, reference: draft ? { ...draft, status: "approved" } : null };
+    const draft = withReference ? newReference(booking, tryout.tasks, referenceText ?? EXAMPLE_REFERENCE) : null;
+    return { tryoutId, bookingId, tryout, booking, reference: draft ? { ...draft, status: "approved", ...(referenceText ? {} : { example: true }) } : null };
   });
 }
 
