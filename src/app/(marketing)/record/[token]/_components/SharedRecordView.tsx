@@ -26,7 +26,7 @@ export function SharedRecordView() {
   if (record === null) return <PageTitle title={RECORD_COPY.metaTitle} intro={RECORD_COPY.publicMissing} />;
   return (
     <>
-      <PageTitle title={RECORD_COPY.publicTitle(record.firstName)} intro={RECORD_COPY.publicIntro} />
+      <PageTitle title={RECORD_COPY.publicTitle(record.firstName)} intro={RECORD_COPY.publicIntro(record.firstName)} />
       <RecordJobs jobs={record.jobs} />
       <div className="flex flex-col gap-4">
         {record.entries.map((entry, index) => (

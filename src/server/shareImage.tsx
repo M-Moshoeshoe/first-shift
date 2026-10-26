@@ -76,7 +76,7 @@ async function recordSummary(token: string): Promise<{ firstName: string; count:
 /** A shared work record's preview: the first name and how many tryouts are verified. Nothing else, ever. */
 export async function recordShareImage(token: string): Promise<ImageResponse> {
   const [logo, record] = await Promise.all([logoDataUrl(), recordSummary(token)]);
-  const title = record ? `${record.firstName}'s work record` : "A work record";
+  const title = record ? `${record.firstName}'s verified work record` : "A work record";
   const line = record ? `${record.count} paid ${record.count === 1 ? "tryout" : "tryouts"}, each confirmed by the business and by ${record.firstName}.` : "Paid tryouts, each confirmed by the business and the young person.";
   return new ImageResponse(
     <ShareFrame logo={logo} footnote="Verified on First Shift">
