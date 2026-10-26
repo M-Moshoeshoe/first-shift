@@ -2,6 +2,7 @@
   "name": "first-shift",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Paid one-day tryouts at local businesses, with references from the business that paid.",
   "engines": {
     "node": ">=24.12 <25"

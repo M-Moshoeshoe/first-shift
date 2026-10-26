@@ -1,6 +1,8 @@
 # Audit 2: the judge's view, submission day
 
-Read-only audit, Monday 26 October 2026, 08:40 to 09:30 SAST, at commit `577db6f` ("Phase 6: records and hiring"), deployed to https://firstshiftza.netlify.app at 08:43. Nothing in the code was changed. This replaces nothing: `docs/AUDIT.md` is the Sunday 00:10 snapshot.
+> A dated snapshot: what was true at the commit named below. It is kept as a record and isn't updated; the code and the other documents have moved on since.
+
+Read-only audit, Monday 26 October 2026, 08:40 to 09:30 SAST, at commit `577db6f` ("Phase 6: records and hiring"), deployed to https://firstshiftza.netlify.app at 08:43. Nothing in the code was changed. This replaces nothing: `docs/audits/AUDIT.md` is the Sunday 00:10 snapshot.
 
 **How it was checked.** `npm run verify` (654 unit tests, every budget, 0 vulnerabilities) and the rules tests (26 of 26) passed before the deploy. `/api/health` on the live site reports every integration configured and live, and `"emulators": false`. Both demo accounts were signed in through the real sign-in page in Microsoft Edge at 390 px, and every screen they can reach was captured (text, links, tap targets, screenshot). Sipho offered his first tryout to Thabo, Thabo accepted, and both booking pages were captured; three posting requests went through the live model (allowed, blocked, asks for money); nothing was posted. `npm run demo:reset` ran before and after. Public pages were checked at 320, 390, 768 and 1280 px with axe-core. knip 5.88.0 was run through npx, outside the project.
 

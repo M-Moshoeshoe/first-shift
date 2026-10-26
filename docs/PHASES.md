@@ -1,6 +1,6 @@
 # The Monday plan
 
-The hard deadline is **Monday 26 October 2026, 23:59**. This replaces the original nine-phase plan, which `docs/AUDIT.md` showed couldn't be finished in time (46 to 62 hours of work, against about 30 productive hours left on Sunday 25 October at 00:30).
+The hard deadline is **Monday 26 October 2026, 23:59**. This replaces the original nine-phase plan, which `docs/audits/AUDIT.md` showed couldn't be finished in time (46 to 62 hours of work, against about 30 productive hours left on Sunday 25 October at 00:30).
 
 The goal is one complete, deployed loop that a judge can walk alone: a business posts a tryout, a young person finds it and applies, the business books them, the day runs from check-in to Received, and a reference lands on the record. Everything not in this plan is explained in the slides, not built.
 
@@ -15,7 +15,7 @@ Work one item at a time, in order. Each item ends with `npm run check` passing, 
 | C | Real services | `docs/DEPLOY.md` written, then followed in the consoles: GitHub, Firebase (Auth, Firestore, Storage, rules), Netlify, the Anthropic key, `npm run eval:ai` passing | 2 h | Done: live at firstshiftza.netlify.app |
 | D | UI foundation v3 | Spacing scale, app shell (header with Sign out, role nav), deliberate desktop layouts, branded 404 and error pages, matching skeletons, home intent, axe and Slow 4G gates in the e2e script | 3 h | Done |
 | E | Posting, server | Tryout repository, service, routes (draft, post, withdraw) with rate limits, and tests | 2.5 h | Done |
-| F | Posting, screens | Posting screen and business dashboard, from the reference design (`reference/prototype.html`) | 3 h | Done |
+| F | Posting, screens | Posting screen and business dashboard, from the reference design (a single-file prototype, not kept in the repo) | 3 h | Done |
 | G | Finding | Nearby list by geohash (no push alerts), served by the server; tryout detail with fares and the injury cover line; applying with the daily limit; "N applied" on the dashboard | 4 h | Built |
 | H | Booking | Ranked short list, booking, check-in code, WhatsApp chat and trip share as plain `wa.me` links. Booking refuses the 24-hour line (`regularEmployment.ts`, "Offer them a job instead?"). "Report a problem" on every booking | 3 h | Built: offers, accept, booking page, status page, Applications, nav badges |
 | I | The day and paying | Door check, check-in, check-out, the pay rules, Paid and Received, with the payment line below wherever payment appears. "Report a problem" stays on the booking through the day | 3 h | Built. Deadlines are checked whenever either party opens a screen (not Netlify Scheduled Functions) |

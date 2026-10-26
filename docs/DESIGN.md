@@ -6,7 +6,7 @@ Young people on cheap Android phones, often outdoors in bright sun, and busy sma
 
 ## Version 4 (26 October 2026)
 
-A quieter, denser system after the audit (`docs/AUDIT-2.md`): Archivo type with a semi-condensed heading width, a smaller type scale, 1 px borders, smaller buttons, Lucide icons, and the owner's logo. The palette, the contrast ratios, the slip, the Stamp and the sharp edges are unchanged. References: our own builds (Citrus Aura, Dragon Pilates), Findra and PopArt Studio for density and ranked lists (home page sections carry no numbers since the final round); Nielsen's heuristics, NN/g's error-message guidelines and WCAG 2.2 AA as the bar.
+A quieter, denser system after the audit (`docs/audits/AUDIT-2.md`): Archivo type with a semi-condensed heading width, a smaller type scale, 1 px borders, smaller buttons, Lucide icons, and the owner's logo. The palette, the contrast ratios, the slip, the Stamp and the sharp edges are unchanged. References: our own builds (Citrus Aura, Dragon Pilates), Findra and PopArt Studio for density and ranked lists (home page sections carry no numbers since the final round); Nielsen's heuristics, NN/g's error-message guidelines and WCAG 2.2 AA as the bar.
 
 ## Logo
 
