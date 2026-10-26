@@ -9,7 +9,8 @@ function fakes() {
   const restore = vi.fn(async () => undefined);
   const mintToken = vi.fn(async (uid: string) => `token-for-${uid}`);
   const findByEmail = vi.fn(async (email: string) => (email === thabo.email ? thabo : null));
-  return { restore, mintToken, findByEmail, service: createDemoSignInService({ findByEmail, restore, mintToken }) };
+  const findByRole = vi.fn(async (role: string) => (role === thabo.role ? thabo : null));
+  return { restore, mintToken, findByEmail, findByRole, service: createDemoSignInService({ findByEmail, findByRole, restore, mintToken }) };
 }
 
 afterEach(() => vi.restoreAllMocks());
@@ -52,5 +53,21 @@ describe("demo sign-in", () => {
     const logged = warn.mock.calls.flat().join(" ");
     expect(logged).toContain("demo_sign_in_refused");
     expect(logged).not.toMatch(/thabo|wrong-password/i);
+  });
+});
+
+describe("one-tap demo sign-in", () => {
+  it("finds the account by its role, puts it back as the script made it, then mints a token, with no password", async () => {
+    const { service, restore, mintToken } = fakes();
+    await expect(service.tryAs("young_person")).resolves.toEqual({ token: "token-for-demo-thabo" });
+    expect(restore).toHaveBeenCalledWith(thabo);
+    expect(restore.mock.invocationCallOrder[0]).toBeLessThan(mintToken.mock.invocationCallOrder[0] ?? 0);
+  });
+
+  it("says the demo isn't set up, and mints nothing, when the role has no account on record", async () => {
+    const { service, mintToken } = fakes();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    await expect(service.tryAs("business")).rejects.toMatchObject({ status: 503, code: "demo_missing", publicMessage: DEMO_MESSAGES.notSetUp });
+    expect(mintToken).not.toHaveBeenCalled();
   });
 });

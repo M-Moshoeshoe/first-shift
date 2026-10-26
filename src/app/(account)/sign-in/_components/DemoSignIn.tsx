@@ -37,7 +37,10 @@ export function DemoSignIn() {
   };
 
   return (
-    <form noValidate onSubmit={(event) => void handleSubmit(event)} aria-label="Demo account" className="flex flex-col gap-4 border-2 border-edge p-4">
+    <form noValidate onSubmit={(event) => void handleSubmit(event)} aria-labelledby="demo-email-heading" className="flex flex-col gap-4 border-2 border-edge p-4">
+      <h2 id="demo-email-heading" className="text-xl font-bold">
+        Sign in with a demo email
+      </h2>
       <TextField id="demo-email" label="Email" type="email" inputMode="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} />
       <TextField id="demo-password" label="Password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
       <div className="flex flex-col gap-3">

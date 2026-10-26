@@ -149,18 +149,20 @@ export function signInErrorMessage(code: string): string {
 /** The demo sign-in's own refusal, from the server (server/services/demoSignInService.ts). */
 export const DEMO_MESSAGES = {
   wrongCredentials: "That email and password don't match a demo account. Check them, then try again.",
+  notSetUp: "The demo accounts are not set up on this site yet. Sign in with Google instead.",
+  noRole: "Choose Thabo or Sipho to try the demo.",
 } as const;
 
-const DEMO_SIGN_IN_MESSAGES: Record<string, string> = {
-  "auth/invalid-custom-token": `The demo sign-in didn't finish. Tap ${BUTTON_LABELS.signInToDemo} to try again.`,
+const demoSignInMessages = (button: string): Record<string, string> => ({
+  "auth/invalid-custom-token": `The demo sign-in did not finish. Tap ${button} to try again.`,
   "auth/user-disabled": "That demo account is switched off. Ask the First Shift team for a working one.",
   "auth/too-many-requests": "There have been too many sign-in attempts from this phone. Wait a few minutes, then try again.",
-  "auth/network-request-failed": `We couldn't reach First Shift. Check your connection, then tap ${BUTTON_LABELS.signInToDemo} again.`,
-};
+  "auth/network-request-failed": `We could not reach First Shift. Check your connection, then tap ${button} again.`,
+});
 
-/** The same for the last step of a demo sign-in, when the browser signs in with the server's token. */
-export function demoSignInErrorMessage(code: string): string {
-  return DEMO_SIGN_IN_MESSAGES[code] ?? `The demo sign-in didn't finish. Tap ${BUTTON_LABELS.signInToDemo} to try again.`;
+/** The same for the last step of a demo sign-in, when the browser signs in with the server's token. Names the button that was tapped. */
+export function demoSignInErrorMessage(code: string, button: string = BUTTON_LABELS.signInToDemo): string {
+  return demoSignInMessages(button)[code] ?? `The demo sign-in did not finish. Tap ${button} to try again.`;
 }
 
 /** Splits a message around "contact us" (any case) so the UI can make it a link. Null when it isn't there. */

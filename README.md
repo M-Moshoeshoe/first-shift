@@ -1,15 +1,69 @@
 # First Shift
 
-Paid one-day tryouts at businesses near you, with a reference from the business that paid. Built for the FNB App of the Year Hackathon 2026.
+**Every job wants experience. This is where you get it.**
 
-## What's in this skeleton
+First Shift connects young South Africans with paid one-day tryouts at small businesses near them. A business posts a tryout in one sentence. A young person nearby applies, works the day, is paid directly by the business (FNB eWallet, PayShap, a cash-send or cash), and gets a reference written from the owner's answers. Every tryout adds a verified line to the young person's work record, which they can share with any employer.
 
-- Next.js 16 (App Router), strict TypeScript and Tailwind, ready for Netlify
-- Every product rule as a pure, unit-tested function in `src/domain`
-- Firestore and Storage security rules that deny by default, with emulator tests
-- Server-only adapters for Firebase Admin, auth, the Claude API, rate limits and logging
-- Checks on every deploy: Netlify runs `npm run verify` (lint, typecheck, tests, build, budgets, dependency audit) and refuses to deploy a failure. GitHub Actions workflows for the same checks, the rules tests and a ZAP scan are in `.github/workflows`, paused for now (Troubleshooting)
-- `AGENTS.md`, the engineering standard Claude Code follows, plus `SECURITY.md`, `docs/RULES.md`, `docs/DESIGN.md` and `docs/PHASES.md`
+Built for the **FNB App of the Year Hackathon 2026**, Youth employment and work readiness track.
+
+**Live:** https://firstshiftza.netlify.app
+
+## Try it in one tap
+
+1. Open https://firstshiftza.netlify.app/sign-in (or tap **Try the demo** at the top of the home page).
+2. Tap **Try as Thabo, looking for work** or **Try as Sipho, a business**. No password to type.
+3. To see both sides, use two browsers (or one normal window and one private window), one for each.
+
+The demo accounts and everything in them are made up and marked demo. Demo and real data never meet: a demo account sees only demo tryouts and people, and a real account never sees demo ones (`SECURITY.md`, Demo isolation).
+
+## The loop
+
+| Step | Who | What happens |
+| --- | --- | --- |
+| Post | Business | Describe the work in a sentence. Claude drafts the title and tasks; code checks the pay is at least the minimum wage (R30.23 an hour), the time is in daylight, and the work is allowed. Unsafe work (electrical, driving, heights, chemicals) is refused with a safer idea; a tryout that asks the young person for money is refused before the AI sees it |
+| Find and apply | Young person | Tryouts within reach, with the pay, the return taxi fare from published routes and what's left after it, whether injury cover is confirmed, and how the business pays on time |
+| Shortlist and offer | Business | Applicants ranked by skill fit, how likely they are to show up (with the reasons) and distance, always with a place kept for someone with no record yet. One offer at a time |
+| Booked | Both | The exact pin, names and photos, a 6-digit check-in code, WhatsApp, Share my trip (a link a trusted person can follow), Report a problem, and fair cancellation rules |
+| The day | Both | The owner checks the face and ID card at the door and types the young person's code; at check-out, the app works out what's owed (never below 4 hours) and the owner answers three questions |
+| Pay | Business | Pays directly by one of the ways the young person chose, then marks it paid. First Shift never holds or moves wages |
+| Received | Young person | Checks their real balance, then taps Received (or Not received, which opens a dispute with proof and pauses the business) |
+| Reference and record | Young person | A reference written with AI from the owner's three answers only. They add it to their record or challenge it. The record and its share link show only verified, paid tryouts |
+| Job offer | Business | After three tryouts together, or before the 24-hour line that would make it regular employment, the owner is asked to offer a job instead |
+
+## What it costs
+
+Free for young people. Businesses pay R25 for each completed tryout, with the first 3 free. A credit is used only when the young person is owed money, and returned when nothing is owed (`docs/MONEY.md`).
+
+## Built with
+
+- **Next.js 16** (App Router), **React 19**, strict **TypeScript**, **Tailwind CSS 4**, on **Netlify**
+- **Firebase**: Google sign-in, Firestore and Storage, with every write going through server routes using the Admin SDK
+- **Claude** (`claude-haiku-5-5`) drafts tryouts, sorts work into allowed kinds and writes references. Code decides: the pay floor, the allowed list, the notice rules and every status change live in `src/domain`, never in a prompt
+- Every product rule is a pure, unit-tested function in `src/domain` (`docs/RULES.md`)
+
+## Security, in one paragraph
+
+Firestore and Storage rules deny by default and are tested for every role. ID numbers are kept only as a keyed hash and the last four digits; no face matching; no personal data in logs or AI prompts. Every write is validated with Zod and audit-logged in the same transaction. Every Netlify deploy runs lint, typecheck, the unit tests, the build, per-page JavaScript budgets and `npm audit`, and refuses to deploy a failure. The full SSDLC is in `SECURITY.md`.
+
+## The panel's feedback
+
+The Geekulcha panel asked us to show the whole loop, make references fair and challengeable, and be clear about non-payment, cancellations, injuries, harassment, disputes, identity checks and labour law. Each point, our answer and where it lives is in `docs/FEEDBACK.md`; our reading of the law, with sources, is in `docs/COMPLIANCE.md`.
+
+## Documents
+
+| File | What's in it |
+| --- | --- |
+| `docs/RULES.md` | Every product rule in plain language |
+| `docs/MONEY.md` | How money and credits move, and the unit economics |
+| `docs/COMPLIANCE.md` | Labour, tax and worker-protection law, with sources |
+| `docs/FEEDBACK.md` | The panel's feedback and our answers |
+| `docs/DESIGN.md` | Design tokens, type, motion and performance budgets |
+| `docs/PHASES.md` | The build plan and the pilot |
+| `docs/AUDIT-2.md` | The audit on submission day and the fixes that followed |
+| `SECURITY.md` | The SSDLC: threats, controls and how each is tested |
+| `AGENTS.md` | The engineering standard the code follows |
+
+# For developers
 
 ## 1. Install the tools (once)
 
@@ -23,7 +77,7 @@ Use **Git Bash** as your VS Code terminal (Terminal > New Terminal > the dropdow
 
 ## 2. Open the project
 
-1. Unzip `first-shift.zip` somewhere without spaces in the path, for example `C:\dev\first-shift`.
+1. Clone the repository somewhere without spaces in the path: `git clone https://github.com/M-Moshoeshoe/first-shift.git C:/dev/first-shift`.
 2. In VS Code: File > Open Folder > `first-shift`. Accept the recommended extensions when asked.
 3. In the terminal:
 
@@ -32,7 +86,7 @@ npm ci
 npm run check
 ```
 
-`npm run check` runs lint, typecheck, the unit tests and a production build. It should pass before you change anything.
+`npm run check` runs lint, typecheck, the unit tests, a production build and the JavaScript budgets. It should pass before you change anything.
 
 ## 3. Run it locally
 
@@ -49,8 +103,7 @@ Open http://localhost:3000. Then open http://localhost:3000/api/health: it shows
 3. **Firestore Database** > Create database > production mode. Pick the region closest to South Africa (for example `africa-south1`, Johannesburg, if it's offered).
 4. **Storage** > Get started.
 5. **Project settings** > Your apps > add a **Web app**. Copy its config values.
-6. **Project settings** > Cloud Messaging > Web Push certificates > Generate key pair. Copy the key.
-7. **Project settings** > Service accounts > Generate new private key. Keep the downloaded file private and never commit it.
+6. **Project settings** > Service accounts > Generate new private key. Keep the downloaded file private and never commit it.
 
 Then create your local environment file:
 
@@ -58,7 +111,7 @@ Then create your local environment file:
 cp .env.example .env.local
 ```
 
-Fill in `.env.local`: the web config values, the VAPID key, and from the service account file the `project_id`, `client_email` and `private_key` (paste the key with its `\n` escapes intact). Add your Anthropic API key, and generate the ID hashing secret with:
+Fill in `.env.local`: the web config values, and from the service account file the `project_id`, `client_email` and `private_key` (paste the key with its `\n` escapes intact). Add your Anthropic API key, and generate the ID hashing secret with:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"

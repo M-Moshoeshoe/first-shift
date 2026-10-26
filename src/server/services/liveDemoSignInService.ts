@@ -33,6 +33,10 @@ export function liveDemoSignInService(): DemoSignInService {
       const doc = snapshot.docs[0];
       return doc ? DemoAccountSchema.parse(doc.data()) : null;
     },
+    async findByRole(role) {
+      const doc = await adminDb().collection("demoAccounts").doc(role).get();
+      return doc.exists ? DemoAccountSchema.parse(doc.data()) : null;
+    },
     restore,
     mintToken: (uid) => adminAuth().createCustomToken(uid),
   });

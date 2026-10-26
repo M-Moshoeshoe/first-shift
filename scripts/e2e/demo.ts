@@ -219,6 +219,16 @@ run(async () => {
   await demoSignIn(THABO.email, THABO.password);
   steps["7. next sign-in puts the email back"] = { email: clientAuth().currentUser?.email, destination: (await profile()).destination };
 
+  // One tap, no password: each role lands where its account belongs; a made-up role is refused.
+  for (const [role, destination] of [["business", "/business"], ["young_person", "/work"]] as const) {
+    await signOut(clientAuth());
+    const { token } = await apiPostSignedOut("/api/demo/try", { role }, DemoTokenSchema);
+    await signInWithCustomToken(clientAuth(), token);
+    steps[`7b. one tap as ${role}`] = (await profile()).destination;
+    if (steps[`7b. one tap as ${role}`] !== destination) throw new Error(`One tap as ${role} should land on ${destination}`);
+  }
+  steps["7c. one tap, made-up role"] = await refusal(() => apiPostSignedOut("/api/demo/try", { role: "admin" }, DemoTokenSchema));
+
   await feedIsolation(steps);
   const first = await demoDay(steps);
   await demoDispute(steps, first);
@@ -226,7 +236,7 @@ run(async () => {
   await demoReview(steps);
 
   console.log(JSON.stringify(steps, null, 2));
-  const refused = ["1. wrong password", "3. edit the demo profile", "3b. change the demo's pay methods", "4. Firebase password changed, then used", "6. email moved off the demo domain", "11. real opens a demo tryout", "12. real applies to a demo tryout"].map((key) => (steps[key] as { status: number }).status);
-  if (!refused.every((status) => status === 401 || status === 403 || status === 404)) throw new Error(`Expected every attack refused, got ${refused.join(", ")}`);
+  const refused = ["1. wrong password", "7c. one tap, made-up role", "3. edit the demo profile", "3b. change the demo's pay methods", "4. Firebase password changed, then used", "6. email moved off the demo domain", "11. real opens a demo tryout", "12. real applies to a demo tryout"].map((key) => (steps[key] as { status: number }).status);
+  if (!refused.every((status) => status === 401 || status === 403 || status === 404 || status === 400)) throw new Error(`Expected every attack refused, got ${refused.join(", ")}`);
   console.log("Every attack on the demo account was refused, the public password still signs in, and demo and real tryouts never meet.");
 });

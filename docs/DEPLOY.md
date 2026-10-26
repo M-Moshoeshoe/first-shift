@@ -137,7 +137,6 @@ Open `.env.local` and fill in:
 | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | `storageBucket` (must match the bucket from 2.5) |
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId` |
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | `appId` |
-| `NEXT_PUBLIC_FIREBASE_VAPID_KEY` | Leave empty: push alerts are cut |
 | `FIREBASE_ADMIN_PROJECT_ID` | `project_id` from the JSON file |
 | `FIREBASE_ADMIN_CLIENT_EMAIL` | `client_email` from the JSON file |
 | `FIREBASE_ADMIN_PRIVATE_KEY` | `private_key` from the JSON file, on one line, in double quotes, keeping its `\n` escapes exactly as they appear: `"-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----\n"` |
@@ -204,7 +203,6 @@ npm run dev
 | --- | --- |
 | `NEXT_PUBLIC_USE_EMULATORS` | Switches the browser to the emulators (it does nothing off `localhost`, but `/api/health` would report it, and the pre-submit checklist fails) |
 | `FIRESTORE_EMULATOR_HOST`, `FIREBASE_AUTH_EMULATOR_HOST`, `FIREBASE_STORAGE_EMULATOR_HOST` | Point the server at emulators that don't exist on Netlify: every request would fail |
-| `NEXT_PUBLIC_FIREBASE_VAPID_KEY` | Push alerts are cut; leave it unset |
 | `NODE_ENV` | Netlify sets it; overriding it breaks the build |
 | `E2E_BASE_URL` | Local test scripts only |
 

@@ -13,6 +13,7 @@ import { fail } from "@/domain/result";
 import { useAuth } from "@/lib/auth/useAuth";
 import { signInWithGoogle } from "@/lib/auth/signInWithGoogle";
 import { testSignInAllowed } from "@/lib/emulators";
+import { DemoChoice } from "./DemoChoice";
 
 const ERROR_ID = "sign-in-error";
 
@@ -88,6 +89,7 @@ export function SignInPanel() {
         </Button>
         <FormError id={ERROR_ID} message={message} />
       </div>
+      <DemoChoice />
       {showDemo ? (
         <Suspense fallback={<div role="status" aria-label="Opening the demo sign-in" className="h-64 animate-skeleton bg-mist" />}>
           <DemoSignIn />
@@ -95,7 +97,7 @@ export function SignInPanel() {
       ) : (
         <div>
           <Button variant="quiet" onClick={() => setShowDemo(true)}>
-            Judges and testers: use a demo account
+            Testers: sign in with a demo email
           </Button>
         </div>
       )}

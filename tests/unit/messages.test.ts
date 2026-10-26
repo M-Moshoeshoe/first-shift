@@ -15,7 +15,7 @@ const everyMessage = [
   ...PHOTO_KINDS.map((kind) => PROFILE_MESSAGES.photoMissing(kind)),
   ...Object.values(PROFILE_MESSAGES).flatMap((value) => (typeof value === "string" ? [value] : [])),
   ...SIGN_IN_CODES.map(signInErrorMessage),
-  ...DEMO_CODES.map(demoSignInErrorMessage),
+  ...DEMO_CODES.map((code) => demoSignInErrorMessage(code)),
   ...Object.values(DEMO_MESSAGES),
   ...Object.values(LOCATION_MESSAGES),
   ...Object.values(POSTING_PROBLEM_MESSAGES),
