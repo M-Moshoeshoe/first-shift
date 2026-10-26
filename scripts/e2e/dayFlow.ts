@@ -26,6 +26,11 @@ export async function dayWalk(rec: Recorder, page: Page, bookingPath: string): P
   await page.getByRole("heading", { name: "Check out" }).waitFor();
   await rec.check(page, "checked in, check-out ready");
   await page.locator("label", { hasText: "We finished the work" }).click();
+  // The three answers are required: Check out without them says so and moves to the first.
+  await page.getByRole("button", { name: "Check out" }).click();
+  await page.getByText("Answer the three questions about the day.").waitFor();
+  await rec.check(page, "check-out, the three answers missing");
+  for (const id of ["check-out-onTime-yes", "check-out-didTheWork-yes", "check-out-wouldHireAgain-yes"]) await page.locator(`label[for="${id}"]`).click();
   await page.getByRole("button", { name: "Check out" }).click();
   await page.getByText("You owe Thabo R210.00.").waitFor();
   // Only the ways Thabo chose (Profile: FNB eWallet, PayShap and cash), never cash-send.
@@ -55,4 +60,28 @@ export async function dayWalk(rec: Recorder, page: Page, bookingPath: string): P
   await page.getByRole("button", { name: "Received", exact: true }).click();
   await page.getByText("Received. Your reference comes next.").waitFor();
   await rec.check(page, "young person, received");
+  await referenceAndRecord(rec, page);
+}
+
+/** Phase 6: the reference written from Lerato's answers (the real model), added to the record, and the record shared. */
+async function referenceAndRecord(rec: Recorder, page: Page): Promise<void> {
+  await page.getByText("Written with AI from the business's answers.").waitFor({ timeout: 90_000 });
+  for (const question of ["On time?", "Did the work as asked?", "Would you hire them again?"]) await page.getByText(question, { exact: true }).waitFor();
+  await rec.check(page, "young person, the reference to review");
+  await page.getByRole("button", { name: "Add to my record" }).click();
+  await page.getByText("Added to your record.").waitFor();
+  await page.goto(`${BASE}/work/record`);
+  await page.getByRole("heading", { name: "Your work record" }).waitFor();
+  await page.getByText("Paid, confirmed by both").first().waitFor();
+  await rec.check(page, "work record");
+  const link = (await page.locator("p.break-all").innerText()).trim();
+  if (!/\/record\/[A-Za-z0-9_-]{24}$/.test(link)) rec.failures.push(`${rec.width} px: the share link looks wrong: ${link}`);
+  await page.goto(link.replace(/^https?:\/\/[^/]+/, BASE));
+  await page.getByRole("heading", { name: "Thabo's work record" }).waitFor();
+  await page.getByText("Written with AI from the business's answers.").waitFor();
+  if ((await page.getByText(/Mokoena|082 123 4567|27821234567|0087/).count()) > 0) rec.failures.push(`${rec.width} px: the shared record shows private details`);
+  await rec.check(page, "shared work record, no sign-in");
+  await page.goto(`${BASE}/record/not-a-real-token-at-all`);
+  await page.getByText("This link isn't working.", { exact: false }).waitFor();
+  await page.goto(`${BASE}/work`);
 }

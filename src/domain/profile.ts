@@ -218,7 +218,7 @@ export function isDestination(path: string): path is Destination {
 const BOOKING_PAGE = /^\/bookings\/[A-Za-z0-9_-]{1,128}$/;
 const SCREENS_OF: Partial<Record<Destination, readonly (string | RegExp)[]>> = {
   "/business": ["/business/post", "/business/owner", "/business/credits", /^\/business\/tryouts\/[A-Za-z0-9_-]{1,128}$/, BOOKING_PAGE],
-  "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/, "/work/applications", "/work/profile", BOOKING_PAGE],
+  "/work": [/^\/work\/tryouts\/[A-Za-z0-9_-]{1,128}$/, "/work/applications", "/work/record", "/work/profile", BOOKING_PAGE],
 };
 
 const opensTo = (destination: Destination, path: string): boolean =>

@@ -8,12 +8,15 @@ import { decideAnswer, decideOffer, offerLapsesAt, openOffer, overlappingApplica
 import type { TryoutRecord } from "@/domain/tryoutDecisions";
 import type { ApplicationsResponse, BadgesResponse, OwnerTryoutResponse } from "@/schemas/booking";
 import { AppError } from "../errors";
+import type { HireRepository } from "../repositories/hireRepository";
 import type { OfferRepository } from "../repositories/offerRepository";
 import type { ProfileRepository } from "../repositories/profileRepository";
 
 export interface OfferServiceDeps {
   offers: OfferRepository;
   profiles: ProfileRepository;
+  /** Job offers made to the young person, shown under Applications. */
+  hires: Pick<HireRepository, "forWorker">;
   /** A fresh 6-digit check-in code and an unguessable share token, made outside the transaction so it stays pure. */
   newSecrets: () => { checkInCode: string; shareToken: string };
   now: () => Date;
@@ -43,7 +46,7 @@ function applicationItem(application: ApplicationRecord, tryout: TryoutRecord, n
  * src/domain (offers.ts, applications.ts); an accept writes the booking and
  * everything it changes in one repository transaction.
  */
-export function createOfferService({ offers, profiles, newSecrets, now }: OfferServiceDeps) {
+export function createOfferService({ offers, profiles, hires, newSecrets, now }: OfferServiceDeps) {
   const role = async (uid: string) => (await profiles.transact(uid, null, (state) => ({ write: null, result: state }))).user?.role ?? null;
 
   return {
@@ -104,12 +107,13 @@ export function createOfferService({ offers, profiles, newSecrets, now }: OfferS
     },
 
     async applications(viewer: Viewer): Promise<ApplicationsResponse> {
-      const items = await offers.workerApplications(viewer.uid);
+      const [items, jobOffers] = await Promise.all([offers.workerApplications(viewer.uid), hires.forWorker(viewer.uid)]);
       return {
         items: items.flatMap(({ application, tryout }) => {
           if (!tryout) return [];
           return [applicationItem(application, tryout, now())];
         }),
+        jobOffers: jobOffers.map((offer) => ({ businessName: offer.businessName, at: offer.at.toISOString() })),
       };
     },
 

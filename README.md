@@ -142,6 +142,8 @@ Open a terminal in the project folder and run `claude`. It reads `AGENTS.md` aut
 | `npm run e2e:demo` | Attacks a demo account in the emulators the way anyone with its password could, and checks each attack is refused |
 | `npm run credits:backfill` | Shows which complete businesses lack their free credits; `-- --apply` grants them (says first whether it targets the emulators or the live project) |
 | `npm run credits:grant` | Lists businesses waiting for credits; `-- <businessUid> <amount> --reason "<why>" --admin <name>` adds them (1 to 50), audit-logged, and closes the request |
+| `npm run review:case` | Lists open review cases by priority; `-- <caseId>` shows the full context; `-- <caseId> resolve --outcome "..." --reason "..." --admin <name>` with any of `--pause`, `--unpause`, `--strike`, `--overturn`, `--reference`, `--grant` resolves it, audit-logged |
+| `npm run pilot:metrics` | The pilot's numbers per week and in total, from real records only (read-only) |
 | `npm run review:tryout` | Lists tryouts waiting for review; `-- <id> approve <category> --reviewer <name>` or `-- <id> reject --reviewer <name>` decides one, audit-logged |
 | `npm run e2e:profile` | Role and young person profile through the real client code, against the emulators (settings in section 5) |
 | `npm run e2e:photo` | Photo uploads and the photo route against the Storage emulator |

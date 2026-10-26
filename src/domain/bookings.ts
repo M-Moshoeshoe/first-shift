@@ -5,6 +5,7 @@ import type { BusinessRecord, Location, UserRecord } from "./profile";
 import { settle, type SettleEvent, type Settlement } from "./settlement";
 import { addDays, atSastTime } from "./time";
 import type { PaymentMethod, PaymentState } from "./paymentFlow";
+import type { OwnerAnswers } from "./references";
 import type { TryoutRecord } from "./tryoutDecisions";
 
 import type { BookingStatus } from "./bookingStatus";
@@ -48,7 +49,8 @@ export interface BookingRecord {
   /** For the door check: the last four digits on the young person's ID card. Shown to the owner only at check-in. */
   workerIdLastFour: string;
   checkedInAt?: Date | null;
-  ended?: { at: Date; reason: CheckoutReason; minutesWorked: number } | null;
+  /** answers: the owner's three, required at check-out; the reference is written from them only (references.ts). */
+  ended?: { at: Date; reason: CheckoutReason; minutesWorked: number; answers?: OwnerAnswers } | null;
   payment?: Payment | null;
   /** Each deadline acts once (day.ts, deadlineActions). */
   reviewOpened?: boolean;

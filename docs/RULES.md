@@ -75,7 +75,7 @@ Consequences:
 | On time | Checked in by 10 minutes after the start | `wasOnTime` |
 | No-show | The owner can record one from 30 minutes after the start if nobody checked in: nothing owed, the credit comes back, a strike for the young person, and a review | `decideNoShow`, `settle()` |
 | Business not open | The young person can say so any time after the start if nobody checked them in. It goes to review; nothing is settled until then | `decideBusinessNotOpen` |
-| Check-out | The owner picks how it ended: finished the work, done early, the young person left early, I ended it early, or safety. `settle()` works out what's owed and uses the credit; a safety stop goes to review | `decideCheckOut` |
+| Check-out | The owner picks how it ended: finished the work, done early, the young person left early, I ended it early, or safety; and answers three questions, all required: "On time?", "Did the work as asked?", "Would you hire them again?". `settle()` works out what's owed and uses the credit; a safety stop goes to review | `decideCheckOut` |
 | Paying | The owner sends it themselves, by one of the ways the young person chose, then taps Paid with the method, the amount (at least what's owed, lower only when the young person left early, never below 4 hours) and, for the three electronic methods, a payment reference | `decideMarkPaid` |
 | Confirming | The young person checks the payment is real (below), then taps Received or Not received. Not received opens a review and pauses the business | `decideConfirm` |
 | Deadlines | Checked whenever either party opens a screen, not by a scheduled job: unpaid by 23:59 pauses the business from 00:00 (lifted when it pays), a reminder at 24 hours, a review at 72 hours. Each acts once | `deadlineActions` |
@@ -191,7 +191,7 @@ Both sides of a tryout know who they're dealing with. What's shown, to whom and 
 | Young people from before | Asked on Profile for their ways to be paid, what they can do, their languages and their surname, and can't apply until they're saved | `needsWorkerUpdate`, `profile_update` |
 | A surname is set once | Like the ID number, so a record can't move to another name; corrections through support | `surname_locked` |
 | Face photos | Taken live in the app with the camera (the front camera for a face, the back one for a shopfront), with a framing guide and three tips: "Use a plain background", "Face the light" and "No sunglasses or hat". A face can't come from the gallery; a shopfront can. If the camera can't open, the phone's own camera opens instead (a file input with capture set), with one line saying so. We don't try to judge backgrounds or clothing, and we don't run face matching | `CameraView`, `PhotoField` |
-| Why an admin keeps them | To find the person behind an account when a safety report, a payment dispute or a strike needs it (review cases). The Privacy page will say so (`docs/PHASES.md`, L) | `SECURITY.md`, Privacy |
+| Why an admin keeps them | To find the person behind an account when a safety report, a payment dispute or a strike needs it (`npm run review:case`). The Privacy page will say so (`docs/PHASES.md`, L) | `SECURITY.md`, Privacy |
 
 ## Location
 
@@ -217,9 +217,29 @@ A tryout shows where it is as a cell about 1 km across (a 6-character geohash) a
 
 The AI sorts every request into a category; `allowedWork.ts` decides. Blocked categories are refused with a safer option, whatever the AI's confidence. Unclear requests (confidence below 0.7) wait for human review. Electrical installation is blocked because the Electrical Installation Regulations, 2009 require it to be done under the control of a registered person.
 
-## Hiring and fees
+## References and the work record
 
-- After 3 completed tryouts with the same person, the owner is asked "Offer a job?", once.
+| Rule | Value | Code |
+| --- | --- | --- |
+| Written from | The owner's three answers and the tryout's tasks, nothing else: no name, no ID, no number reaches the model. The wording is AI's, labelled "Written with AI from the business's answers." | `writeReferencePrompt`, `newReference` |
+| When | Only after the young person taps Received, once per booking, as soon as they open it (or "Write my reference" if the AI didn't answer). Counts against the daily AI limit. A failure writes nothing | `referenceDraftProblem` |
+| The young person decides | They see the three answers as the criteria and the wording, then tap "Add to my record" or "Challenge it" with a reason, which opens a review case. Owners can't edit a reference once written; there is no route for it | `decideReference` |
+| On review | A challenge upheld takes the reference off for good; a challenge rejected gives it back to the young person to add or leave off, and it can't be challenged again | `review.ts`, `challengeRejected` |
+| The record | `/work/record`: every tryout paid and confirmed by both, as a verified entry (business, date, hours, "Paid, confirmed by both"), with its reference once approved. Hours are the agreed hours, or the hours worked when the young person left early or it ended for safety | `recordEntries`, `recordHours` |
+| Sharing | A link at an unguessable 144-bit token (`/record/{token}`), made on the first visit to the record: the first name and the verified entries with approved references only. Never an ID, a surname or a phone number. No sign-in; not in search results; a plain Open Graph title and description | `sharedRecord`, `isRecordToken` |
+
+## Hiring
+
+| Rule | Value | Code |
+| --- | --- | --- |
+| When it's offered | After a tryout ends, if the pair has 3 completed tryouts together, or even a 4-hour tryout more this month would reach the 24-hour line, the owner sees "Offer {name} a job" on the booking | `hireOfferDue` |
+| What it does | Records the offer once per pair (counted in `npm run pilot:metrics`), then the owner sends a prefilled WhatsApp message they can change. The young person sees "Job offer from {business}" under Applications | `hireOffers`, `HIRE_COPY` |
+
+## The review list
+
+`npm run review:case` (admin only, needs the Admin credentials): open cases by priority (safety, then payment, then references, then tryouts and credit requests, oldest first within each), each case's full context (both profiles, the booking timeline, the payment, the evidence, earlier cases and strikes), and resolving one with an outcome and the reasoning. Actions: pause or unpause either side, add or overturn a strike, uphold or reject a reference challenge, grant credits. Every action is audit-logged under the admin's name with the reasoning (`review.ts`, `reviewService.ts`).
+
+`npm run pilot:metrics` reports, per week and in total, from real records only: tryouts completed and paid, the paid-on-time rate, repeat businesses, safety reports by kind and how long they took to close, references approved and challenged, and job offers (`pilotMetrics.ts`).
 
 ## Tryout credits
 

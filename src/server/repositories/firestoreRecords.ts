@@ -57,7 +57,10 @@ const BookingSchema = z.object({
   // Bookings made before the door check carried it: none on the live site yet, so required.
   workerIdLastFour: z.string(),
   checkedInAt: instant.nullable().optional(),
-  ended: z.object({ at: instant, reason: z.enum(CHECKOUT_REASONS), minutesWorked: z.number() }).nullable().optional(),
+  ended: z
+    .object({ at: instant, reason: z.enum(CHECKOUT_REASONS), minutesWorked: z.number(), answers: z.object({ onTime: z.boolean(), didTheWork: z.boolean(), wouldHireAgain: z.boolean() }).optional() })
+    .nullable()
+    .optional(),
   payment: z
     .object({
       state: z.enum(["awaiting_payment", "awaiting_confirmation", "received", "not_received"]),

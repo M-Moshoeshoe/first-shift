@@ -62,6 +62,7 @@ describe("references", () => {
     ownerId: "sipho",
     tryoutId: "t1",
     answers: { onTime: true, didTheWork: true, wouldHireAgain: true },
+    demo: false,
     tasks: ["Pack shelves"],
     text: "Thabo arrived on time and packed the shelves well.",
     status: "draft",

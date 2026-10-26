@@ -9,6 +9,9 @@ import { DemoTokenSchema } from "../../src/schemas/demo";
 import * as z from "zod/mini";
 import { ApplicationsSchema, BookingViewSchema, StepResultSchema } from "../../src/schemas/booking";
 import { CreditRequestResultSchema, CreditsViewSchema } from "../../src/schemas/credits";
+import { DraftResultSchema, RecordViewSchema } from "../../src/schemas/record";
+import { SharedRecordSchema } from "../../src/schemas/sharedRecord";
+import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { adminApp, clearEmulators, post, refusal, requireEmulators, run, signInAs, standInForBrowser, startNow } from "./session";
 
@@ -28,6 +31,7 @@ const THABO = { email: "e2e-thabo@firstshift.demo", password: randomBytes(12).to
 const SIPHO = { email: "e2e-sipho@firstshift.demo", password: randomBytes(12).toString("base64url") };
 // Fixed arguments only, never input: one command line works on Windows and elsewhere.
 const script = (name: string, args: string[] = []) => execSync(["npm run --silent", name, "--", ...args].join(" "), { stdio: "inherit" });
+const scriptOutput = (name: string, args: string[] = []) => execSync(["npm run --silent", name, "--", ...args].join(" "), { encoding: "utf8" });
 
 async function demoSignIn(email: string, password: string): Promise<void> {
   const { token } = await apiPostSignedOut("/api/demo/sign-in", { email, password }, DemoTokenSchema);
@@ -57,6 +61,7 @@ async function feedIsolation(steps: Record<string, unknown>): Promise<void> {
   steps["12. real applies to a demo tryout"] = await refusal(() => apiPost("/api/applications", { tryoutId: first.id }, ApplicationResultSchema));
 }
 
+const ANSWERS = { onTime: true, didTheWork: true, wouldHireAgain: true };
 const AnswerSchema = z.object({ status: z.string(), state: z.object({ kind: z.string(), bookingId: z.optional(z.string()) }) });
 const step = (path: string, body: unknown = {}) => apiPost(path, body, StepResultSchema);
 
@@ -81,13 +86,21 @@ async function demoDay(steps: Record<string, unknown>): Promise<string> {
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
   await step(`/api/bookings/${bookingId}/check-in`, { code, faceMatches: true, nameMatches: true, lastFourMatches: true });
-  await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed" });
+  await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed", answers: ANSWERS });
   const owed = (await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema)).day.owedCents;
   await step(`/api/bookings/${bookingId}/paid`, { method: "ewallet", amountCents: owed });
 
   await signOut(clientAuth());
   await demoSignIn(THABO.email, THABO.password);
   await step(`/api/bookings/${bookingId}/confirm`, { received: true });
+  // Phase 6: the reference, written by the real model from Sipho's answers, added to the record and shared.
+  await apiPost(`/api/bookings/${bookingId}/reference`, {}, DraftResultSchema);
+  await apiPost(`/api/references/${bookingId}`, { action: "approve" }, StepResultSchema);
+  const record = await apiGet("/api/record", RecordViewSchema);
+  // Signed out, as anyone with the link: a plain request, no token.
+  const shared = SharedRecordSchema.parse(await (await fetch(`/api/record/${record.shareToken}`)).json());
+  steps["13b. reference and record"] = { entries: record.entries.length, reference: shared.entries[0]?.reference?.text };
+  if (!shared.entries[0]?.reference || JSON.stringify(shared).match(/0000|27000000000|Mokoena/)) throw new Error(`The shared record should show the approved reference and nothing private: ${JSON.stringify(shared)}`);
   const final = await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema);
   steps["13. demo tryout, offer to Received"] = { booked: answered.status, status: final.status, owed: final.day.owedCents, payment: final.day.payment?.state };
   if (final.day.payment?.state !== "received") throw new Error("The demo tryout should end at Received.");
@@ -118,7 +131,7 @@ async function demoDispute(steps: Record<string, unknown>, firstTryoutId: string
   await signOut(clientAuth());
   await demoSignIn(SIPHO.email, SIPHO.password);
   await step(`/api/bookings/${bookingId}/check-in`, { code, faceMatches: true, nameMatches: true, lastFourMatches: true });
-  await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed" });
+  await step(`/api/bookings/${bookingId}/check-out`, { reason: "completed", answers: ANSWERS });
   const owed = (await apiGet(`/api/bookings/${bookingId}`, BookingViewSchema)).day.owedCents;
   const evidenceBefore = await refusal(() => step(`/api/bookings/${bookingId}/evidence`, { image: SCREENSHOT }));
   await step(`/api/bookings/${bookingId}/paid`, { method: "cash", amountCents: owed });
@@ -135,6 +148,25 @@ async function demoDispute(steps: Record<string, unknown>, firstTryoutId: string
   const [files] = await getStorage(adminApp()).bucket().getFiles({ prefix: `evidence/${bookingId}/` });
   steps["14. dispute: proof after Not received"] = { beforeNotReceived: evidenceBefore.status, twice: twice.status, notAnImage: notImage.status, filesStored: files.length };
   if (evidenceBefore.status !== 409 || twice.status !== 409 || notImage.status !== 422 || files.length !== 2) throw new Error(`Proof should be refused before Not received, taken once from each side, and stored privately: ${JSON.stringify(steps["14. dispute: proof after Not received"])}`);
+}
+
+/** npm run review:case: the open cases by priority, then the dispute resolved with an unpause, audit-logged; and npm run pilot:metrics, which leaves demo records out. */
+async function demoReview(steps: Record<string, unknown>): Promise<void> {
+  const listed = scriptOutput("review:case");
+  const line = listed.split("\n").find((row) => row.startsWith("payment") && row.includes("booking_review"));
+  const caseId = line?.trim().split(/\s+/)[1] ?? "";
+  if (!caseId) throw new Error(`review:case should list the Not received case under payment:\n${listed}`);
+  const context = scriptOutput("review:case", [caseId]);
+  scriptOutput("review:case", [caseId, "resolve", "--outcome", "paid-in-cash-confirmed", "--reason", "both-sides-agree-after-the-screenshots", "--admin", "e2e", "--unpause", "business"]);
+  const db = getFirestore(adminApp());
+  const closed = await db.collection("cases").doc(caseId).get();
+  const business = await db.collection("businesses").doc(String(closed.get("businessId"))).get();
+  const audit = await db.collection("auditLog").where("target", "==", caseId).where("action", "==", "case_resolved").get();
+  const metrics = scriptOutput("pilot:metrics");
+  steps["16. review:case and pilot:metrics"] = { caseId, showsEvidence: context.includes("Nothing in my hand"), status: closed.get("status"), business: business.get("status"), audited: audit.size, metricsLeaveOutDemo: metrics.includes("No real tryouts yet") };
+  if (closed.get("status") !== "closed" || business.get("status") !== "active" || audit.size !== 1 || !context.includes("Nothing in my hand") || !metrics.includes("No real tryouts yet")) {
+    throw new Error(`review:case should show the evidence, close the case and unpause the business, audited; pilot:metrics should leave demo out: ${JSON.stringify(steps["16. review:case and pilot:metrics"])}`);
+  }
 }
 
 /** Sipho asks for more credits, an admin grants them with npm run credits:grant (audit-logged), and the request closes. */
@@ -191,6 +223,7 @@ run(async () => {
   const first = await demoDay(steps);
   await demoDispute(steps, first);
   await demoCredits(steps);
+  await demoReview(steps);
 
   console.log(JSON.stringify(steps, null, 2));
   const refused = ["1. wrong password", "3. edit the demo profile", "3b. change the demo's pay methods", "4. Firebase password changed, then used", "6. email moved off the demo domain", "11. real opens a demo tryout", "12. real applies to a demo tryout"].map((key) => (steps[key] as { status: number }).status);

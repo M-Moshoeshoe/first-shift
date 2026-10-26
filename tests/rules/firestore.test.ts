@@ -195,4 +195,17 @@ describe("applications and bookings, written only by the server (Phases 3 and 4)
       await assertFails(updateDoc(doc(client, "evidence/e1"), { note: "changed" }));
     }
   });
+
+  it("keeps references and job offers server-only: written by the server, read through it, never by a client (Phase 6)", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "hireOffers/sipho_thabo"), { ownerId: "sipho", workerId: "thabo", businessName: "Sipho's Phone Repairs" });
+    });
+    for (const client of [as("thabo"), as("sipho"), anonymous()]) {
+      await assertFails(getDoc(doc(client, "hireOffers/sipho_thabo")));
+      await assertFails(getDocs(query(collection(client, "hireOffers"), where("workerId", "==", "thabo"))));
+      await assertFails(setDoc(doc(client, "hireOffers/sipho_lerato"), { ownerId: "sipho", workerId: "lerato" }));
+      await assertFails(updateDoc(doc(client, "references/r1"), { status: "approved", text: "Rewritten" }));
+      await assertFails(setDoc(doc(client, "references/r2"), { workerId: "thabo", ownerId: "sipho", status: "approved" }));
+    }
+  });
 });

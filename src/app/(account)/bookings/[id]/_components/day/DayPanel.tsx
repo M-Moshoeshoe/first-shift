@@ -11,7 +11,9 @@ import { CheckInForm } from "./CheckInForm";
 import { CheckOutForm } from "./CheckOutForm";
 import { ConfirmPayment } from "./ConfirmPayment";
 import { ConfirmStep } from "./ConfirmStep";
+import { HirePanel } from "./HirePanel";
 import { PayForm } from "./PayForm";
+import { ReferencePanel } from "./ReferencePanel";
 
 // Proof is asked for only in a dispute, so its form and the resizing code load only then.
 const EvidenceForm = lazy(() => import("./EvidenceForm").then((module) => ({ default: module.EvidenceForm })));
@@ -65,7 +67,8 @@ function WorkerPay({ booking, reload }: { booking: BookingViewResponse; reload: 
 
 /**
  * The day on the booking page, for whichever side is looking: the door,
- * check-out, paying, and confirming. Loaded only once the day has started,
+ * check-out, paying, confirming, and after Received the reference and, for
+ * the owner, a job offer when it's due. Loaded only once the day has started,
  * so the booking page stays light. Each step reloads the booking.
  */
 export function DayPanel({ booking, reload }: { booking: BookingViewResponse; reload: () => void }) {
@@ -99,6 +102,8 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
           </div>
         ) : null}
         <Proof booking={booking} reload={reload} />
+        {payment?.state === "received" ? <ReferencePanel bookingId={booking.id} /> : null}
+        {booking.status === "ended" ? <HirePanel bookingId={booking.id} name={booking.workerFirstName} /> : null}
       </section>
     );
   }
@@ -109,6 +114,7 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
       {day.canReportNotOpen ? <ConfirmStep path={path("not-open")} label={DAY_COPY.notOpen} explain={DAY_COPY.notOpenConfirm} yes={DAY_COPY.notOpenYes} fallback={NOT_FOUND} done={reload} /> : null}
       {day.payable ? <WorkerPay booking={booking} reload={reload} /> : null}
       <Proof booking={booking} reload={reload} />
+      {day.payment?.state === "received" ? <ReferencePanel bookingId={booking.id} /> : null}
     </section>
   );
 }

@@ -3,11 +3,16 @@ import { BOOKING_TITLE } from "./bookingFlow";
 import { BASE, pathIs, signIn, type Recorder } from "./kit";
 
 /** The Credits screen, as the owner sees it after the day: the free credits, the one used, a request for more, and the launch prices as text. */
-export async function creditsWalk(rec: Recorder, page: Page): Promise<void> {
+export async function creditsWalk(rec: Recorder, page: Page, bookingPath: string): Promise<void> {
   await page.getByRole("button", { name: "Sign out" }).first().click();
   await pathIs(page, "/sign-in");
   await signIn(page, "e2e-lerato");
   await pathIs(page, "/business");
+  // The owner's own answers on the booking, read-only: nobody rewrites a reference.
+  await page.goto(bookingPath.startsWith("/") ? `${BASE}${bookingPath}` : bookingPath);
+  await page.getByRole("heading", { name: "Your answers" }).waitFor();
+  await rec.check(page, "booking, the owner's answers after Received");
+  await page.goto(`${BASE}/business`);
   await page.getByRole("link", { name: "See your credits" }).click();
   await pathIs(page, "/business/credits");
   await page.getByRole("heading", { name: "Credits", exact: true }).waitFor();

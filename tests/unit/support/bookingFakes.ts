@@ -48,7 +48,7 @@ export function createBookingFakes(now: () => Date) {
     secretCount += 1;
     return { checkInCode: String(100000 + secretCount), shareToken: `share-token-${String(secretCount).padStart(8, "0")}` };
   };
-  const offerService = createOfferService({ offers, profiles: store.repo, newSecrets, now });
+  const offerService = createOfferService({ offers, profiles: store.repo, hires: { forWorker: async () => [] }, newSecrets, now });
   const bookingService = createBookingService({ bookings: bookingRepo, photos: { metadata: async () => null, download: async () => null }, now });
   let ids = 0;
   const evidenceStore = { save: async (path: string, bytes: Uint8Array) => void files.set(path, bytes), remove: async (path: string) => void files.delete(path) };

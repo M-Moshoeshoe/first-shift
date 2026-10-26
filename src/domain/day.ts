@@ -1,5 +1,6 @@
 import { RULES } from "@/config/rules";
 import { partyOf, type BookingRecord, type CheckoutReason, type Payment } from "./bookings";
+import type { OwnerAnswers } from "./references";
 import { bookingReview, type ReviewCase } from "./cases";
 import type { Viewer } from "./demo";
 import { isAcceptedAmount } from "./pay";
@@ -64,11 +65,13 @@ export const wasOnTime = (booking: Pick<BookingRecord, "startAt" | "checkedInAt"
   Boolean(booking.checkedInAt && booking.checkedInAt <= addMinutes(booking.startAt, RULES.onTimeGraceMinutes));
 
 /**
- * The owner checks out with how the day ended. settle() works out what's
- * owed (pay.ts): the full amount, or for leaving early or a safety stop the
- * hours worked, never under 4. A safety stop goes to review.
+ * The owner checks out with how the day ended and their three answers (on
+ * time, did the work, would hire again), which the reference is written
+ * from. settle() works out what's owed (pay.ts): the full amount, or for
+ * leaving early or a safety stop the hours worked, never under 4. A safety
+ * stop goes to review.
  */
-export function decideCheckOut(viewer: Viewer, bookingId: string, booking: BookingRecord | null, reason: CheckoutReason, now: Date): DayEnding & { minutesWorked?: number } {
+export function decideCheckOut(viewer: Viewer, bookingId: string, booking: BookingRecord | null, reason: CheckoutReason, answers: OwnerAnswers, now: Date): DayEnding & { minutesWorked?: number; answers?: OwnerAnswers } {
   if (!asOwner(viewer, booking)) return { kind: "refuse", problem: "not_found" };
   if (booking.status === "ended") return { kind: "unchanged" };
   if (booking.status !== "checked_in" || !booking.checkedInAt) return { kind: "refuse", problem: "not_now" };
@@ -76,7 +79,7 @@ export function decideCheckOut(viewer: Viewer, bookingId: string, booking: Booki
   const terms = { rateCentsPerHour: booking.rateCentsPerHour, agreedHours: booking.hours };
   const event: SettleEvent = reason === "worker_left_early" || reason === "safety" ? { kind: reason, ...terms, minutesWorked } : { kind: reason, ...terms };
   const review = reason === "safety" ? bookingReview("safety_stop", { bookingId, ...booking }) : null;
-  return { kind: "end", settlement: settle(event), review, minutesWorked };
+  return { kind: "end", settlement: settle(event), review, minutesWorked, answers: { onTime: answers.onTime, didTheWork: answers.didTheWork, wouldHireAgain: answers.wouldHireAgain } };
 }
 
 /** A booking with money owed: ended, or cancelled late by the business. */

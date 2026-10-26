@@ -7,6 +7,7 @@ const owner = { uid: "sipho", demo: false };
 const worker = { uid: "thabo", demo: false };
 const stranger = { uid: "lerato", demo: false };
 const START = fromSast(2026, 10, 27, 9, 0);
+const ANSWERS = { onTime: true, didTheWork: false, wouldHireAgain: true };
 
 const booking = (overrides: Partial<BookingRecord> = {}): BookingRecord => ({
   tryoutId: "t1", ownerId: "sipho", workerId: "thabo", demo: false, title: "Phone shop helper", businessName: "Sipho's Phone Repairs", businessArea: "Randburg",
@@ -61,22 +62,26 @@ describe("check-out, settled through settle()", () => {
   const inDay = booking({ status: "checked_in", checkedInAt: fromSast(2026, 10, 27, 9, 0) });
 
   it("owes the full day when the work is done, and uses the credit", () => {
-    expect(decideCheckOut(owner, "b1", inDay, "completed", fromSast(2026, 10, 27, 14, 0))).toMatchObject({ kind: "end", settlement: { wage: { amountCents: 21000, minimumCents: 21000 }, credit: "use" }, review: null });
-    expect(decideCheckOut(owner, "b1", inDay, "business_ended_early", fromSast(2026, 10, 27, 11, 0))).toMatchObject({ settlement: { wage: { amountCents: 21000 } } });
+    expect(decideCheckOut(owner, "b1", inDay, "completed", ANSWERS, fromSast(2026, 10, 27, 14, 0))).toMatchObject({ kind: "end", settlement: { wage: { amountCents: 21000, minimumCents: 21000 }, credit: "use" }, review: null });
+    expect(decideCheckOut(owner, "b1", inDay, "business_ended_early", ANSWERS, fromSast(2026, 10, 27, 11, 0))).toMatchObject({ settlement: { wage: { amountCents: 21000 } } });
   });
 
   it("lets the owner lower it only when the young person left early, never below 4 hours", () => {
-    expect(decideCheckOut(owner, "b1", inDay, "worker_left_early", fromSast(2026, 10, 27, 11, 0))).toMatchObject({ settlement: { wage: { amountCents: 21000, minimumCents: 14000 } }, minutesWorked: 120 });
-    expect(decideCheckOut(owner, "b1", inDay, "worker_left_early", fromSast(2026, 10, 27, 14, 7))).toMatchObject({ settlement: { wage: { minimumCents: 18375 } } });
+    expect(decideCheckOut(owner, "b1", inDay, "worker_left_early", ANSWERS, fromSast(2026, 10, 27, 11, 0))).toMatchObject({ settlement: { wage: { amountCents: 21000, minimumCents: 14000 } }, minutesWorked: 120 });
+    expect(decideCheckOut(owner, "b1", inDay, "worker_left_early", ANSWERS, fromSast(2026, 10, 27, 14, 7))).toMatchObject({ settlement: { wage: { minimumCents: 18375 } } });
   });
 
   it("sends a safety stop to review, paying the hours worked with the 4-hour floor", () => {
-    expect(decideCheckOut(owner, "b1", inDay, "safety", fromSast(2026, 10, 27, 10, 0))).toMatchObject({ settlement: { wage: { amountCents: 14000, needsReview: true } }, review: { reason: "safety_stop" } });
+    expect(decideCheckOut(owner, "b1", inDay, "safety", ANSWERS, fromSast(2026, 10, 27, 10, 0))).toMatchObject({ settlement: { wage: { amountCents: 14000, needsReview: true } }, review: { reason: "safety_stop" } });
+  });
+
+  it("keeps the owner's three answers with the ending, for the reference", () => {
+    expect(decideCheckOut(owner, "b1", inDay, "completed", ANSWERS, fromSast(2026, 10, 27, 14, 0))).toMatchObject({ kind: "end", answers: ANSWERS });
   });
 
   it("needs a check-in first, and is the owner's alone", () => {
-    expect(decideCheckOut(owner, "b1", booking(), "completed", START)).toEqual({ kind: "refuse", problem: "not_now" });
-    expect(decideCheckOut(worker, "b1", inDay, "completed", START)).toEqual({ kind: "refuse", problem: "not_found" });
+    expect(decideCheckOut(owner, "b1", booking(), "completed", ANSWERS, START)).toEqual({ kind: "refuse", problem: "not_now" });
+    expect(decideCheckOut(worker, "b1", inDay, "completed", ANSWERS, START)).toEqual({ kind: "refuse", problem: "not_found" });
   });
 });
 

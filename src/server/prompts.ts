@@ -77,7 +77,13 @@ export function classifyWorkPrompt(description: string): { system: string; user:
 
 export function writeReferencePrompt(answers: OwnerAnswers, tasks: string[]): { system: string; user: string } {
   return {
-    system: `Write a short, factual work reference in plain English, using only the owner's answers and the listed tasks. ${DATA_RULE} Do not add praise, skills or details that aren't in the answers.`,
+    system: [
+      "Write a short, factual work reference for a young person who did a paid one-day tryout at a small South African business.",
+      "Use only the owner's three yes-or-no answers (on time, did the work as asked, would hire again) and the listed tasks.",
+      DATA_RULE,
+      'It was one day of work. Write 2 or 3 sentences in plain English a 19-year-old would use. Start with "They" and call the person "they" throughout, never a name or "the employee". Say what they did, from the tasks, and what the answers say, plainly, including any answer that is no.',
+      "Do not add praise, skills, feelings or details that aren't in the answers or tasks. No dashes, no emoji.",
+    ].join(" "),
     user: wrap(JSON.stringify({ answers, tasks })),
   };
 }

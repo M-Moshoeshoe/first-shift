@@ -55,6 +55,8 @@ export const ApplicationsSchema = z.object({
       bookingId: z.nullable(z.string()),
     }),
   ),
+  /** "Job offer from {business}": offers made after tryouts together (domain/hire.ts). */
+  jobOffers: z.array(z.object({ businessName: z.string(), at: z.string() })),
 });
 export type ApplicationsResponse = z.infer<typeof ApplicationsSchema>;
 
@@ -125,7 +127,15 @@ export const DoorCheckSchema = z.object({
   nameMatches: z.boolean(),
   lastFourMatches: z.boolean(),
 });
-export const CheckOutSchema = z.object({ reason: z.enum(CHECKOUT_REASONS, { error: "Choose how the day ended." }) });
+// Each of the owner's three answers is required: a reference is written from them (domain/references.ts).
+const answer = (message: string) => z.boolean({ error: message });
+export const CheckOutSchema = z.object({
+  reason: z.enum(CHECKOUT_REASONS, { error: "Choose how the day ended." }),
+  answers: z.object(
+    { onTime: answer("Say whether they were on time."), didTheWork: answer("Say whether they did the work as asked."), wouldHireAgain: answer("Say whether you would hire them again.") },
+    { error: "Answer the three questions about the day." },
+  ),
+});
 export const ConfirmSchema = z.object({ received: z.boolean() });
 export const StepResultSchema = z.object({ status: z.enum(["done", "unchanged"]) });
 export type BookingViewResponse = z.infer<typeof BookingViewSchema>;

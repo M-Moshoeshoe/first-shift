@@ -1,5 +1,6 @@
 import "server-only";
 import type { BookingRecord, CheckoutReason, Payment } from "@/domain/bookings";
+import type { OwnerAnswers } from "@/domain/references";
 import type { ReviewCase } from "@/domain/cases";
 import { decideBusinessNotOpen, decideCheckIn, decideCheckOut, decideConfirm, decideMarkPaid, decideNoShow, deadlineActions, payRecordCounters, unpaidPause, wasOnTime, type DoorCheck, type MarkPaid } from "@/domain/day";
 import { CHECK_IN_MESSAGES, MARK_PAID_MESSAGES } from "@/domain/dayMessages";
@@ -68,18 +69,18 @@ export function createDayService({ bookings, evidence, newId, now }: DayServiceD
       });
     },
 
-    /** Check-out: settle() works out what's owed and uses the credit; both records count a completed tryout. */
-    async checkOut(viewer: Viewer, bookingId: string, reason: CheckoutReason): Promise<Step> {
+    /** Check-out with the owner's three answers: settle() works out what's owed and uses the credit; both records count a completed tryout. */
+    async checkOut(viewer: Viewer, bookingId: string, reason: CheckoutReason, answers: OwnerAnswers): Promise<Step> {
       return bookings.transactBooking<Step>(bookingId, viewer.uid, ({ booking, ownerLedger }) => {
         const at = now();
-        const decision = decideCheckOut(viewer, bookingId, booking, reason, at);
+        const decision = decideCheckOut(viewer, bookingId, booking, reason, answers, at);
         if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? NOT_FOUND : NOT_NOW);
         if (decision.kind === "unchanged" || !booking) return { write: null, result: { status: "unchanged" } };
         const { settlement, review } = decision;
         const credit = settlementCredit(settlement, ownerLedger, booking.tryoutId);
         return {
           write: {
-            booking: { status: "ended", ended: { at, reason, minutesWorked: decision.minutesWorked ?? 0 }, owedCents: settlement.wage?.amountCents ?? 0, owedMinimumCents: settlement.wage?.minimumCents ?? 0, payment: { state: "awaiting_payment" } },
+            booking: { status: "ended", ended: { at, reason, minutesWorked: decision.minutesWorked ?? 0, answers: decision.answers }, owedCents: settlement.wage?.amountCents ?? 0, owedMinimumCents: settlement.wage?.minimumCents ?? 0, payment: { state: "awaiting_payment" } },
             tryoutStatus: "completed",
             ledger: credit.kind === "append" ? credit.entries : [],
             review,

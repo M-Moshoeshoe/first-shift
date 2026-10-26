@@ -1,3 +1,4 @@
+import type { BookingRecord } from "./bookings";
 import type { ReviewCase } from "./cases";
 
 /**
@@ -5,7 +6,8 @@ import type { ReviewCase } from "./cases";
  * tasks, with the wording written with AI. The young person reviews every one
  * before it can be shared: they add it to their record, or challenge it.
  */
-export const REFERENCE_STATUSES = ["draft", "approved", "challenged"] as const;
+// withdrawn: a challenge upheld on review takes it off for good; the owner can't rewrite it.
+export const REFERENCE_STATUSES = ["draft", "approved", "challenged", "withdrawn"] as const;
 export type ReferenceStatus = (typeof REFERENCE_STATUSES)[number];
 
 /** The owner's three one-tap answers: the same criteria for every reference. */
@@ -15,6 +17,7 @@ export interface OwnerAnswers {
   wouldHireAgain: boolean;
 }
 
+/** references/{bookingId}: one per completed tryout, written once and never by the owner. */
 export interface ReferenceRecord {
   workerId: string;
   ownerId: string;
@@ -24,6 +27,29 @@ export interface ReferenceRecord {
   /** The wording, written with AI from the answers and tasks only, and labelled so. */
   text: string;
   status: ReferenceStatus;
+  demo: boolean;
+  /** A challenge rejected on review: it's back with the young person to add or leave off, and can't be challenged again. */
+  challengeRejected?: boolean;
+}
+
+export type DraftProblem = "not_found" | "not_received" | "no_answers";
+
+/**
+ * Whether a reference can be written now: only for the young person it's
+ * about, only after they confirmed Received, and only from the owner's
+ * answers. Null means write it; a booking with one already changes nothing.
+ */
+export function referenceDraftProblem(uid: string, booking: BookingRecord | null): DraftProblem | null {
+  if (!booking || booking.workerId !== uid) return "not_found";
+  if (booking.payment?.state !== "received") return "not_received";
+  return booking.ended?.answers ? null : "no_answers";
+}
+
+/** The reference to store: the answers and tasks it was written from, and the AI's wording, as a draft for the young person. */
+export function newReference(booking: BookingRecord, tasks: readonly string[], text: string): ReferenceRecord | null {
+  const answers = booking.ended?.answers;
+  if (!answers) return null;
+  return { workerId: booking.workerId, ownerId: booking.ownerId, tryoutId: booking.tryoutId, answers, tasks: [...tasks], text: text.trim(), status: "draft", demo: booking.demo };
 }
 
 export type ReferenceDecision =
@@ -44,6 +70,7 @@ export function decideReference(uid: string, reference: ReferenceRecord | null, 
   if (reference.status === target) return { kind: "unchanged" };
   if (reference.status !== "draft") return { kind: "refuse", problem: "already_decided" };
   if (choice.action === "approve") return { kind: "approve" };
+  if (reference.challengeRejected) return { kind: "refuse", problem: "already_decided" };
   return {
     kind: "challenge",
     reviewCase: { kind: "reference_challenge", referenceId, workerId: uid, ownerId: reference.ownerId, reason: choice.reason.trim(), status: "open" },

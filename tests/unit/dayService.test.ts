@@ -10,6 +10,7 @@ import { shop } from "./support/tryoutFakes";
 let clock = fromSast(2026, 10, 26, 8, 0);
 const sipho = { uid: "sipho", demo: false };
 const thaboViewer = { uid: "thabo", demo: false };
+const ANSWERS = { onTime: true, didTheWork: true, wouldHireAgain: true };
 
 const refusal = async (call: Promise<unknown>) => {
   const error = await call.then(() => null, (caught: unknown) => caught);
@@ -44,7 +45,7 @@ describe("a full tryout, from the door to Received", () => {
     expect(await bookingService.status(secrets.get("booking-1")?.shareToken ?? "")).toMatchObject({ status: "checked_in" });
 
     clock = fromSast(2026, 10, 27, 15, 0);
-    expect(await dayService.checkOut(sipho, "booking-1", "completed")).toEqual({ status: "done" });
+    expect(await dayService.checkOut(sipho, "booking-1", "completed", ANSWERS)).toEqual({ status: "done" });
     expect(bookings.get("booking-1")).toMatchObject({ status: "ended", owedCents: 21000, payment: { state: "awaiting_payment" } });
     expect(store.ledgers.get("sipho")?.at(-1)).toEqual({ kind: "use", tryoutId: "t1" });
     expect(tryouts.get("t1")?.status).toBe("completed");
@@ -95,7 +96,7 @@ describe("a full tryout, from the door to Received", () => {
     clock = fromSast(2026, 10, 27, 9, 0);
     await dayService.checkIn(sipho, "booking-1", door);
     clock = fromSast(2026, 10, 27, 15, 0);
-    await dayService.checkOut(sipho, "booking-1", "completed");
+    await dayService.checkOut(sipho, "booking-1", "completed", ANSWERS);
     clock = fromSast(2026, 10, 28, 0, 1);
     await dayService.sweepDeadlines(thaboViewer);
     expect(store.businesses.get("sipho")).toMatchObject({ status: "paused", pausedFor: "unpaid:booking-1" });
@@ -115,7 +116,7 @@ describe("a full tryout, from the door to Received", () => {
     clock = fromSast(2026, 10, 27, 9, 0);
     await dayService.checkIn(sipho, "booking-1", door);
     clock = fromSast(2026, 10, 27, 15, 0);
-    await dayService.checkOut(sipho, "booking-1", "completed");
+    await dayService.checkOut(sipho, "booking-1", "completed", ANSWERS);
     await dayService.markPaid(sipho, "booking-1", { method: "ewallet", amountCents: 21000 });
     clock = fromSast(2026, 10, 28, 15, 1);
     expect(await dayService.sweepDeadlines(thaboViewer)).toEqual(["booking-1"]);
@@ -131,7 +132,7 @@ describe("proof, only after Not received", () => {
     clock = fromSast(2026, 10, 27, 9, 0);
     await fakes.dayService.checkIn(sipho, "booking-1", fakes.door);
     clock = fromSast(2026, 10, 27, 15, 0);
-    await fakes.dayService.checkOut(sipho, "booking-1", "completed");
+    await fakes.dayService.checkOut(sipho, "booking-1", "completed", ANSWERS);
     return fakes;
   }
 

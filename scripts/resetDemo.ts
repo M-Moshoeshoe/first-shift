@@ -14,7 +14,7 @@ import { announceTarget } from "./adminTarget";
  * live tryouts in the next three days, all marked demo, and Thabo's
  * application to Sipho's first tryout. Everything the demo accounts made
  * since (tryouts, applications, bookings and their secrets, credits, cases,
- * strikes, proof screenshots, daily limits) is deleted first. It touches only demo records: the demo accounts' own uids,
+ * strikes, proof screenshots, references, job offers, daily limits) is deleted first. It touches only demo records: the demo accounts' own uids,
  * the two extra demo businesses, and documents marked demo: true. The audit
  * log is kept, with one demo_reset entry per account added to it.
  *
@@ -70,6 +70,9 @@ async function main(): Promise<void> {
       db.collection("cases").where("reporterId", "in", accounts),
       db.collection("strikes").where("uid", "in", accounts),
       db.collection("evidence").where("demo", "==", true),
+      db.collection("references").where("workerId", "==", uids.youngPerson),
+      db.collection("references").where("demo", "==", true),
+      db.collection("hireOffers").where("demo", "==", true),
     ])),
   ]);
   // Screenshots added as proof on demo bookings, at their private paths (domain/evidence.ts).

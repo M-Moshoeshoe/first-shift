@@ -19,7 +19,7 @@ Work one item at a time, in order. Each item ends with `npm run check` passing, 
 | G | Finding | Nearby list by geohash (no push alerts), served by the server; tryout detail with fares and the injury cover line; applying with the daily limit; "N applied" on the dashboard | 4 h | Built |
 | H | Booking | Ranked short list, booking, check-in code, WhatsApp chat and trip share as plain `wa.me` links. Booking refuses the 24-hour line (`regularEmployment.ts`, "Offer them a job instead?"). "Report a problem" on every booking | 3 h | Built: offers, accept, booking page, status page, Applications, nav badges |
 | I | The day and paying | Door check, check-in, check-out, the pay rules, Paid and Received, with the payment line below wherever payment appears. "Report a problem" stays on the booking through the day | 3 h | Built. Deadlines are checked whenever either party opens a screen (not Netlify Scheduled Functions) |
-| J | Records | The owner's three answers, the AI reference, and the young person's review: they see the three answers as the fixed criteria and the wording labelled "Written with AI", then tap "Add to my record" or "Challenge it" (`references.ts`). Only approved references reach the shareable record; a challenge opens a review case | 2.5 h | |
+| J | Records | The owner's three answers, the AI reference, and the young person's review: they see the three answers as the fixed criteria and the wording labelled "Written with AI", then tap "Add to my record" or "Challenge it" (`references.ts`). Only approved references reach the shareable record; a challenge opens a review case | 2.5 h | Built (Phase 6, 26 October 2026): references, `/work/record` and its share link, job offers, `npm run review:case`, `npm run pilot:metrics` |
 | K | Demo mode | Seeded demo accounts at every stage, rebuilt against the real data model and labelled demo everywhere; one judge can walk the loop alone | 3 h | Started: two demo accounts with isolation, `npm run demo:reset` with live demo tryouts; stages to come |
 | L | Plain pages | Contact, Privacy, and a public "Safety and fair play" page (below), linked from the home page footer, sign-in and every booking. Privacy must say why an admin keeps full names, phone numbers and the last four ID digits: to find the person behind an account for a safety report, a payment dispute or a strike (`SECURITY.md`, Privacy) | 1 h | |
 | M | Launch | Final deploy, ZAP baseline reviewed, Slow 4G phone test, the pre-submit checklist in `AGENTS.md` | 2 h | |
@@ -55,7 +55,7 @@ Six weeks in Ivory Park, Tembisa and Midrand, after a labour lawyer has reviewed
 | Repeat businesses | Businesses with 2 or more completed tryouts | Half of the active ones |
 | Safety reports | Reports by kind, and how long each took to close | Every one closed within 48 hours |
 | References approved | Approved, out of all references written; challenges and how they ended | 9 in 10 approved |
-| Job offers made | "Offer a job?" accepted by the owner | 5 |
+| Job offers made | "Offer {name} a job" tapped by the owner | 5 |
 
 A week where a safety report stays open, or a payment isn't confirmed, is reviewed before more tryouts are posted that week.
 
@@ -79,8 +79,7 @@ Explained in the slides as next steps, not built:
 - The fill forecast
 - The Android APK
 - Blind ratings
-- The "Offer a job?" hire prompt screen
-- The review list screen for disputes, reports, reference challenges and appeals
+- The review list as a screen: for now it's `npm run review:case`, run by an admin
 - Checking COIDA registration with the Compensation Fund
 - Designed Contact and Privacy pages (L ships plain ones)
 

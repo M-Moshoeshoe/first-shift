@@ -2,6 +2,7 @@ import "server-only";
 import { randomBytes, randomInt } from "node:crypto";
 import { firebaseEvidenceStore, firebasePhotoStore } from "../repositories/firebasePhotoStore";
 import { firestoreBookingRepository } from "../repositories/firestoreBookingRepository";
+import { firestoreHireRepository } from "../repositories/firestoreHireRepository";
 import { firestoreOfferRepository } from "../repositories/firestoreOfferRepository";
 import { firestoreProfileRepository } from "../repositories/firestoreProfileRepository";
 import { createBookingService, type BookingService } from "./bookingService";
@@ -13,7 +14,7 @@ const newSecrets = () => ({ checkInCode: String(randomInt(0, 1_000_000)).padStar
 
 /** The offer and booking services wired to Firestore and Storage. Routes use these; tests use fakes. */
 export function liveOfferService(): OfferService {
-  return createOfferService({ offers: firestoreOfferRepository, profiles: firestoreProfileRepository, newSecrets, now: () => new Date() });
+  return createOfferService({ offers: firestoreOfferRepository, profiles: firestoreProfileRepository, hires: firestoreHireRepository, newSecrets, now: () => new Date() });
 }
 
 export function liveDayService(): DayService {

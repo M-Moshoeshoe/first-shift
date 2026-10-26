@@ -175,6 +175,8 @@ Every page's JavaScript has a budget: the gzipped size of all the scripts it loa
 | `/work/profile` | 260 KB (the cap) | 247.8 KB, 16 scripts (ways to be paid, what you can do, 26 October 2026) |
 | `/business/owner` | 260 KB (the cap) | 254.3 KB, 17 scripts (the owner's details, 26 October 2026) |
 | `/business/credits` | 260 KB (the cap) | 245.8 KB, 16 scripts (the Credits screen, 26 October 2026) |
+| `/work/record` | 260 KB (the cap) | 246.8 KB, 16 scripts (the work record, 26 October 2026) |
+| `/record/[token]` | 219 KB (199.2 KB measured, + 10%) | 199.2 KB, 10 scripts: the shared work record, no sign-in code, its schema in a module of its own |
 | `/bookings/[id]` | 260 KB (the cap) | 258.2 KB, 17 scripts (payment methods, 26 October 2026); the day's panels (check-in, check-out, paying, confirming) load only once the day has begun, and the proof form and its resizing code only after Not received |
 | `/status/[token]` | 200 KB (a marketing page) | 198.7 KB, 10 scripts: no sign-in code; the status words have their own module (`bookingStatus.ts`) so the page loads none of the booking rules |
 
