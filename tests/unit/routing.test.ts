@@ -46,6 +46,9 @@ describe("every account screen is open only while it's the person's destination"
     expect(redirectFor("/business/post", "/business")).toBeNull();
     expect(redirectFor("/business/post", "/work")).toBe("/work");
     expect(redirectFor("/business/post", "/onboarding/business")).toBe("/onboarding/business");
+    // The read-only Business profile tab: the owner's, like every page under /business.
+    expect(redirectFor("/business/profile", "/business")).toBeNull();
+    expect(redirectFor("/business/profile", "/work")).toBe("/work");
     expect(redirectFor("/business/anything-else", "/business")).toBe("/business");
     expect(redirectFor("/business/post/../admin", "/business")).toBe("/business");
     expect(redirectFor("/work/tryouts/abc_123-X", "/work")).toBeNull();

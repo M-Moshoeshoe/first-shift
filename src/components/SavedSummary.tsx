@@ -1,14 +1,15 @@
 interface SavedSummaryProps {
   id: string;
+  title?: string;
   rows: readonly { term: string; value: string }[];
 }
 
 /** What's already saved, so a person who comes back sees it and only what's left to do. Used by both onboarding forms. */
-export function SavedSummary({ id, rows }: SavedSummaryProps) {
+export function SavedSummary({ id, title = "Your details are saved", rows }: SavedSummaryProps) {
   return (
     <section aria-labelledby={id} className="flex flex-col gap-2 border-2 border-ink p-4">
       <h3 id={id} className="font-bold">
-        Your details are saved
+        {title}
       </h3>
       <dl className="flex flex-col gap-1 text-sm">
         {rows.map((row) => (
