@@ -1,29 +1,52 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { DEMO_COPY } from "@/domain/demoCopy";
+import { toast } from "@/lib/toast";
+
+// Survives the reload after a reset, so the fresh page can say it worked.
+const RESET_KEY = "first-shift:demo-reset";
 
 const ERROR_ID = "demo-reset-error";
 
 /**
  * On every screen while a demo account is signed in (AppShell loads it only then): says it's the demo, and
  * offers "Reset the demo", in two taps because it resets the world every
- * judge shares. Afterwards sign-in sends the person to their start screen.
+ * judge shares. Afterwards the person's start screen loads afresh, so nothing
+ * on it is from before the reset, and says the demo is back to the start.
  */
 export function DemoBar() {
-  const router = useRouter();
+  const pathname = usePathname();
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      if (!sessionStorage.getItem(RESET_KEY)) return;
+      sessionStorage.removeItem(RESET_KEY);
+      toast(DEMO_COPY.resetDone);
+    } catch {
+      // Storage blocked: the fresh page still shows the reset demo, only without the note.
+    }
+  }, []);
   const reset = async () => {
     setBusy(true);
     setError(null);
     const { resetDemo } = await import("@/lib/demoReset");
     const result = await resetDemo();
-    if (result.ok) return router.replace("/sign-in");
+    if (result.ok) {
+      try {
+        sessionStorage.setItem(RESET_KEY, "1");
+      } catch {
+        // See above.
+      }
+      // A full load, not a client navigation: every screen fetches the reset demo, none shows what was there before.
+      const home = pathname.startsWith("/business") ? "/business" : pathname.startsWith("/work") ? "/work" : "/sign-in";
+      return window.location.replace(home);
+    }
     setError(result.error);
     setBusy(false);
   };

@@ -15,6 +15,7 @@ export const DEMO_COPY = {
   resetYes: "Yes, reset the demo",
   resetNo: "Keep going",
   resetBusy: "Resetting",
+  resetDone: "The demo is back to the start.",
   resetFailed: "The demo did not reset. Check your connection, then try again.",
   resetTooSoon: "The demo was reset less than a minute ago. Wait a minute, then try again.",
 } as const;
