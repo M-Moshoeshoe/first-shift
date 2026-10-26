@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, type KeyboardEvent } from "react";
+import { OnView } from "@/components/OnView";
+import { ShiftSlip } from "@/components/ShiftSlip";
 import { HOW } from "./homeContent";
 
 const SIDES = [HOW.young, HOW.business] as const;
+const PAID_SLIP = { day: "Saturday", hours: "9:00 to 15:00", business: "Sipho's Phone Repairs", area: "Randburg", payCents: 21000 } as const;
 
 /**
  * 03: the two sides of a tryout, four numbered steps each. Side by side on a
@@ -46,7 +49,15 @@ export function HowItWorksTabs() {
                   <span aria-hidden="true" className="w-6 shrink-0 text-sm font-semibold text-muted tabular-nums">
                     {String(number + 1).padStart(2, "0")}
                   </span>
-                  <span className="text-base">{step}</span>
+                  <span className="flex flex-col gap-4 text-base">
+                    {step}
+                    {/* The young person's last step ends with the money: a small slip whose Paid Stamp lands as it comes into view. */}
+                    {side.id === HOW.young.id && number === side.steps.length - 1 ? (
+                      <span className="block max-w-xs pt-6">
+                        <OnView before={<ShiftSlip {...PAID_SLIP} />} later={<ShiftSlip {...PAID_SLIP} stamp="Paid" />} />
+                      </span>
+                    ) : null}
+                  </span>
                 </li>
               ))}
             </ol>

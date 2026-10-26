@@ -52,7 +52,7 @@ function ShareSlip({ day, hours, pay, business, place }: { day: string; hours: s
 export async function siteShareImage(): Promise<ImageResponse> {
   const logo = await logoDataUrl();
   return new ImageResponse(
-    <ShareFrame logo={logo} footnote="Built for the FNB App of the Year Hackathon 2026">
+    <ShareFrame logo={logo} footnote="Paid one-day tryouts at small businesses near you">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 48 }}>
         <div style={{ display: "flex", fontSize: 64, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2, width: 520 }}>Every job wants experience. Get yours in a day.</div>
         <ShareSlip day="Saturday" hours="9:00 to 15:00" pay="R210.00" business="Sipho's Phone Repairs" place="Randburg, from Ivory Park" />

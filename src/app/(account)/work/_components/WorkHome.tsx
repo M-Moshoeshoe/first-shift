@@ -16,7 +16,7 @@ export function WorkHome() {
   const heading = useHeadingFocus(true);
   return (
     <>
-      <PageTitle headingRef={heading} title={worker?.firstName ? `${greetingFor(new Date())}, ${worker.firstName}` : FEED_COPY.title} intro={worker?.area ? FEED_COPY.intro(worker.area) : undefined} />
+      <PageTitle headingRef={heading} title={worker?.firstName ? `${greetingFor(new Date())}, ${worker.firstName}` : FEED_COPY.title} />
       {worker && (!worker.payMethods?.length || !worker.skills?.length || !worker.languages?.length || !worker.hasSurname) ? (
         <section aria-labelledby="profile-update" className="flex flex-col gap-3 border border-line p-4">
           <h2 id="profile-update" className="text-xl font-bold">
@@ -31,7 +31,7 @@ export function WorkHome() {
       <TryoutExplainer />
       <section aria-labelledby="feed-heading" className="flex flex-col gap-4">
         <h2 id="feed-heading" className="text-xl">
-          {FEED_COPY.title}
+          {worker?.area ? FEED_COPY.near(worker.area) : FEED_COPY.title}
         </h2>
         <NearbyList />
       </section>

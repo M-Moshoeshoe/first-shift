@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { OnView } from "@/components/OnView";
 import { ShiftSlip } from "@/components/ShiftSlip";
 import { buttonClass } from "@/components/ui/Button";
 import { HERO } from "./homeContent";
+
+const HERO_SLIP = { day: "Saturday", hours: "9:00 to 15:00", business: "Sipho's Phone Repairs", area: "Randburg", distance: "from Ivory Park", payCents: 21000, returnFareCents: 5600 } as const;
 
 /** 01: the promise, the two ways in, three facts, and the example slip, which carries the one load animation. */
 export function HomeHero() {
@@ -34,7 +37,8 @@ export function HomeHero() {
         </div>
         <figure className="flex flex-col gap-2 pt-6">
           <div className="load-sequence">
-            <ShiftSlip day="Saturday" hours="9:00 to 15:00" business="Sipho's Phone Repairs" area="Randburg" distance="from Ivory Park" payCents={21000} returnFareCents={5600} stamp="Booked" />
+            {/* On a phone the slip sits below the fold, so its Booked Stamp waits until it is seen. */}
+            <OnView before={<ShiftSlip {...HERO_SLIP} />} later={<ShiftSlip {...HERO_SLIP} stamp="Booked" />} />
           </div>
           <figcaption className="text-sm text-muted">Example tryout</figcaption>
         </figure>

@@ -13,7 +13,7 @@ const clock = (hour: number): string => `${String(hour).padStart(2, "0")}:00`;
 
 export const FEED_COPY = {
   title: "Paid tryouts near you",
-  intro: (area: string) => `Within ${RULES.nearbyRadiusKm} km of ${area}, and further along direct taxi routes from there.`,
+  near: (area: string) => `Tryouts near ${area}, including places on direct taxi routes.`,
   explainerTitle: "What's a tryout?",
   explainer: `One paid day at a business near you. You're paid the same day, at least ${formatRand(RULES.minimumWageCentsPerHour)} an hour, and the business writes you a reference.`,
   explainerDismiss: "Got it",

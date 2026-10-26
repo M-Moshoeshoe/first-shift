@@ -4,10 +4,10 @@ import { BrandLogo } from "./BrandLogo";
 const GROUPS = [
   { title: "Product", links: [{ href: "/#how-it-works", label: "How it works" }, { href: "/#for-businesses", label: "For businesses" }, { href: "/#what-it-costs", label: "What it costs" }] },
   { title: "Trust", links: [{ href: "/safety", label: "Safety and fair play" }, { href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" }] },
-  { title: "Contact", links: [{ href: "/contact", label: "Contact us" }, { href: "https://github.com/M-Moshoeshoe/first-shift", label: "GitHub" }] },
+  { title: "Contact", links: [{ href: "/contact", label: "Contact us" }] },
 ] as const;
 
-/** Every public page's footer: the logo, one line about First Shift, the link groups, and the hackathon it was built for. */
+/** Every public page's footer: the logo, one line about First Shift, and the link groups. */
 export function MarketingFooter() {
   return (
     <footer className="border-t border-line bg-paper px-5 py-12">
@@ -29,7 +29,6 @@ export function MarketingFooter() {
           ))}
         </div>
       </div>
-      <p className="mx-auto mt-8 max-w-md text-micro text-muted lg:max-w-6xl">Built for the FNB App of the Year Hackathon 2026.</p>
     </footer>
   );
 }

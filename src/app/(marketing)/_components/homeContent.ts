@@ -12,13 +12,13 @@ export const HERO = {
   title: "Every job wants experience. Get yours in a day.",
   intro: "Paid one-day tryouts at small businesses near you, with a reference from the business that paid.",
   chips: [`At least ${MINIMUM} an hour`, "Paid the same day", "A real reference"],
-  demo: "Judging the hackathon? Try the demo in one tap.",
+  demo: "Want to look around first? Explore the demo.",
 } as const;
 
 export const WHAT = {
   title: "What a tryout is",
   sentence: "One paid day of real work at a small business near you: you show what you can do, and the business sees you at work.",
-  facts: [`${RULES.minPaidHours} to ${RULES.maxTryoutHours} hours, in daylight, at the business`, `At least ${MINIMUM} an hour, and at least ${RULES.minPaidHours} hours paid`, "Paid by the business directly, the same day"],
+  facts: [`${RULES.minPaidHours} to ${RULES.maxTryoutHours} hours, in daylight, at the business`, `Paid at least the national minimum wage, for at least ${RULES.minPaidHours} hours`, "Paid by the business directly, the same day"],
 } as const;
 
 export const HOW = {
@@ -29,7 +29,7 @@ export const HOW = {
     steps: [
       "Find a paid tryout near you and apply in one tap.",
       "Get booked, and share your trip with someone you trust.",
-      "Do the day. The owner checks you in at the door and pays you before you go.",
+      "Do the day. The owner checks you in at the door and pays you the same day.",
       "Get a reference written from the business's answers, on a work record you can share.",
     ],
   },
@@ -58,23 +58,18 @@ export const SAFETY = {
 
 export const COST = {
   title: "What it costs",
-  sentence: `Free for young people. Businesses pay ${CREDIT} for each completed tryout, and their first ${RULES.freeCredits} are free.`,
-  numbers: [
-    { value: MINIMUM, label: "an hour, at least" },
-    { value: `${RULES.minPaidHours} hours`, label: "paid, at least" },
-    { value: CREDIT, label: "per completed tryout, for the business" },
-  ],
+  // Fees only: what a young person earns is in section 02, not here.
+  lines: ["Free for young people.", `Businesses pay ${CREDIT} for each completed tryout.`, `Their first ${RULES.freeCredits} tryouts are free.`, "No subscription and no sign-up fee."],
 } as const;
 
 export const FAQ = {
   title: "Questions",
   items: [
     { q: "What is a tryout?", a: `One paid day of real work at a small business, ${RULES.minPaidHours} to ${RULES.maxTryoutHours} hours, in daylight. It ends with a reference written from the business's answers.` },
-    { q: "Who pays, and how much?", a: `The business pays the young person directly: at least ${MINIMUM} an hour, and at least ${RULES.minPaidHours} hours. Young people never pay anything. Businesses pay First Shift ${CREDIT} for each completed tryout, and their first ${RULES.freeCredits} are free.` },
+    { q: "Who pays, and how much?", a: `The business pays the young person directly: at least the national minimum wage, for at least ${RULES.minPaidHours} hours. Young people never pay anything. Businesses pay First Shift ${CREDIT} for each completed tryout, and their first ${RULES.freeCredits} are free.` },
     { q: "How are young people paid?", a: "By one of the ways they choose: FNB eWallet, PayShap, a cash-send from the business's bank, or cash. We never ask for a bank account number. Check your real balance before you tap Received." },
     { q: "How is it kept safe?", a: "Tryouts are in daylight, at the business, with the owner on site. The owner checks your ID at the door, you can share your trip, and unsafe work is refused before it is posted." },
     { q: "What happens if someone is not paid?", a: "Tap Not received. The business is paused at once, both sides can add a screenshot, and the First Shift team looks into it. A business that has not marked a tryout paid by 23:59 that day is paused too." },
-    { q: "Can foreign nationals use First Shift?", a: "Not yet. Today we check South African ID numbers only. Refugee IDs, work permits and study visas are planned, each checked by a person." },
   ],
 } as const;
 
