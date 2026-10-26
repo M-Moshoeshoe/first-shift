@@ -9,12 +9,12 @@ import { SectionHeading } from "./SectionHeading";
 // Server-rendered icons: plain SVG in the HTML, no JavaScript (docs/DESIGN.md, Icons).
 const SAFETY_ICONS: Record<(typeof SAFETY.cards)[number]["icon"], LucideIcon> = { id: IdCard, daylight: Sun, share: Share2, report: Flag };
 
-/** 04: four ways a tryout is kept safe, each a card, and the way to the full page. */
+/** Four ways a tryout is kept safe, each a card, and the way to the full page. */
 export function SafetySection() {
   return (
     <Band tone="mist" wide>
       <section aria-labelledby="safety" className="reveal flex flex-col gap-8">
-        <SectionHeading id="safety" number="04" title={SAFETY.title} />
+        <SectionHeading id="safety" title={SAFETY.title} />
         <ScenePhoto scene={SCENES.corner} crop="band" sizes="(min-width: 1024px) 72rem, 100vw" className="aspect-8/3 lg:aspect-4/1" />
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SAFETY.cards.map((card) => {

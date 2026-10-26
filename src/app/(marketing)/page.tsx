@@ -11,7 +11,7 @@ import { SafetySection } from "./_components/SafetySection";
 import { SectionHeading } from "./_components/SectionHeading";
 
 /**
- * The home page, in numbered sections (docs/DESIGN.md, v4): the hero, what a
+ * The home page, in sections (docs/DESIGN.md, v4): the hero, what a
  * tryout is, how it works for each side, safety, what it costs, and the
  * questions people ask. No live activity strip: there is none to show yet,
  * and the page never invents any. Tones alternate paper and mist.
@@ -23,7 +23,7 @@ export default function HomePage() {
       <Band tone="mist" wide>
         <section aria-labelledby="what" className="reveal flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:gap-16">
           <div className="flex flex-col gap-3">
-            <SectionHeading id="what" number="02" title={WHAT.title} />
+            <SectionHeading id="what" title={WHAT.title} />
             <p className="text-base lg:text-xl">{WHAT.sentence}</p>
           </div>
           <ul className="flex flex-col gap-3">
@@ -37,7 +37,7 @@ export default function HomePage() {
       </Band>
       <Band tone="paper" wide>
         <section id="how-it-works" aria-labelledby="how" className="flex scroll-mt-20 flex-col gap-8">
-          <SectionHeading id="how" number="03" title={HOW.title} />
+          <SectionHeading id="how" title={HOW.title} />
           <HowItWorksTabs />
         </section>
       </Band>

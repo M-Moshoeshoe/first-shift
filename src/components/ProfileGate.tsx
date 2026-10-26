@@ -8,6 +8,7 @@ import { readIntent, withIntent } from "@/domain/intent";
 import { destinationFor, redirectFor } from "@/domain/profile";
 import { GatedProfileContext } from "@/lib/auth/gatedProfile";
 import { useOwnProfile } from "@/lib/auth/useOwnProfile";
+import { setSignedInHint } from "@/lib/signedInHint";
 import { AppShell } from "./AppShell";
 import { ProfileErrorState } from "./ProfileErrorState";
 import { ScreenSkeleton } from "./ScreenSkeleton";
@@ -35,6 +36,12 @@ export function ProfileGate({ children }: { children: ReactNode }) {
       : profile.status === "ready"
         ? redirectFor(pathname, profile.view.destination)
         : null;
+
+  // The public pages' "Open First Shift" (domain/signedInHint.ts): set once we know which home is theirs.
+  const role = profile.status === "ready" && profile.view.complete ? profile.view.role : null;
+  useEffect(() => {
+    if (role) setSignedInHint(role === "business" ? "/business" : "/work");
+  }, [role]);
 
   useEffect(() => {
     if (target) router.replace(withIntent(target, readIntent(window.location.search)));

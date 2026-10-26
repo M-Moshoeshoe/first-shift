@@ -1,5 +1,6 @@
 "use client";
 
+import { clearSignedInHint } from "@/lib/signedInHint";
 import { onAuthStateChanged, signOut as firebaseSignOut, type User } from "firebase/auth";
 import { createContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { clientAuth, firebaseConfigured } from "@/lib/firebaseClient";
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!configured) return undefined;
     return onAuthStateChanged(clientAuth(), (next) => {
+      if (!next) clearSignedInHint();
       setUser(next);
       setLoading(false);
     });

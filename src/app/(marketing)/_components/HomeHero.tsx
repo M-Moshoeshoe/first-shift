@@ -8,7 +8,7 @@ import { SCENES } from "./scenes";
 
 const HERO_SLIP = { day: "Saturday", hours: "9:00 to 15:00", business: "Sipho's Phone Repairs", area: "Randburg", distance: "from Ivory Park", payCents: 21000, returnFareCents: 5600 } as const;
 
-/** 01: the promise, the two ways in, three facts, and the example slip, which carries the one load animation. */
+/** The promise, the two ways in, three facts, and the example slip, which carries the one load animation. */
 export function HomeHero() {
   return (
     <section aria-labelledby="hero" className="bg-paper px-5 py-12 lg:py-24">

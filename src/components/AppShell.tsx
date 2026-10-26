@@ -43,7 +43,8 @@ export function AppShell({ nav = [], bare = false, children }: AppShellProps) {
       {bare ? (
         <main className="flex-1 bg-mist px-5 py-8 lg:py-12">{children}</main>
       ) : (
-        <main className={`flex-1 lg:bg-mist lg:px-5 lg:py-12 ${items.length > 0 ? "pb-16 lg:pb-12" : ""}`}>
+        // Room at the end of every page for the Help button (bottom 16 or 80 px, 44 px tall) and the tab bar, so nothing stays under them.
+        <main className={`flex-1 lg:bg-mist lg:px-5 lg:py-12 ${items.length > 0 ? "pb-36 lg:pb-12" : "pb-16 lg:pb-12"}`}>
           <div className="lg:mx-auto lg:max-w-md lg:border lg:border-line lg:bg-paper">{children}</div>
         </main>
       )}

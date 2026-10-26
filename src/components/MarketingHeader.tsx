@@ -2,17 +2,40 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
+import { homeFromCookies } from "@/domain/signedInHint";
 import { BrandLogo } from "./BrandLogo";
 
+// Sections of the home page are plain anchors, so the browser scrolls and fires hashchange (HowItWorksTabs opens the businesses tab).
 const LINKS = [
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#for-businesses", label: "For businesses" },
-  { href: "/safety", label: "Safety" },
-  { href: "/sign-in", label: "Sign in" },
+  { href: "/#how-it-works", label: "How it works", anchor: true },
+  { href: "/#for-businesses", label: "For businesses", anchor: true },
+  { href: "/safety", label: "Safety", anchor: false },
+  { href: "/#what-it-costs", label: "What it costs", anchor: true },
 ] as const;
 
-const GET_STARTED = { href: "/sign-in", label: "Get started" } as const;
+const DEMO = { href: "/sign-in#demo", label: "Explore the demo" } as const;
+
+/** Sign in, or Open First Shift when this browser holds the signed-in hint. Read after load, so the page stays static. */
+const noSubscription = () => () => undefined;
+
+function useAccountLink(): { href: string; label: string } {
+  // The server render and hydration say Sign in; the browser then reads the cookie (it changes only on another page).
+  const home = useSyncExternalStore(noSubscription, () => homeFromCookies(document.cookie), () => null);
+  return home ? { href: home, label: "Open First Shift" } : { href: "/sign-in", label: "Sign in" };
+}
+
+function NavLink({ link, className, onClick }: { link: (typeof LINKS)[number]; className: string; onClick?: () => void }) {
+  return link.anchor ? (
+    <a href={link.href} onClick={onClick} className={className}>
+      {link.label}
+    </a>
+  ) : (
+    <Link href={link.href} onClick={onClick} className={className}>
+      {link.label}
+    </Link>
+  );
+}
 
 /** Hidden while scrolling down, back on scrolling up or near the top (motion 9). A passive listener, no library. */
 function useHideOnScroll(): boolean {
@@ -72,7 +95,7 @@ function useDrawer() {
 }
 
 /**
- * Public pages: the logo, then the links and "Get started" on a desktop, or a
+ * Public pages: the logo, then the links, Explore the demo and Sign in (or Open First Shift) on a desktop, or a
  * menu button on a phone that opens a drawer from the right with a scrim.
  * The drawer traps focus while open and closes on Escape, a scrim tap or a
  * link, returning focus to the menu button. No auth code is loaded here.
@@ -80,6 +103,7 @@ function useDrawer() {
 export function MarketingHeader() {
   const hidden = useHideOnScroll();
   const { open, setOpen, menuButton, drawer, close, onKeyDown } = useDrawer();
+  const account = useAccountLink();
 
   return (
     <header className={`sticky top-0 z-30 border-b border-line bg-paper px-5 transition-transform duration-(--dur-base) ease-out ${hidden && !open ? "-translate-y-full" : ""}`}>
@@ -89,12 +113,13 @@ export function MarketingHeader() {
         </Link>
         <nav aria-label="Site" className="hidden items-center gap-6 lg:flex">
           {LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="link text-[13.5px] font-semibold">
-              {link.label}
-            </Link>
+            <NavLink key={link.href} link={link} className="link text-[13.5px] font-semibold" />
           ))}
-          <Link href={GET_STARTED.href} className="inline-flex min-h-10 items-center bg-primary px-4 text-sm font-semibold text-on-primary">
-            {GET_STARTED.label}
+          <Link href={DEMO.href} className="link text-[13.5px] font-semibold">
+            {DEMO.label}
+          </Link>
+          <Link href={account.href} className="inline-flex min-h-10 items-center bg-primary px-4 text-sm font-semibold text-on-primary">
+            {account.label}
           </Link>
         </nav>
         <button ref={menuButton} type="button" aria-expanded={open} aria-controls="site-menu" onClick={() => setOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-semibold lg:hidden">
@@ -120,12 +145,13 @@ export function MarketingHeader() {
             Close
           </button>
           {LINKS.map((link) => (
-            <Link key={link.href} href={link.href} onClick={() => setOpen(false)} className="flex min-h-11 items-center border-b border-line text-base font-semibold">
-              {link.label}
-            </Link>
+            <NavLink key={link.href} link={link} onClick={() => setOpen(false)} className="flex min-h-11 items-center border-b border-line text-base font-semibold" />
           ))}
-          <Link href={GET_STARTED.href} onClick={() => setOpen(false)} className="mt-4 inline-flex min-h-12 items-center justify-center bg-primary px-5 text-base font-semibold text-on-primary">
-            {GET_STARTED.label}
+          <Link href={account.href} onClick={() => setOpen(false)} className="mt-4 inline-flex min-h-12 items-center justify-center bg-primary px-5 text-base font-semibold text-on-primary">
+            {account.label}
+          </Link>
+          <Link href={DEMO.href} onClick={() => setOpen(false)} className="inline-flex min-h-11 items-center justify-center text-base font-semibold">
+            <span className="link">{DEMO.label}</span>
           </Link>
         </div>
       </div>

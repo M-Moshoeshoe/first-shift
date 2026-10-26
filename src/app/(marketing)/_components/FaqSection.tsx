@@ -2,12 +2,12 @@ import { Band } from "@/components/ui/Band";
 import { FAQ } from "./homeContent";
 import { SectionHeading } from "./SectionHeading";
 
-/** 06: the questions people ask, as native details and summary: no JavaScript. */
+/** The questions people ask, as native details and summary: no JavaScript. */
 export function FaqSection() {
   return (
     <Band tone="mist" wide>
       <section aria-labelledby="faq" className="flex flex-col gap-6">
-        <SectionHeading id="faq" number="06" title={FAQ.title} />
+        <SectionHeading id="faq" title={FAQ.title} />
         <div className="flex max-w-3xl flex-col gap-2">
           {FAQ.items.map((item) => (
             // Native details and summary: open and close with no JavaScript, keyboard and screen reader ready.

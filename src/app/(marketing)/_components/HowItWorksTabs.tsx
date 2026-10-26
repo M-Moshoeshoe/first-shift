@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent } from "react";
 import { OnView } from "@/components/OnView";
 import { ShiftSlip } from "@/components/ShiftSlip";
 import { HOW } from "./homeContent";
@@ -11,11 +11,23 @@ const SIDES = [HOW.young, HOW.business] as const;
 const PAID_SLIP = { day: "Saturday", hours: "9:00 to 15:00", business: "Sipho's Phone Repairs", area: "Randburg", payCents: 21000 } as const;
 
 /**
- * 03: the two sides of a tryout, four numbered steps each. Side by side on a
+ * The two sides of a tryout, four numbered steps each. Side by side on a
  * desktop; tabs on a phone (arrow keys move between them, as tabs should).
  */
 export function HowItWorksTabs() {
   const [selected, setSelected] = useState(0);
+  // "For businesses" in the menu links to #for-businesses: open that tab, then scroll to it, since a hidden tab panel can't be scrolled to.
+  useEffect(() => {
+    const follow = () => {
+      const index = SIDES.findIndex((side) => `#${side.id}` === window.location.hash);
+      if (index < 0) return;
+      setSelected(index);
+      requestAnimationFrame(() => document.getElementById(SIDES[index]?.id ?? "")?.scrollIntoView({ block: "start" }));
+    };
+    follow();
+    window.addEventListener("hashchange", follow);
+    return () => window.removeEventListener("hashchange", follow);
+  }, []);
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
     const next = selected === 0 ? 1 : 0;
