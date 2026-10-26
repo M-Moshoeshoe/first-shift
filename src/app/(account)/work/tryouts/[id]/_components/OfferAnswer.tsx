@@ -6,7 +6,7 @@ import { Button, buttonClass } from "@/components/ui/Button";
 import { FormError } from "@/components/ui/FormError";
 import { OFFER_COPY } from "@/domain/bookingMessages";
 import { FINDING_MESSAGES } from "@/domain/findingMessages";
-import { sastClock } from "@/domain/time";
+import { sastWhen } from "@/domain/time";
 import { ApiError, apiPost } from "@/lib/api";
 import { AnswerResultSchema } from "@/schemas/booking";
 import type { ApplyStateResponse } from "@/schemas/finding";
@@ -52,7 +52,7 @@ export function OfferAnswer({ tryoutId, state, onReload }: { tryoutId: string; s
         <h2 id="offer-heading" className="text-xl font-bold">
           {OFFER_COPY.offeredTitle}
         </h2>
-        <p className="text-lg">{OFFER_COPY.offered(sastClock(new Date(state.lapsesAt)))}</p>
+        <p className="text-lg">{OFFER_COPY.offered(sastWhen(new Date(state.lapsesAt)))}</p>
       </div>
       <Button busy={busy === "accept"} busyLabel="Accepting" aria-describedby={ERROR_ID} onClick={() => void answer("accept")}>
         {OFFER_COPY.accept}

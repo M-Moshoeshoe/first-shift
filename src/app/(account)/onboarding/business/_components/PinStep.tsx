@@ -68,7 +68,7 @@ export function PinStep({ details, pin, hasPhoto, focusHeading, onPinned, onNext
   return (
     <div className="flex flex-col gap-4">
       <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
-        Your premises pin
+        Your shop&apos;s location
       </h2>
       {hasPhoto && !pin ? (
         <p role="status" className="text-lg font-bold">

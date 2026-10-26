@@ -99,6 +99,7 @@ Folders and files:
 ## Copy rules (no AI tells)
 
 - Plain words a 19-year-old in Tembisa would use. Sentence case. Active voice. Buttons say what happens ("Post tryout", then "Tryout posted").
+- Contractions, GOV.UK style: positive ones are fine (you'll, it's, we're); negative and conditional ones are not (cannot, do not, have not, we would). `tests/unit/copyContractions.test.ts` fails on any in `src/`.
 - No em dashes, no emoji, no sparkle icons, no "AI-powered" badges, no "unlock", "empower", "seamless", "revolutionise" or "journey".
 - No all-caps labels, no eyebrow labels above headings, no middle-dot separators, no arrows appended to buttons.
 - No `rounded-*` class of any kind, including `rounded-full` and arbitrary values, which still work in Tailwind v4 without the radius tokens. Edges are sharp and photos are square; no circles anywhere (`docs/DESIGN.md`).

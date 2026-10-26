@@ -24,7 +24,7 @@ const DayPanel = lazy(() => import("./day/DayPanel").then((module) => ({ default
 // Demo bookings only, before the door opens.
 const SkipToDay = lazy(() => import("./SkipToDay").then((module) => ({ default: module.SkipToDay })));
 
-const FALLBACK = `This booking didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
+const FALLBACK = `This booking did not load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
 
 /** Whether there's anything for the day panel to show yet. */
 const hasDay = ({ day, status }: BookingViewResponse): boolean =>

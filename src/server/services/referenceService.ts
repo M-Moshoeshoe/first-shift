@@ -19,7 +19,7 @@ export interface ReferenceServiceDeps {
   newToken: () => string;
 }
 
-const NOT_FOUND = "We can't find that reference. Go back to your bookings and check.";
+const NOT_FOUND = "We cannot find that reference. Go back to your bookings and check.";
 const notFound = () => new AppError(404, "not_found", NOT_FOUND);
 const AI_LIMIT = "You've used today's writing help. Try again tomorrow.";
 

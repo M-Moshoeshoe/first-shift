@@ -13,7 +13,7 @@ export default function NotFound() {
   return (
     <PageShell>
       <Band tone="paper">
-        <PageTitle title="We can't find that page" intro="The link may be old or mistyped. Start again from the home page." />
+        <PageTitle title="We cannot find that page" intro="The link may be old or mistyped. Start again from the home page." />
         <Link href="/" className={buttonClass("primary")}>
           {BUTTON_LABELS.goHome}
         </Link>

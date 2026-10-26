@@ -10,18 +10,18 @@ import { formatRand } from "./money";
  */
 
 export const OFFER_PROBLEM_MESSAGES: Record<OfferProblem, string> = {
-  not_found: "We can't find that tryout. Go back to your tryouts and check.",
-  not_open: `Offers close ${RULES.bookingCutoffMinutes / 60} hour before the start, so nobody is booked who can't get there. This tryout can't be offered any more.`,
+  not_found: "We cannot find that tryout. Go back to your tryouts and check.",
+  not_open: `Offers close ${RULES.bookingCutoffMinutes / 60} hour before the start, so nobody is booked who cannot get there. This tryout cannot be offered any more.`,
   offer_pending: "You've already offered this tryout to someone. Wait for their answer: if they decline, you can offer it to someone else.",
-  not_applicant: "That person isn't waiting on this tryout any more. Choose someone else from the list.",
+  not_applicant: "That person is not waiting on this tryout any more. Choose someone else from the list.",
 };
 
 export const ANSWER_PROBLEM_MESSAGES: Record<AcceptProblem | "not_found", string> = {
-  not_found: "We can't find that offer. Go back to Applications and check.",
+  not_found: "We cannot find that offer. Go back to Applications and check.",
   no_offer: "There's no offer waiting for you on this tryout. Check Applications.",
   lapsed: "This offer has ended: offers close an hour before the start. Look for another tryout.",
   no_credits: "The business has no credit to book with right now, so this offer cannot go ahead. Look for another tryout in the meantime.",
-  overlaps_booking: "You're already booked on a tryout at this time, so you can't accept this one.",
+  overlaps_booking: "You're already booked on a tryout at this time, so you cannot accept this one.",
   // The young person's own words: the owner's version asks them to offer a job (tryoutMessages.ts, BOOKING_MESSAGES).
   regular_employment: "You have worked close to 24 hours with this business this month. Another tryout would make it regular work, which needs a proper job. Ask the business about a job instead.",
 };
@@ -39,7 +39,7 @@ export const APPLICATION_LABELS: Record<ApplicationStatus, string> = {
 export const APPLICATIONS_COPY = {
   title: "Your applications",
   intro: "Where each tryout you applied for stands. Tap one to see it.",
-  empty: "You haven't applied for any tryouts yet. Find one under Tryouts.",
+  empty: "You have not applied for any tryouts yet. Find one under Tryouts.",
   offerEnded: "Offer ended",
 };
 
@@ -76,6 +76,9 @@ export const OFFER_COPY = {
   notSelected: "The business picked someone else for this one. Keep applying: there are other tryouts near you.",
 };
 
+/** One sentence for a booking that is gone, or never was this person's: the same everywhere. */
+export const BOOKING_NOT_FOUND = "We cannot find that booking. Go back and check your tryouts.";
+
 export const BOOKING_COPY = {
   ownerNextTitle: "What happens next",
   ownerNext: (name: string, opens: string) => [
@@ -89,7 +92,7 @@ export const BOOKING_COPY = {
   code: "Your check-in code",
   codeHint: "Show it to the owner at the door. They check your face and your ID card, then enter it.",
   payoutPhone: "Their number for payments",
-  payment: "You send the payment yourself, from your FNB app, your bank or in cash. First Shift doesn't move money. It records the payment, and the young person confirms they received it.",
+  payment: "You send the payment yourself, from your FNB app, your bank or in cash. First Shift does not move money. It records the payment, and the young person confirms they received it.",
   payMethods: "How they can be paid",
   chat: "Chat on WhatsApp",
   ownerTitle: (name: string) => `${name}, the owner`,
@@ -106,8 +109,8 @@ export const BOOKING_COPY = {
   cancelLate: (owedCents: number) =>
     owedCents > 0 ? `Cancelling now is late: it counts as a strike, and you'll owe them ${formatRand(owedCents)} for the 4 hours.` : "Cancelling now is late: it counts as a strike against you.",
   cancelled: "This booking is cancelled.",
-  started: "This tryout has started, so it can't be cancelled.",
-  notFound: "We can't find that booking. Go back and check your tryouts.",
+  started: "This tryout has started, so it cannot be cancelled.",
+  notFound: BOOKING_NOT_FOUND,
 };
 
 export const REPORT_COPY = {

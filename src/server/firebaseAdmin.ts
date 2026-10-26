@@ -21,7 +21,7 @@ function adminApp(): App {
     return initializeApp({ projectId: env.FIREBASE_ADMIN_PROJECT_ID ?? "demo-first-shift", storageBucket });
   }
   if (!env.FIREBASE_ADMIN_PROJECT_ID || !env.FIREBASE_ADMIN_CLIENT_EMAIL || !env.FIREBASE_ADMIN_PRIVATE_KEY) {
-    throw new AppError(503, "not_configured", "The server isn't set up yet. Add the Firebase Admin settings (see README).");
+    throw new AppError(503, "not_configured", "The server is not set up yet. Add the Firebase Admin settings (see README).");
   }
   return initializeApp({
     credential: cert({

@@ -10,7 +10,7 @@ import { FormError } from "@/components/ui/FormError";
 import { PageTitle } from "@/components/ui/PageTitle";
 import { BUTTON_LABELS } from "@/domain/buttonLabels";
 import { OWNER_COPY } from "@/domain/bookingMessages";
-import { sastClock, sastSlot } from "@/domain/time";
+import { sastSlot, sastWhen } from "@/domain/time";
 import { ApiError, apiPost } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 import { useHeadingFocus } from "@/lib/useHeadingFocus";
@@ -19,7 +19,7 @@ import { STATUS_LINE } from "../../../_components/ownTryouts";
 import { ApplicantCard } from "./ApplicantCard";
 import { BookedPanel } from "./BookedPanel";
 
-const FALLBACK = `This tryout didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
+const FALLBACK = `This tryout did not load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
 
 /** The owner's tryout: its slip, any offer waiting or the booking, and the applicants ranked, each with one action. */
 export function OwnerTryout() {
@@ -77,7 +77,7 @@ export function OwnerTryout() {
       <PageTitle headingRef={heading} title={tryout.title} intro={STATUS_LINE[tryout.status]} />
       <ShiftSlip day={day} hours={hours} business={tryout.title} area={tryout.area} payCents={tryout.payCents} />
       {bookingId ? <BookedPanel bookingId={bookingId} name={booked} /> : null}
-      {offer ? <p className="text-lg font-bold">{OWNER_COPY.offered(offer.firstName, sastClock(new Date(offer.lapsesAt)))}</p> : null}
+      {offer ? <p className="text-lg font-bold">{OWNER_COPY.offered(offer.firstName, sastWhen(new Date(offer.lapsesAt)))}</p> : null}
       <FormError message={error} />
       {bookingId ? null : (
         <section aria-labelledby="applicants-heading" className="flex flex-col gap-4">

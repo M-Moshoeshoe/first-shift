@@ -16,7 +16,7 @@ export const METHOD_LABELS: Record<PaymentMethod, string> = {
 
 /** What each method needs, under its name on the young person's profile. */
 export const METHOD_DETAILS: Record<PaymentMethod, string> = {
-  ewallet: "To your cellphone number. You don't need a bank account; the business must bank with FNB.",
+  ewallet: "To your cellphone number. You do not need a bank account; the business must bank with FNB.",
   payshap: "To your cellphone number, instantly. Your bank must support PayShap.",
   cash_send: "From the business's own bank, such as Standard Bank Instant Money or Absa CashSend, to your cellphone number.",
   cash: "In person, at the end of the day.",

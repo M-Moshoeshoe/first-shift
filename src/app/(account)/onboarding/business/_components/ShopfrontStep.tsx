@@ -23,7 +23,7 @@ export function ShopfrontStep({ details, pin, focusHeading, onSaved, onBack }: S
     { term: "Area", value: details.area },
     { term: "Opening hours", value: details.openingHours },
     { term: "Injury cover", value: details.coida ? COIDA_OPTION_LABELS[details.coida] : "Not answered" },
-    { term: "Premises pin", value: pin ? pinPrecisionText(pin.accuracyMetres) : LOCATION_COPY.notPinned },
+    { term: "Your shop's location", value: pin ? pinPrecisionText(pin.accuracyMetres) : LOCATION_COPY.notPinned },
   ];
   return (
     <PhotoStepForm

@@ -14,7 +14,7 @@ export class ApiError extends Error {
 }
 
 const TIMEOUT_MS = 20_000;
-export const OFFLINE_MESSAGE = "We couldn't reach First Shift. Check your connection, then try again.";
+export const OFFLINE_MESSAGE = "We could not reach First Shift. Check your connection, then try again.";
 // zod/mini in the browser: the full build would add about 20 KB to every account page (docs/DESIGN.md, Performance).
 const ServerErrorSchema = z.object({ error: z.string(), message: z.string().check(z.minLength(1)) });
 
@@ -55,7 +55,7 @@ async function request<T>(method: "GET" | "POST", path: string, schema: $ZodType
   if (!response.ok) throw errorFromResponse(response.status, json);
 
   const parsed = safeParse(schema, json);
-  if (!parsed.success) throw new ApiError(response.status, "bad_response", "First Shift sent a reply this page couldn't read. Reload the page and try again.");
+  if (!parsed.success) throw new ApiError(response.status, "bad_response", "First Shift sent a reply this page could not read. Reload the page and try again.");
   return parsed.data;
 }
 

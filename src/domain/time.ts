@@ -49,6 +49,11 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 const sastWeekday = (date: Date): number => addMinutes(date, RULES.timezoneOffsetMinutes).getUTCDay();
 
 /** A South African clock time, "8:00", as the slips show times. */
+/** A moment as a person reads it, with its day: "8:00 on Tue 27 Oct". */
+export function sastWhen(date: Date): string {
+  return `${sastClock(date)} on ${sastSlot(date, date).day}`;
+}
+
 export function sastClock(date: Date): string {
   const { hour, minute } = sastParts(date);
   return `${hour}:${String(minute).padStart(2, "0")}`;

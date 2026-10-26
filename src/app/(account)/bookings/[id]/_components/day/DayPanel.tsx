@@ -14,11 +14,11 @@ import { ConfirmStep } from "./ConfirmStep";
 import { HirePanel } from "./HirePanel";
 import { PayForm } from "./PayForm";
 import { ReferencePanel } from "./ReferencePanel";
+import { BOOKING_NOT_FOUND } from "@/domain/bookingMessages";
 
 // Proof is asked for only in a dispute, so its form and the resizing code load only then.
 const EvidenceForm = lazy(() => import("./EvidenceForm").then((module) => ({ default: module.EvidenceForm })));
 
-const NOT_FOUND = "We can't find that booking. Go back and check your tryouts.";
 
 /** After Not received, either side: add their screenshot once, or see it's been sent. */
 function Proof({ booking, reload }: { booking: BookingViewResponse; reload: () => void }) {
@@ -81,7 +81,7 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
     return (
       <section aria-label="The day" className="flex flex-col gap-4">
         {day.canCheckIn && day.door ? <CheckInForm bookingId={booking.id} name={booking.workerFirstName} lastFour={day.door.lastFour} done={reload} /> : null}
-        {day.canNoShow ? <ConfirmStep path={path("no-show")} label={DAY_COPY.noShow(booking.workerFirstName)} explain={DAY_COPY.noShowConfirm(booking.workerFirstName)} yes={DAY_COPY.noShowYes} fallback={NOT_FOUND} done={reload} /> : null}
+        {day.canNoShow ? <ConfirmStep path={path("no-show")} label={DAY_COPY.noShow(booking.workerFirstName)} explain={DAY_COPY.noShowConfirm(booking.workerFirstName)} yes={DAY_COPY.noShowYes} fallback={BOOKING_NOT_FOUND} done={reload} /> : null}
         {booking.status === "no_show" ? <p className="text-lg">{DAY_COPY.noShowDone}</p> : null}
         {checkedIn}
         {day.canCheckOut ? <CheckOutForm bookingId={booking.id} name={booking.workerFirstName} done={reload} /> : null}
@@ -111,7 +111,7 @@ export function DayPanel({ booking, reload }: { booking: BookingViewResponse; re
   return (
     <section aria-label="The day" className="flex flex-col gap-4">
       {checkedIn}
-      {day.canReportNotOpen ? <ConfirmStep path={path("not-open")} label={DAY_COPY.notOpen} explain={DAY_COPY.notOpenConfirm} yes={DAY_COPY.notOpenYes} fallback={NOT_FOUND} done={reload} /> : null}
+      {day.canReportNotOpen ? <ConfirmStep path={path("not-open")} label={DAY_COPY.notOpen} explain={DAY_COPY.notOpenConfirm} yes={DAY_COPY.notOpenYes} fallback={BOOKING_NOT_FOUND} done={reload} /> : null}
       {day.payable ? <WorkerPay booking={booking} reload={reload} /> : null}
       <Proof booking={booking} reload={reload} />
       {day.payment?.state === "received" ? <ReferencePanel bookingId={booking.id} /> : null}

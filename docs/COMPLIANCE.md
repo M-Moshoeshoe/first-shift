@@ -66,7 +66,7 @@ We don't check the answer with the Compensation Fund yet, and the line says so b
 
 Everywhere payment appears, the product says:
 
-> You send the payment yourself, from your FNB app, your bank or in cash. First Shift doesn't move money. It records the payment, and the young person confirms they received it.
+> You send the payment yourself, from your FNB app, your bank or in cash. First Shift does not move money. It records the payment, and the young person confirms they received it.
 
 The FNB eWallet is sent by the business from its own FNB app. First Shift has no access to it, and an eWallet API is a roadmap ask, not something we've built on (`AGENTS.md`, lesson 6).
 

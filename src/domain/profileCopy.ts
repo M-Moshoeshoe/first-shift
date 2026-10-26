@@ -51,7 +51,7 @@ export const OWNER_FORM_COPY = {
   intro: "Young people you book see your first name, your photo and this number, so they know who to ask for. We keep the rest private.",
   legalName: "Your full name, as on your ID",
   idNumber: "Your ID number",
-  idHint: "We check you're 18 or older. We keep only the last four digits and a scrambled code that can't be turned back into your number.",
+  idHint: "We check you're 18 or older. We keep only the last four digits and a scrambled code that cannot be turned back into your number.",
   phone: "Your cellphone number",
   phoneHint: "Young people you book can message you on WhatsApp at this number.",
   cipc: "CIPC registration number (optional)",
@@ -72,7 +72,7 @@ export const CAMERA_COPY = {
   tips: ["Use a plain background", "Face the light", "No sunglasses or hat"],
   faceView: "Camera view. Fit your face inside the frame.",
   shopView: "Camera view. Fit your shopfront inside the frame.",
-  unavailable: "This browser can't open the camera here, so your phone's own camera opens instead.",
+  unavailable: "This browser cannot open the camera here, so your phone's own camera opens instead.",
   fallback: BUTTON_LABELS.takeAPhoto,
 } as const;
 

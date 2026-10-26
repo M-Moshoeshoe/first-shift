@@ -11,7 +11,7 @@ let client: Anthropic | undefined;
 
 function anthropic(): Anthropic {
   const apiKey = serverEnv().ANTHROPIC_API_KEY;
-  if (!apiKey) throw new AppError(503, "not_configured", "AI isn't set up yet. Add ANTHROPIC_API_KEY (see README).");
+  if (!apiKey) throw new AppError(503, "not_configured", "AI is not set up yet. Add ANTHROPIC_API_KEY (see README).");
   client ??= new Anthropic({ apiKey, timeout: 20_000, maxRetries: 1 });
   return client;
 }
@@ -46,6 +46,6 @@ export async function askForJson<T>({ purpose, system, user, maxTokens, schema }
   } catch (error) {
     if (error instanceof AppError) throw error;
     log("error", "ai_request_failed", { purpose, reason: error instanceof Error ? error.message : "unknown" });
-    throw new AppError(502, "ai_unavailable", "We couldn't draft that right now. Try again in a minute.");
+    throw new AppError(502, "ai_unavailable", "We could not draft that right now. Try again in a minute.");
   }
 }

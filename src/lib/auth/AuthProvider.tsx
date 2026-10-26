@@ -17,7 +17,7 @@ export const AuthContext = createContext<AuthState | null>(null);
 
 const signOut = () => firebaseSignOut(clientAuth());
 
-const NOT_CONFIGURED = "Sign-in isn't set up on this copy of First Shift yet. Add the Firebase settings (see README), then reload.";
+const NOT_CONFIGURED = "Sign-in is not set up on this copy of First Shift yet. Add the Firebase settings (see README), then reload.";
 
 /** Holds the signed-in user for every account screen. Marketing pages never load it. */
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -61,7 +61,7 @@ export function WithdrawSheet({ tryoutId, onClose }: WithdrawSheetProps) {
             <Heading slot="title" className="text-xl font-bold">
               Withdraw this tryout?
             </Heading>
-            <p className="text-lg">Young people won&apos;t see it anymore. You can post a new one at any time.</p>
+            <p className="text-lg">Young people will not see it anymore. You can post a new one at any time.</p>
           </div>
           <div className="flex flex-col gap-3">
             <Button variant="stop" busy={busy} busyLabel="Withdrawing" aria-describedby={ERROR_ID} onClick={() => void withdraw()}>

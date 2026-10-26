@@ -19,7 +19,7 @@ export function ProfileErrorState({ message, onRetry }: ProfileErrorStateProps) 
   return (
     <>
       <div role="alert">
-        <PageTitle title="We couldn't load your profile" intro={message} />
+        <PageTitle title="We could not load your profile" intro={message} />
       </div>
       <div className="flex flex-col gap-3">
         <Button onClick={onRetry}>{BUTTON_LABELS.tryAgain}</Button>

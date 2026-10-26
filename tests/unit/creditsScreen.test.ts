@@ -33,9 +33,9 @@ describe("the history, in plain words", () => {
       "5 credits added by First Shift",
       "You asked for more credits",
       "1 credit returned: Stock count helper",
-      "1 credit held for Stock count helper",
+      "1 credit set aside for Stock count helper",
       "1 credit used: Phone shop helper",
-      "1 credit held for Phone shop helper",
+      "1 credit set aside for Phone shop helper",
       "3 credits added, free",
     ]);
   });

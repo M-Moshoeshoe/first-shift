@@ -14,7 +14,7 @@ import { useHeadingFocus } from "@/lib/useHeadingFocus";
 import { ApplicationsSchema } from "@/schemas/booking";
 import { JobOfferCard } from "./JobOfferCard";
 
-const FALLBACK = `Your applications didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
+const FALLBACK = `Your applications did not load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`;
 
 /** Every tryout the young person applied for and where it stands. Each opens the tryout, or the booking once booked. */
 export function ApplicationsList() {

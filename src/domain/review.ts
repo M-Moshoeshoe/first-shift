@@ -97,6 +97,6 @@ export const RESOLUTION_PROBLEMS: Record<ResolutionProblem, string> = {
   reason: "Give the reasoning with --reason, at least 3 characters: it goes in the audit log.",
   admin: "Name the admin with --admin <name> (letters, digits and hyphens).",
   reference_only: "--reference works only on a reference challenge.",
-  no_young_person: "This case doesn't name a young person, so nothing can be done to one.",
+  no_young_person: "This case does not name a young person, so nothing can be done to one.",
   grant: `--grant takes a whole number from 1 to ${RULES.adminGrantMaxCredits}.`,
 };

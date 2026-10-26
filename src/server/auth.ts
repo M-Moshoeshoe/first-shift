@@ -21,7 +21,7 @@ export async function requireUser(request: Request): Promise<SignedInUser> {
   // The demo claim is set only by the server (scripts/createDemoAccounts.ts), so it can't be forged.
   const demo = decoded.demo === true;
   if (!isAllowedSignIn(decoded.firebase?.sign_in_provider, { demo, email: decoded.email })) {
-    throw new AppError(403, "sign_in_not_allowed", "That account can't use First Shift. Sign in with Google instead.");
+    throw new AppError(403, "sign_in_not_allowed", "That account cannot use First Shift. Sign in with Google instead.");
   }
   return { uid: decoded.uid, demo };
 }

@@ -14,53 +14,53 @@ import { BUTTON_LABELS } from "./buttonLabels";
 export const CONTACT_PHRASE = "contact us";
 
 export const ID_HINT =
-  "We check your ID number so businesses know you're 18 or older and allowed to work. We keep only the last four digits and a scrambled code that can't be turned back into your number.";
+  "We check your ID number so businesses know you're 18 or older and allowed to work. We keep only the last four digits and a scrambled code that cannot be turned back into your number.";
 
 export const ID_PROBLEM_MESSAGES: Record<IdProblem, string> = {
   format: "Your ID number must be 13 digits. Check it against your ID and type it again.",
-  date_of_birth: "The first 6 digits of your ID number aren't a real date of birth. Check them against your ID.",
-  citizenship_digit: "The 11th digit of your ID number must be 0 or 1. Check it against your ID. Refugee IDs and permits can't be used yet.",
-  check_digit: "That ID number isn't valid, so one digit is probably wrong. Check it against your ID and type it again.",
+  date_of_birth: "The first 6 digits of your ID number are not a real date of birth. Check them against your ID.",
+  citizenship_digit: "The 11th digit of your ID number must be 0 or 1. Check it against your ID. Refugee IDs and permits cannot be used yet.",
+  check_digit: "That ID number is not valid, so one digit is probably wrong. Check it against your ID and type it again.",
   under_age: "You need to be 18 or older to do tryouts. You can sign up from your 18th birthday.",
 };
 
 const SAVE_BUTTON: Record<PhotoKind, string> = { profile: BUTTON_LABELS.saveMyProfile, shopfront: BUTTON_LABELS.saveMyBusiness };
 
 export const PROFILE_MESSAGES = {
-  idInUse: `This ID number is already linked to another First Shift account. Sign in with the Google account you used before. If that wasn't you, ${CONTACT_PHRASE}.`,
+  idInUse: `This ID number is already linked to another First Shift account. Sign in with the Google account you used before. If that was not you, ${CONTACT_PHRASE}.`,
   idLocked: `Your account already has a different ID number. If you entered the wrong ID number, ${CONTACT_PHRASE} to correct it.`,
-  idChecksOff: "ID checks aren't working on this site right now, so nothing was saved. Try again later.",
+  idChecksOff: "ID checks are not working on this site right now, so nothing was saved. Try again later.",
   roleMissing: "Choose whether you're looking for work or running a business first.",
   roleLocked: {
     young_person: "This account is already set up to look for work. To run a business on First Shift, sign in with a different Google account.",
     business: "This account is already set up for a business. To look for work, sign in with a different Google account.",
   } satisfies Record<Role, string>,
-  photoMissing: (kind: PhotoKind) => `Your photo didn't finish uploading. Take or choose it again, then tap ${SAVE_BUTTON[kind]}.`,
+  photoMissing: (kind: PhotoKind) => `Your photo did not finish uploading. Take or choose it again, then tap ${SAVE_BUTTON[kind]}.`,
   photoWrongType: "Your photo must be a JPEG, PNG or WebP picture. Take or choose a different photo.",
   photoTooBig: "Your photo is bigger than 2 MB. Take or choose a smaller photo.",
   detailsFirst: "Save your details first, then add your photo.",
   pinMissing: `Your profile is saved. To finish, come back and tap ${BUTTON_LABELS.useMyLocation} while you're at the business.`,
-  fallback: "Some of your details couldn't be saved. Check the form and try again.",
+  fallback: "Some of your details could not be saved. Check the form and try again.",
   // Step 5 additions, for review.
-  photoUnreadable: `This photo can't be opened on this phone. Tap ${BUTTON_LABELS.openTheCamera} and take it again.`,
+  photoUnreadable: `This photo cannot be opened on this phone. Tap ${BUTTON_LABELS.openTheCamera} and take it again.`,
   photoNeeded: `Add a photo of your face first. Tap ${BUTTON_LABELS.openTheCamera}, then ${BUTTON_LABELS.takeThePhoto}.`,
-  profileUnavailable: `Your profile didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`,
+  profileUnavailable: `Your profile did not load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`,
   // Step 6 additions, for review.
   shopfrontNeeded: `Add a photo of your shopfront first. Tap ${BUTTON_LABELS.openTheCamera} or ${BUTTON_LABELS.chooseAPhoto}.`,
-  pinImprecise: `Your location isn't precise enough yet. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
+  pinImprecise: `Your location is not precise enough yet. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
   // Approved in step 3; moved here when the Sign out button became shared.
-  signOutFailed: `We couldn't sign you out. Check your connection, then tap ${BUTTON_LABELS.signOut} again.`,
+  signOutFailed: `We could not sign you out. Check your connection, then tap ${BUTTON_LABELS.signOut} again.`,
   surnameLocked: `Your surname is already saved. If it's wrong, ${CONTACT_PHRASE} to correct it.`,
   // Demo isolation, for review.
-  demoLocked: `This is a demo account, so its profile is set up for you and can't be changed. To make your own, tap ${BUTTON_LABELS.signOut} and ${BUTTON_LABELS.continueWithGoogle}.`,
+  demoLocked: `This is a demo account, so its profile is set up for you and cannot be changed. To make your own, tap ${BUTTON_LABELS.signOut} and ${BUTTON_LABELS.continueWithGoogle}.`,
 } as const;
 
 /** Step 6, for review: why a premises pin couldn't be taken, and what to do. */
 export const LOCATION_MESSAGES: Record<LocationProblem, string> = {
   denied: `Location is blocked for First Shift. Tap the icon next to the web address, choose Permissions, and turn on Location. Then tap ${BUTTON_LABELS.useMyLocation} again.`,
-  unavailable: `Your phone couldn't find where you are. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
+  unavailable: `Your phone could not find where you are. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
   timeout: `Your phone took too long to find where you are. Step outside or turn on your phone's location, then tap ${BUTTON_LABELS.useMyLocation} again.`,
-  unsupported: `This browser can't share your location. Open First Shift in Chrome or Samsung Internet to add your pin, or tap ${BUTTON_LABELS.skipForNow}.`,
+  unsupported: `This browser cannot share your location. Open First Shift in Chrome or Samsung Internet to add your pin, or tap ${BUTTON_LABELS.skipForNow}.`,
   imprecise: PROFILE_MESSAGES.pinImprecise,
 };
 
@@ -127,8 +127,8 @@ export const FIELD_MESSAGES = {
   businessName: "Enter your business name.",
   businessArea: "Enter the area your business is in, like Midrand.",
   openingHours: "Enter your opening hours, like Monday to Saturday, 8:00 to 17:00.",
-  coida: "Choose whether you're registered with the Compensation Fund. If you don't know, choose I'm not sure.",
-  pinOutsideSa: `That location isn't in South Africa. Tap ${BUTTON_LABELS.useMyLocation} again while you're at the business.`,
+  coida: "Choose whether you're registered with the Compensation Fund. If you do not know, choose I'm not sure.",
+  pinOutsideSa: `That location is not in South Africa. Tap ${BUTTON_LABELS.useMyLocation} again while you're at the business.`,
 } as const;
 
 const SIGN_IN_MESSAGES: Record<string, string> = {
@@ -136,19 +136,19 @@ const SIGN_IN_MESSAGES: Record<string, string> = {
   "auth/popup-closed-by-user": `The Google sign-in window closed before you finished. Tap ${BUTTON_LABELS.continueWithGoogle} to try again.`,
   "auth/cancelled-popup-request": `The Google sign-in window closed before you finished. Tap ${BUTTON_LABELS.continueWithGoogle} to try again.`,
   "auth/user-cancelled": `You cancelled signing in with Google. Tap ${BUTTON_LABELS.continueWithGoogle} to try again.`,
-  "auth/network-request-failed": `We couldn't reach Google. Check your connection, then tap ${BUTTON_LABELS.continueWithGoogle} again.`,
+  "auth/network-request-failed": `We could not reach Google. Check your connection, then tap ${BUTTON_LABELS.continueWithGoogle} again.`,
   "auth/too-many-requests": "There have been too many sign-in attempts from this phone. Wait a few minutes, then try again.",
-  "auth/unauthorized-domain": "Google sign-in isn't switched on for this web address yet. Use the main First Shift site, or ask the team to add this address.",
+  "auth/unauthorized-domain": "Google sign-in is not switched on for this web address yet. Use the main First Shift site, or ask the team to add this address.",
 };
 
 /** One plain sentence for each way Google sign-in can fail, saying what happened and what to do. */
 export function signInErrorMessage(code: string): string {
-  return SIGN_IN_MESSAGES[code] ?? `Google sign-in didn't finish. Tap ${BUTTON_LABELS.continueWithGoogle} to try again.`;
+  return SIGN_IN_MESSAGES[code] ?? `Google sign-in did not finish. Tap ${BUTTON_LABELS.continueWithGoogle} to try again.`;
 }
 
 /** The demo sign-in's own refusal, from the server (server/services/demoSignInService.ts). */
 export const DEMO_MESSAGES = {
-  wrongCredentials: "That email and password don't match a demo account. Check them, then try again.",
+  wrongCredentials: "That email and password do not match a demo account. Check them, then try again.",
   notSetUp: "The demo accounts are not set up on this site yet. Sign in with Google instead.",
   noRole: "Choose Thabo or Sipho to try the demo.",
 } as const;

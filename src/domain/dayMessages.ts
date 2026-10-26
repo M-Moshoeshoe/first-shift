@@ -4,6 +4,7 @@ import type { CheckInProblem, MarkPaidProblem } from "./day";
 import type { EvidenceProblem } from "./evidence";
 import { formatRand } from "./money";
 import type { PaymentMethod } from "./paymentFlow";
+import { BOOKING_NOT_FOUND } from "./bookingMessages";
 
 /*
  * Every sentence on the day: the door, check-in, no-shows, check-out, paying
@@ -12,20 +13,20 @@ import type { PaymentMethod } from "./paymentFlow";
  */
 
 export const CHECK_IN_MESSAGES: Record<CheckInProblem, string> = {
-  not_found: "We can't find that booking. Go back and check your tryouts.",
-  not_booked: "This booking isn't waiting for a check-in any more.",
+  not_found: BOOKING_NOT_FOUND,
+  not_booked: "This booking is not waiting for a check-in any more.",
   too_early: `Check-in opens ${RULES.checkInOpensMinutesBefore} minutes before the start. Try again closer to the time.`,
-  over: "This tryout's time has passed, so it can't be checked in now. Contact us if they worked it.",
+  over: "This tryout's time has passed, so it cannot be checked in now. Contact us if they worked it.",
   door_check: "Check all three at the door before you check them in: their face, the name on their ID card and its last four digits.",
   locked: "Too many wrong codes have been tried on this booking, so check-in is locked. Contact us to sort it out.",
-  wrong_code: "That code doesn't match. Ask them for the code on their booking page and type it again.",
+  wrong_code: "That code does not match. Ask them for the code on their booking page and type it again.",
 };
 
 export const MARK_PAID_MESSAGES: Record<MarkPaidProblem, string> = {
-  not_found: "We can't find that booking. Go back and check your tryouts.",
+  not_found: BOOKING_NOT_FOUND,
   not_payable: "There's nothing to pay on this booking yet. Check them out first.",
   below_minimum: "That's less than what's owed. Enter at least the amount shown; paying more is fine.",
-  method_not_offered: "They can't be paid that way. Choose one of the ways shown, which they picked on their profile.",
+  method_not_offered: "They cannot be paid that way. Choose one of the ways shown, which they picked on their profile.",
 };
 
 export const DAY_COPY = {
@@ -38,19 +39,19 @@ export const DAY_COPY = {
   codeHint: "Six digits, on their booking page.",
   checkIn: (name: string) => `Check in ${name}`,
   checkedIn: (time: string) => `Checked in at ${time}.`,
-  noShow: (name: string) => `${name} didn't arrive`,
-  noShowConfirm: (name: string) => `This records a no-show for ${name} and sends it to review. Your credit comes back.`,
+  noShow: (name: string) => `${name} did not arrive`,
+  noShowConfirm: (name: string) => `This records a no-show for ${name}, to be looked into by the First Shift team. Your credit comes back.`,
   noShowYes: "Yes, record a no-show",
   noShowDone: "Recorded as a no-show. We'll look at it and contact you both if we need to.",
-  notOpen: "The business wasn't open",
-  notOpenConfirm: "Tell us the business wasn't open when you got there. We'll look into it and contact you; if it's confirmed, they owe you 4 hours' pay.",
+  notOpen: "The business was not open",
+  notOpenConfirm: "Tell us the business was not open when you got there. We'll look into it and contact you; if it's confirmed, they owe you 4 hours' pay.",
   notOpenYes: "Yes, tell First Shift",
   notOpenDone: "Thanks. We're looking into it and will contact you.",
   checkOutTitle: "Check out",
   checkOutLegend: "How did the day end?",
   checkOut: "Check out",
   owe: (name: string, cents: number) => `You owe ${name} ${formatRand(cents)}.`,
-  safetyReview: "A safety stop always goes to review. We'll contact you both.",
+  safetyReview: "A safety stop is always looked into by the First Shift team. We'll contact you both.",
   payTitle: "Pay",
   methodLegend: "How did you pay?",
   methodHint: (name: string, phone: string) => `${name} chose these ways to be paid, to ${phone}.`,
@@ -58,7 +59,7 @@ export const DAY_COPY = {
   referenceHint: (name: string) => `Recommended. The reference on your payment, so ${name} can match it. Up to ${RULES.paymentReferenceMaxChars} characters.`,
   referenceTooLong: `The reference can be up to ${RULES.paymentReferenceMaxChars} characters. Make it shorter.`,
   cashHandover: (name: string) => `Hand over the cash, then ask ${name} to tap Received on their phone.`,
-  paidTooMuch: "Paid too much? Don't ask for it back. Tap Report a problem and choose I paid too much: we'll sort it out.",
+  paidTooMuch: "Paid too much? Do not ask for it back. Tap Report a problem and choose I paid too much: we'll sort it out.",
   amount: "Amount paid",
   amountHint: (owed: number, minimum: number) =>
     minimum < owed ? `${formatRand(owed)} is owed for the full day. You can lower it to the hours worked, not below ${formatRand(minimum)}.` : `${formatRand(owed)} is owed. You can pay more.`,
@@ -69,12 +70,12 @@ export const DAY_COPY = {
   workerWaiting: (cents: number) => `You're owed ${formatRand(cents)}. The business pays you directly; you'll confirm here when it arrives.`,
   workerPaid: (business: string, cents: number, method: string) => `${business} says they paid you ${formatRand(cents)} by ${method}.`,
   workerReference: (reference: string) => `Payment reference: ${reference}`,
-  overpaid: (owed: number) => `That's more than the ${formatRand(owed)} owed. You don't have to send anything back: if anyone asks you to, don't pay, and tap Report a problem.`,
-  neverSendBack: "First Shift never asks you to send money back, and you never pay anyone to get a tryout. If someone asks, don't pay: tap Report a problem.",
+  overpaid: (owed: number) => `That's more than the ${formatRand(owed)} owed. You do not have to send anything back: if anyone asks you to, do not pay, and tap Report a problem.`,
+  neverSendBack: "First Shift never asks you to send money back, and you never pay anyone to get a tryout. If someone asks, do not pay: tap Report a problem.",
   received: "Received",
   notReceived: "Not received",
   receivedDone: "Received. Your reference comes next.",
-  notReceivedDone: "We've opened a review and will contact you both. The business stays paused until it's sorted out.",
+  notReceivedDone: "The First Shift team will look into it and contact you both. The business stays paused until it's sorted out.",
   reminder: (business: string) => `${business} marked this paid a day ago. Check your balance and tell us whether it arrived.`,
 } as const;
 
@@ -114,9 +115,9 @@ export const EVIDENCE_COPY = {
 } as const;
 
 export const EVIDENCE_MESSAGES: Record<EvidenceProblem, string> = {
-  not_found: "We can't find that booking. Go back and check your tryouts.",
+  not_found: BOOKING_NOT_FOUND,
   not_disputed: "Proof is added only after the young person taps Not received.",
   already_added: "You've already sent your proof for this tryout.",
-  not_an_image: "That file isn't a picture. Choose a screenshot saved as a JPEG, PNG or WebP image.",
+  not_an_image: "That file is not a picture. Choose a screenshot saved as a JPEG, PNG or WebP image.",
   too_big: "That screenshot is bigger than 2 MB. Choose a smaller one.",
 };

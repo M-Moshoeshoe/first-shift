@@ -37,7 +37,7 @@ describe("the balance check, as the page renders it", () => {
 
   it("says plainly that nothing is ever sent back, and an overpayment stays with the young person", () => {
     const html = render(paidBy("ewallet", 25000));
-    expect(html).toContain("You don&#x27;t have to send anything back");
+    expect(html).toContain("You do not have to send anything back");
     expect(html).toContain("First Shift never asks you to send money back");
   });
 });

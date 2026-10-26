@@ -14,9 +14,9 @@ const hoursRange = `${RULES.minPaidHours} to ${RULES.maxTryoutHours} hours`;
 
 export const POSTING_PROBLEM_MESSAGES: Record<PostingProblem, string> = {
   not_business: "Only a business account can post tryouts. Sign in with the Google account you used for your business.",
-  profile_incomplete: "Finish your business profile first: your details, your premises pin and a photo of your shopfront.",
+  profile_incomplete: "Finish your business profile first: your details, your shop's location and a photo of your shopfront.",
   owner_missing: "Add your details as the owner first: your full name, your ID number, a photo of your face and your cellphone number.",
-  account_paused: `Your account is paused, so you can't post tryouts right now. Contact us to sort it out.`,
+  account_paused: `Your account is paused, so you cannot post tryouts right now. Contact us to sort it out.`,
   no_credits: `You've used your credits. Open Credits and tap ${BUTTON_LABELS.requestMoreCredits}. We'll add them and let you know.`,
 };
 
@@ -37,11 +37,11 @@ export const TRYOUT_MESSAGES = {
   postsLimit: `You can post up to ${RULES.postsPerDay} tryouts a day. Post this one tomorrow.`,
   aiLimit: "You've used today's drafting help. Try again tomorrow.",
   // When the AI doesn't answer: drafting says so, and posting (which only checks the work) says that instead.
-  aiDraftUnavailable: "We couldn't draft that right now. Try again in a minute.",
-  aiCheckUnavailable: "We couldn't check your tryout right now. Try again in a minute.",
-  notFound: "We can't find that tryout. It may have been withdrawn already. Go back to your tryouts and check.",
-  booked: `Someone is booked on this tryout, so it can't be withdrawn. Contact us if you need to cancel.`,
-  finished: "This tryout has already happened, so it can't be withdrawn.",
+  aiDraftUnavailable: "We could not draft that right now. Try again in a minute.",
+  aiCheckUnavailable: "We could not check your tryout right now. Try again in a minute.",
+  notFound: "We cannot find that tryout. It may have been withdrawn already. Go back to your tryouts and check.",
+  booked: `Someone is booked on this tryout, so it cannot be withdrawn. Contact us if you need to cancel.`,
+  finished: "This tryout has already happened, so it cannot be withdrawn.",
   asksForMoney: "A tryout never costs the young person anything. Take out anything that asks them to pay, such as a fee, a deposit or their own uniform, then try again.",
 } as const;
 

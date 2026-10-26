@@ -9,7 +9,7 @@ describe("sign-in messages", () => {
   });
 
   it("falls back to a plain sentence for codes it doesn't know", () => {
-    expect(signInErrorMessage("auth/something-new")).toMatch(/didn't finish.*try again/);
+    expect(signInErrorMessage("auth/something-new")).toMatch(/did not finish.*try again/);
   });
 
   it("never apologises or uses an em dash", () => {

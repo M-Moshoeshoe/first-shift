@@ -8,6 +8,7 @@ import type { HireViewResponse } from "@/schemas/record";
 import { AppError } from "../errors";
 import type { BookingRepository } from "../repositories/bookingRepository";
 import type { HireRepository } from "../repositories/hireRepository";
+import { BOOKING_NOT_FOUND } from "@/domain/bookingMessages";
 
 export interface HireServiceDeps {
   hires: HireRepository;
@@ -15,7 +16,6 @@ export interface HireServiceDeps {
   now: () => Date;
 }
 
-const NOT_FOUND = "We cannot find that booking. Go back and check your tryouts.";
 const OFFER_NOT_FOUND = "We cannot find that job offer. Go back to Applications and check.";
 const NOT_DUE = "A job offer comes up after three tryouts together, or when another tryout would make this regular employment.";
 const ALREADY_ANSWERED = "You have already answered this job offer.";
@@ -52,7 +52,7 @@ export const jobOfferView = (offer: HireOfferRecord & { id: string }): Applicati
 export function createHireService({ hires, bookings, now }: HireServiceDeps) {
   async function owned(viewer: Viewer, bookingId: string) {
     const found = await bookings.get(bookingId);
-    if (!found || partyOf(viewer, found.booking) !== "business") throw new AppError(404, "not_found", NOT_FOUND);
+    if (!found || partyOf(viewer, found.booking) !== "business") throw new AppError(404, "not_found", BOOKING_NOT_FOUND);
     return found.booking;
   }
 

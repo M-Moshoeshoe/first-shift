@@ -37,7 +37,7 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
         <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
           We&apos;re checking this one
         </h2>
-        <p className="text-lg">We couldn&apos;t tell what kind of work this is, so someone will check it before it goes live. You&apos;ll see it on your dashboard.</p>
+        <p className="text-lg">We could not tell what kind of work this is, so someone will check it before it goes live. You&apos;ll see it on your dashboard.</p>
         {backToTryouts}
       </div>
     );
@@ -47,7 +47,7 @@ export function PostOutcome({ outcome, onChangeRequest }: { outcome: Outcome; on
     return (
       <div className="flex flex-col gap-4">
         <h2 ref={heading} tabIndex={-1} className="text-xl font-bold">
-          This work can&apos;t be a tryout
+          This work cannot be a tryout
         </h2>
         <p className="border-2 border-stop p-4 text-lg">{outcome.saferOption}</p>
         <Button onClick={onChangeRequest}>Change my request</Button>

@@ -50,7 +50,7 @@ export function TryoutList({ uid }: { uid: string }) {
   if (list.status === "error") {
     return (
       <div className="flex flex-col gap-3">
-        <FormError message={`Your tryouts didn't load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`} />
+        <FormError message={`Your tryouts did not load. Check your connection, then tap ${BUTTON_LABELS.tryAgain}.`} />
         <Button variant="secondary" onClick={() => setAttempt((count) => count + 1)}>
           {BUTTON_LABELS.tryAgain}
         </Button>

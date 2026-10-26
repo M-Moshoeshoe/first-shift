@@ -7,7 +7,7 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
   booked: "Booked",
   checked_in: "Checked in",
   ended: "Finished",
-  no_show: "Didn't go ahead",
+  no_show: "Did not go ahead",
   cancelled: "Cancelled",
 };
 
@@ -16,5 +16,5 @@ export const STATUS_PAGE_COPY = {
   title: (name: string) => `${name}'s tryout`,
   at: (business: string, area: string) => `At ${business}, ${area}.`,
   // One message for an unknown link and an expired one, so a guessed link learns nothing.
-  unavailable: "This link isn't working. Status links stop at midnight on the day of the tryout; check you copied all of it.",
+  unavailable: "This link is not working. Status links stop at midnight on the day of the tryout; check you copied all of it.",
 };

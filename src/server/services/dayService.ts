@@ -11,6 +11,7 @@ import { log } from "../log";
 import type { BookingRepository, BookingWrite } from "../repositories/bookingRepository";
 import type { EvidenceStore } from "../repositories/photoStore";
 import { addEvidence } from "./evidenceStep";
+import { BOOKING_NOT_FOUND } from "@/domain/bookingMessages";
 
 export interface DayServiceDeps {
   bookings: BookingRepository;
@@ -21,8 +22,7 @@ export interface DayServiceDeps {
 }
 
 type Step = { status: "done" | "unchanged" };
-const NOT_FOUND = "We can't find that booking. Go back and check your tryouts.";
-const NOT_NOW = "That can't be done on this booking right now. Reload the page to see where it stands.";
+const NOT_NOW = "That cannot be done on this booking right now. Reload the page to see where it stands.";
 const refuse = (problem: "not_found" | string, message: string) => new AppError(problem === "not_found" ? 404 : 409, problem, message);
 
 /**
@@ -53,7 +53,7 @@ export function createDayService({ bookings, evidence, newId, now }: DayServiceD
     async noShow(viewer: Viewer, bookingId: string): Promise<Step> {
       return bookings.transactBooking<Step>(bookingId, viewer.uid, ({ booking, ownerLedger }) => {
         const decision = decideNoShow(viewer, bookingId, booking, now());
-        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? NOT_FOUND : NOT_NOW);
+        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? BOOKING_NOT_FOUND : NOT_NOW);
         if (decision.kind === "unchanged" || !booking) return { write: null, result: { status: "unchanged" } };
         const credit = settlementCredit(decision.settlement, ownerLedger, booking.tryoutId);
         const ledger = credit.kind === "append" ? credit.entries : [];
@@ -64,7 +64,7 @@ export function createDayService({ bookings, evidence, newId, now }: DayServiceD
     async businessNotOpen(viewer: Viewer, bookingId: string): Promise<Step> {
       return bookings.transactBooking<Step>(bookingId, viewer.uid, ({ booking }) => {
         const decision = decideBusinessNotOpen(viewer, bookingId, booking, now());
-        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? NOT_FOUND : NOT_NOW);
+        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? BOOKING_NOT_FOUND : NOT_NOW);
         return { write: { review: decision.review, audit: "business_not_open_reported" }, result: { status: "done" } };
       });
     },
@@ -74,7 +74,7 @@ export function createDayService({ bookings, evidence, newId, now }: DayServiceD
       return bookings.transactBooking<Step>(bookingId, viewer.uid, ({ booking, ownerLedger }) => {
         const at = now();
         const decision = decideCheckOut(viewer, bookingId, booking, reason, answers, at);
-        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? NOT_FOUND : NOT_NOW);
+        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? BOOKING_NOT_FOUND : NOT_NOW);
         if (decision.kind === "unchanged" || !booking) return { write: null, result: { status: "unchanged" } };
         const { settlement, review } = decision;
         const credit = settlementCredit(settlement, ownerLedger, booking.tryoutId);
@@ -111,7 +111,7 @@ export function createDayService({ bookings, evidence, newId, now }: DayServiceD
     async confirm(viewer: Viewer, bookingId: string, received: boolean): Promise<Step> {
       return bookings.transactBooking<Step>(bookingId, viewer.uid, ({ booking }) => {
         const decision = decideConfirm(viewer, bookingId, booking, received, now());
-        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? NOT_FOUND : NOT_NOW);
+        if (decision.kind === "refuse") throw refuse(decision.problem, decision.problem === "not_found" ? BOOKING_NOT_FOUND : NOT_NOW);
         if (decision.kind === "unchanged" || !booking) return { write: null, result: { status: "unchanged" } };
         return { write: answerWrite(bookingId, booking, decision, received), result: { status: "done" } };
       });

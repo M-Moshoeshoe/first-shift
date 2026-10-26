@@ -1,14 +1,11 @@
 import { PersonPhoto } from "@/components/PersonPhoto";
 import { RULES } from "@/config/rules";
 import { BOOKING_COPY } from "@/domain/bookingMessages";
-import { addMinutes, sastClock, sastSlot } from "@/domain/time";
+import { addMinutes, sastWhen } from "@/domain/time";
 import type { BookingViewResponse } from "@/schemas/booking";
 
 /** When check-in opens, as the owner reads it: "8:00 on Tue 27 Oct". */
-function opensAt(startAt: string): string {
-  const opens = addMinutes(new Date(startAt), -RULES.checkInOpensMinutesBefore);
-  return `${sastClock(opens)} on ${sastSlot(opens, opens).day}`;
-}
+const opensAt = (startAt: string): string => sastWhen(addMinutes(new Date(startAt), -RULES.checkInOpensMinutesBefore));
 
 /**
  * Who's on the other side of the booking, with their photo. For the young

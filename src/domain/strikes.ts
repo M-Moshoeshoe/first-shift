@@ -40,7 +40,7 @@ export function accountStatus({ now, strikes, hasUnresolvedUnpaid = false, hasOp
     reasons.push(`${count} strikes in the last ${RULES.strikeWindowDays} days`);
     return { status: "suspended", activeStrikes: count, reasons };
   }
-  if (hasUnresolvedUnpaid) reasons.push("A tryout hasn't been paid yet");
+  if (hasUnresolvedUnpaid) reasons.push("A tryout has not been paid yet");
   if (hasOpenSafetyReport) reasons.push("A safety report is being reviewed");
   return { status: reasons.length > 0 ? "paused" : "active", activeStrikes: count, reasons };
 }

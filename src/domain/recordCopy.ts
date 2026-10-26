@@ -38,13 +38,13 @@ export const REFERENCE_COPY = {
   withdrawn: "We looked into your challenge and took this reference off.",
   write: "Write my reference",
   writing: "Writing your reference",
-  notYet: "Your reference isn't written yet. Tap Write my reference.",
+  notYet: "Your reference is not written yet. Tap Write my reference.",
   notYetWaiting: "Your reference is not written yet. It is written once you tap Received.",
   aiFailed: "We could not write your reference just now. Wait a minute, then tap Write my reference.",
   loadFailed: "Your reference did not load. Check your connection, then reload the page.",
   writeFailed: "Your reference was not written. Check your connection, then tap Write my reference.",
   decideFailed: "That did not go through. Check your connection, then tap the button again.",
-  ownerNote: "The young person reviews the reference written from your answers. You can't change it once it's written.",
+  ownerNote: "The young person reviews the reference written from your answers. You cannot change it once it's written.",
 } as const;
 
 export const RECORD_COPY = {
@@ -61,8 +61,8 @@ export const RECORD_COPY = {
   shareText: (link: string) => `My work record on First Shift, with references from the businesses I worked for: ${link}`,
   publicTitle: (name: string) => `${name}'s work record`,
   publicIntro: "Paid tryouts on First Shift, each confirmed by the business and the young person. References show only once the young person approved them.",
-  publicMissing: "This link isn't working. Ask the person who sent it for a new one.",
-  unavailable: "Your record didn't load. Check your connection, then tap Try again.",
+  publicMissing: "This link is not working. Ask the person who sent it for a new one.",
+  unavailable: "Your record did not load. Check your connection, then tap Try again.",
   metaTitle: "A work record on First Shift",
   metaDescription: "Paid tryouts, each confirmed by the business and the young person, with references they approved.",
 } as const;
