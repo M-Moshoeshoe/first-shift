@@ -62,7 +62,6 @@ export const OWNER_COPY = {
   seeBooking: "See the booking",
   completed: (count: number) => `Tryouts done: ${count}`,
   references: (count: number) => `References: ${count}`,
-  showUp: (score: number) => `Likely to show up: ${score} out of 100`,
   showUpTitle: "Likely to show up",
   showUpShort: "show-up",
   showUpScore: (score: number) => `${score} out of 100`,
@@ -70,8 +69,6 @@ export const OWNER_COPY = {
   returnFare: (cents: number) => `Return taxi ${formatRand(cents)}`,
   example: "Example applicant",
   exampleNote: "Made up to show a full list, so it cannot be offered. Offer the tryout to Thabo to try booking.",
-  open: (name: string) => `See ${name}'s details`,
-  details: "Their details",
   showUpReasons: "Worked out from their record on First Shift",
   close: "Close",
 };
